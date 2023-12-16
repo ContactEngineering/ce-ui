@@ -1,0 +1,41 @@
+[build-system]
+requires = ['setuptools>=40.8.0', 'setuptools_scm[toml]>=6.2', 'wheel']
+build-backend = 'setuptools.build_meta:__legacy__'
+
+[project]
+name = 'ce-ui'
+description = 'The user-facing interface of contact.engineering.'
+requires-python = '>=3.8.0'
+dynamic = ['dependencies', 'entry-points', 'optional-dependencies', 'version']
+readme = 'README.rst'
+license = { file = 'LICENSE' }
+authors = [
+    { name = "Michael Röttger", email = "info@michael-roettger.de" },
+    { name = "Lars Pastewka", email = "lars.pastewka@imtek.uni-freiburg.de" }
+]
+classifiers = [
+    'Development Status :: 5 - Production/Stable',
+    'Environment :: Web Environment',
+    'Framework :: Django',
+    'Framework :: Django :: 3.2',
+    'Framework :: Celery',
+    'Intended Audience :: Developers',
+    'License :: OSI Approved :: MIT License',
+    'Operating System :: POSIX',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3 :: Only',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Topic :: Internet :: WWW/HTTP',
+    'Topic :: Internet :: WWW/HTTP :: Dynamic Content'
+]
+
+[project.urls]
+homepage = 'https://contact.engineering'
+repository = 'https://github.com/ContactEngineering/ce-ui'
+
+[tool.setuptools]
+py-modules = ['ce_ui']
+
+[tool.setuptools_scm]
