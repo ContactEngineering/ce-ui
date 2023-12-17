@@ -724,7 +724,7 @@ class AnalysisResultDetailView(DetailView):
             {
                 'title': f"Analyze",
                 'icon': "chart-area",
-                'href': f"{reverse('analysis:results-list')}?subjects={self.request.GET.get('subjects')}",
+                'href': f"{reverse('ce_ui:results-list')}?subjects={self.request.GET.get('subjects')}",
                 'active': False,
                 'login_required': False,
                 'tooltip': "Results for selected analysis functions"
@@ -782,7 +782,7 @@ class AnalysesResultListView(TemplateView):
             'title': f"Analyze",
             'icon': "chart-area",
             'icon-style-prefix': 'fas',
-            'href': f"{reverse('analysis:results-list')}?subjects={self.request.GET.get('subjects')}",
+            'href': f"{reverse('ce_ui:results-list')}?subjects={self.request.GET.get('subjects')}",
             'active': True,
             'login_required': False,
             'tooltip': "Results for selected analysis functions",

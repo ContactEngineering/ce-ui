@@ -267,14 +267,14 @@ def instances_to_basket_items(topographies, surfaces, tags):
     """
     basket_items = []
     for surface in surfaces:
-        unselect_url = reverse('manager:surface-unselect', kwargs=dict(pk=surface.pk))
+        unselect_url = reverse('ce_ui:surface-unselect', kwargs=dict(pk=surface.pk))
         basket_items.append(dict(label=str(surface),
                                  type="surface",
                                  id=surface.pk,
                                  unselect_url=unselect_url,
                                  key=f"surface-{surface.pk}"))
     for topography in topographies:
-        unselect_url = reverse('manager:topography-unselect', kwargs=dict(pk=topography.pk))
+        unselect_url = reverse('ce_ui:topography-unselect', kwargs=dict(pk=topography.pk))
         basket_items.append(dict(label=topography.name,
                                  type="topography",
                                  id=topography.pk,
@@ -282,7 +282,7 @@ def instances_to_basket_items(topographies, surfaces, tags):
                                  key=f"topography-{topography.pk}",
                                  surface_key=f"surface-{topography.surface.pk}"))
     for tag in tags:
-        unselect_url = reverse('manager:tag-unselect', kwargs=dict(pk=tag.pk))
+        unselect_url = reverse('ce_ui:tag-unselect', kwargs=dict(pk=tag.pk))
         basket_items.append(dict(label=tag.name,
                                  type="tag",
                                  id=tag.pk,
