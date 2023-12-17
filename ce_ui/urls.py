@@ -3,10 +3,16 @@ from django.urls import re_path, path
 from . import views
 
 app_name = "ui"
+urlprefix='ui/'
 urlpatterns = [
     #
     # HTML routes
     #
+    path(
+        'html/dataset-list/',
+        view=views.DataSetListView.as_view(),
+        name='select'
+    ),
     path(
         r'html/topography/',
         view=views.TopographyDetailView.as_view(),
@@ -18,9 +24,14 @@ urlpatterns = [
         name='surface-detail'
     ),
     path(
-        'html/select/',
-        view=views.SelectView.as_view(),
-        name='select'
+        'html/analysis-list/',
+        view=views.AnalysesResultListView.as_view(),
+        name='results-list'
+    ),
+    path(
+        r'html/analysis-detail/<int:pk>/',
+        view=views.AnalysisResultDetailView.as_view(),
+        name='results-detail'
     ),
     #
     # Data routes

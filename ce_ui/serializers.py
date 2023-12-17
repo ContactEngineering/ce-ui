@@ -6,14 +6,15 @@ from guardian.shortcuts import get_perms, get_users_with_perms
 from rest_framework import serializers
 from tagulous.contrib.drf import TagRelatedManagerField
 
-from .models import Surface, Topography, TagModel
-from .utils import get_search_term, filtered_topographies, subjects_to_base64, guardian_to_api
+from topobank.manager.models import Surface, Topography, TagModel
+from topobank.manager.utils import subjects_to_base64, guardian_to_api
+
+from .utils import get_search_term, filtered_topographies
 
 _log = logging.getLogger(__name__)
 
 
 # From: RomanKhudobei, https://github.com/encode/django-rest-framework/issues/1655
-
 class TopographySearchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Topography

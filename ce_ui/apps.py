@@ -1,12 +1,9 @@
 import logging
 from importlib.metadata import version
 
-__version__ = version("ce-ui")
+from topobank.plugins import PluginConfig
 
-try:
-    from topobank.plugins import PluginConfig
-except ImportError:
-    raise RuntimeError("Please use topobank 0.92.0 or above to use this plugin!")
+__version__ = version("ce-ui")
 
 _log = logging.Logger(__file__)
 
@@ -25,4 +22,7 @@ class CEUIPluginConfig(PluginConfig):
         restricted = False  # Accessible for all users, without permissions
 
     def ready(self):
-        pass
+        # make sure the functions are registered now
+
+        # noinspection PyUnresolvedReferences
+        import ce_ui.signals

@@ -6,7 +6,7 @@ from django.db.models import Q, Value, TextField
 from django.db.models.functions import Replace
 from django.http import HttpResponse
 from django.urls import reverse
-from django.views.generic import TemplateView
+from django.views.generic import DetailView, TemplateView
 
 from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
@@ -20,24 +20,26 @@ from trackstats.models import Metric, Period
 
 from topobank.usage_stats.utils import increase_statistics_by_date, increase_statistics_by_date_and_object
 
+from topobank.analysis.models import AnalysisFunction
 from topobank.manager.containers import write_surface_container
 from topobank.manager.models import Topography, Surface, TagModel, topography_datafile_path
-from topobank.manager.serializers import SurfaceSerializer, TopographySerializer, TagSearchSerizalizer, \
-    SurfaceSearchSerializer
-from topobank.manager.utils import selected_instances, tags_for_user, current_selection_as_basket_items, \
-    filtered_topographies, get_search_term, get_category, get_sharing_status, get_tree_mode, get_upload_instructions, \
-    api_to_guardian, surfaces_for_user, filter_queryset_by_search_term
+from topobank.manager.utils import get_upload_instructions, api_to_guardian, surfaces_for_user, subjects_from_base64
+
+from .serializers import TagSearchSerizalizer, SurfaceSearchSerializer
+from .utils import instances_to_selection, selected_instances, tags_for_user, current_selection_as_basket_items, \
+    filtered_topographies, get_search_term, get_category, get_sharing_status, get_tree_mode, \
+    filter_queryset_by_search_term, selection_to_subjects_dict
 
 # create dicts with labels and option values for Select tab
 CATEGORY_FILTER_CHOICES = {'all': 'All categories',
                            **{cc[0]: cc[1] + " only" for cc in Surface.CATEGORY_CHOICES}}
 SHARING_STATUS_FILTER_CHOICES = {
-    'all': 'All accessible surfaces',
-    'own': 'Only own surfaces',
-    'shared_ingress': 'Only surfaces shared with you',
-    'published_ingress': 'Only surfaces published by others',
-    'shared_egress': 'Only surfaces shared by you',
-    'published_egress': 'Only surfaces published by you'
+    'all': 'All accessible datasets',
+    'own': 'Only my datasets',
+    'shared_ingress': 'Only datasets shared with you',
+    'published_ingress': 'Only datasets published by others',
+    'shared_egress': 'Only datasets shared by you',
+    'published_egress': 'Only datasets published by you'
 }
 TREE_MODE_CHOICES = ['surface list', 'tag tree']
 
@@ -216,7 +218,7 @@ class TopographyDetailView(TemplateView):
         return context
 
 
-class SelectView(TemplateView):
+class DataSetListView(TemplateView):
     template_name = "manager/select.html"
 
     def dispatch(self, request, *args, **kwargs):
@@ -625,3 +627,160 @@ def unselect_all(request):
     """
     request.session['selection'] = []
     return Response([])
+
+
+def extra_tabs_if_single_item_selected(topographies, surfaces):
+    """Return contribution to context for opening extra tabs if a single topography/surface is selected.
+
+    Parameters
+    ----------
+    topographies: list of topographies
+        Use here the result of function `utils.selected_instances`.
+
+    surfaces: list of surfaces
+        Use here the result of function `utils.selected_instances`.
+
+    Returns
+    -------
+    Sequence of dicts, each dict corresponds to an extra tab.
+
+    """
+    tabs = []
+
+    if len(topographies) == 1 and len(surfaces) == 0:
+        # exactly one topography was selected -> show also tabs of topography
+        topo = topographies[0]
+        tabs.extend([
+            {
+                'title': f"{topo.surface.label}",
+                'icon': "gem",
+                'icon_style_prefix': 'far',
+                'href': f"{reverse('manager:surface-detail')}?surface={topo.surface.pk}",
+                'active': False,
+                'login_required': False,
+                'tooltip': f"Properties of surface '{topo.surface.label}'",
+            },
+            {
+                'title': f"{topo.name}",
+                'icon': "file",
+                'icon_style_prefix': 'far',
+                'href': f"{reverse('manager:topography-detail')}?topography={topo.pk}",
+                'active': False,
+                'login_required': False,
+                'tooltip': f"Properties of measurement '{topo.name}'",
+            }
+        ])
+    elif len(surfaces) == 1 and all(t.surface == surfaces[0] for t in topographies):
+        # exactly one surface was selected -> show also tab of surface
+        surface = surfaces[0]
+        tabs.append(
+            {
+                'title': f"{surface.label}",
+                'icon': 'gem',
+                'icon_style_prefix': 'far',
+                'href': f"{reverse('manager:surface-detail')}?surface={surface.pk}",
+                'active': False,
+                'login_required': False,
+                'tooltip': f"Properties of surface '{surface.label}'",
+            }
+        )
+    return tabs
+
+
+class AnalysisResultDetailView(DetailView):
+    """Show analyses for a given analysis function.
+    """
+    model = AnalysisFunction
+    template_name = "analysis/analyses_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        function = self.object
+        # Check if user is allowed to use this function
+        reg = AnalysisRegistry()
+        if function.name not in reg.get_analysis_function_names(self.request.user):
+            raise PermissionDenied()
+
+        # filter subjects to those this user is allowed to see
+        effective_topographies, effective_surfaces, subjects = selection_to_subjects_dict(self.request)
+
+        # get analysis result type
+        visualization_app_name, visualization_type = reg.get_visualization_type_for_function_name(function.name)
+
+        context['function'] = function
+        context['visualization_type'] = visualization_type
+
+        # Decide whether to open extra tabs for surface/topography details
+        tabs = extra_tabs_if_single_item_selected(effective_topographies, effective_surfaces)
+        tabs.extend([
+            {
+                'title': f"Analyze",
+                'icon': "chart-area",
+                'href': f"{reverse('analysis:results-list')}?subjects={self.request.GET.get('subjects')}",
+                'active': False,
+                'login_required': False,
+                'tooltip': "Results for selected analysis functions"
+            },
+            {
+                'title': f"{function.name}",
+                'icon': "chart-area",
+                'href': f"{self.request.path}?subjects={self.request.GET.get('subjects')}",
+                'active': True,
+                'login_required': False,
+                'tooltip': f"Results for analysis '{function.name}'",
+                'show_basket': True,
+            }
+        ])
+        context['extra_tabs'] = tabs
+
+        return context
+
+
+class AnalysesResultListView(TemplateView):
+    """View showing analyses from multiple functions.
+    """
+    template_name = "analysis/analyses_list.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        topographies = []
+        surfaces = []
+
+        # Find out what the subjects are. The usual query is a base64 encoded
+        # subjects dictionary passed as the 'subjects' argument.
+        subjects = self.request.GET.get('subjects')
+        topography = self.request.GET.get('topography')
+        surface = self.request.GET.get('surface')
+        if subjects is not None:
+            try:
+                subjects = subjects_from_base64(subjects)
+            except:
+                subjects = None
+
+            if subjects is not None:
+                # Update session to reflect selection
+                topographies = [t for t in subjects if isinstance(t, Topography)]
+                surfaces = [t for t in subjects if isinstance(t, Surface)]
+                self.request.session['selection'] = instances_to_selection(topographies=topographies, surfaces=surfaces)
+        elif topography is not None:
+            pass
+        elif surface is not None:
+            pass
+
+        # Decide whether to open extra tabs for surface/topography details
+        tabs = extra_tabs_if_single_item_selected(topographies, surfaces)
+        tabs.append({
+            'title': f"Analyze",
+            'icon': "chart-area",
+            'icon-style-prefix': 'fas',
+            'href': f"{reverse('analysis:results-list')}?subjects={self.request.GET.get('subjects')}",
+            'active': True,
+            'login_required': False,
+            'tooltip': "Results for selected analysis functions",
+            'show_basket': True,
+        })
+        context['extra_tabs'] = tabs
+
+        return context
