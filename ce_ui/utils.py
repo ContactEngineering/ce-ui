@@ -1,33 +1,48 @@
-import base64
-import functools
-import json
 import logging
 
-import markdown2
-import tempfile
-import traceback
-
-from storages.utils import clean_name
-
-from django.conf import settings
 from django.db.models import Q, Value, Count, TextField
 from django.db.models.functions import Replace
 from django.core.exceptions import PermissionDenied
-from django.core.files import File
-from django.core.files.storage import default_storage
-from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.search import SearchVector, SearchQuery
 
 from rest_framework.reverse import reverse
 
-from guardian.core import ObjectPermissionChecker
-from guardian.shortcuts import get_objects_for_user, get_users_with_perms
+from guardian.shortcuts import get_users_with_perms
 
-from SurfaceTopography import open_topography
-from SurfaceTopography.IO import readers as surface_topography_readers
-from SurfaceTopography.IO.DZI import write_dzi
+from topobank.manager.utils import subjects_to_dict, surfaces_for_user
+from topobank.manager.models import SurfaceCollection, TagModel, Topography, Surface
 
 _log = logging.getLogger(__name__)
+
+DEFAULT_DATASOURCE_NAME = 'Default'
+MAX_LEN_SEARCH_TERM = 200
+SELECTION_SESSION_VARNAME = 'selection'
+
+
+def surface_collection_name(surface_names, max_total_length=SurfaceCollection.MAX_LENGTH_NAME):
+    """For a given list of names, return a length-limited collection name."""
+    num_surfaces = len(surface_names)
+    k = 0
+    coll_name_prefix = ""
+    last_coll_name = ""
+    while k < num_surfaces:
+        coll_name_prefix += f"Surface '{surface_names[k]}'"
+        num_rest = num_surfaces - (k + 1)
+        coll_name = coll_name_prefix[:]
+        if num_rest > 0:
+            coll_name += f" and {num_rest} more"
+        if len(coll_name) > max_total_length:
+            if last_coll_name == "":
+                coll_name = coll_name_prefix[:max_total_length - 4] + "..."
+            else:
+                coll_name = last_coll_name
+            break
+        else:
+            last_coll_name = coll_name
+            coll_name_prefix += ", "
+            k += 1  # add one more and try if it still fits
+
+    return coll_name
 
 
 def selection_from_session(session):
@@ -86,8 +101,6 @@ def instances_to_topographies(topographies, surfaces, tags):
     -------
     Queryset of topography, distinct
     """
-    from .models import Topography
-
     topography_ids = [topo.id for topo in topographies]
     surface_ids = [s.id for s in surfaces]
     tag_ids = [tag.id for tag in tags]
@@ -117,8 +130,6 @@ def instances_to_surfaces(surfaces, tags):
     -------
     Queryset of surface, distinct
     """
-    from .models import Surface
-
     surface_ids = [s.id for s in surfaces]
     tag_ids = [tag.id for tag in tags]
 
@@ -144,8 +155,6 @@ def selection_to_instances(selection):
 
     Also surfaces without topographies are returned in 'surfaces' if selected.
     """
-    from .models import Topography, Surface, TagModel
-
     topography_ids = set()
     surface_ids = set()
     tag_ids = set()
@@ -208,8 +217,6 @@ def current_selection_as_surface_list(request):
     :param request: current request
     :return: list of Surface instances, sorted by name
     """
-    from .models import Surface
-
     topographies, surfaces, tags = selected_instances(request)
 
     #
@@ -352,7 +359,6 @@ def filtered_topographies(request, surfaces):
     queryset with matching topographies
 
     """
-    from topobank.manager.models import Topography
     topographies = Topography.objects.filter(surface__in=surfaces)
     search_term = get_search_term(request)
     if search_term:
@@ -385,7 +391,6 @@ def tags_for_user(user, surfaces=None, topographies=None):
                      or to reduce number of topographies based on a request
     :return: list of strings
     """
-    from .models import TagModel, Topography
     from django.db.models import Q
 
     if surfaces is None:
@@ -440,7 +445,6 @@ def selection_to_subjects_dict(request):
     effective_surfaces = [s for s in effective_surfaces if s in surfaces_with_view_permission]
 
     if len(effective_surfaces) > 1:
-        from .models import SurfaceCollection
         # In order to find a matching SurfaceCollection, we need to search first
         # for all surface collections with same number of surfaces, then filtering
         # for the exact surfaces
@@ -625,4 +629,3 @@ def get_permission_table_data(instance, request_user, actions=['view', 'change',
         perms_table.append(row)
 
     return perms_table
-

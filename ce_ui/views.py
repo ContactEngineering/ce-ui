@@ -1,4 +1,5 @@
 import logging
+from html import unescape
 from io import BytesIO
 
 from django.core.exceptions import PermissionDenied
@@ -14,16 +15,22 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.utils.urls import remove_query_param, replace_query_param
 
+from guardian.compat import get_user_model as guardian_user_model
+from guardian.shortcuts import get_objects_for_user
 from guardian.utils import get_user_obj_perms_model
 
+from termsandconditions.models import TermsAndConditions
+from termsandconditions.views import TermsView as OrigTermsView, AcceptTermsView
 from trackstats.models import Metric, Period
-
-from topobank.usage_stats.utils import increase_statistics_by_date, increase_statistics_by_date_and_object
 
 from topobank.analysis.models import AnalysisFunction
 from topobank.manager.containers import write_surface_container
 from topobank.manager.models import Topography, Surface, TagModel, topography_datafile_path
 from topobank.manager.utils import get_upload_instructions, api_to_guardian, surfaces_for_user, subjects_from_base64
+from topobank.manager.utils import get_reader_infos
+from topobank.usage_stats.utils import increase_statistics_by_date, increase_statistics_by_date_and_object, \
+    current_statistics
+from topobank.users.models import User
 
 from .serializers import TagSearchSerizalizer, SurfaceSearchSerializer
 from .utils import instances_to_selection, selected_instances, tags_for_user, current_selection_as_basket_items, \
@@ -199,7 +206,7 @@ class TopographyDetailView(TemplateView):
                 'title': f"{topography.surface.label}",
                 'icon': "gem",
                 'icon_style_prefix': 'far',
-                'href': f"{reverse('manager:surface-detail')}?surface={topography.surface.pk}",
+                'href': f"{reverse('ce_ui:surface-detail')}?surface={topography.surface.pk}",
                 'active': False,
                 'login_required': False,
                 'tooltip': f"Properties of surface '{topography.surface.label}'"
@@ -249,8 +256,8 @@ class DataSetListView(TemplateView):
 
         # key: tree mode
         context['base_urls'] = {
-            'surface list': self.request.build_absolute_uri(reverse('manager:search')),
-            'tag tree': self.request.build_absolute_uri(reverse('manager:tag-list')),
+            'surface list': self.request.build_absolute_uri(reverse('ce_ui:search')),
+            'tag tree': self.request.build_absolute_uri(reverse('ce_ui:tag-list')),
         }
 
         context['category_filter_choices'] = CATEGORY_FILTER_CHOICES.copy()
@@ -289,7 +296,7 @@ class SurfaceDetailView(TemplateView):
                 'title': f"{surface.label}",
                 'icon': "gem",
                 'icon_style_prefix': 'far',
-                'href': f"{reverse('manager:surface-detail')}?surface={surface.pk}",
+                'href': f"{reverse('ce_ui:surface-detail')}?surface={surface.pk}",
                 'active': False,
                 'tooltip': f"Properties of surface '{surface.label}'"
             }
@@ -655,7 +662,7 @@ def extra_tabs_if_single_item_selected(topographies, surfaces):
                 'title': f"{topo.surface.label}",
                 'icon': "gem",
                 'icon_style_prefix': 'far',
-                'href': f"{reverse('manager:surface-detail')}?surface={topo.surface.pk}",
+                'href': f"{reverse('ce_ui:surface-detail')}?surface={topo.surface.pk}",
                 'active': False,
                 'login_required': False,
                 'tooltip': f"Properties of surface '{topo.surface.label}'",
@@ -664,7 +671,7 @@ def extra_tabs_if_single_item_selected(topographies, surfaces):
                 'title': f"{topo.name}",
                 'icon': "file",
                 'icon_style_prefix': 'far',
-                'href': f"{reverse('manager:topography-detail')}?topography={topo.pk}",
+                'href': f"{reverse('ce_ui:topography-detail')}?topography={topo.pk}",
                 'active': False,
                 'login_required': False,
                 'tooltip': f"Properties of measurement '{topo.name}'",
@@ -678,7 +685,7 @@ def extra_tabs_if_single_item_selected(topographies, surfaces):
                 'title': f"{surface.label}",
                 'icon': 'gem',
                 'icon_style_prefix': 'far',
-                'href': f"{reverse('manager:surface-detail')}?surface={surface.pk}",
+                'href': f"{reverse('ce_ui:surface-detail')}?surface={surface.pk}",
                 'active': False,
                 'login_required': False,
                 'tooltip': f"Properties of surface '{surface.label}'",
@@ -784,3 +791,122 @@ class AnalysesResultListView(TemplateView):
         context['extra_tabs'] = tabs
 
         return context
+
+
+class HomeView(TemplateView):
+    template_name = 'pages/home.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        user = self.request.user
+        if user.is_anonymous:
+            anon = guardian_user_model().get_anonymous()
+            context['num_users'] = User.objects.filter(Q(is_active=True) & ~Q(pk=anon.pk)).count()
+
+            current_stats = current_statistics()
+        else:
+            current_stats = current_statistics(user)
+
+            # count surfaces you can view, but you are not creator
+            context['num_shared_surfaces'] = get_objects_for_user(user, 'view_surface', klass=Surface) \
+                .filter(~Q(creator=user)).count()
+
+        context['num_surfaces'] = current_stats['num_surfaces_excluding_publications']
+        context['num_topographies'] = current_stats['num_topographies_excluding_publications']
+        context['num_analyses'] = current_stats['num_analyses_excluding_publications']
+
+        return context
+
+
+class TermsView(TemplateView):
+    template_name = 'pages/termsconditions.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        active_terms = TermsAndConditions.get_active_terms_list()
+
+        if not self.request.user.is_anonymous:
+            context['agreed_terms'] = TermsAndConditions.objects.filter(
+                userterms__date_accepted__isnull=False,
+                userterms__user=self.request.user).order_by('date_created')
+
+            context['not_agreed_terms'] = active_terms.filter(
+                Q(userterms=None) | \
+                (Q(userterms__date_accepted__isnull=True) & Q(userterms__user=self.request.user))) \
+                .order_by('date_created')
+        else:
+            context['active_terms'] = active_terms.order_by('date_created')
+
+        context['extra_tabs'] = [{
+            'login_required': False,
+            'icon': 'file-contract',
+            'title': "Terms and Conditions",
+            'active': True,
+        }]
+        context['connect_fixed_tabs_with_extra_tabs'] = False
+
+        return context
+
+
+class HelpView(TemplateView):
+    template_name = 'pages/help.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        context['reader_infos'] = get_reader_infos()
+        context['extra_tabs'] = [
+            {
+                'icon': 'question-circle',
+                'title': "Help",
+                'href': self.request.path,
+                'active': True,
+                'login_required': False,
+            }
+        ]
+        return context
+
+
+#
+# The following two views are overwritten from
+# termsandconditions package in order to add context
+# for the tabbed interface
+#
+def tabs_for_terms(terms, request_path):
+    if len(terms) == 1:
+        tab_title = unescape(f"{terms[0].name} {terms[0].version_number}")  # mimics '|safe' as in original template
+    else:
+        tab_title = "Terms"  # should not happen in Topobank, but just to be safe
+
+    return [
+        {
+            'icon': 'file-contract',
+            'title': "Terms and Conditions",
+            'href': reverse('terms'),
+            'active': False,
+            'login_required': False,
+        },
+        {
+            'icon': 'file-contract',
+            'title': tab_title,
+            'href': request_path,
+            'active': True,
+            'login_required': False,
+        }
+    ]
+
+
+class TabbedTermsMixin:
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['extra_tabs'] = tabs_for_terms(self.get_terms(self.kwargs), self.request.path)
+        context['connect_fixed_tabs_with_extra_tabs'] = False
+        return context
+
+
+class TermsDetailView(TabbedTermsMixin, OrigTermsView):
+    pass
+
+
+class TermsAcceptView(TabbedTermsMixin, AcceptTermsView):
+    pass

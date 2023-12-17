@@ -2,7 +2,7 @@ from django.urls import re_path, path
 
 from . import views
 
-app_name = "ui"
+app_name = "ce_ui"
 urlprefix='ui/'
 urlpatterns = [
     #

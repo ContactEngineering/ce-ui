@@ -15,8 +15,8 @@ import topobank
 from .utils import current_selection_as_basket_items
 
 HOME_URL = reverse('home')
-SELECT_URL = reverse('manager:select')
-UNSELECT_ALL_URL = reverse('manager:unselect-all')
+SELECT_URL = reverse('ce_ui:select')
+UNSELECT_ALL_URL = reverse('ce_ui:unselect-all')
 
 
 def fixed_tabs_processor(request):

@@ -62,13 +62,13 @@ class TopographySearchSerializer(serializers.ModelSerializer):
         perms = get_perms(user, surface)  # TODO are permissions needed here?
 
         urls = {
-            'select': shortcuts.reverse('manager:topography-select', kwargs=dict(pk=obj.pk)),
-            'unselect': shortcuts.reverse('manager:topography-unselect', kwargs=dict(pk=obj.pk))
+            'select': shortcuts.reverse('ce_ui:topography-select', kwargs=dict(pk=obj.pk)),
+            'unselect': shortcuts.reverse('ce_ui:topography-unselect', kwargs=dict(pk=obj.pk))
         }
 
         if 'view_surface' in perms:
-            urls['detail'] = f"{shortcuts.reverse('manager:topography-detail')}?topography={obj.pk}"
-            urls['analyze'] = f"{shortcuts.reverse('analysis:results-list')}?subjects={subjects_to_base64([obj])}"
+            urls['detail'] = f"{shortcuts.reverse('ce_ui:topography-detail')}?topography={obj.pk}"
+            urls['analyze'] = f"{shortcuts.reverse('ce_ui:results-list')}?subjects={subjects_to_base64([obj])}"
 
         return urls
 
@@ -172,14 +172,14 @@ class SurfaceSearchSerializer(serializers.ModelSerializer):
         perms = get_perms(user, obj)  # TODO are permissions needed here?
 
         urls = {
-            'select': shortcuts.reverse('manager:surface-select', kwargs=dict(pk=obj.pk)),
-            'unselect': shortcuts.reverse('manager:surface-unselect', kwargs=dict(pk=obj.pk))
+            'select': shortcuts.reverse('ce_ui:surface-select', kwargs=dict(pk=obj.pk)),
+            'unselect': shortcuts.reverse('ce_ui:surface-unselect', kwargs=dict(pk=obj.pk))
         }
         if 'view_surface' in perms:
-            urls['detail'] = f"{shortcuts.reverse('manager:surface-detail')}?surface={obj.pk}"
+            urls['detail'] = f"{shortcuts.reverse('ce_ui:surface-detail')}?surface={obj.pk}"
             if obj.num_topographies() > 0:
                 urls.update({
-                    'analyze': f"{shortcuts.reverse('analysis:results-list')}?subjects={subjects_to_base64([obj])}"
+                    'analyze': f"{shortcuts.reverse('ce_ui:results-list')}?subjects={subjects_to_base64([obj])}"
                 })
             urls['download'] = shortcuts.reverse('manager:surface-download', kwargs=dict(surface_id=obj.id))
 
@@ -260,8 +260,8 @@ class TagSearchSerizalizer(serializers.ModelSerializer):
 
     def get_urls(self, obj):
         urls = {
-            'select': shortcuts.reverse('manager:tag-select', kwargs=dict(pk=obj.pk)),
-            'unselect': shortcuts.reverse('manager:tag-unselect', kwargs=dict(pk=obj.pk))
+            'select': shortcuts.reverse('ce_ui:tag-select', kwargs=dict(pk=obj.pk)),
+            'unselect': shortcuts.reverse('ce_ui:tag-unselect', kwargs=dict(pk=obj.pk))
         }
         return urls
 

@@ -228,7 +228,7 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                  class="btn-group btn-group-sm float-end">
                 <a v-if="!selected"
                    class="btn btn-outline-secondary float-end ms-2"
-                   :href="`/manager/html/topography/?topography=${topography.id}`">
+                   :href="`/ui/html/topography/?topography=${topography.id}`">
                     <i class="fa fa-expand"></i>
                 </a>
                 <button v-if="selected"
@@ -324,7 +324,7 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                 <div class="row">
                     <div v-if="topography.thumbnail != null"
                          class="col-2">
-                        <a :href="`/manager/html/topography/?topography=${topography.id}`">
+                        <a :href="`/ui/html/topography/?topography=${topography.id}`">
                             <img class="img-thumbnail mw-100"
                                  :src="topography.thumbnail">
                         </a>

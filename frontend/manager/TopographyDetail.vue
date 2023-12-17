@@ -38,7 +38,7 @@ function deleteTopography() {
     axios.delete(_topography.url).then(response => {
         this.$emit('topography-deleted', _topography.value.url);
         const id = getIdFromUrl(_topography.value.surface);
-        window.location.href = `/manager/html/surface/?surface=${id}`;
+        window.location.href = `/ui/html/surface/?surface=${id}`;
     });
 }
 
