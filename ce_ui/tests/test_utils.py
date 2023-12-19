@@ -193,7 +193,7 @@ def test_related_surfaces_for_selection(rf):
 
     def get_request(topographies=[], surfaces=[], tags=[]):
         """Simple get request while setting the selection"""
-        request = rf.get(reverse('manager:select'))
+        request = rf.get(reverse('ce_ui:select'))
         request.user = user
         request.session = {'selection': instances_to_selection(
             topographies=topographies,

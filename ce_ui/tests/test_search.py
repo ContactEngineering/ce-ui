@@ -1,15 +1,18 @@
 """Test related to searching"""
+
 import pytest
 
 from django.shortcuts import reverse
 from rest_framework.test import APIRequestFactory
 
-from topobank.topobank.manager.models import TagModel
-from topobank.topobank.manager.views import SurfaceSearchPaginator, SurfaceListView, TagTreeView
-from topobank.topobank.manager.utils import subjects_to_base64
+from topobank.manager.models import TagModel
+from topobank.manager.utils import subjects_to_base64
 
-from topobank.topobank.manager.tests.utils import ordereddicts_to_dicts, Topography1DFactory, UserFactory, SurfaceFactory, search_surfaces
+from topobank.manager.tests.utils import ordereddicts_to_dicts, Topography1DFactory, UserFactory, SurfaceFactory
 
+from ..views import SurfaceSearchPaginator, SurfaceListView, TagTreeView
+
+from .utils import search_surfaces
 
 def assert_dict_equal(a, b, key=None):
     try:
@@ -71,7 +74,7 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
     session = dict(selection=[f'surface-{surface2.pk}', f'topography-{topo1a.pk}', f'surface-{surface3.pk}'])
 
     factory = APIRequestFactory()
-    request = factory.get(reverse('manager:search'))  # no search term here, see below for another search with term
+    request = factory.get(reverse('ce_ui:search'))  # no search term here, see below for another search with term
     request.user = user
     request.session = session
 
@@ -130,10 +133,10 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
                  'thumbnail': None,
                  'unit': topo1a.unit,
                  'unit_editable': topo1a.unit_editable,
-                 'urls': {'detail': f'/manager/html/topography/?topography={topo1a.id}',
-                          'select': f'/manager/api/selection/topography/{topo1a.id}/select/',
+                 'urls': {'detail': f'/ui/html/topography/?topography={topo1a.id}',
+                          'select': f'/ui/api/selection/topography/{topo1a.id}/select/',
                           'analyze': topo1a_analyze,
-                          'unselect': f'/manager/api/selection/topography/{topo1a.id}/unselect/'}},
+                          'unselect': f'/ui/api/selection/topography/{topo1a.id}/unselect/'}},
                 {'creator': user_url,
                  'creator_name': user.name,
                  'description': '',
@@ -167,10 +170,10 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
                  'thumbnail': None,
                  'unit': topo1b.unit,
                  'unit_editable': topo1b.unit_editable,
-                 'urls': {'detail': f'/manager/html/topography/?topography={topo1b.id}',
-                          'select': f'/manager/api/selection/topography/{topo1b.id}/select/',
+                 'urls': {'detail': f'/ui/html/topography/?topography={topo1b.id}',
+                          'select': f'/ui/api/selection/topography/{topo1b.id}/select/',
                           'analyze': topo1b_analyze,
-                          'unselect': f'/manager/api/selection/topography/{topo1b.id}/unselect/'}},
+                          'unselect': f'/ui/api/selection/topography/{topo1b.id}/unselect/'}},
 
             ],
             'creator': user_url,
@@ -194,9 +197,9 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
             'version': None,
             'urls': {'analyze': surface1_analyze,
                      'download': f'/manager/api/surface/{surface1.id}/download/',
-                     'detail': f'/manager/html/surface/?surface={surface1.id}',
-                     'select': f'/manager/api/selection/surface/{surface1.id}/select/',
-                     'unselect': f'/manager/api/selection/surface/{surface1.id}/unselect/'}
+                     'detail': f'/ui/html/surface/?surface={surface1.id}',
+                     'select': f'/ui/api/selection/surface/{surface1.id}/select/',
+                     'unselect': f'/ui/api/selection/surface/{surface1.id}/unselect/'}
         },
         {
             'category': 'sim',
@@ -235,10 +238,10 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
                  'thumbnail': None,
                  'unit': topo2a.unit,
                  'unit_editable': topo2a.unit_editable,
-                 'urls': {'detail': f'/manager/html/topography/?topography={topo2a.id}',
-                          'select': f'/manager/api/selection/topography/{topo2a.id}/select/',
+                 'urls': {'detail': f'/ui/html/topography/?topography={topo2a.id}',
+                          'select': f'/ui/api/selection/topography/{topo2a.id}/select/',
                           'analyze': topo2a_analyze,
-                          'unselect': f'/manager/api/selection/topography/{topo2a.id}/unselect/'}},
+                          'unselect': f'/ui/api/selection/topography/{topo2a.id}/unselect/'}},
                 {'creator': user_url,
                  'creator_name': user.name,
                  'description': '',
@@ -272,10 +275,10 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
                  'thumbnail': None,
                  'unit': topo2b.unit,
                  'unit_editable': topo2b.unit_editable,
-                 'urls': {'detail': f'/manager/html/topography/?topography={topo2b.id}',
-                          'select': f'/manager/api/selection/topography/{topo2b.id}/select/',
+                 'urls': {'detail': f'/ui/html/topography/?topography={topo2b.id}',
+                          'select': f'/ui/api/selection/topography/{topo2b.id}/select/',
                           'analyze': topo2b_analyze,
-                          'unselect': f'/manager/api/selection/topography/{topo2b.id}/unselect/'}},
+                          'unselect': f'/ui/api/selection/topography/{topo2b.id}/unselect/'}},
             ],
             'creator': user_url,
             'creator_name': user.name,
@@ -298,9 +301,9 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
             'version': None,
             'urls': {'analyze': surface2_analyze,
                      'download': f'/manager/api/surface/{surface2.id}/download/',
-                     'detail': f'/manager/html/surface/?surface={surface2.id}',
-                     'select': f'/manager/api/selection/surface/{surface2.id}/select/',
-                     'unselect': f'/manager/api/selection/surface/{surface2.id}/unselect/'}
+                     'detail': f'/ui/html/surface/?surface={surface2.id}',
+                     'select': f'/ui/api/selection/surface/{surface2.id}/select/',
+                     'unselect': f'/ui/api/selection/surface/{surface2.id}/unselect/'}
         },
         {
             'category': 'dum',
@@ -326,9 +329,9 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
             'type': 'surface',
             'version': None,
             'urls': {'download': f'/manager/api/surface/{surface3.id}/download/',
-                     'detail': f'/manager/html/surface/?surface={surface3.id}',
-                     'select': f'/manager/api/selection/surface/{surface3.id}/select/',
-                     'unselect': f'/manager/api/selection/surface/{surface3.id}/unselect/'}
+                     'detail': f'/ui/html/surface/?surface={surface3.id}',
+                     'select': f'/ui/api/selection/surface/{surface3.id}/select/',
+                     'unselect': f'/ui/api/selection/surface/{surface3.id}/unselect/'}
         },
     ]
 
@@ -337,7 +340,7 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
     #
     # Do a search and check for reduced results because search for "topo2a"
     #
-    request = factory.get(reverse('manager:search') + f"?search={topo2a.name}")
+    request = factory.get(reverse('ce_ui:search') + f"?search={topo2a.name}")
     request.user = user
     request.session = session
 
@@ -386,10 +389,10 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
                  'thumbnail': None,
                  'unit': topo2a.unit,
                  'unit_editable': topo2a.unit_editable,
-                 'urls': {'detail': f'/manager/html/topography/?topography={topo2a.id}',
-                          'select': f'/manager/api/selection/topography/{topo2a.id}/select/',
+                 'urls': {'detail': f'/ui/html/topography/?topography={topo2a.id}',
+                          'select': f'/ui/api/selection/topography/{topo2a.id}/select/',
                           'analyze': topo2a_analyze,
-                          'unselect': f'/manager/api/selection/topography/{topo2a.id}/unselect/'}},
+                          'unselect': f'/ui/api/selection/topography/{topo2a.id}/unselect/'}},
             ],
             'creator': user_url,
             'creator_name': user.name,
@@ -412,9 +415,9 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
             'version': None,
             'urls': {'analyze': surface2_analyze,
                      'download': f'/manager/api/surface/{surface2.id}/download/',
-                     'detail': f'/manager/html/surface/?surface={surface2.id}',
-                     'select': f'/manager/api/selection/surface/{surface2.id}/select/',
-                     'unselect': f'/manager/api/selection/surface/{surface2.id}/unselect/'}
+                     'detail': f'/ui/html/surface/?surface={surface2.id}',
+                     'select': f'/ui/api/selection/surface/{surface2.id}/select/',
+                     'unselect': f'/ui/api/selection/surface/{surface2.id}/unselect/'}
         },
     ]
 
@@ -424,7 +427,7 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
     #
     # Do a search and check for reduced results because search for category "exp"
     #
-    request = factory.get(reverse('manager:search') + "?category=exp")
+    request = factory.get(reverse('ce_ui:search') + "?category=exp")
     request.user = user
     request.session = session
 
@@ -473,10 +476,10 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
                  'thumbnail': None,
                  'unit': topo1a.unit,
                  'unit_editable': topo1a.unit_editable,
-                 'urls': {'detail': f'/manager/html/topography/?topography={topo1a.id}',
-                          'select': f'/manager/api/selection/topography/{topo1a.id}/select/',
+                 'urls': {'detail': f'/ui/html/topography/?topography={topo1a.id}',
+                          'select': f'/ui/api/selection/topography/{topo1a.id}/select/',
                           'analyze': topo1a_analyze,
-                          'unselect': f'/manager/api/selection/topography/{topo1a.id}/unselect/'}},
+                          'unselect': f'/ui/api/selection/topography/{topo1a.id}/unselect/'}},
                 {'creator': user_url,
                  'creator_name': user.name,
                  'description': '',
@@ -510,10 +513,10 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
                  'thumbnail': None,
                  'unit': topo1b.unit,
                  'unit_editable': topo1b.unit_editable,
-                 'urls': {'detail': f'/manager/html/topography/?topography={topo1b.id}',
-                          'select': f'/manager/api/selection/topography/{topo1b.id}/select/',
+                 'urls': {'detail': f'/ui/html/topography/?topography={topo1b.id}',
+                          'select': f'/ui/api/selection/topography/{topo1b.id}/select/',
                           'analyze': topo1b_analyze,
-                          'unselect': f'/manager/api/selection/topography/{topo1b.id}/unselect/'}},
+                          'unselect': f'/ui/api/selection/topography/{topo1b.id}/unselect/'}},
 
             ],
             'creator': user_url,
@@ -537,9 +540,9 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
             'version': None,
             'urls': {'analyze': surface1_analyze,
                      'download': f'/manager/api/surface/{surface1.id}/download/',
-                     'detail': f'/manager/html/surface/?surface={surface1.id}',
-                     'select': f'/manager/api/selection/surface/{surface1.id}/select/',
-                     'unselect': f'/manager/api/selection/surface/{surface1.id}/unselect/'}
+                     'detail': f'/ui/html/surface/?surface={surface1.id}',
+                     'select': f'/ui/api/selection/surface/{surface1.id}/select/',
+                     'unselect': f'/ui/api/selection/surface/{surface1.id}/unselect/'}
         },
     ]
 
@@ -567,7 +570,7 @@ def test_tag_search_with_request_factory(user_three_surfaces_four_topographies):
     session = dict(selection=[f'surface-{surface2.pk}', f'topography-{topo1a.pk}', f'surface-{surface3.pk}'])
 
     factory = APIRequestFactory()
-    request = factory.get(reverse('manager:tag-list'))
+    request = factory.get(reverse('ce_ui:tag-list'))
     request.user = user
     request.session = session
 
@@ -621,10 +624,10 @@ def test_tag_search_with_request_factory(user_three_surfaces_four_topographies):
         'thumbnail': None,
         'unit': topo1a.unit,
         'unit_editable': topo1a.unit_editable,
-        'urls': {'detail': f'/manager/html/topography/?topography={topo1a.id}',
-                 'select': f'/manager/api/selection/topography/{topo1a.id}/select/',
+        'urls': {'detail': f'/ui/html/topography/?topography={topo1a.id}',
+                 'select': f'/ui/api/selection/topography/{topo1a.id}/select/',
                  'analyze': topo1a_analyze,
-                 'unselect': f'/manager/api/selection/topography/{topo1a.id}/unselect/'}
+                 'unselect': f'/ui/api/selection/topography/{topo1a.id}/unselect/'}
     }
     expected_dict_topo1b = {
         'creator': user_url,
@@ -660,10 +663,10 @@ def test_tag_search_with_request_factory(user_three_surfaces_four_topographies):
         'thumbnail': None,
         'unit': topo1b.unit,
         'unit_editable': topo1b.unit_editable,
-        'urls': {'detail': f'/manager/html/topography/?topography={topo1b.id}',
-                 'select': f'/manager/api/selection/topography/{topo1b.id}/select/',
+        'urls': {'detail': f'/ui/html/topography/?topography={topo1b.id}',
+                 'select': f'/ui/api/selection/topography/{topo1b.id}/select/',
                  'analyze': topo1b_analyze,
-                 'unselect': f'/manager/api/selection/topography/{topo1b.id}/unselect/'}
+                 'unselect': f'/ui/api/selection/topography/{topo1b.id}/unselect/'}
     }
 
     expected_dict_topo2a = {
@@ -700,10 +703,10 @@ def test_tag_search_with_request_factory(user_three_surfaces_four_topographies):
         'thumbnail': None,
         'unit': topo2a.unit,
         'unit_editable': topo2a.unit_editable,
-        'urls': {'detail': f'/manager/html/topography/?topography={topo2a.id}',
-                 'select': f'/manager/api/selection/topography/{topo2a.id}/select/',
+        'urls': {'detail': f'/ui/html/topography/?topography={topo2a.id}',
+                 'select': f'/ui/api/selection/topography/{topo2a.id}/select/',
                  'analyze': topo2a_analyze,
-                 'unselect': f'/manager/api/selection/topography/{topo2a.id}/unselect/'}
+                 'unselect': f'/ui/api/selection/topography/{topo2a.id}/unselect/'}
     }
 
     expected_dict_topo2b = {
@@ -740,10 +743,10 @@ def test_tag_search_with_request_factory(user_three_surfaces_four_topographies):
         'thumbnail': None,
         'unit': topo2b.unit,
         'unit_editable': topo2b.unit_editable,
-        'urls': {'detail': f'/manager/html/topography/?topography={topo2b.id}',
-                 'select': f'/manager/api/selection/topography/{topo2b.id}/select/',
+        'urls': {'detail': f'/ui/html/topography/?topography={topo2b.id}',
+                 'select': f'/ui/api/selection/topography/{topo2b.id}/select/',
                  'analyze': topo2b_analyze,
-                 'unselect': f'/manager/api/selection/topography/{topo2b.id}/unselect/'}
+                 'unselect': f'/ui/api/selection/topography/{topo2b.id}/unselect/'}
     }
 
     expected_dict_surface1 = {
@@ -771,9 +774,9 @@ def test_tag_search_with_request_factory(user_three_surfaces_four_topographies):
         'version': None,
         'urls': {'analyze': surface1_analyze,
                  'download': f'/manager/api/surface/{surface1.id}/download/',
-                 'detail': f'/manager/html/surface/?surface={surface1.id}',
-                 'select': f'/manager/api/selection/surface/{surface1.id}/select/',
-                 'unselect': f'/manager/api/selection/surface/{surface1.id}/unselect/'}
+                 'detail': f'/ui/html/surface/?surface={surface1.id}',
+                 'select': f'/ui/api/selection/surface/{surface1.id}/select/',
+                 'unselect': f'/ui/api/selection/surface/{surface1.id}/unselect/'}
     }
 
     bike_pk = TagModel.objects.get(name='bike').pk
@@ -782,11 +785,11 @@ def test_tag_search_with_request_factory(user_three_surfaces_four_topographies):
     train_tgv_pk = TagModel.objects.get(name='train/tgv').pk
     train_ice_restaurant_pk = TagModel.objects.get(name='train/ice/restaurant').pk
 
-    bike_select_prefix = f"/manager/api/selection/tag/{bike_pk}/"
-    train_select_prefix = f"/manager/api/selection/tag/{train_pk}/"
-    train_ice_select_prefix = f"/manager/api/selection/tag/{train_ice_pk}/"
-    train_tgv_select_prefix = f"/manager/api/selection/tag/{train_tgv_pk}/"
-    train_ice_restaurant_select_prefix = f"/manager/api/selection/tag/{train_ice_restaurant_pk}/"
+    bike_select_prefix = f"/ui/api/selection/tag/{bike_pk}/"
+    train_select_prefix = f"/ui/api/selection/tag/{train_pk}/"
+    train_ice_select_prefix = f"/ui/api/selection/tag/{train_ice_pk}/"
+    train_tgv_select_prefix = f"/ui/api/selection/tag/{train_tgv_pk}/"
+    train_ice_restaurant_select_prefix = f"/ui/api/selection/tag/{train_ice_restaurant_pk}/"
 
     expected_dicts = [
         {
@@ -902,7 +905,7 @@ def test_tag_search_with_request_factory(user_three_surfaces_four_topographies):
     #
     # Now restrict result by query parameters, search for "topo2a"
     #
-    request = factory.get(reverse('manager:tag-list') + f"?search={topo2a.name}")
+    request = factory.get(reverse('ce_ui:tag-list') + f"?search={topo2a.name}")
     request.user = user
     request.session = session
 
@@ -987,7 +990,7 @@ def test_tag_search_with_request_factory(user_three_surfaces_four_topographies):
     # Now restrict result by query parameters, search for category 'dum'
     # -> no result, because surface 3 would match, but has no tag
     #
-    request = factory.get(reverse('manager:tag-list') + "?category=dum")
+    request = factory.get(reverse('ce_ui:tag-list') + "?category=dum")
     request.user = user
     request.session = session
 
@@ -1012,10 +1015,10 @@ def test_tag_search_with_request_factory(user_three_surfaces_four_topographies):
     surface4.share(user)
 
     shared_pk = TagModel.objects.get(name='shared').pk
-    shared_prefix = f"/manager/html/tag/{shared_pk}/"
-    surface4_prefix = f"/manager/html/surface/{surface4.pk}/"
+    shared_prefix = f"/ui/html/tag/{shared_pk}/"
+    surface4_prefix = f"/ui/html/surface/{surface4.pk}/"
 
-    request = factory.get(reverse('manager:tag-list') + "?sharing_status=shared_ingress")
+    request = factory.get(reverse('ce_ui:tag-list') + "?sharing_status=shared_ingress")
     request.user = user
     request.session = session
 

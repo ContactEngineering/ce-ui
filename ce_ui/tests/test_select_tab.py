@@ -5,13 +5,12 @@ import pytest
 from django.shortcuts import reverse
 from rest_framework.test import APIRequestFactory
 
-from topobank.topobank.manager.views import select_surface, unselect_surface, \
-    select_topography, unselect_topography, \
-    select_tag, unselect_tag, unselect_all, DEFAULT_SELECT_TAB_STATE
-from topobank.topobank.manager.utils import selected_instances
-from topobank.topobank.manager.tests.utils import SurfaceFactory, UserFactory, Topography1DFactory, \
-    TagModelFactory
+from topobank.manager.tests.utils import SurfaceFactory, UserFactory, Topography1DFactory, TagModelFactory
 from topobank.utils import assert_no_form_errors
+
+from ..utils import selected_instances
+from ..views import select_surface, unselect_surface, select_topography, unselect_topography, select_tag, unselect_tag, \
+    unselect_all, DEFAULT_SELECT_TAB_STATE
 
 
 @pytest.mark.django_db
@@ -29,7 +28,7 @@ def test_select_surface():
     #
     # First select a single surface
     #
-    request = factory.post(reverse('manager:surface-select', kwargs=dict(pk=surface1.pk)))
+    request = factory.post(reverse('ce_ui:surface-select', kwargs=dict(pk=surface1.pk)))
     request.user = user
     request.session = session
 
@@ -44,7 +43,7 @@ def test_select_surface():
     #
     # Then select another
     #
-    request = factory.post(reverse('manager:surface-select', kwargs=dict(pk=surface1.pk)))
+    request = factory.post(reverse('ce_ui:surface-select', kwargs=dict(pk=surface1.pk)))
     request.user = user
     request.session = session
 
@@ -60,7 +59,7 @@ def test_select_surface():
     # If a surface is selected after a single topography of this surface
     # was selected, the selection of the single topography should be still there
     #
-    request = factory.post(reverse('manager:topography-select', kwargs=dict(pk=topo3a.pk)))
+    request = factory.post(reverse('ce_ui:topography-select', kwargs=dict(pk=topo3a.pk)))
     request.user = user
     request.session = session
 
@@ -74,7 +73,7 @@ def test_select_surface():
     assert selected_instances(request)[0] == [topo3a]
     assert selected_instances(request)[1] == [surface1, surface2]
 
-    request = factory.post(reverse('manager:surface-select', kwargs=dict(pk=surface3.pk)))
+    request = factory.post(reverse('ce_ui:surface-select', kwargs=dict(pk=surface3.pk)))
     request.user = user
     request.session = session
 
@@ -102,7 +101,7 @@ def test_unselect_surface():
     #
     # deselect a surface
     #
-    request = factory.post(reverse('manager:surface-unselect', kwargs=dict(pk=surface1.pk)))
+    request = factory.post(reverse('ce_ui:surface-unselect', kwargs=dict(pk=surface1.pk)))
     request.user = user
     request.session = session
 
@@ -121,11 +120,10 @@ def test_try_to_select_surface_but_not_allowed():
     user2 = UserFactory()
     surface1 = SurfaceFactory(creator=user1)
 
-
     factory = APIRequestFactory()
     session = {}
 
-    request = factory.post(reverse('manager:surface-select', kwargs=dict(pk=surface1.pk)))
+    request = factory.post(reverse('ce_ui:surface-select', kwargs=dict(pk=surface1.pk)))
     request.user = user2
     request.session = session
 
@@ -144,7 +142,7 @@ def test_try_to_select_topography_but_not_allowed():
     factory = APIRequestFactory()
     session = {}
 
-    request = factory.post(reverse('manager:topography-select', kwargs=dict(pk=topo1.pk)))
+    request = factory.post(reverse('ce_ui:topography-select', kwargs=dict(pk=topo1.pk)))
     request.user = user2
     request.session = session
 
@@ -169,7 +167,7 @@ def test_try_to_select_tag_but_not_allowed():
     factory = APIRequestFactory()
     session = {}
 
-    request = factory.post(reverse('manager:tag-select', kwargs=dict(pk=tag1.pk)))
+    request = factory.post(reverse('ce_ui:tag-select', kwargs=dict(pk=tag1.pk)))
     request.user = user2
     request.session = session
 
@@ -200,7 +198,7 @@ def test_select_topography():
     #
     # First select a single surface
     #
-    request = factory.post(reverse('manager:topography-select', kwargs=dict(pk=topo1a.pk)))
+    request = factory.post(reverse('ce_ui:topography-select', kwargs=dict(pk=topo1a.pk)))
     request.user = user
     request.session = session
 
@@ -215,7 +213,7 @@ def test_select_topography():
     #
     # Then select a second one
     #
-    request = factory.post(reverse('manager:topography-select', kwargs=dict(pk=topo1b.pk)))
+    request = factory.post(reverse('ce_ui:topography-select', kwargs=dict(pk=topo1b.pk)))
     request.user = user
     request.session = session
 
@@ -230,7 +228,7 @@ def test_select_topography():
     #
     # When selecting all topographies of a surface, the surface should not be selected
     #
-    request = factory.post(reverse('manager:topography-select', kwargs=dict(pk=topo1c.pk)))
+    request = factory.post(reverse('ce_ui:topography-select', kwargs=dict(pk=topo1c.pk)))
     request.user = user
     request.session = session
 
@@ -249,7 +247,7 @@ def test_select_topography():
     # When selecting some arbitrary topography, a permission denied should show up
     #
     invalid_pk = 99999999999
-    request = factory.post(reverse('manager:topography-select', kwargs=dict(pk=invalid_pk)))
+    request = factory.post(reverse('ce_ui:topography-select', kwargs=dict(pk=invalid_pk)))
     request.user = user
     request.session = session
 
@@ -272,7 +270,7 @@ def test_unselect_topography():
     #
     # deselect a topography
     #
-    request = factory.post(reverse('manager:topography-unselect', kwargs=dict(pk=topo1a.pk)))
+    request = factory.post(reverse('ce_ui:topography-unselect', kwargs=dict(pk=topo1a.pk)))
     request.user = user
     request.session = session
 
@@ -290,7 +288,7 @@ def test_unselect_topography():
     #
     # Now remove topo1b
     #
-    request = factory.post(reverse('manager:topography-unselect', kwargs=dict(pk=topo1b.pk)))
+    request = factory.post(reverse('ce_ui:topography-unselect', kwargs=dict(pk=topo1b.pk)))
     request.user = user
     request.session = session
 
@@ -307,7 +305,6 @@ def test_unselect_topography():
 #
 @pytest.mark.django_db
 def test_select_tag():
-
     user = UserFactory()
 
     tag1 = TagModelFactory()
@@ -322,7 +319,7 @@ def test_select_tag():
     #
     # First select a single tag
     #
-    request = factory.post(reverse('manager:tag-select', kwargs=dict(pk=tag1.pk)))
+    request = factory.post(reverse('ce_ui:tag-select', kwargs=dict(pk=tag1.pk)))
     request.user = user
     request.session = session
 
@@ -337,7 +334,7 @@ def test_select_tag():
     #
     # Then select another
     #
-    request = factory.post(reverse('manager:tag-select', kwargs=dict(pk=tag2.pk)))
+    request = factory.post(reverse('ce_ui:tag-select', kwargs=dict(pk=tag2.pk)))
     request.user = user
     request.session = session
 
@@ -366,7 +363,7 @@ def test_unselect_tag():
     #
     # deselect a tag
     #
-    request = factory.post(reverse('manager:tag-unselect', kwargs=dict(pk=tag1.pk)))
+    request = factory.post(reverse('ce_ui:tag-unselect', kwargs=dict(pk=tag1.pk)))
     request.user = user
     request.session = session
 
@@ -395,7 +392,7 @@ def test_unselect_all():
     #
     # deselect all
     #
-    request = factory.post(reverse('manager:unselect-all'))
+    request = factory.post(reverse('ce_ui:unselect-all'))
     request.user = user
     request.session = session
 
@@ -408,10 +405,9 @@ def test_unselect_all():
 
 @pytest.mark.django_db
 def test_select_tab_state_should_be_default_after_login(client):
-
     # first request the site anonymously .. select tab state is set to that of
     # an anonymous user
-    response = client.get(reverse('manager:select'))
+    response = client.get(reverse('ce_ui:select'))
     assert response.context['select_tab_state']['sharing_status'] == 'published_ingress'
 
     # Then login as authenticated user
@@ -427,14 +423,13 @@ def test_select_tab_state_should_be_default_after_login(client):
     assert response.status_code == 302
     assert_no_form_errors(response)
 
-    response = client.get(reverse('manager:select'))
+    response = client.get(reverse('ce_ui:select'))
 
     assert response.context['select_tab_state'] == DEFAULT_SELECT_TAB_STATE
 
 
 @pytest.mark.django_db
 def test_select_tab_state_should_be_default_after_search(client, handle_usage_statistics):
-
     state_before_search = DEFAULT_SELECT_TAB_STATE.copy()
     state_before_search['current_page'] = 2
 
@@ -450,12 +445,3 @@ def test_select_tab_state_should_be_default_after_search(client, handle_usage_st
     assert exp_state_after_search['current_page'] == 1
 
     assert response.context['select_tab_state'] == exp_state_after_search
-
-
-
-
-
-
-
-
-

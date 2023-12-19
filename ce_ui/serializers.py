@@ -2,12 +2,13 @@ import logging
 
 from django import shortcuts
 
-from guardian.shortcuts import get_perms, get_users_with_perms
+from guardian.shortcuts import get_perms
 from rest_framework import serializers
 from tagulous.contrib.drf import TagRelatedManagerField
 
 from topobank.manager.models import Surface, Topography, TagModel
-from topobank.manager.utils import subjects_to_base64, guardian_to_api
+from topobank.manager.serializers import SurfaceSerializer, TopographySerializer
+from topobank.manager.utils import subjects_to_base64
 
 from .utils import get_search_term, filtered_topographies
 

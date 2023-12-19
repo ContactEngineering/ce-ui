@@ -2,7 +2,7 @@ import pytest
 from django.urls import reverse
 from django.contrib.auth.models import Permission
 
-from topobank.topobank.users.tests.test_utils import are_collaborating, SurfaceFactory
+from topobank.users.tests.test_utils import are_collaborating, SurfaceFactory
 
 
 @pytest.mark.django_db

@@ -1,6 +1,9 @@
 from django.shortcuts import reverse
 
+from topobank.manager.tests.utils import ordereddicts_to_dicts
+
 from ..views import SurfaceListView
+
 
 def search_surfaces(request_factory, user, expr):
     """Search surfaces with given expression and return dicts with results.
@@ -20,7 +23,7 @@ def search_surfaces(request_factory, user, expr):
     -------
     List of dicts with search results, sorted by 'title' key.
     """
-    request = request_factory.get(reverse('manager:search') + f"?search={expr}")
+    request = request_factory.get(reverse('ce_ui:search') + f"?search={expr}")
     request.user = user
     request.session = {}  # must be there
     response = SurfaceListView.as_view()(request)

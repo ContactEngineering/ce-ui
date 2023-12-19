@@ -1,24 +1,18 @@
 import datetime
-import os.path
 import yaml
 import zipfile
-from pathlib import Path
 from io import BytesIO
 
 import pytest
-from pytest import approx
 
 from django.shortcuts import reverse
 from django.conf import settings
-from django.core.files.storage import default_storage
-from django.utils.text import slugify
 from rest_framework.test import APIRequestFactory
 
 from trackstats.models import Metric, Period
 
-from .utils import FIXTURE_DIR, SurfaceFactory, Topography1DFactory, Topography2DFactory, UserFactory, two_topos, \
-    one_line_scan, upload_file
-from ..models import Topography, Surface, MAX_LENGTH_DATAFILE_FORMAT
+from topobank.manager.tests.utils import SurfaceFactory, Topography1DFactory, Topography2DFactory, UserFactory
+
 from ..views import DEFAULT_CONTAINER_FILENAME
 
 
@@ -35,7 +29,7 @@ def test_download_selection(client, mocker, handle_usage_statistics):
 
     factory = APIRequestFactory()
 
-    request = factory.get(reverse('manager:download-selection'))
+    request = factory.get(reverse('ce_ui:download-selection'))
     request.user = user
     request.session = {
         'selection': [f'topography-{topo1a.id}', f'surface-{surface2.id}']
