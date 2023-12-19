@@ -437,7 +437,7 @@ def test_select_tab_state_should_be_default_after_search(client, handle_usage_st
     client.force_login(user)
     client.session['select_tab_state'] = state_before_search
 
-    response = client.get(reverse('search'), data={'search': 'what I want to find'}, follow=True)
+    response = client.get(f"{reverse('search')}?search='what I want to find'", follow=True)
 
     exp_state_after_search = DEFAULT_SELECT_TAB_STATE.copy()
     exp_state_after_search['search_term'] = 'what I want to find'

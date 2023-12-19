@@ -88,12 +88,12 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
 
     user_url = request.build_absolute_uri(user.get_absolute_url())
 
-    topo1a_analyze = f"/analysis/html/list/?subjects={subjects_to_base64([topo1a])}"
-    topo1b_analyze = f"/analysis/html/list/?subjects={subjects_to_base64([topo1b])}"
-    topo2a_analyze = f"/analysis/html/list/?subjects={subjects_to_base64([topo2a])}"
-    topo2b_analyze = f"/analysis/html/list/?subjects={subjects_to_base64([topo2b])}"
-    surface1_analyze = f"/analysis/html/list/?subjects={subjects_to_base64([surface1])}"
-    surface2_analyze = f"/analysis/html/list/?subjects={subjects_to_base64([surface2])}"
+    topo1a_analyze = f"/ui/html/analysis-list/?subjects={subjects_to_base64([topo1a])}"
+    topo1b_analyze = f"/ui/html/analysis-list/?subjects={subjects_to_base64([topo1b])}"
+    topo2a_analyze = f"/ui/html/analysis-list/?subjects={subjects_to_base64([topo2a])}"
+    topo2b_analyze = f"/ui/html/analysis-list/?subjects={subjects_to_base64([topo2b])}"
+    surface1_analyze = f"/ui/html/analysis-list/?subjects={subjects_to_base64([surface1])}"
+    surface2_analyze = f"/ui/html/analysis-list/?subjects={subjects_to_base64([surface2])}"
 
     expected_dicts = [
         {
@@ -583,12 +583,12 @@ def test_tag_search_with_request_factory(user_three_surfaces_four_topographies):
 
     user_url = request.build_absolute_uri(user.get_absolute_url())
 
-    topo1a_analyze = f"/analysis/html/list/?subjects={subjects_to_base64([topo1a])}"
-    topo1b_analyze = f"/analysis/html/list/?subjects={subjects_to_base64([topo1b])}"
-    topo2a_analyze = f"/analysis/html/list/?subjects={subjects_to_base64([topo2a])}"
-    topo2b_analyze = f"/analysis/html/list/?subjects={subjects_to_base64([topo2b])}"
-    surface1_analyze = f"/analysis/html/list/?subjects={subjects_to_base64([surface1])}"
-    surface2_analyze = f"/analysis/html/list/?subjects={subjects_to_base64([surface2])}"
+    topo1a_analyze = f"/ui/html/analysis-list/?subjects={subjects_to_base64([topo1a])}"
+    topo1b_analyze = f"/ui/html/analysis-list/?subjects={subjects_to_base64([topo1b])}"
+    topo2a_analyze = f"/ui/html/analysis-list/?subjects={subjects_to_base64([topo2a])}"
+    topo2b_analyze = f"/ui/html/analysis-list/?subjects={subjects_to_base64([topo2b])}"
+    surface1_analyze = f"/ui/html/analysis-list/?subjects={subjects_to_base64([surface1])}"
+    surface2_analyze = f"/ui/html/analysis-list/?subjects={subjects_to_base64([surface2])}"
 
     expected_dict_topo1a = {
         'creator': user_url,

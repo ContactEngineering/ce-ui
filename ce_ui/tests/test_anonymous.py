@@ -15,16 +15,16 @@ from termsandconditions.models import TermsAndConditions
 @pytest.mark.django_db
 def test_anonymous_user_only_published_as_default(client):
     response = client.get(reverse('ce_ui:select'))
-    assert_not_in_content(response, 'All accessible surfaces')
-    assert_not_in_content(response, 'Only own surfaces')
-    assert_not_in_content(response, 'Only surfaces shared with you')
-    assert_not_in_content(response, 'Only surfaces shared by you')
-    assert_not_in_content(response, 'Only surfaces published by you')
-    assert_in_content(response, 'Only surfaces published by others')
+    assert_not_in_content(response, 'All accessible datasets')
+    assert_not_in_content(response, 'Only own datasets')
+    assert_not_in_content(response, 'Only datasets shared with you')
+    assert_not_in_content(response, 'Only datasets shared by you')
+    assert_not_in_content(response, 'Only datasets published by you')
+    assert_in_content(response, 'Only datasets published by others')
 
 
 @pytest.mark.django_db
-def test_terms_conditions_as_anonymous(client):
+def test_terms_conditions_as_anonymous(client, handle_usage_statistics):
     # Install terms and conditions for test
     TermsAndConditions.objects.create(slug='test-terms', name="Test of T&amp;C",
                                       text="some text", date_active=timezone.now())
