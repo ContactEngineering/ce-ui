@@ -7,11 +7,10 @@ export default {
     components: {
         BasketElement
     },
-    inject: ['csrfToken'],
     props: {
         analysisListUrl: {
             type: String,
-            default: '/analysis/html/list/'
+            default: '/ui/html/analysis-list/'
         },
         apiUnselectAllUrl: {
             type: String,

@@ -444,7 +444,7 @@ const allSelected = computed({
                                     </b-dropdown-item>
                                 </b-dropdown>
                                 <div class="btn-group-vertical mt-2 w-100" role="group">
-                                    <a :href="`/analysis/html/list/?subjects=${base64Subjects}`"
+                                    <a :href="`/ui/html/analysis-list/?subjects=${base64Subjects}`"
                                        class="btn btn-outline-secondary btn-block">
                                         Analyze this digital surface twin
                                     </a>

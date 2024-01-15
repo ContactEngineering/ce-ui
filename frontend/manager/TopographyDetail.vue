@@ -89,7 +89,7 @@ const base64Subjects = computed(() => {
                             <div class="card-body">
                                 <topography-badges :topography="_topography"></topography-badges>
                                 <div class="btn-group-vertical mt-2 w-100" role="group">
-                                    <a :href="`/analysis/html/list/?subjects=${base64Subjects}`"
+                                    <a :href="`/ui/html/analysis-list/?subjects=${base64Subjects}`"
                                        class="btn btn-outline-secondary btn-block">
                                         Analyze this measurement
                                     </a>
