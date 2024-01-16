@@ -226,7 +226,7 @@ const hrefOriginalSurface = computed(() => {
 });
 
 const publishUrl = computed(() => {
-    return `/go/publish/${getSurfaceId()}/`;
+    return `/go/html/publish/${getSurfaceId()}/`;
 });
 
 const isEditable = computed(() => {
