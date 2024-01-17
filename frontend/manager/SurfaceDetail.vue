@@ -49,7 +49,8 @@ const emit = defineEmits([
 ])
 
 // Data that is displayed or can be edited
-const _data = ref(null);  // Surface data
+const _surface = ref(null);  // Surface data
+const _publication = ref(null);  // Publication data
 const _permissions = ref(null);  // Permissions
 const _topographies = ref([]);  // Topographies contained in this surface
 const _versions = ref(null);  // Published versions of this surface
@@ -77,7 +78,7 @@ function emptyTopography() {
         unit: null,
         height_scale_editable: true,
         height_scale: null,
-        fill_undefined_data_mode: null,
+        fill_undefined_surface_mode: null,
         detrend_mode: null,
         is_periodic: null,
         instrument_name: null,
@@ -89,32 +90,44 @@ function emptyTopography() {
 }
 
 onMounted(() => {
-    if (_data.value == null) {
+    if (_surface.value == null) {
         updateCard();
     }
 });
 
 function getSurfaceId() {
-    return getIdFromUrl(_data.value.url);
+    return getIdFromUrl(_surface.value.url);
 }
 
 function getOriginalSurfaceId() {
-    if (_data.value.publication == null) {
-        return getIdFromUrl(_data.value.url);
+    if (_publication.value == null) {
+        return getIdFromUrl(_surface.value.url);
     } else {
-        return getIdFromUrl(_data.value.publication.original_surface);
+        return getIdFromUrl(_publication.value.original_surface);
     }
 }
 
 function updateCard() {
     /* Fetch JSON describing the card */
     axios.get(`${props.surfaceUrl}?children=yes&permissions=yes`).then(response => {
-        _data.value = response.data;
+        _surface.value = response.data;
         _permissions.value = response.data.permissions;
         _topographies.value = response.data.topography_set;
         _selected.value = new Array(_topographies.value.length).fill(false);  // Nothing is selected
-        updateVersions();
+        updatePublication();
     });
+}
+
+function updatePublication() {
+    if (_surface.value.publication == null) {
+        _publication.value = null;
+        updateVersions();
+    } else {
+        axios.get(_surface.value.publication).then(response => {
+            _publication.value = response.data;
+            updateVersions();
+        });
+    }
 }
 
 function updateVersions() {
@@ -192,17 +205,17 @@ function surfaceHrefForVersion(version) {
 }
 
 function deleteSurface() {
-    axios.delete(_data.value.url).then(response => {
-        emit('delete:surface', _data.value.url);
+    axios.delete(_surface.value.url).then(response => {
+        emit('delete:surface', _surface.value.url);
         window.location.href = `/ui/html/select/`;
     });
 }
 
 const category = computed(() => {
-    if (_data.value == null) {
+    if (_surface.value == null) {
         return 'Unknown category';
     }
-    const retval = props.categories[_data.value.category];
+    const retval = props.categories[_surface.value.category];
     if (retval === undefined) {
         return 'Unknown category';
     }
@@ -210,14 +223,14 @@ const category = computed(() => {
 });
 
 const base64Subjects = computed(() => {
-    return subjectsToBase64({surface: [_data.value.id]});
+    return subjectsToBase64({surface: [_surface.value.id]});
 });
 
 const versionString = computed(() => {
-    if (_data.value == null || _data.value.publication == null) {
+    if (_surface.value == null || _publication.value == null) {
         return "Work in progress";
     } else {
-        return `Version ${_data.value.publication.version} (${_data.value.publication.datetime.slice(0, 10)})`;
+        return `Version ${_publication.value.version} (${_publication.value.datetime.slice(0, 10)})`;
     }
 });
 
@@ -230,11 +243,11 @@ const publishUrl = computed(() => {
 });
 
 const isEditable = computed(() => {
-    return _data.value != null && _data.value.permissions.current_user.permission !== 'view';
+    return _surface.value != null && _surface.value.permissions.current_user.permission !== 'view';
 });
 
 const isPublication = computed(() => {
-    return _data.value != null && _data.value.publication != null;
+    return _surface.value != null && _publication.value != null;
 });
 
 const anySelected = computed(() => {
@@ -266,14 +279,14 @@ const allSelected = computed({
                          variant="danger">
                     {{ error.message }}
                 </b-alert>
-                <div v-if="_data == null"
+                <div v-if="_surface == null"
                      class="card mb-1">
                     <div class="card-body">
                         <b-spinner small></b-spinner>
                         Querying digital surface twin data, please wait...
                     </div>
                 </div>
-                <b-tabs v-if="_data != null"
+                <b-tabs v-if="_surface != null"
                         class="nav-pills-custom"
                         content-class="w-100"
                         fill
@@ -333,22 +346,22 @@ const allSelected = computed({
                         </b-card>
                     </b-tab>
                     <b-tab title="Properties">
-                        <surface-properties v-if="_data != null"
-                                            :surface-url="_data.url"
-                                            :name="_data.name"
-                                            :description="_data.description"
-                                            :category="_data.category"
-                                            :tags="_data.tags"
+                        <surface-properties v-if="_surface != null"
+                                            :surface-url="_surface.url"
+                                            :name="_surface.name"
+                                            :description="_surface.description"
+                                            :category="_surface.category"
+                                            :tags="_surface.tags"
                                             :permission="_permissions.current_user.permission">
                         </surface-properties>
                     </b-tab>
-                    <b-tab v-if="_data != null"
+                    <b-tab v-if="_surface != null"
                            title="Permissions">
-                        <surface-permissions v-if="_data.publication == null"
-                                             :surface-url="_data.url"
+                        <surface-permissions v-if="_surface.publication == null"
+                                             :surface-url="_surface.url"
                                              v-model:permissions="_permissions">
                         </surface-permissions>
-                        <b-card v-if="_data.publication != null"
+                        <b-card v-if="_surface.publication != null"
                                 class="w-100">
                             <template #header>
                                 <h5 class="float-start">Permissions</h5>
@@ -367,34 +380,34 @@ const allSelected = computed({
                             </template>
                             <b-card-body>
                                 <p class="mb-5">
-                                    <a :href="ccLicenseInfo[_data.publication.license].descriptionUrl">
-                                        <img :src="`/static/images/cc/${_data.publication.license}.svg`"
-                                             :title="`Dataset can be reused under the terms of the ${ccLicenseInfo[_data.publication.license].title}.`"
+                                    <a :href="ccLicenseInfo[_publication.license].descriptionUrl">
+                                        <img :src="`/static/images/cc/${_publication.license}.svg`"
+                                             :title="`Dataset can be reused under the terms of the ${ccLicenseInfo[_publication.license].title}.`"
                                              style="float:right; margin-left: 0.25rem;"/>
                                     </a>
                                     This dataset can be reused under the terms of the
-                                    <a :href="ccLicenseInfo[_data.publication.license].descriptionUrl">
-                                        {{ ccLicenseInfo[_data.publication.license].title }}
+                                    <a :href="ccLicenseInfo[_publication.license].descriptionUrl">
+                                        {{ ccLicenseInfo[_publication.license].title }}
                                     </a>.
                                     When reusing this dataset, please cite the original source.
                                 </p>
                                 <b-accordion>
                                     <b-accordion-item title="Citation" visible>
-                                        <div v-html="_data.publication.citation.html"/>
+                                        <div v-html="_publication.citation.html"/>
                                     </b-accordion-item>
                                     <b-accordion-item title="RIS">
                                         <code>
-                                            <pre>{{ _data.publication.citation.ris }}</pre>
+                                            <pre>{{ _publication.citation.ris }}</pre>
                                         </code>
                                     </b-accordion-item>
                                     <b-accordion-item title="BibTeX">
                                         <code>
-                                            <pre>{{ _data.publication.citation.bibtex }}</pre>
+                                            <pre>{{ _publication.citation.bibtex }}</pre>
                                         </code>
                                     </b-accordion-item>
                                     <b-accordion-item title="BibLaTeX">
                                         <code>
-                                            <pre>{{ _data.publication.citation.biblatex }}</pre>
+                                            <pre>{{ _publication.citation.biblatex }}</pre>
                                         </code>
                                     </b-accordion-item>
                                 </b-accordion>
@@ -403,7 +416,7 @@ const allSelected = computed({
                     </b-tab>
                     <template #tabs-end>
                         <hr/>
-                        <div v-if="_data != null"
+                        <div v-if="_surface != null"
                              class="card mt-2">
                             <div class="card-body">
                                 <div>
@@ -411,13 +424,13 @@ const allSelected = computed({
                                         {{ category }}
                                     </span>
                                 </div>
-                                <div v-if="_data.publication != null">
+                                <div v-if="_publication != null">
                                     <span class="badge bg-info">
-                                        Published by {{ _data.publication.publisher.name }}
+                                        Published by {{ _publication.publisher.name }}
                                     </span>
                                 </div>
                                 <div>
-                                    <span v-for="tag in _data.tags"
+                                    <span v-for="tag in _surface.tags"
                                           class="badge bg-success">
                                         {{ tag.name }}
                                     </span>
@@ -427,9 +440,9 @@ const allSelected = computed({
                                             variant="info"
                                             :text="versionString">
                                     <b-dropdown-item
-                                        v-if="_data.publication == null || _data.publication.has_access_to_original_surface"
+                                        v-if="_publication == null || _publication.has_access_to_original_surface"
                                         :href="hrefOriginalSurface"
-                                        :disabled="_data.publication == null">
+                                        :disabled="_publication == null">
                                         Work in progress
                                     </b-dropdown-item>
                                     <b-dropdown-item v-if="_versions == null">
@@ -439,7 +452,7 @@ const allSelected = computed({
                                     <b-dropdown-item v-if="_versions != null"
                                                      v-for="version in _versions"
                                                      :href="surfaceHrefForVersion(version)"
-                                                     :disabled="_data.publication != null && _data.publication.version === version.version">
+                                                     :disabled="_publication != null && _publication.version === version.version">
                                         Version {{ version.version }}
                                     </b-dropdown-item>
                                 </b-dropdown>
@@ -474,11 +487,11 @@ const allSelected = computed({
             </div>
         </div>
     </div>
-    <b-modal v-if="_data != null"
+    <b-modal v-if="_surface != null"
              v-model="_showDeleteModal"
              @ok="deleteSurface"
              title="Delete digital surface twin">
-        You are about to delete the digital surface twin with name <b>{{ _data.name }}</b> and all contained
+        You are about to delete the digital surface twin with name <b>{{ _surface.name }}</b> and all contained
         measurements. Are you sure you want to proceed?
     </b-modal>
 </template>
