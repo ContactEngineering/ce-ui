@@ -85,26 +85,25 @@ const base64Subjects = computed(() => {
                     </b-tab>
                     <template #tabs-end>
                         <hr/>
+                        <a :href="`/ui/html/analysis-list/?subjects=${base64Subjects}`"
+                           class="btn btn-outline-danger mb-2 mt-2">
+                            Analyze
+                        </a>
+
+                        <a :href="_topography.datafile"
+                           class="btn btn-outline-secondary mb-2">
+                            Download
+                        </a>
+
+                        <a href="#"
+                           class="btn btn-outline-secondary mb-2"
+                           @click="_showDeleteModal = true">
+                            Delete
+                        </a>
+                        <hr/>
                         <div class="card mt-2">
                             <div class="card-body">
                                 <topography-badges :topography="_topography"></topography-badges>
-                                <div class="btn-group-vertical mt-2 w-100" role="group">
-                                    <a :href="`/ui/html/analysis-list/?subjects=${base64Subjects}`"
-                                       class="btn btn-outline-secondary btn-block">
-                                        Analyze this measurement
-                                    </a>
-
-                                    <a :href="_topography.datafile"
-                                       class="btn btn-outline-secondary btn-block">
-                                        Download
-                                    </a>
-
-                                    <a href="#"
-                                       class="btn btn-outline-danger btn-block"
-                                       @click="_showDeleteModal = true">
-                                        Delete
-                                    </a>
-                                </div>
                             </div>
                         </div>
                     </template>

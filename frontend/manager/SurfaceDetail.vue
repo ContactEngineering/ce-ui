@@ -416,6 +416,29 @@ const allSelected = computed({
                     </b-tab>
                     <template #tabs-end>
                         <hr/>
+                        <a :href="`/ui/html/analysis-list/?subjects=${base64Subjects}`"
+                           class="btn btn-outline-danger mb-2 mt-2">
+                            Analyze
+                        </a>
+
+                        <a :href="`${surfaceUrl}download/`"
+                           class="btn btn-outline-secondary mb-2">
+                            Download
+                        </a>
+
+                        <a v-if="!isPublication"
+                           :href="publishUrl"
+                           class="btn btn-outline-secondary mb-2">
+                            Publish
+                        </a>
+
+                        <a v-if="_versions == null || _versions.length === 0"
+                           href="#"
+                           class="btn btn-outline-secondary mb-2"
+                           @click="_showDeleteModal = true">
+                            Delete
+                        </a>
+                        <hr/>
                         <div v-if="_surface != null"
                              class="card mt-2">
                             <div class="card-body">
@@ -456,30 +479,6 @@ const allSelected = computed({
                                         Version {{ version.version }}
                                     </b-dropdown-item>
                                 </b-dropdown>
-                                <div class="btn-group-vertical mt-2 w-100" role="group">
-                                    <a :href="`/ui/html/analysis-list/?subjects=${base64Subjects}`"
-                                       class="btn btn-outline-secondary btn-block">
-                                        Analyze this digital surface twin
-                                    </a>
-
-                                    <a :href="`${surfaceUrl}download/`"
-                                       class="btn btn-outline-secondary btn-block">
-                                        Download
-                                    </a>
-
-                                    <a v-if="!isPublication"
-                                       :href="publishUrl"
-                                       class="btn btn-outline-success btn-block">
-                                        Publish
-                                    </a>
-
-                                    <a v-if="_versions == null || _versions.length === 0"
-                                       href="#"
-                                       class="btn btn-outline-danger btn-block"
-                                       @click="_showDeleteModal = true">
-                                        Delete
-                                    </a>
-                                </div>
                             </div>
                         </div>
                     </template>
