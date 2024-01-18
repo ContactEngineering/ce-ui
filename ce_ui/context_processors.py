@@ -1,16 +1,9 @@
+import json
+
 from django.conf import settings
 from django.shortcuts import reverse
-from django.templatetags.static import static
-import django
 
-import json
-import celery
-import numpy
-import scipy
-
-import SurfaceTopography, ContactMechanics, NuMPI, muFFT
-
-import topobank
+from topobank.supplib.versions import get_versions
 
 from .utils import current_selection_as_basket_items
 
@@ -74,52 +67,7 @@ def fixed_tabs_processor(request):
 
 
 def versions_processor(request):
-    # key 'links': dicts with keys display_name:url
-    versions = [
-        dict(module='TopoBank',
-             version=topobank.__version__,
-             license=('MIT', 'https://github.com/ContactEngineering/topobank/blob/develop/LICENSE'),
-             links={'Website': 'https://github.com/ComputationalMechanics/TopoBank',
-                    'Changelog': static('other/CHANGELOG.md')}),  # needs 'manage.py collectstatic' before!
-        dict(module='SurfaceTopography',
-             version=SurfaceTopography.__version__,
-             license=('MIT', 'https://github.com/ContactEngineering/SurfaceTopography/blob/master/LICENSE.md'),
-             links={'Website': 'https://github.com/ComputationalMechanics/SurfaceTopography',
-                    'Changelog': f'https://github.com/ComputationalMechanics/SurfaceTopography/blob/{SurfaceTopography.__version__}/SurfaceTopography/ChangeLog.md'}),
-        dict(module='ContactMechanics',
-             version=ContactMechanics.__version__,
-             license=('MIT', 'https://github.com/ContactEngineering/ContactMechanics/blob/master/LICENSE.md'),
-             links={'Website': 'https://github.com/ComputationalMechanics/ContactMechanics',  #
-                    'Changelog': f'https://github.com/ComputationalMechanics/ContactMechanics/blob/{ContactMechanics.__version__}/ContactMechanics/ChangeLog.md'}),
-        dict(module='NuMPI',
-             version=NuMPI.__version__,
-             license=('MIT', 'https://github.com/IMTEK-Simulation/NuMPI/blob/master/LICENCE.md'),
-             links={'Website': 'https://github.com/IMTEK-Simulation/NuMPI',
-                    'Changelog': f'https://github.com/IMTEK-Simulation/NuMPI/blob/{NuMPI.__version__}/ChangeLog.md'}),
-        dict(module='muFFT',
-             version=muFFT.version.description(),
-             license=('LGPL-3', 'https://gitlab.com/muspectre/muspectre/-/blob/master/LICENSE'),
-             links={'Website': 'https://gitlab.com/muspectre/muspectre',
-                    'Changelog': f'https://gitlab.com/muspectre/muspectre/-/blob/{muFFT.version.description()}/CHANGELOG.md'}),
-        dict(module='NumPy',
-             version=numpy.__version__,
-             license=('BSD 3-Clause', 'https://github.com/numpy/numpy/blob/main/LICENSE.txt'),
-             links={'Website': 'https://numpy.org/'}),
-        dict(module='SciPy',
-             version=scipy.__version__,
-             license=('BSD 3-Clause', 'https://github.com/scipy/scipy/blob/main/LICENSE.txt'),
-             links={'Website': 'https://www.scipy.org/'}),
-        dict(module='Django',
-             version=django.__version__,
-             license=('BSD 3-Clause', 'https://github.com/django/django/blob/main/LICENSE'),
-             links={'Website': 'https://www.djangoproject.com/'}),
-        dict(module='Celery',
-             version=celery.__version__,
-             license=('BSD 3-Clause', 'https://github.com/celery/celery/blob/main/LICENSE'),
-             links={'Website': 'http://www.celeryproject.org/'})
-    ]
-
-    return dict(versions=versions, contact_email_address=settings.CONTACT_EMAIL_ADDRESS)
+    return dict(versions=get_versions())
 
 
 def basket_processor(request):
