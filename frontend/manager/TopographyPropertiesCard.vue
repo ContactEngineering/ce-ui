@@ -284,7 +284,7 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
             <div v-if="!batchEdit"
                  class="btn-group btn-group-sm float-end me-2">
                 <a class="btn btn-outline-secondary"
-                   :href="`/ui/html/anlysis-list/?subjects=${subjectsToBase64({topography: [topography.id]})}`">
+                   :href="`/ui/html/analysis-list/?subjects=${subjectsToBase64({topography: [topography.id]})}`">
                     Analyze
                 </a>
             </div>
