@@ -14,6 +14,7 @@ from ..views import SurfaceSearchPaginator, SurfaceListView, TagTreeView
 
 from .utils import search_surfaces
 
+
 def assert_dict_equal(a, b, key=None):
     try:
         keys_a = set(a.keys())
@@ -588,7 +589,6 @@ def test_tag_search_with_request_factory(user_three_surfaces_four_topographies):
     topo2a_analyze = f"/ui/html/analysis-list/?subjects={subjects_to_base64([topo2a])}"
     topo2b_analyze = f"/ui/html/analysis-list/?subjects={subjects_to_base64([topo2b])}"
     surface1_analyze = f"/ui/html/analysis-list/?subjects={subjects_to_base64([surface1])}"
-    surface2_analyze = f"/ui/html/analysis-list/?subjects={subjects_to_base64([surface2])}"
 
     expected_dict_topo1a = {
         'creator': user_url,
@@ -1084,7 +1084,7 @@ def test_search_expressions_with_request_factory():
     surface2 = SurfaceFactory(creator=user)
 
     topo2a = Topography1DFactory(surface=surface2, name='Measurement 2A')
-    topo2b = Topography1DFactory(surface=surface2, name='Measurement 2B', description="a small lion")
+    Topography1DFactory(surface=surface2, name='Measurement 2B', description="a small lion")
 
     #
     # Set some tags
@@ -1121,7 +1121,7 @@ def test_search_expressions_with_request_factory():
     assert result[1]['children'][0]['name'] == topo2a.name
 
     # Exclusion using '-'
-    result = search_surfaces(factory, user, f'-elephant')
+    result = search_surfaces(factory, user, '-elephant')
     assert len(result) == 2
     assert result[0]['name'] == surface1.name
     assert result[1]['name'] == surface2.name
@@ -1129,7 +1129,7 @@ def test_search_expressions_with_request_factory():
     assert len(result[1]['children']) == 2
 
     # Searching nearby
-    result = search_surfaces(factory, user, f'Find * here')
+    result = search_surfaces(factory, user, 'Find * here')
     assert len(result) == 1
     assert result[0]['name'] == surface1.name
     assert len(result[0]['children']) == 1  # here one measurement has it
@@ -1144,7 +1144,7 @@ def test_search_expressions_with_request_factory():
     #
 
     # result = search_surfaces(f'bike AND "a big" or "a small" -"not me"')
-    result = search_surfaces(factory, user, f'bike -snake big')
+    result = search_surfaces(factory, user, 'bike -snake big')
 
     assert len(result) == 1  # surface 2 is excluded because there is no "bike"
     assert result[0]['name'] == surface1.name

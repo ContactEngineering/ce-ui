@@ -24,9 +24,10 @@ from termsandconditions.views import TermsView as OrigTermsView, AcceptTermsView
 from trackstats.models import Metric, Period
 
 from topobank.analysis.models import AnalysisFunction
+from topobank.analysis.registry import AnalysisRegistry
 from topobank.manager.containers import write_surface_container
-from topobank.manager.models import Topography, Surface, TagModel, topography_datafile_path
-from topobank.manager.utils import get_upload_instructions, api_to_guardian, surfaces_for_user, subjects_from_base64
+from topobank.manager.models import Topography, Surface, TagModel
+from topobank.manager.utils import surfaces_for_user, subjects_from_base64
 from topobank.manager.utils import get_reader_infos
 from topobank.usage_stats.utils import increase_statistics_by_date, increase_statistics_by_date_and_object, \
     current_statistics
@@ -576,7 +577,7 @@ def set_tag_select_status(request, pk, select_status):
     except ValueError:
         raise PermissionDenied()
 
-    if not tag in tags_for_user(request.user):
+    if tag not in tags_for_user(request.user):
         raise PermissionDenied()
 
     tag_key = _tag_key(pk)
@@ -722,7 +723,7 @@ class AnalysisResultDetailView(DetailView):
         tabs = extra_tabs_if_single_item_selected(effective_topographies, effective_surfaces)
         tabs.extend([
             {
-                'title': f"Analyze",
+                'title': "Analyze",
                 'icon': "chart-area",
                 'href': f"{reverse('ce_ui:results-list')}?subjects={self.request.GET.get('subjects')}",
                 'active': False,
@@ -763,7 +764,7 @@ class AnalysesResultListView(TemplateView):
         if subjects is not None:
             try:
                 subjects = subjects_from_base64(subjects)
-            except:
+            except:  # noqa: E722
                 subjects = None
 
             if subjects is not None:
@@ -779,7 +780,7 @@ class AnalysesResultListView(TemplateView):
         # Decide whether to open extra tabs for surface/topography details
         tabs = extra_tabs_if_single_item_selected(topographies, surfaces)
         tabs.append({
-            'title': f"Analyze",
+            'title': "Analyze",
             'icon': "chart-area",
             'icon-style-prefix': 'fas',
             'href': f"{reverse('ce_ui:results-list')}?subjects={self.request.GET.get('subjects')}",
@@ -832,9 +833,10 @@ class TermsView(TemplateView):
                 userterms__user=self.request.user).order_by('date_created')
 
             context['not_agreed_terms'] = active_terms.filter(
-                Q(userterms=None) | \
-                (Q(userterms__date_accepted__isnull=True) & Q(userterms__user=self.request.user))) \
-                .order_by('date_created')
+                Q(userterms=None) |
+                (Q(userterms__date_accepted__isnull=True) &
+                 Q(userterms__user=self.request.user))).order_by('date_created')
+
         else:
             context['active_terms'] = active_terms.order_by('date_created')
 

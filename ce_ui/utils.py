@@ -1,6 +1,6 @@
 import logging
 
-from django.db.models import Q, Value, Count, TextField
+from django.db.models import Count, Q, Value, TextField
 from django.db.models.functions import Replace
 from django.core.exceptions import PermissionDenied
 from django.contrib.postgres.search import SearchVector, SearchQuery
@@ -391,8 +391,6 @@ def tags_for_user(user, surfaces=None, topographies=None):
                      or to reduce number of topographies based on a request
     :return: list of strings
     """
-    from django.db.models import Q
-
     if surfaces is None:
         surfaces = surfaces_for_user(user)
     if topographies is None:
@@ -458,8 +456,8 @@ def selection_to_subjects_dict(request):
             _log.info(f"Found existing surface collection for surfaces {[s.id for s in effective_surfaces]}.")
             coll = surf_collections.first()
             if surf_collections.count() > 1:
-                _log.warning(
-                    f"More than on surface collection instance for surfaces {[s.id for s in effective_surfaces]} found.")
+                _log.warning("More than on surface collection instance for surfaces "
+                             f"{[s.id for s in effective_surfaces]} found.")
         else:
             coll = SurfaceCollection.objects.create(name=surface_collection_name([s.name for s in effective_surfaces]))
             coll.surfaces.set(effective_surfaces)

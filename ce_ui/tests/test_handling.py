@@ -24,8 +24,8 @@ def test_download_selection(client, mocker, handle_usage_statistics):
     surface1 = SurfaceFactory(creator=user)
     surface2 = SurfaceFactory(creator=user)
     topo1a = Topography1DFactory(surface=surface1)
-    topo1b = Topography2DFactory(surface=surface1)
-    topo2a = Topography1DFactory(surface=surface2)
+    Topography2DFactory(surface=surface1)
+    Topography1DFactory(surface=surface2)
 
     factory = APIRequestFactory()
 

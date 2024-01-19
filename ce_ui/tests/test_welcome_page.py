@@ -10,7 +10,6 @@ from topobank.manager.tests.utils import SurfaceFactory, Topography1DFactory, Us
 @pytest.mark.django_db
 @pytest.fixture
 def test_instances(test_analysis_function):
-
     users = [
         UserFactory(username='user1'),
         UserFactory(username='user2')
@@ -32,7 +31,6 @@ def test_instances(test_analysis_function):
 
 @pytest.mark.django_db
 def test_welcome_page_statistics(client, test_instances, handle_usage_statistics):
-
     (user_1, user_2), (surface_1, surface_2), (topography_1,) = test_instances
     surface_2.share(user_2)
 
@@ -68,8 +66,6 @@ def test_welcome_page_statistics(client, test_instances, handle_usage_statistics
     assert_in_content(response, '<div class="welcome-page-statistics">0</div> digital surface twins')
     assert_in_content(response, '<div class="welcome-page-statistics">0</div> individual measurements')
     assert_in_content(response, '<div class="welcome-page-statistics">0</div> computed analyses')
-    assert_in_content(response, f'<div class="welcome-page-statistics">1</div> digital twins of other users')
+    assert_in_content(response, '<div class="welcome-page-statistics">1</div> digital twins of other users')
 
     client.logout()
-
-

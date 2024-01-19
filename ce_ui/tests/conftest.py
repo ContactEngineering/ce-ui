@@ -1,8 +1,8 @@
-pytest_plugins = "topobank.fixtures"
-
 import pytest
 
-from topobank.manager.tests.utils import UserFactory
+from topobank.fixtures import handle_usage_statistics, sync_analysis_functions, test_analysis_function  # noqa: F401
+from topobank.manager.tests.utils import two_topos, user_three_topographies_three_surfaces_three_tags, \
+    UserFactory  # noqa: F401
 from topobank.organizations.tests.utils import OrganizationFactory
 
 

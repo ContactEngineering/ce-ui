@@ -7,7 +7,6 @@ from topobank.users.tests.test_utils import are_collaborating, SurfaceFactory
 
 @pytest.mark.django_db
 def test_sharing_profile(client, django_user_model, handle_usage_statistics):
-
     user1 = django_user_model.objects.create_user(username='testuser1', password="abcd$1234")
     user2 = django_user_model.objects.create_user(username='testuser2', password="abcd$5678")
 
@@ -36,8 +35,3 @@ def test_sharing_profile(client, django_user_model, handle_usage_statistics):
     assert are_collaborating(user1, user2)
     response = client.get(reverse('users:detail', kwargs={'username': 'testuser2'}))
     assert response.status_code == 200  # Allowed
-
-
-
-
-

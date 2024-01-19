@@ -9,8 +9,8 @@ from topobank.manager.tests.utils import SurfaceFactory, UserFactory, Topography
 from topobank.utils import assert_no_form_errors
 
 from ..utils import selected_instances
-from ..views import select_surface, unselect_surface, select_topography, unselect_topography, select_tag, unselect_tag, \
-    unselect_all, DEFAULT_SELECT_TAB_STATE
+from ..views import select_surface, unselect_surface, select_topography, unselect_topography, select_tag, \
+    unselect_tag, unselect_all, DEFAULT_SELECT_TAB_STATE
 
 
 @pytest.mark.django_db
@@ -20,7 +20,7 @@ def test_select_surface():
     surface2 = SurfaceFactory(creator=user)
     surface3 = SurfaceFactory(creator=user)
     topo3a = Topography1DFactory(surface=surface3)
-    topo3b = Topography1DFactory(surface=surface3)
+    Topography1DFactory(surface=surface3)
 
     factory = APIRequestFactory()
     session = {}
@@ -162,7 +162,7 @@ def test_try_to_select_tag_but_not_allowed():
     user2 = UserFactory()
 
     tag1 = TagModelFactory()
-    surface1 = SurfaceFactory(creator=user1, tags=[tag1])
+    SurfaceFactory(creator=user1, tags=[tag1])
 
     factory = APIRequestFactory()
     session = {}
@@ -177,7 +177,7 @@ def test_try_to_select_tag_but_not_allowed():
     assert response.status_code == 403
 
     # If user 2 also uses this tag, it can be selected
-    surface2 = SurfaceFactory(creator=user2, tags=[tag1])
+    SurfaceFactory(creator=user2, tags=[tag1])
 
     response = select_tag(request, tag1.pk)
     assert response.status_code == 200
@@ -190,7 +190,7 @@ def test_select_topography():
     topo1a = Topography1DFactory(surface=surface1)
     topo1b = Topography1DFactory(surface=surface1)
     topo1c = Topography1DFactory(surface=surface1)
-    surface2 = SurfaceFactory(creator=user)
+    SurfaceFactory(creator=user)
 
     factory = APIRequestFactory()
     session = {}
@@ -311,7 +311,7 @@ def test_select_tag():
     tag2 = TagModelFactory()
 
     # we use the tags, so the user is allowed to select it
-    surface1 = SurfaceFactory(creator=user, tags=[tag1, tag2])
+    SurfaceFactory(creator=user, tags=[tag1, tag2])
 
     factory = APIRequestFactory()
     session = {}
@@ -355,7 +355,7 @@ def test_unselect_tag():
     tag2 = TagModelFactory()
 
     # we use the tags, so the user is allowed to select it
-    surface1 = SurfaceFactory(creator=user, tags=[tag1, tag2])
+    SurfaceFactory(creator=user, tags=[tag1, tag2])
 
     factory = APIRequestFactory()
     session = dict(selection=[f'tag-{tag1.pk}', f'tag-{tag2.pk}'])

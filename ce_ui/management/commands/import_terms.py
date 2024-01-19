@@ -110,5 +110,3 @@ class Command(BaseCommand):
         )
 
         self.stdout.write(self.style.SUCCESS(f"Successfully created terms and conditions '{name}' in database."))
-
-

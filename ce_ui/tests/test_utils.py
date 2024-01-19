@@ -2,8 +2,8 @@ import pytest
 from django.shortcuts import reverse
 
 from topobank.manager.models import Surface, Topography
-from topobank.manager.tests.utils import two_topos, Topography1DFactory, Topography2DFactory, SurfaceFactory, \
-    TagModelFactory, UserFactory, user_three_topographies_three_surfaces_three_tags
+from topobank.manager.tests.utils import Topography1DFactory, Topography2DFactory, SurfaceFactory, TagModelFactory, \
+    UserFactory
 
 from ..utils import selection_to_instances, instances_to_selection, tags_for_user, \
     instances_to_topographies, instances_to_surfaces, current_selection_as_surface_list, surface_collection_name
@@ -187,8 +187,8 @@ def test_related_surfaces_for_selection(rf):
 
     # add some topographies
     topo1a = Topography1DFactory(surface=surf1)
-    topo1b = Topography2DFactory(surface=surf1, tags=[tag2])
-    topo2a = Topography2DFactory(surface=surf2, tags=[tag1])
+    Topography2DFactory(surface=surf1, tags=[tag2])
+    Topography2DFactory(surface=surf2, tags=[tag1])
 
     # surf3 has no topography
 

@@ -28,4 +28,4 @@ class CEUIPluginConfig(PluginConfig):
         # make sure the functions are registered now
 
         # noinspection PyUnresolvedReferences
-        import ce_ui.signals
+        import ce_ui.signals  # noqa: F401
