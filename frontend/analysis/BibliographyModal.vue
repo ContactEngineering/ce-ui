@@ -32,8 +32,8 @@ export default {
                         :id="`dois-modal-label-${uid}`">
                         Bibliography
                     </h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
+                    <button class="btn-close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true"></span>
                     </button>
                 </div>
                 <div v-if="dois.length > 0" class="modal-body">
