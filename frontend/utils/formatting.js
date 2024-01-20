@@ -64,3 +64,17 @@ export function formatExponential(d, maxNumberOfDecimalPlaces) {
     return String(d);
   }
 }
+
+
+/**
+ * Format bytes as human-readable text.
+ *
+ * From: https://stackoverflow.com/questions/10420352/converting-file-size-in-bytes-to-human-readable-string
+ *
+ * @param {number} [size] Number of bytes. *
+ * @returns {string} Formatted string.
+ * */
+export function prettyBytes(size) {
+    var i = size == 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
+    return (size / Math.pow(1024, i)).toFixed(2) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
+}

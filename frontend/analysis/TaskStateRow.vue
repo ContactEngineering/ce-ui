@@ -2,6 +2,8 @@
 
 import axios from "axios";
 
+import {prettyBytes} from "../utils/formatting.js";
+
 export default {
     name: 'task-state-row',
     emits: [
@@ -93,6 +95,9 @@ export default {
     computed: {
         analysisId() {
             return this._analysis == null ? -1 : this._analysis.url.split('/').slice(-2, -1)[0];
+        },
+        taskMemoryPretty() {
+            return prettyBytes(this._analysis.task_memory);
         }
     }
 };
@@ -135,7 +140,7 @@ export default {
                     &#8212; <b>Started at:</b> {{ new Date(_analysis.start_time) }}
                     &#8212; <b>Duration:</b> {{ Math.round(_analysis.duration) }} seconds</span>
                 <span v-if="_analysis.task_memory != null">
-                    &#8212; <b>Peak memory usage:</b> {{ Math.round(_analysis.task_memory / 1024 / 1024) }} MB
+                    &#8212; <b>Peak memory usage:</b> {{ taskMemoryPretty }}
                 </span>
             </p>
             <p v-if="_analysis.task_state == 'fa'">
