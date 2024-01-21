@@ -13,6 +13,8 @@ import {
     BDropdownItem,
     BFormCheckbox,
     BModal,
+    BPlaceholder,
+    BPlaceholderButton,
     BSpinner,
     BTab,
     BTabs,
@@ -56,7 +58,7 @@ const _topographies = ref([]);  // Topographies contained in this surface
 const _versions = ref(null);  // Published versions of this surface
 
 // GUI logic
-const _errors = ref([]);   // Errors from saving batch edits
+const _error = ref(null);   // Errors from saving batch edits
 const _saving = ref(false);  // Saving batch edits
 const _showDeleteModal = ref(false);  // Triggers delete modal
 const _selected = ref([]);  // Selected topographies (for batch editing)
@@ -115,6 +117,8 @@ function updateCard() {
         _topographies.value = response.data.topography_set;
         _selected.value = new Array(_topographies.value.length).fill(false);  // Nothing is selected
         updatePublication();
+    }).catch(error => {
+        _error.value = error;
     });
 }
 
@@ -126,6 +130,8 @@ function updatePublication() {
         axios.get(_surface.value.publication).then(response => {
             _publication.value = response.data;
             updateVersions();
+        }).catch(error => {
+            _error.value = error;
         });
     }
 }
@@ -133,6 +139,8 @@ function updatePublication() {
 function updateVersions() {
     axios.get(`/go/api/publication/?original_surface=${getOriginalSurfaceId()}`).then(response => {
         _versions.value = response.data;
+    }).catch(error => {
+        _error.value = error;
     });
 }
 
@@ -148,6 +156,8 @@ function uploadNewTopography(file) {
         upload.file = file;  // need to know which file to upload
         _topographies.value.push(upload);  // this will trigger showing a topography-upload-card
         _selected.value.push(false);  // initially unselected
+    }).catch(error => {
+        _error.value = error;
     });
 }
 
@@ -163,7 +173,7 @@ function saveBatchEdit(topography) {
     const cleanedBatchEditTopography = filterTopographyForPatchRequest(topography);
 
     // Clear possible errors
-    _errors.value = [];
+    _error.value = null;
 
     // Update all topographies and issue patch request
     for (const i in _topographies.value) {
@@ -176,8 +186,7 @@ function saveBatchEdit(topography) {
             axios.patch(t.url, filterTopographyForPatchRequest(t)).then(response => {
                 _topographies.value[i] = response.data;
             }).catch(error => {
-                _errors.value.push(error);
-                console.log(_errors);
+                _error.value = error;
             });
         }
     }
@@ -208,6 +217,8 @@ function deleteSurface() {
     axios.delete(_surface.value.url).then(response => {
         emit('delete:surface', _surface.value.url);
         window.location.href = `/ui/html/select/`;
+    }).catch(error => {
+        _error.value = error;
     });
 }
 
@@ -273,21 +284,30 @@ const allSelected = computed({
 
 <template>
     <div class="container">
-        <div class="row">
-            <div class="col-12">
-                <b-alert v-for="error in _errors"
-                         variant="danger">
-                    {{ error.message }}
-                </b-alert>
-                <div v-if="_surface == null"
-                     class="card mb-1">
-                    <div class="card-body">
-                        <b-spinner small></b-spinner>
-                        Querying digital surface twin data, please wait...
-                    </div>
+        <div v-if="_surface == null"
+             class="row">
+            <div class="col-3">
+                <b-placeholder-button v-for="i in [1, 2, 3, 4]"
+                                      animation="wave">
+                </b-placeholder-button>
+            </div>
+            <div class="col-9">
+                <div v-for="i in [1, 2]"
+                     class="mb-3">
+                    <b-placeholder v-for="i in [1, 2, 3]"
+                                   animation="wave">
+                    </b-placeholder>
                 </div>
-                <b-tabs v-if="_surface != null"
-                        class="nav-pills-custom"
+            </div>
+        </div>
+        <b-alert :model-value="_error != null"
+                 variant="danger">
+            {{ _error.message }}: {{ _error.response.statusText }}
+        </b-alert>
+        <div v-if="_surface != null"
+             class="row">
+            <div class="col-12">
+                <b-tabs class="nav-pills-custom"
                         content-class="w-100"
                         fill
                         pills
@@ -330,10 +350,10 @@ const allSelected = computed({
                                 <h5 class="float-start">Bandwidths</h5>
                             </template>
                             <b-card-body>
-                                <b-alert v-if="_topographies.length == 0" info>
+                                <b-alert :model-value="_topographies.length == 0" info>
                                     This surface has no measurements yet.
                                 </b-alert>
-                                <b-alert v-if="_topographies.length > 0" secondary>
+                                <b-alert :model-value="_topographies.length > 0" secondary>
                                     This bandwidth plot shows the range of length scales that have been measured for
                                     this digital surface twin. Each of the blocks below represents one measurement.
                                     Part of the bandwidth shown may be unreliable due to the configured instrument's
