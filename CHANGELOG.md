@@ -5,7 +5,7 @@
 - ENH: Added alert for failing uploads
 - BUG: Fixed search (#45)
 - BUG: Fixed display of alerts
-- MAINT: Nicer placeholde while loading dataset
+- MAINT: Nicer placeholders while loading dataset
 
 ## 1.5.0 (2024-01-20)
 
