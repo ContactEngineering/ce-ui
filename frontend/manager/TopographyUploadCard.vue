@@ -5,6 +5,7 @@ import {cloneDeep} from "lodash";
 import {onMounted, ref} from "vue";
 
 import {
+    BAlert,
     BProgress
 } from 'bootstrap-vue-next';
 
@@ -16,6 +17,7 @@ const props = defineProps({
     topography: Object
 });
 
+const _error = ref(null);
 const _loaded = ref(0);
 const _total = ref(1);
 
@@ -43,6 +45,9 @@ onMounted(() => {
         ).then(response => {
             // Upload successfully finished
             emitUpdateTopography();
+        }).catch(error => {
+            // Upload failed
+            _error.value = error;
         });
     } else if (props.topography.upload_instructions.method === 'PUT') {
         axios.put(
@@ -55,7 +60,9 @@ onMounted(() => {
         ).then(response => {
             // Upload successfully finished
             emitUpdateTopography();
-            a
+        }).catch(error => {
+            // Upload failed
+            _error.value = error;
         });
     } else {
         alert(`Unknown upload method: "${props.topography.upload_instructions.method}`);
@@ -72,7 +79,12 @@ onMounted(() => {
             </div>
         </div>
         <div class="card-body">
-            <b-progress show-progress animated
+            <b-alert :model-value="_error != null"
+                  variant="danger">
+                {{ _error.message }}: {{ _error.response.statusText }}
+            </b-alert>
+            <b-progress v-if="_error == null"
+                        show-progress animated
                         :value="_loaded"
                         :max="_total">
             </b-progress>

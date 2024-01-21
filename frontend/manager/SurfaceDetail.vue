@@ -56,7 +56,7 @@ const _topographies = ref([]);  // Topographies contained in this surface
 const _versions = ref(null);  // Published versions of this surface
 
 // GUI logic
-const _errors = ref([]);   // Errors from saving batch edits
+const _error = ref(null);   // Errors from saving batch edits
 const _saving = ref(false);  // Saving batch edits
 const _showDeleteModal = ref(false);  // Triggers delete modal
 const _selected = ref([]);  // Selected topographies (for batch editing)
@@ -163,7 +163,7 @@ function saveBatchEdit(topography) {
     const cleanedBatchEditTopography = filterTopographyForPatchRequest(topography);
 
     // Clear possible errors
-    _errors.value = [];
+    _error.value = null;
 
     // Update all topographies and issue patch request
     for (const i in _topographies.value) {
@@ -176,8 +176,7 @@ function saveBatchEdit(topography) {
             axios.patch(t.url, filterTopographyForPatchRequest(t)).then(response => {
                 _topographies.value[i] = response.data;
             }).catch(error => {
-                _errors.value.push(error);
-                console.log(_errors);
+                _error.value = error;
             });
         }
     }
@@ -275,9 +274,9 @@ const allSelected = computed({
     <div class="container">
         <div class="row">
             <div class="col-12">
-                <b-alert v-for="error in _errors"
+                <b-alert :model-value="_error != null"
                          variant="danger">
-                    {{ error.message }}
+                    {{ _error.message }}: {{ _error.response.statusText }}
                 </b-alert>
                 <div v-if="_surface == null"
                      class="card mb-1">
@@ -330,10 +329,10 @@ const allSelected = computed({
                                 <h5 class="float-start">Bandwidths</h5>
                             </template>
                             <b-card-body>
-                                <b-alert v-if="_topographies.length == 0" info>
+                                <b-alert :model-value="_topographies.length == 0" info>
                                     This surface has no measurements yet.
                                 </b-alert>
-                                <b-alert v-if="_topographies.length > 0" secondary>
+                                <b-alert :model-value="_topographies.length > 0" secondary>
                                     This bandwidth plot shows the range of length scales that have been measured for
                                     this digital surface twin. Each of the blocks below represents one measurement.
                                     Part of the bandwidth shown may be unreliable due to the configured instrument's
