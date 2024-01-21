@@ -1,5 +1,12 @@
 # Changelog for plugin *ce-ui*
 
+## 1.5.1 (2024-01-21)
+
+- ENH: Added alert for failing uploads
+- BUG: Fixed search (#45)
+- BUG: Fixed display of alerts
+- MAINT: Nicer placeholde while loading dataset
+
 ## 1.5.0 (2024-01-20)
 
 - MAINT: Split user interface module from main TopoBank

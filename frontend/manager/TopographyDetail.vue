@@ -3,7 +3,7 @@
 import axios from "axios";
 
 import {computed, onMounted, ref, watch} from "vue";
-import {BModal, BSpinner, BTab, BTabs} from "bootstrap-vue-next";
+import {BAlert, BModal, BPlaceholder, BPlaceholderButton, BSpinner, BTab, BTabs} from "bootstrap-vue-next";
 
 import {getIdFromUrl, subjectsToBase64} from "topobank/utils/api.js";
 
@@ -19,6 +19,7 @@ const props = defineProps({
 });
 
 const _disabled = ref(false);
+const _error = ref(null);
 const _showDeleteModal = ref(false);
 const _topography = ref(null);
 
@@ -31,14 +32,18 @@ function updateCard() {
     axios.get(`${props.topographyUrl}?permissions=yes`).then(response => {
         _topography.value = response.data;
         _disabled.value = _topography.value === null || _topography.value.permissions.current_user.permission === 'view';
+    }).catch(error => {
+        _error.value = error;
     });
-};
+}
 
 function deleteTopography() {
     axios.delete(_topography.url).then(response => {
         this.$emit('topography-deleted', _topography.value.url);
         const id = getIdFromUrl(_topography.value.surface);
         window.location.href = `/ui/html/surface/?surface=${id}`;
+    }).catch(error => {
+        _error.value = error;
     });
 }
 
@@ -52,17 +57,27 @@ const base64Subjects = computed(() => {
 
 <template>
     <div class="container">
-        <div class="row">
+        <div v-if="_topography == null"
+             class="row">
+            <div class="col-3">
+                <b-placeholder-button v-for="i in [1, 2]"
+                                      animation="wave">
+                </b-placeholder-button>
+            </div>
+            <div class="col-9">
+                <b-placeholder v-for="i in [1, 2, 3]"
+                               animation="wave">
+                </b-placeholder>
+            </div>
+        </div>
+        <b-alert :model-value="_error != null"
+                 variant="danger">
+            {{ _error.message }}: {{ _error.response.statusText }}
+        </b-alert>
+        <div v-if="_topography !== null"
+             class="row">
             <div class="col-12">
-                <div v-if="_topography === null"
-                     class="card mb-1">
-                    <div class="card-body">
-                        <b-spinner small></b-spinner>
-                        Querying measurement data, please wait...
-                    </div>
-                </div>
-                <b-tabs v-if="_topography !== null"
-                        class="nav-pills-custom"
+                <b-tabs class="nav-pills-custom"
                         content-class="w-100"
                         fill
                         pills
