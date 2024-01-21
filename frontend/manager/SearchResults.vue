@@ -364,7 +364,7 @@ export default {
         },
         createSurface() {
             axios.post('/manager/api/surface/').then(response => {
-               window.location.href = `/ui/html/surface/?surface=${response.data.id}`;
+                window.location.href = `/ui/html/surface/?surface=${response.data.id}`;
             });
         }
     }
