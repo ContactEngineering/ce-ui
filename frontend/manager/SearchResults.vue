@@ -110,11 +110,11 @@ onMounted(() => {
             checkbox: true,
             selectMode: 2, // 'multi'
             source: {
-                url: searchUrl.toString(),  // this is a computed property, see below
+                url: searchUrl.value.toString(),  // this is a computed property, see below
                 cache: false
             },
             postProcess(event, data) {
-                // console.log("PostProcess: ", data);
+                console.log("PostProcess: ", data);
                 _numPages.value = data.response.num_pages;
                 _numItems.value = data.response.num_items;
                 _currentPage.value = data.response.current_page;
@@ -229,7 +229,7 @@ onMounted(() => {
                 if (node.data.topography_count && node.data.version) {
                     info_footer += `This is version ${node.data.version} of this digital surface twin and contains ${node.data.topography_count} measurements.`
                 } else if (node.data.version) {
-                    info_footer += `This is version ${node.data.version} of this digital surface twin.`
+                    info_footer += `This is version ${node.data.version} of this dig77ital surface twin.`
                 } else if (node.data.topography_count) {
                     info_footer += `This digital surface twin contains ${node.data.topography_count} measurements.`
                 }
@@ -313,7 +313,7 @@ function reload() {
     console.log("Reloading tree, tree mode: " + _treeMode.value + " current page: " + _currentPage.value);
 
     _tree.value.setOption('source', {
-        url: searchUrl.toString(),
+        url: searchUrl.value.toString(),
         cache: false,
     });
     setLoadingIndicator();
