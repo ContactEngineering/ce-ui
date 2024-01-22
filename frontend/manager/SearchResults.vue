@@ -288,7 +288,7 @@ export default {
             console.log("Requested search URL: " + url.toString());
 
             return url;
-        },
+        }
     },
     methods: {
         setLoadingIndicator() {
@@ -446,7 +446,7 @@ export default {
                     <li class="ms-2">
                         <div class="input-group nav-item">
                             <label class="input-group-text" for="page-size-select">Page size</label>
-                            <select name="page_size" class="custom-select" id="page-size-select" v-model="_pageSize"
+                            <select name="page_size" class="form-select" id="page-size-select" v-model="_pageSize"
                                     @change="reload()">
                                 <option v-for="ps in [10,25,50,100]" v-bind:class="{selected: ps==pageSize}">{{ ps }}
                                 </option>
