@@ -174,7 +174,6 @@ def filtered_surfaces(request):
     return qs
 
 
-
 def download_selection_as_surfaces(request):
     """Returns a file comprised from surfaces related to the selection.
 

@@ -10,7 +10,7 @@ from topobank.manager.models import Surface, Topography, TagModel
 from topobank.manager.serializers import SurfaceSerializer, TopographySerializer
 from topobank.manager.utils import subjects_to_base64
 
-from .utils import get_search_term, filtered_topographies, get_order_by
+from .utils import get_search_term, filtered_topographies
 
 _log = logging.getLogger(__name__)
 
