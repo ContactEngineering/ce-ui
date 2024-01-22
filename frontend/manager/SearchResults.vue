@@ -17,7 +17,7 @@ import axios from "axios";
 
 import {computed, onMounted, ref} from "vue";
 
-import {BInputGroup, BFormSelect, BPagination} from "bootstrap-vue-next";
+import {BFormSelect, BInputGroup, BPagination, BSpinner} from "bootstrap-vue-next";
 
 import {createTree} from 'jquery.fancytree';
 
@@ -264,7 +264,7 @@ onMounted(() => {
             },
         }
     ); // fancytree()
-    setLoadingIndicator();
+    _isLoading.value = true;
 });
 
 const currentPage = computed({
@@ -282,7 +282,7 @@ const currentPage = computed({
                 url: pageUrl,
                 cache: false,
             });
-            setLoadingIndicator();
+            _isLoading.value = true;
         } else {
             console.warn("Cannot load page " + value + ", because the page number is invalid.")
         }
@@ -322,21 +322,6 @@ const searchUrl = computed(() => {
     return url;
 });
 
-function setLoadingIndicator() {
-    // hack: replace loading indicator from fancytree by own indicator with spinner
-    let loading_node = $('tr.fancytree-statusnode-loading');
-    if (loading_node) {
-        loading_node.html(`
-                        <td id="tree-loading-indicator" role="status">
-                          <div class="h6">
-                            <span id="tree-loading-spinner" class="spinner"></span>Please wait...
-                          </div>
-                        </td>
-                    `);
-        _isLoading.value = true;
-    }
-}
-
 function clearSearchTerm() {
     console.log("Clearing search term...");
     _searchTerm.value = '';
@@ -353,7 +338,7 @@ function reload() {
         url: searchUrl.value.toString(),
         cache: false,
     });
-    setLoadingIndicator();
+    _isLoading.value = true;
 }
 
 function setSelectedByKey(key, selected) {
@@ -446,7 +431,8 @@ function createSurface() {
         </div>
     </form>
 
-    <div class="row row-cols-lg-auto">
+    <div v-if="!_isLoading"
+         class="row row-cols-lg-auto">
         <div class="col-md-8">
             <b-pagination v-model="currentPage"
                           :limit="9"
@@ -466,15 +452,23 @@ function createSurface() {
                 <button class="btn btn-primary form-control disabled"
                         title="Please sign-in to use this feature"
                         disabled>
-                    Create digital surface twin
+                    Create new digital surface twin
                 </button>
             </div>
             <div v-if="!isAnonymous" class="form-group" title="Create a new digital surface twin">
                 <a class="btn btn-primary form-control"
                    @click="createSurface">
-                    Create digital surface twin
+                    Create new digital surface twin
                 </a>
             </div>
+        </div>
+    </div>
+
+    <div v-if="_isLoading"
+         class="d-flex justify-content-center mt-5">
+        <div class="flex-column text-center">
+            <b-spinner/>
+            <p>Please wait...</p>
         </div>
     </div>
 
