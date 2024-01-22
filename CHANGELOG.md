@@ -1,5 +1,10 @@
 # Changelog for plugin *ce-ui*
 
+## 1.6.0 (2024-01-22)
+
+- ENH: Select search order
+- ENH: Report modification date
+
 ## 1.5.1 (2024-01-21)
 
 - ENH: Added alert for failing uploads
