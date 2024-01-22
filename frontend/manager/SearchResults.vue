@@ -116,7 +116,7 @@ export default {
                 checkbox: true,
                 selectMode: 2, // 'multi'
                 source: {
-                    url: this.search_url.toString(),  // this is a computed property, see below
+                    url: this.searchUrl.toString(),  // this is a computed property, see below
                     cache: false
                 },
                 postProcess(event, data) {
@@ -267,7 +267,7 @@ export default {
         this.setLoadingIndicator();
     },   // mounted()
     computed: {
-        search_url() {
+        searchUrl() {
             // Returns URL object
 
             let url = new URL(this.baseUrls[this._treeMode]);
@@ -318,7 +318,7 @@ export default {
             console.log("Reloading tree, tree mode: " + this._treeMode + " current page: " + this._currentPage);
 
             this._tree.setOption('source', {
-                url: this.search_url.toString(),
+                url: this.searchUrl.toString(),
                 cache: false,
             });
             this.setLoadingIndicator();
