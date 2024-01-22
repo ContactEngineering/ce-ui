@@ -59,7 +59,7 @@ const base64Subjects = computed(() => {
     <div class="container">
         <div v-if="_topography == null"
              class="row">
-            <div class="col-3">
+            <div class="col-3 mb-1">
                 <b-placeholder-button v-for="i in [1, 2]"
                                       animation="wave">
                 </b-placeholder-button>
