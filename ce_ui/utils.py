@@ -1,6 +1,6 @@
 import logging
 
-from django.db.models import Count, Q, Value, TextField
+from django.db.models import Count, Q, Value, TextField, Subquery
 from django.db.models.functions import Replace
 from django.core.exceptions import PermissionDenied
 from django.contrib.postgres.search import SearchVector, SearchQuery
@@ -360,6 +360,10 @@ def filtered_topographies(request, surfaces):
 
     """
     topographies = Topography.objects.filter(surface__in=surfaces)
+
+    #
+    # Search results
+    #
     search_term = get_search_term(request)
     if search_term:
         # We introduce an extra field for search in tag names where the tag names
@@ -373,6 +377,15 @@ def filtered_topographies(request, surfaces):
         topographies = filter_queryset_by_search_term(topographies, search_term, [
             'description', 'creator__name', 'name_for_search', 'tag_names_for_search',
         ])
+
+    #
+    # Sort results
+    #
+    order_by = get_order_by(request)
+    topographies = Topography.objects.filter(
+        pk__in=Subquery(topographies.values('pk'))
+    ).order_by(order_by)
+
     return topographies
 
 
@@ -516,6 +529,23 @@ def get_category(request) -> str:
     if category not in CATEGORY_FILTER_CHOICES.keys():
         raise PermissionDenied()
     return category
+
+
+def get_order_by(request) -> str:
+    """Extract sort by from given request.
+    Parameters
+    ----------
+    request
+
+    Returns
+    -------
+    Sorted with requested sort by.
+    """
+    from .views import ORDER_BY_CHOICES
+    order_by = request.GET.get('order_by', default='date')
+    if order_by not in ORDER_BY_CHOICES.keys():
+        order_by = 'name'
+    return order_by
 
 
 def get_sharing_status(request) -> str:

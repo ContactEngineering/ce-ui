@@ -236,11 +236,6 @@ body {
     border-radius: 5px 0px 0px 5px; /* left side should be round */
 }
 
-/** More visible status node in fancytree while loading .. */
-#tree-loading-indicator {
-    font-size: x-large;
-}
-
 /** larger font in basket elements */
 .basket-element {
     font-size: medium;
@@ -618,7 +613,7 @@ body.fixed-nav.sidebar-toggled #content-wrapper {
     margin-left: 0.75rem;
     top: 0.3rem;
     font-weight: 400;
-    font-size: 0.5rem;
+    font-size: 0.7rem;
 }
 
 @media (min-width: 768px) {
@@ -1022,4 +1017,9 @@ input[type=number] {
 /* Fix width of the unit selection box */
 .unit-select {
     max-width: 5rem;
+}
+
+/* Hide fancytree loading indicator */
+.fancytree-statusnode-loading {
+    display: none;
 }
