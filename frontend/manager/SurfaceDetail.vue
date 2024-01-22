@@ -286,7 +286,7 @@ const allSelected = computed({
     <div class="container">
         <div v-if="_surface == null"
              class="row">
-            <div class="col-3">
+            <div class="col-3 mb-1">
                 <b-placeholder-button v-for="i in [1, 2, 3, 4]"
                                       animation="wave">
                 </b-placeholder-button>
