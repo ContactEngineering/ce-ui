@@ -375,48 +375,66 @@ function createSurface() {
     <basket :basket-items="_selection"
             @unselect-successful="unselect">
     </basket>
-    <form>
-        <div class="d-flex flex-row mb-2">
-            <div v-if="_searchTerm" class="form-group flex-fill me-2">
-                <button class="btn btn-warning form-control" type="button"
-                        id="clear-search-term-btn"
-                        @click="clearSearchTerm"
-                        :disabled="_isLoading">
-                    Clear filter for <b>{{ _searchTerm }}</b>
+    <div class="row row-cols-lg-auto mb-2">
+        <div v-if="_searchTerm" class="form-group">
+            <button class="btn btn-warning form-control" type="button"
+                    id="clear-search-term-btn"
+                    @click="clearSearchTerm"
+                    :disabled="_isLoading">
+                Clear filter for <b>{{ _searchTerm }}</b>
+            </button>
+        </div>
+        <div v-else class="form-group">
+            <button class="btn btn-outline-info form-control disabled" type="button">
+                Not filtered for search term
+            </button>
+        </div>
+
+        <div class="form-group">
+            <select name="category"
+                    class="form-control"
+                    v-model="_category"
+                    @change="reload"
+                    :disabled="_isLoading">
+                <option v-for="(choiceLabel, choiceVal) in categoryFilterChoices"
+                        v-bind:value="choiceVal" v-bind:selected="choiceVal==_category">
+                    {{ choiceLabel }}
+                </option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <select name="sharing_status"
+                    class="form-control"
+                    v-model="_sharingStatus"
+                    @change="reload"
+                    :disabled="_isLoading">
+                <option v-for="(choiceLabel, choiceVal) in sharingStatusFilterChoices"
+                        v-bind:value="choiceVal" v-bind:selected="choiceVal==_sharingStatus">
+                    {{ choiceLabel }}
+                </option>
+            </select>
+        </div>
+
+        <div class="col-md-4">
+            <div v-if="isAnonymous" class="form-group">
+                <button class="btn btn-primary form-control disabled"
+                        title="Please sign-in to use this feature"
+                        disabled>
+                    Create new digital surface twin
                 </button>
             </div>
-            <div v-else class="form-group flex-fill me-2">
-                <button class="btn btn-outline-info form-control disabled" type="button">
-                    Not filtered for search term
+            <div v-if="!isAnonymous" class="form-group" title="Create a new digital surface twin">
+                <button class="btn btn-primary form-control"
+                        @click="createSurface"
+                        :disabled="_isLoading">
+                    Create new digital surface twin
                 </button>
             </div>
-
-            <div class="form-group me-2">
-                <select name="category"
-                        class="form-control"
-                        v-model="_category"
-                        @change="reload"
-                        :disabled="_isLoading">
-                    <option v-for="(choiceLabel, choiceVal) in categoryFilterChoices"
-                            v-bind:value="choiceVal" v-bind:selected="choiceVal==_category">
-                        {{ choiceLabel }}
-                    </option>
-                </select>
-            </div>
-
-            <div class="form-group me-2">
-                <select name="sharing_status"
-                        class="form-control"
-                        v-model="_sharingStatus"
-                        @change="reload"
-                        :disabled="_isLoading">
-                    <option v-for="(choiceLabel, choiceVal) in sharingStatusFilterChoices"
-                            v-bind:value="choiceVal" v-bind:selected="choiceVal==_sharingStatus">
-                        {{ choiceLabel }}
-                    </option>
-                </select>
-            </div>
-
+        </div>
+    </div>
+    <div class="row row-cols-lg-auto">
+        <div class="col-md-4">
             <div id="tree-selector" class="btn-group">
                 <label v-for="choice in
                      [ { label: 'Surface list',
@@ -441,9 +459,6 @@ function createSurface() {
                 </label>
             </div>
         </div>
-    </form>
-
-    <div class="row row-cols-lg-auto">
         <div class="col-md-8">
             <b-pagination v-model="currentPage"
                           :disabled="_isLoading"
@@ -459,22 +474,6 @@ function createSurface() {
                                :options="[10, 25, 50, 100]">
                 </b-form-select>
             </b-input-group>
-        </div>
-        <div class="col-md-4">
-            <div v-if="isAnonymous" class="form-group">
-                <button class="btn btn-primary form-control disabled"
-                        title="Please sign-in to use this feature"
-                        disabled>
-                    Create new digital surface twin
-                </button>
-            </div>
-            <div v-if="!isAnonymous" class="form-group" title="Create a new digital surface twin">
-                <button class="btn btn-primary form-control"
-                        @click="createSurface"
-                        :disabled="_isLoading">
-                    Create new digital surface twin
-                </button>
-            </div>
         </div>
     </div>
 

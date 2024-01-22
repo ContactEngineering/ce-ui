@@ -13,8 +13,6 @@ import {
     BDropdownItem,
     BFormCheckbox,
     BModal,
-    BPlaceholder,
-    BPlaceholderButton,
     BSpinner,
     BTab,
     BTabs,
@@ -285,19 +283,10 @@ const allSelected = computed({
 <template>
     <div class="container">
         <div v-if="_surface == null"
-             class="row">
-            <div class="col-3 mb-1">
-                <b-placeholder-button v-for="i in [1, 2, 3, 4]"
-                                      animation="wave">
-                </b-placeholder-button>
-            </div>
-            <div class="col-9">
-                <div v-for="i in [1, 2]"
-                     class="mb-3">
-                    <b-placeholder v-for="i in [1, 2, 3]"
-                                   animation="wave">
-                    </b-placeholder>
-                </div>
+             class="d-flex justify-content-center mt-5">
+            <div class="flex-column text-center">
+                <b-spinner/>
+                <p>Loading...</p>
             </div>
         </div>
         <b-alert :model-value="_error != null"

@@ -3,7 +3,7 @@
 import axios from "axios";
 
 import {computed, onMounted, ref, watch} from "vue";
-import {BAlert, BModal, BPlaceholder, BPlaceholderButton, BSpinner, BTab, BTabs} from "bootstrap-vue-next";
+import {BAlert, BModal, BSpinner, BTab, BTabs} from "bootstrap-vue-next";
 
 import {getIdFromUrl, subjectsToBase64} from "topobank/utils/api.js";
 
@@ -58,16 +58,10 @@ const base64Subjects = computed(() => {
 <template>
     <div class="container">
         <div v-if="_topography == null"
-             class="row">
-            <div class="col-3 mb-1">
-                <b-placeholder-button v-for="i in [1, 2]"
-                                      animation="wave">
-                </b-placeholder-button>
-            </div>
-            <div class="col-9">
-                <b-placeholder v-for="i in [1, 2, 3]"
-                               animation="wave">
-                </b-placeholder>
+             class="d-flex justify-content-center mt-5">
+            <div class="flex-column text-center">
+                <b-spinner/>
+                <p>Loading...</p>
             </div>
         </div>
         <b-alert :model-value="_error != null"
