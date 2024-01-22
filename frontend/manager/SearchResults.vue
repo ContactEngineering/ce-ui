@@ -27,7 +27,6 @@ export default {
     components: {
         Basket
     },
-    inject: ['csrfToken'],
     props: {
         baseUrls: Object,
         category: String,
@@ -139,20 +138,18 @@ export default {
                     const is_selected = node.isSelected();
                     if (node.data.urls !== undefined) {
                         if (is_selected) {
-                            fetch(node.data.urls.select, {method: 'POST', headers: {'X-CSRFToken': _this.csrfToken}})
-                                .then(response => response.json())
-                                .then(data => {
-                                    _this._selection = data;
+                            axios.post(node.data.urls.select)
+                                .then(response => {
+                                    _this._selection = response.data;
                                     _this.setSelectedByKey(node.key, true);
                                 })
                                 .catch(error => {
                                     console.error("Could not select: " + error);
                                 });
                         } else {
-                            fetch(node.data.urls.unselect, {method: 'POST', headers: {'X-CSRFToken': _this.csrfToken}})
-                                .then(response => response.json())
-                                .then(data => {
-                                    _this._selection = data;
+                            axios.post(node.data.urls.unselect)
+                                .then(response => {
+                                    _this._selection = response.data;
                                     _this.setSelectedByKey(node.key, false);
                                 })
                                 .catch(error => {
