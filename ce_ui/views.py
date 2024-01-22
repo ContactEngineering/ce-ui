@@ -43,7 +43,7 @@ CATEGORY_FILTER_CHOICES = {'all': 'All categories',
                            **{cc[0]: cc[1] + " only" for cc in Surface.CATEGORY_CHOICES}}
 ORDER_BY_CHOICES = {
     'name': 'name',
-    '-modification_datetime': 'date'
+    '-creation_datetime': 'date'
 }
 SHARING_STATUS_FILTER_CHOICES = {
     'all': 'All accessible datasets',
@@ -61,7 +61,7 @@ DEFAULT_PAGE_SIZE = 10
 DEFAULT_SELECT_TAB_STATE = {
     'search_term': '',  # empty string means: no search
     'category': 'all',
-    'order_by': 'name',
+    'order_by': '-creation_datetime',
     'sharing_status': 'all',
     'tree_mode': 'surface list',
     'page_size': 10,

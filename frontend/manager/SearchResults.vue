@@ -198,11 +198,6 @@ onMounted(() => {
                     description_html += `<img src="/static/images/cc/${node.data.publication_license}.svg" title="Dataset can be reused under the terms of a Creative Commons license." style="float:right">`;
                 }
 
-                if (!node.data.publication_date && node.data.modification_datetime) {
-                    const date = new Date(node.data.modification_datetime);
-                    description_html += `<p class='badge bg-light text-dark me-1'>Last modified ${date.toISOString().substring(0, 10)}</p>`;
-                }
-
                 // Tags
                 if (node.data.category) {
                     description_html += `<p class='badge bg-light text-dark me-1'>${node.data.category_name}</p>`;
@@ -231,7 +226,7 @@ onMounted(() => {
                     if (node.type == "surface") {
                         publication_info += `This dataset is unpublished. It was created by ${node.data.creator_name}`;
                         if (node.data.creation_datetime) {
-                            const date = new Date(node.data.modification_datetime);
+                            const date = new Date(node.data.creation_datetime);
                             publication_info += ` on ${date.toISOString().substring(0, 10)}`;
                         }
                         publication_info += ".";
