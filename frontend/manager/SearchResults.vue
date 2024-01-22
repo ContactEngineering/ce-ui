@@ -17,7 +17,7 @@ import axios from "axios";
 
 import {computed, onMounted, ref} from "vue";
 
-import {BPagination} from "bootstrap-vue-next";
+import {BInputGroup, BFormSelect, BPagination} from "bootstrap-vue-next";
 
 import {createTree} from 'jquery.fancytree';
 
@@ -44,7 +44,8 @@ const props = defineProps({
     treeMode: String
 });
 
-const _selection = ref(props.initialSelection);
+
+// UI logic
 const _category = ref(props.category);
 const _currentPage = ref(props.currentPage);
 const _isLoading = ref(props.isLoading);
@@ -55,9 +56,14 @@ const _pageRange = ref(null);
 const _pageSize = ref(props.pageSize);
 const _pageUrls = ref(null);
 const _searchTerm = ref(props.searchTerm);
+const _selection = ref(props.initialSelection);
 const _sharingStatus = ref(props.sharingStatus);
-const _tree = ref(null);
 const _treeMode = ref(props.treeMode);
+
+// The actual fancy tree
+const _tree = ref(null);
+
+// Constants
 const _treeModeInfos = {
     "surface list": {
         element_kind: "digital surface twins",
@@ -261,6 +267,38 @@ onMounted(() => {
     setLoadingIndicator();
 });
 
+const currentPage = computed({
+    get() {
+        return _currentPage.value;
+    },
+    set(value) {
+        _currentPage.value = value;
+
+        if ((value >= 1) && (value <= _pageRange.value.length)) {
+            const pageUrl = new URL(_pageUrls.value[value - 1]);
+
+            console.log("Loading page " + value + " from " + pageUrl + "..");
+            _tree.value.setOption('source', {
+                url: pageUrl,
+                cache: false,
+            });
+            setLoadingIndicator();
+        } else {
+            console.warn("Cannot load page " + value + ", because the page number is invalid.")
+        }
+    }
+});
+
+const pageSize = computed({
+    get() {
+        return _pageSize.value;
+    },
+    set(value) {
+        _pageSize.value = value;
+        reload();
+    }
+});
+
 const searchUrl = computed(() => {
     // Returns URL object
 
@@ -274,7 +312,7 @@ const searchUrl = computed(() => {
     queryParams.set("category", _category.value);
     queryParams.set("sharing_status", _sharingStatus.value);
     queryParams.set('page_size', _pageSize.value);
-    queryParams.set('page', _currentPage.value);
+    queryParams.set('page', currentPage.value);
     queryParams.set('tree_mode', _treeMode.value);
     url.search = queryParams.toString();
     // url = url.toString();
@@ -310,30 +348,12 @@ function reload() {
        with currently set state of the select tab,
        except of the page number which should be 1. */
     _currentPage.value = 1;
-    console.log("Reloading tree, tree mode: " + _treeMode.value + " current page: " + _currentPage.value);
 
     _tree.value.setOption('source', {
         url: searchUrl.value.toString(),
         cache: false,
     });
     setLoadingIndicator();
-}
-
-function loadPage(pageNo) {
-    pageNo = parseInt(pageNo);
-
-    if ((pageNo >= 1) && (pageNo <= _pageRange.value.length)) {
-        let page_url = new URL(_pageUrls.value[pageNo - 1]);
-
-        console.log("Loading page " + pageNo + " from " + page_url + "..");
-        _tree.value.setOption('source', {
-            url: page_url,
-            cache: false,
-        });
-        setLoadingIndicator();
-    } else {
-        console.warn("Cannot load page " + pageNo + ", because the page number is invalid.")
-    }
 }
 
 function setSelectedByKey(key, selected) {
@@ -426,39 +446,21 @@ function createSurface() {
         </div>
     </form>
 
-    <div class="row">
+    <div class="row row-cols-lg-auto">
         <div class="col-md-8">
-            <b-pagination v-model="_currentPage"
+            <b-pagination v-model="currentPage"
+                          :limit="9"
                           :total-rows="_numItems"
                           :per-page="_pageSize">
             </b-pagination>
-            <nav aria-label="Pagination">
-                <ul id="pagination" class="pagination">
-                    <li class="page-item" v-bind:class="{ disabled: _currentPage <= 1 }">
-                        <a class="page-link" v-on:click="loadPage(_currentPage-1)">Previous</a>
-                    </li>
-                    <li class="page-item" v-bind:class="{ active: _currentPage==page_no}"
-                        v-for="page_no in _pageRange">
-                        <a class="page-link" v-on:click="loadPage(page_no)">{{ page_no }}</a>
-                    </li>
-                    <li class="page-item" v-bind:class="{ disabled: _currentPage >=_numPages }">
-                        <a class="page-link" v-on:click="loadPage(_currentPage+1)">Next</a>
-                    </li>
-
-                    <li class="ms-2">
-                        <div class="input-group nav-item">
-                            <label class="input-group-text" for="page-size-select">Page size</label>
-                            <select name="page_size" class="form-select" id="page-size-select" v-model="_pageSize"
-                                    @change="reload()">
-                                <option v-for="ps in [10,25,50,100]" v-bind:class="{selected: ps==pageSize}">{{ ps }}
-                                </option>
-                            </select>
-                        </div>
-                    </li>
-                </ul>
-            </nav>
         </div>
-
+        <div class="col-md-4">
+            <b-input-group prepend="Page size">
+                <b-form-select v-model="pageSize"
+                               :options="[10, 25, 50, 100]">
+                </b-form-select>
+            </b-input-group>
+        </div>
         <div class="col-md-4">
             <div v-if="isAnonymous" class="form-group">
                 <button class="btn btn-primary form-control disabled"
