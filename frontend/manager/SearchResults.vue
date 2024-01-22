@@ -380,7 +380,8 @@ function createSurface() {
             <div v-if="_searchTerm" class="form-group flex-fill me-2">
                 <button class="btn btn-warning form-control" type="button"
                         id="clear-search-term-btn"
-                        @click="clearSearchTerm">
+                        @click="clearSearchTerm"
+                        :disabled="_isLoading">
                     Clear filter for <b>{{ _searchTerm }}</b>
                 </button>
             </div>
@@ -391,7 +392,11 @@ function createSurface() {
             </div>
 
             <div class="form-group me-2">
-                <select name="category" class="form-control" v-model="_category" @change="reload">
+                <select name="category"
+                        class="form-control"
+                        v-model="_category"
+                        @change="reload"
+                        :disabled="_isLoading">
                     <option v-for="(choiceLabel, choiceVal) in categoryFilterChoices"
                             v-bind:value="choiceVal" v-bind:selected="choiceVal==_category">
                         {{ choiceLabel }}
@@ -400,7 +405,11 @@ function createSurface() {
             </div>
 
             <div class="form-group me-2">
-                <select name="sharing_status" class="form-control" v-model="_sharingStatus" @change="reload">
+                <select name="sharing_status"
+                        class="form-control"
+                        v-model="_sharingStatus"
+                        @change="reload"
+                        :disabled="_isLoading">
                     <option v-for="(choiceLabel, choiceVal) in sharingStatusFilterChoices"
                             v-bind:value="choiceVal" v-bind:selected="choiceVal==_sharingStatus">
                         {{ choiceLabel }}
@@ -417,24 +426,27 @@ function createSurface() {
                          value: 'tag tree',
                          icon_class: 'fas fa-tag'}]"
                        v-bind:class="{active: _treeMode==choice.value,
-                                    'btn': true,
-                                    'btn-success': _treeMode==choice.value,
-                                    'btn-outline-success': _treeMode!=choice.value}">
+                                      'btn': true,
+                                      'btn-success': _treeMode==choice.value,
+                                      'btn-outline-success': _treeMode!=choice.value,
+                                      'disabled': _isLoading}">
                     <input type="radio"
                            class="btn-check"
                            autocomplete="off"
                            name="tree_mode"
-                           v-bind:value="choice.value" v-model="_treeMode" @change="reload">
+                           v-bind:value="choice.value"
+                           v-model="_treeMode"
+                           @change="reload">
                     <span><i v-bind:class="choice.icon_class"></i> {{ choice.label }}</span>
                 </label>
             </div>
         </div>
     </form>
 
-    <div v-if="!_isLoading"
-         class="row row-cols-lg-auto">
+    <div class="row row-cols-lg-auto">
         <div class="col-md-8">
             <b-pagination v-model="currentPage"
+                          :disabled="_isLoading"
                           :limit="9"
                           :total-rows="_numItems"
                           :per-page="_pageSize">
@@ -443,6 +455,7 @@ function createSurface() {
         <div class="col-md-4">
             <b-input-group prepend="Page size">
                 <b-form-select v-model="pageSize"
+                               :disabled="_isLoading"
                                :options="[10, 25, 50, 100]">
                 </b-form-select>
             </b-input-group>
@@ -456,10 +469,11 @@ function createSurface() {
                 </button>
             </div>
             <div v-if="!isAnonymous" class="form-group" title="Create a new digital surface twin">
-                <a class="btn btn-primary form-control"
-                   @click="createSurface">
+                <button class="btn btn-primary form-control"
+                        @click="createSurface"
+                        :disabled="_isLoading">
                     Create new digital surface twin
-                </a>
+                </button>
             </div>
         </div>
     </div>
@@ -468,7 +482,7 @@ function createSurface() {
          class="d-flex justify-content-center mt-5">
         <div class="flex-column text-center">
             <b-spinner/>
-            <p>Please wait...</p>
+            <p>Loading...</p>
         </div>
     </div>
 
