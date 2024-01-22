@@ -198,10 +198,7 @@ onMounted(() => {
                     description_html += `<img src="/static/images/cc/${node.data.publication_license}.svg" title="Dataset can be reused under the terms of a Creative Commons license." style="float:right">`;
                 }
 
-                if (node.data.publication_date) {
-                    const date = new Date(node.data.modification_datetime);
-                    description_html += `<p class='badge bg-secondary me-1'>Published ${date.toISOString().substring(0, 10)}</p>`;
-                } else if (node.data.modification_datetime) {
+                if (!node.data.publication_date && node.data.modification_datetime) {
                     const date = new Date(node.data.modification_datetime);
                     description_html += `<p class='badge bg-light text-dark me-1'>Last modified ${date.toISOString().substring(0, 10)}</p>`;
                 }
@@ -228,10 +225,16 @@ onMounted(() => {
 
                 let publication_info = "";
                 if (node.data.publication_authors) {
-                    publication_info += `${node.data.publication_authors}`;
+                    const date = new Date(node.data.publication_date);
+                    publication_info += `${node.data.publication_authors} (published ${date.toISOString().substring(0, 10)})`;
                 } else {
                     if (node.type == "surface") {
-                        publication_info += `This dataset is unpublished. It was created by ${node.data.creator_name}.`;
+                        publication_info += `This dataset is unpublished. It was created by ${node.data.creator_name}`;
+                        if (node.data.creation_datetime) {
+                            const date = new Date(node.data.modification_datetime);
+                            publication_info += ` on ${date.toISOString().substring(0, 10)}`;
+                        }
+                        publication_info += ".";
                     }
                 }
 
