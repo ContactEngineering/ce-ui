@@ -10,7 +10,7 @@ from topobank.manager.models import Surface, Topography, TagModel
 from topobank.manager.serializers import SurfaceSerializer, TopographySerializer
 from topobank.manager.utils import subjects_to_base64
 
-from .utils import get_search_term, filtered_topographies
+from .utils import get_search_term, filtered_topographies, get_order_by
 
 _log = logging.getLogger(__name__)
 
@@ -23,7 +23,8 @@ class TopographySearchSerializer(serializers.ModelSerializer):
                   'title', 'folder', 'version', 'publication_date', 'publication_authors', 'datafile_format',
                   'measurement_date', 'resolution_x', 'resolution_y', 'size_x', 'size_y', 'size_editable', 'unit',
                   'unit_editable', 'height_scale', 'height_scale_editable', 'creator_name', 'sharing_status', 'label',
-                  'is_periodic', 'thumbnail', 'tags', 'instrument_name', 'instrument_type', 'instrument_parameters']
+                  'is_periodic', 'thumbnail', 'tags', 'instrument_name', 'instrument_type', 'instrument_parameters',
+                  'creation_datetime', 'modification_datetime']
 
     creator = serializers.HyperlinkedRelatedField(
         read_only=True,
@@ -108,7 +109,7 @@ class SurfaceSearchSerializer(serializers.ModelSerializer):
         fields = ['id', 'type', 'name', 'creator', 'creator_name', 'description', 'category', 'category_name', 'tags',
                   'children', 'sharing_status', 'urls', 'selected', 'key', 'title', 'folder', 'version',
                   'publication_doi', 'publication_date', 'publication_authors', 'publication_license',
-                  'topography_count', 'label']
+                  'topography_count', 'label', 'creation_datetime', 'modification_datetime']
 
     creator = serializers.HyperlinkedRelatedField(
         read_only=True,
@@ -165,6 +166,7 @@ class SurfaceSearchSerializer(serializers.ModelSerializer):
             topographies = filtered_topographies(request, [obj])
         else:
             topographies = obj.topography_set.all()
+
         return TopographySearchSerializer(topographies, many=True, context=self.context).data
 
     def get_urls(self, obj):

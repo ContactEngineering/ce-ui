@@ -3,7 +3,7 @@ from html import unescape
 from io import BytesIO
 
 from django.core.exceptions import PermissionDenied
-from django.db.models import Q, Value, TextField
+from django.db.models import Q, Value, TextField, Subquery
 from django.db.models.functions import Replace
 from django.http import HttpResponse
 from django.urls import reverse
@@ -35,12 +35,16 @@ from topobank.users.models import User
 
 from .serializers import TagSearchSerizalizer, SurfaceSearchSerializer
 from .utils import instances_to_selection, selected_instances, tags_for_user, current_selection_as_basket_items, \
-    filtered_topographies, get_search_term, get_category, get_sharing_status, get_tree_mode, \
+    filtered_topographies, get_search_term, get_category, get_order_by, get_sharing_status, get_tree_mode, \
     filter_queryset_by_search_term, selection_to_subjects_dict
 
 # create dicts with labels and option values for Select tab
 CATEGORY_FILTER_CHOICES = {'all': 'All categories',
                            **{cc[0]: cc[1] + " only" for cc in Surface.CATEGORY_CHOICES}}
+ORDER_BY_CHOICES = {
+    'name': 'name',
+    '-modification_datetime': 'date'
+}
 SHARING_STATUS_FILTER_CHOICES = {
     'all': 'All accessible datasets',
     'own': 'Only my datasets',
@@ -57,6 +61,7 @@ DEFAULT_PAGE_SIZE = 10
 DEFAULT_SELECT_TAB_STATE = {
     'search_term': '',  # empty string means: no search
     'category': 'all',
+    'order_by': 'name',
     'sharing_status': 'all',
     'tree_mode': 'surface list',
     'page_size': 10,
@@ -127,6 +132,7 @@ def filtered_surfaces(request):
             qs = qs.filter(creator=user)
         case 'all':
             pass
+
     #
     # Filter by search term
     #
@@ -156,7 +162,17 @@ def filtered_surfaces(request):
             'topography_name_for_search', 'topography__description', 'topography_tag_names_for_search',
             'topography__creator__name',
         ])
+
+    #
+    # Sort results
+    #
+    order_by = get_order_by(request)
+    qs = Surface.objects.filter(
+        pk__in=Subquery(qs.values('pk'))
+    ).order_by(order_by)
+
     return qs
+
 
 
 def download_selection_as_surfaces(request):
@@ -262,6 +278,7 @@ class DataSetListView(TemplateView):
         }
 
         context['category_filter_choices'] = CATEGORY_FILTER_CHOICES.copy()
+        context['order_by_filter_choices'] = ORDER_BY_CHOICES.copy()
 
         if self.request.user.is_anonymous:
             # Anonymous user have only one choice
@@ -330,6 +347,7 @@ class SurfaceSearchPaginator(PageNumberPagination):
 
         select_tab_state['search_term'] = get_search_term(self.request)
         select_tab_state['category'] = get_category(self.request)
+        select_tab_state['order_by'] = get_order_by(self.request)
         select_tab_state['sharing_status'] = get_sharing_status(self.request)
         select_tab_state['tree_mode'] = get_tree_mode(self.request)
         page_size = self.get_page_size(self.request)
@@ -348,6 +366,7 @@ class SurfaceSearchPaginator(PageNumberPagination):
             'page_size': page_size,
             'search_term': select_tab_state['search_term'],
             'category': select_tab_state['category'],
+            'order_by': select_tab_state['order_by'],
             'sharing_status': select_tab_state['sharing_status'],
             'tree_mode': select_tab_state['tree_mode'],
             'page_results': data

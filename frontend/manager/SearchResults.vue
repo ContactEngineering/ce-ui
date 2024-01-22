@@ -37,6 +37,8 @@ const props = defineProps({
     },
     isAnonymous: Boolean,
     isLoading: Boolean,
+    orderBy: String,
+    orderByFilterChoices: Object,
     pageSize: Number,
     sharingStatus: String,
     sharingStatusFilterChoices: Object,
@@ -52,6 +54,7 @@ const _isLoading = ref(props.isLoading);
 const _numItems = ref(null);
 const _numItemsOnCurrentPage = ref(null);
 const _numPages = ref(null);
+const _orderBy = ref(props.orderBy);
 const _pageRange = ref(null);
 const _pageSize = ref(props.pageSize);
 const _pageUrls = ref(null);
@@ -76,6 +79,8 @@ const _treeModeInfos = {
 };
 
 onMounted(() => {
+    console.log(props.orderBy);
+
     // init fancytree
     _tree.value = createTree('#surface-tree', {
             extensions: ["glyph", "table"],
@@ -193,9 +198,17 @@ onMounted(() => {
                     description_html += `<img src="/static/images/cc/${node.data.publication_license}.svg" title="Dataset can be reused under the terms of a Creative Commons license." style="float:right">`;
                 }
 
+                if (node.data.publication_date) {
+                    const date = new Date(node.data.modification_datetime);
+                    description_html += `<p class='badge bg-secondary me-1'>Published ${date.toISOString().substring(0, 10)}</p>`;
+                } else if (node.data.modification_datetime) {
+                    const date = new Date(node.data.modification_datetime);
+                    description_html += `<p class='badge bg-light text-dark me-1'>Last modified ${date.toISOString().substring(0, 10)}</p>`;
+                }
+
                 // Tags
                 if (node.data.category) {
-                    description_html += `<p class='badge bg-secondary me-1'>${node.data.category_name}</p>`;
+                    description_html += `<p class='badge bg-light text-dark me-1'>${node.data.category_name}</p>`;
                 }
 
                 if (node.data.sharing_status == "own") {
@@ -215,7 +228,7 @@ onMounted(() => {
 
                 let publication_info = "";
                 if (node.data.publication_authors) {
-                    publication_info += `${node.data.publication_authors} (published ${node.data.publication_date})`;
+                    publication_info += `${node.data.publication_authors}`;
                 } else {
                     if (node.type == "surface") {
                         publication_info += `This dataset is unpublished. It was created by ${node.data.creator_name}.`;
@@ -289,6 +302,16 @@ const currentPage = computed({
     }
 });
 
+const orderBy = computed({
+    get() {
+        return _orderBy.value;
+    },
+    set(value) {
+        _orderBy.value = value;
+        reload();
+    }
+});
+
 const pageSize = computed({
     get() {
         return _pageSize.value;
@@ -310,6 +333,7 @@ const searchUrl = computed(() => {
 
     queryParams.set("search", _searchTerm.value);  // empty string -> no search
     queryParams.set("category", _category.value);
+    queryParams.set("order_by", _orderBy.value);
     queryParams.set("sharing_status", _sharingStatus.value);
     queryParams.set('page_size', _pageSize.value);
     queryParams.set('page', currentPage.value);
@@ -459,7 +483,7 @@ function createSurface() {
                 </label>
             </div>
         </div>
-        <div class="col-md-8">
+        <div class="col-md-4">
             <b-pagination v-model="currentPage"
                           :disabled="_isLoading"
                           :limit="9"
@@ -472,6 +496,14 @@ function createSurface() {
                 <b-form-select v-model="pageSize"
                                :disabled="_isLoading"
                                :options="[10, 25, 50, 100]">
+                </b-form-select>
+            </b-input-group>
+        </div>
+        <div class="col-md-4">
+            <b-input-group prepend="Sort by">
+                <b-form-select v-model="orderBy"
+                               :disabled="_isLoading"
+                               :options="orderByFilterChoices">
                 </b-form-select>
             </b-input-group>
         </div>
