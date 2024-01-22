@@ -15,6 +15,8 @@
 import $ from 'jquery';
 import axios from "axios";
 
+import {BPagination} from "bootstrap-vue-next";
+
 import {createTree} from 'jquery.fancytree';
 
 import 'jquery.fancytree/dist/modules/jquery.fancytree.glyph';
@@ -25,7 +27,8 @@ import Basket from './Basket.vue';
 export default {
     name: 'search-results',
     components: {
-        Basket
+        Basket,
+        BPagination
     },
     props: {
         baseUrls: Object,
@@ -430,6 +433,10 @@ export default {
 
     <div class="row">
         <div class="col-md-8">
+            <b-pagination v-model="_currentPage"
+                          :total-rows="_numItems"
+                          :per-page="_pageSize">
+            </b-pagination>
             <nav aria-label="Pagination">
                 <ul id="pagination" class="pagination">
                     <li class="page-item" v-bind:class="{ disabled: _currentPage <= 1 }">
