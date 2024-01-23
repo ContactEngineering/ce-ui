@@ -1,5 +1,9 @@
 # Changelog for plugin *ce-ui*
 
+## 1.6.1 (not yet released)
+
+- MAINT: Adding gitignore
+
 ## 1.6.0 (2024-01-22)
 
 - ENH: Select search order
