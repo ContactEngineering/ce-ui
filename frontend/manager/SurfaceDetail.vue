@@ -23,8 +23,9 @@ import {ccLicenseInfo} from "../utils/data";
 
 import BandwidthPlot from './BandwidthPlot.vue';
 import DropZone from '../components/DropZone.vue';
-import SurfaceProperties from './SurfaceProperties.vue';
+import SurfaceDescription from './SurfaceDescription.vue';
 import SurfacePermissions from './SurfacePermissions.vue';
+import SurfaceProperties from './SurfaceProperties.vue';
 import TopographyCard from "./TopographyCard.vue";
 import TopographyPropertiesCard from "./TopographyPropertiesCard.vue";
 
@@ -354,13 +355,20 @@ const allSelected = computed({
                             </b-card-body>
                         </b-card>
                     </b-tab>
-                    <b-tab title="Properties">
-                        <surface-properties v-if="_surface != null"
+                    <b-tab title="Description">
+                        <surface-description v-if="_surface != null"
                                             :surface-url="_surface.url"
                                             :name="_surface.name"
                                             :description="_surface.description"
                                             :category="_surface.category"
                                             :tags="_surface.tags"
+                                            :permission="_permissions.current_user.permission">
+                        </surface-description>
+                    </b-tab>
+                    <b-tab title="Properties">
+                        <surface-properties v-if="_surface != null"
+                                            :surface-url="_surface.url"
+                                            :properties="_surface.properties"
                                             :permission="_permissions.current_user.permission">
                         </surface-properties>
                     </b-tab>

@@ -1,157 +1,173 @@
-<script>
-
+<script setup>
+import {BCard, BCardBody, BButton, BButtonGroup, BSpinner, BFormInput, BAlert} from 'bootstrap-vue-next';
+import {ref, computed} from 'vue';
 import axios from "axios";
+import cloneDeep from 'lodash/cloneDeep';
 
-import {
-    BAlert, BButton, BButtonGroup, BCard, BCardBody, BForm, BFormGroup, BFormInput, BFormSelect, BFormTags,
-    BFormTextarea, BSpinner
-} from 'bootstrap-vue-next';
+const props = defineProps({
+    surfaceUrl: String,
+    properties: String,
+    permission: String
+});
 
-export default {
-    name: 'surface-properties',
-    components: {
-        BAlert,
-        BButton,
-        BButtonGroup,
-        BCard,
-        BCardBody,
-        BForm,
-        BFormGroup,
-        BFormInput,
-        BFormSelect,
-        BFormTags,
-        BFormTextarea,
-        BSpinner
-    },
-    props: {
-        category: String,
-        description: String,
-        name: String,
-        permission: String,
-        surfaceUrl: String,
-        tags: Object
-    },
-    data() {
-        return {
-            _category: this.category,
-            _description: this.description,
-            _editing: false,
-            _error: null,
-            _name: this.name,
-            _options: [
-                {value: 'exp', text: 'Experimental data'},
-                {value: 'sim', text: 'Simulated data'},
-                {value: 'dum', text: 'Dummy data'},
-            ],
-            _savedDescription: this.description,
-            _savedName: this.name,
-            _saving: false,
-            _tags: this.tags
-        }
-    },
-    methods: {
-        saveCard() {
-            this._editing = false;
-            this._saving = true;
-            axios.patch(this.surfaceUrl, {
-                name: this._name,
-                description: this._description,
-                category: this._category,
-                tags: this._tags
-            }).then(response => {
-                this._error = null;
-                this.$emit('surface-updated', response.data);
-            }).catch(error => {
-                this._error = error;
-                this._name = this._savedName;
-                this._description = this._saveDescription;
-            }).finally(() => {
-                this._saving = false;
-            });
-        }
-    },
-    computed: {
-        isEditable() {
-            return this.permission !== 'view';
-        }
+let properties = ref(JSON.parse(props.properties));
+// this is used as backup of the current properties,
+let _properties = ref([]);
+let editMode = ref(false);
+let saving = ref(false);
+let warnings = ref([]);
+let messages = ref([]);
+
+const showWarning = (msg) => {
+    messages.value.push({type: 'warning', visible: true, content: msg});
+}
+
+const showError = (msg) => {
+    messages.value.push({type: 'danger', visible: true, content: msg});
+}
+
+const enterEditMode = () => {
+    editMode.value = true;
+    // backup properties before edit
+    _properties.value = cloneDeep(properties.value);
+}
+
+const discardChanges = () => {
+    // restore properties
+    properties.value = cloneDeep(_properties.value);
+    editMode.value = false;
+}
+
+const saveChanges = () => {
+    // Check for empty names and give warning
+    if (properties.value.filter((property) => property.name === "").length > 0) {
+        showWarning("The property name can not be empty");
     }
-};
+    // Check for empty values and give warning
+    if (properties.value.filter((property) => property.value === "").length > 0) {
+        showWarning("The property value can not be empty");
+    }
+    // Remove Properties with empty names of empty values
+    properties.value = properties.value.filter((property) => !(property.name === "" || property.value === ""));
+
+    // Patch request to store json String
+    // This is just a prove of concept, we should probably save the data in a safer structure...
+
+    console.log("Saving: " + JSON.stringify(properties.value));
+    console.log(props.surfaceUrl)
+    saving.value = true;
+    axios.patch(props.surfaceUrl, {
+        properties: JSON.stringify(properties.value)
+    }).then(response => {
+        editMode.value = false;
+    }).catch(error => {
+        showError("A Error occurred: " + error.message)
+    }).finally(() => {
+        saving.value = false;
+    });
+}
+
+const addProperty = () => {
+    // Enter editMode
+    if (!editMode.value) {
+        enterEditMode();
+    }
+    // Add new empty property if there is no empty last property
+    const len = properties.value.length;
+    if (len === 0 || (properties.value[len - 1].name != '' && properties.value[len - 1].value != '')) {
+        properties.value.push({name: "", value: ""});
+    }
+}
+
+const removeProperty = (n) => {
+    if (n >= 0 && n < properties.value.length) {
+        properties.value.splice(n, 1);
+    } else {
+        console.error('Invalid index');
+    }
+}
+
+const isEditable = computed(() => {
+    return ['edit', 'full'].includes(props.permission);
+})
+
 </script>
 
 <template>
     <b-card>
         <template #header>
-            <h5 class="float-start">Properties</h5>
-            <b-button-group v-if="!_editing && !_saving && isEditable"
-                            class="float-end"
-                            size="sm">
-                <b-button variant="outline-secondary"
-                          @click="_savedName = `${_name}`; _savedDescription = `${_description}`; _editing = true">
+            <div class="d-flex">
+                <h5 class="flex-grow-1">Properties</h5>
+                <b-button size="sm" v-if="!editMode && isEditable" @click="enterEditMode" variant="outline-secondary">
                     <i class="fa fa-pen"></i>
                 </b-button>
-            </b-button-group>
-            <b-button-group v-if="_editing || _saving"
-                            class="float-end"
-                            size="sm">
-                <b-button v-if="_editing"
-                          variant="danger"
-                          @click="_editing = false; _name = _savedName; _description = _savedDescription">
-                    Discard
-                </b-button>
-                <b-button variant="success"
-                          @click="saveCard">
-                    <b-spinner small v-if="_saving"></b-spinner>
-                    SAVE
-                </b-button>
-            </b-button-group>
+                <b-button-group v-else-if="isEditable" size="sm">
+                    <b-button v-if="!saving" @click="discardChanges" variant="danger">
+                        Discard
+                    </b-button>
+                    <b-button @click="saveChanges" variant="success">
+                        <b-spinner v-if="saving" small />
+                        SAVE
+                    </b-button>
+                </b-button-group>
+            </div>
         </template>
         <b-card-body>
-            <b-alert :model-value="_error !== null"
-                     variant="danger">
-                {{ _error.message }}
-            </b-alert>
-            <b-form>
-                <b-form-group id="input-group-name"
-                              label="Name"
-                              label-for="input-name"
-                              description="A short, descriptive name for this digital surface twin">
-                    <b-form-input id="input-name"
-                                  v-model="_name"
-                                  placeholder="Please enter a name here"
-                                  :disabled="!_editing">
-                    </b-form-input>
-                </b-form-group>
-                <b-form-group id="input-group-description"
-                              label="Description"
-                              label-for="input-description"
-                              description="Arbitrary descriptive text, ideally including information on specimen preparation, measurement conditions, etc.">
-                    <b-form-textarea id="input-description"
-                                     v-model="_description"
-                                     placeholder="Please enter a description here"
-                                     rows="10"
-                                     :disabled="!_editing">
-                    </b-form-textarea>
-                </b-form-group>
-                <b-form-group id="input-group-category"
-                              label="Category"
-                              label-for="input-category"
-                              description="Please indicate the category of the data contained in this digital surface twin.">
-                    <b-form-select id="input-category"
-                                   v-model="_category"
-                                   :options="_options"
-                                   :disabled="!_editing">
-                    </b-form-select>
-                </b-form-group>
-                <b-form-group id="input-group-tags"
-                              label="Tags"
-                              label-for="input-tags"
-                              description="Attach arbitrary tags (labels) to this digital surface twin. Tags can be hierachical (like a directory structure); separate hierarchies with a /, e.g. 'bear/foot/nail' may indicate a set of topography scans on the nail of a bear foot.">
-                    <b-form-tags id="input-tags"
-                                   v-model="_tags"
-                                   :disabled="!_editing">
-                    </b-form-tags>
-                </b-form-group>
-            </b-form>
+            <div class="border rounded-3 mb-3 p-3">
+                <div class="d-flex" v-for="(property, index) in properties">
+                    <div class="flex-shrink-1 d-flex">
+                        <b-button v-if="editMode" @click="removeProperty(index)" class="m-1 align-self-center" size="sm"
+                                  variant="danger" title="remove property">
+                            <i class="fa fa-minus"></i>
+                        </b-button>
+                        <i v-else class="p-2 align-self-center fa fa-bars"></i>
+                    </div>
+                    <div class="w-25 d-flex ms-1">
+                        <b-form-input v-if="editMode" size="sm" placeholder="Property name" class="align-self-center"
+                                      v-model="property.name"></b-form-input>
+                        <div v-else class="p-2">
+                            <span v-if="property.name===''" class="fw-lighter">
+                                Property name
+                            </span>
+                            <span v-else>{{ property.name }} </span>
+                        </div>
+                    </div>
+                    <div class="d-flex ms-1">
+                        <b-form-input v-if="editMode" size="sm" placeholder="Property value" class="align-self-center"
+                                      v-model="property.value"></b-form-input>
+                        <div v-else class="p-2">
+                            <span v-if="property.value===''" class="fw-lighter">Property value</span>
+                            <span v-else> {{ property.value }} </span>
+                        </div>
+                    </div>
+                </div>
+                <div v-if="isEditable" @click="addProperty" class="d-flex highlight-on-hover rounded-3">
+                    <div class="p-2 flex-shrink-1">
+                        <i class="fa fa-plus"></i>
+                    </div>
+                    <div class="w-25 p-2">
+                        Add property
+                    </div>
+                </div>
+            </div>
+            <div v-for="message in messages">
+                <b-alert v-model="message.visible" dismissible :variant="message.type">
+                    {{ message.content }}
+                </b-alert>
+            </div>
         </b-card-body>
     </b-card>
 </template>
+
+<style scoped>
+.highlight-on-hover {
+    border: 1px solid rgba(0, 0, 0, 0);
+    transition: background-color 0.3s; /* Optional: Add a smooth transition effect */
+}
+
+.highlight-on-hover:hover {
+    border: 1px solid #000000;
+    background: var(--bs-secondary-bg-subtle);
+    cursor: pointer;
+}
+</style>
