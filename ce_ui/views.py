@@ -314,7 +314,7 @@ class SurfaceDetailView(TemplateView):
                 'icon': "gem",
                 'icon_style_prefix': 'far',
                 'href': f"{reverse('ce_ui:surface-detail')}?surface={surface.pk}",
-                'active': False,
+                'active': True,
                 'tooltip': f"Properties of surface '{surface.label}'"
             }
         ]
