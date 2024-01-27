@@ -10,8 +10,8 @@ const props = defineProps({
     permission: String
 });
 
-let properties = ref(JSON.parse(props.properties));
-// this is used as backup of the current properties,
+// let props.properties = ref(JSON.parse(props.properties));
+// this is used as backup of the current props.properties,
 let _properties = ref([]);
 let editMode = ref(false);
 let saving = ref(false);
@@ -28,36 +28,34 @@ const showError = (msg) => {
 
 const enterEditMode = () => {
     editMode.value = true;
-    // backup properties before edit
-    _properties.value = cloneDeep(properties.value);
+    // backup props.properties before edit
+    _properties = cloneDeep(props.properties);
 }
 
 const discardChanges = () => {
-    // restore properties
-    properties.value = cloneDeep(_properties.value);
+    // restore props.properties
+    props.properties = []; //cloneDeep(_properties.value);
     editMode.value = false;
 }
 
 const saveChanges = () => {
     // Check for empty names and give warning
-    if (properties.value.filter((property) => property.name === "").length > 0) {
+    if (props.properties.filter((property) => property.name === "").length > 0) {
         showWarning("The property name can not be empty");
     }
     // Check for empty values and give warning
-    if (properties.value.filter((property) => property.value === "").length > 0) {
+    if (props.properties.filter((property) => property.value === "").length > 0) {
         showWarning("The property value can not be empty");
     }
-    // Remove Properties with empty names of empty values
-    properties.value = properties.value.filter((property) => !(property.name === "" || property.value === ""));
+    // Remove props.properties with empty names of empty values
+    props.properties = props.properties.filter((property) => !(property.name === "" || property.value === ""));
 
     // Patch request to store json String
     // This is just a prove of concept, we should probably save the data in a safer structure...
 
-    console.log("Saving: " + JSON.stringify(properties.value));
-    console.log(props.surfaceUrl)
     saving.value = true;
     axios.patch(props.surfaceUrl, {
-        properties: JSON.stringify(properties.value)
+       'properties': props.properties
     }).then(response => {
         editMode.value = false;
     }).catch(error => {
@@ -73,15 +71,15 @@ const addProperty = () => {
         enterEditMode();
     }
     // Add new empty property if there is no empty last property
-    const len = properties.value.length;
-    if (len === 0 || (properties.value[len - 1].name != '' && properties.value[len - 1].value != '')) {
-        properties.value.push({name: "", value: ""});
+    const len = props.properties.length;
+    if (len === 0 || (props.properties[len - 1].name != '' && props.properties[len - 1].value != '')) {
+        props.properties.push({name: "", value: ""});
     }
 }
 
 const removeProperty = (n) => {
-    if (n >= 0 && n < properties.value.length) {
-        properties.value.splice(n, 1);
+    if (n >= 0 && n < props.properties.length) {
+        props.properties.splice(n, 1);
     } else {
         console.error('Invalid index');
     }
@@ -94,6 +92,7 @@ const isEditable = computed(() => {
 </script>
 
 <template>
+    {{ props.properties }} 
     <b-card>
         <template #header>
             <div class="d-flex">
@@ -114,7 +113,7 @@ const isEditable = computed(() => {
         </template>
         <b-card-body>
             <div class="border rounded-3 mb-3 p-3">
-                <div class="d-flex" v-for="(property, index) in properties">
+                <div class="d-flex" v-for="(property, index) in props.properties">
                     <div class="flex-shrink-1 d-flex">
                         <b-button v-if="editMode" @click="removeProperty(index)" class="m-1 align-self-center" size="sm"
                                   variant="danger" title="remove property">
