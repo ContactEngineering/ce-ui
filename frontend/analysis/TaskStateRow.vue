@@ -144,12 +144,10 @@ export default {
                 </span>
             </p>
             <p v-if="_analysis.task_state == 'fa'">
-                This task was created on {{ new Date(_analysis.creation_time) }},
-                started running {{ new Date(_analysis.start_time) }}
-                but failed.
-                <span v-if="_error != null">
-            with message: <i>{{ _error }}</i>
-          </span>
+                <span><b>Created on:</b> {{ new Date(_analysis.creation_time) }}
+                    &#8212; <b>Started at:</b> {{ new Date(_analysis.start_time) }}
+                    &#8212; <b>Error message:</b> {{ _error }}
+                </span>
             </p>
             <p v-if="_analysis.task_state == 'pe'">
                 This task was created on {{ new Date(_analysis.creation_time) }} and is currently waiting to be started.
