@@ -1,7 +1,8 @@
 # Changelog for plugin *ce-ui*
 
-## 1.6.1 (not yet released)
+## 1.6.1 (2024-01-30)
 
+- MAINT: Cosmetic fixes to the user interface
 - MAINT: Adding gitignore
 
 ## 1.6.0 (2024-01-22)
