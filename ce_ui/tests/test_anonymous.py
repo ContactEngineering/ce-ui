@@ -13,7 +13,7 @@ from termsandconditions.models import TermsAndConditions
 
 
 @pytest.mark.django_db
-def test_anonymous_user_only_published_as_default(client):
+def test_anonymous_user_only_published_as_default(client, orcid_socialapp):
     response = client.get(reverse('ce_ui:select'))
     assert_not_in_content(response, 'All accessible datasets')
     assert_not_in_content(response, 'Only own datasets')
@@ -24,7 +24,7 @@ def test_anonymous_user_only_published_as_default(client):
 
 
 @pytest.mark.django_db
-def test_terms_conditions_as_anonymous(client, handle_usage_statistics):
+def test_terms_conditions_as_anonymous(client, handle_usage_statistics, orcid_socialapp):
     # Install terms and conditions for test
     TermsAndConditions.objects.create(slug='test-terms', name="Test of T&amp;C",
                                       text="some text", date_active=timezone.now())
