@@ -31,13 +31,6 @@ def test_instances(test_analysis_function):
 
 @pytest.mark.django_db
 def test_welcome_page_statistics(client, test_instances, handle_usage_statistics, orcid_socialapp):
-    from allauth.socialaccount.models import SocialApp
-    print(SocialApp.objects.all())
-
-    from topobank.users.adapters import SocialAccountAdapter
-    adapter = SocialAccountAdapter()
-    l = adapter.list_apps(None, 'orcid')
-
     (user_1, user_2), (surface_1, surface_2), (topography_1,) = test_instances
     surface_2.share(user_2)
 

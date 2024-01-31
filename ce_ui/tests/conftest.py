@@ -1,8 +1,6 @@
 import pytest
 
-from django import template
-
-register = template.Library()
+from allauth.socialaccount.models import SocialApp
 
 from topobank.fixtures import handle_usage_statistics, sync_analysis_functions, test_analysis_function  # noqa: F401
 from topobank.manager.tests.utils import two_topos, user_three_topographies_three_surfaces_three_tags, \
@@ -23,6 +21,5 @@ def user_with_plugin():
 @pytest.mark.django_db
 @pytest.fixture
 def orcid_socialapp():
-    from allauth.socialaccount.models import SocialApp
     social_app = SocialApp.objects.create(provider='orcid', name='ORCID')
     social_app.sites.set([1])
