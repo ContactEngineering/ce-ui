@@ -110,7 +110,7 @@ function getOriginalSurfaceId() {
 
 function updateCard() {
     /* Fetch JSON describing the card */
-    axios.get(`${props.surfaceUrl}?children=yes&permissions=yes`).then(response => {
+    axios.get(`${props.surfaceUrl}?children=yes&permissions=yes&properties=yes`).then(response => {
         _surface.value = response.data;
         _permissions.value = response.data.permissions;
         _topographies.value = response.data.topography_set;
