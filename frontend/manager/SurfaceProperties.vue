@@ -1,29 +1,30 @@
 <script setup>
-import {BCard, BCardBody, BButton, BButtonGroup, BSpinner, BFormInput, BAlert} from 'bootstrap-vue-next';
-import {ref, computed} from 'vue';
+import { BCard, BCardBody, BButton, BButtonGroup, BSpinner, BFormInput, BAlert } from 'bootstrap-vue-next';
+import { ref, computed } from 'vue';
 import axios from "axios";
 import cloneDeep from 'lodash/cloneDeep';
 
+
 const props = defineProps({
     surfaceUrl: String,
-    properties: String,
+    properties: Array,
     permission: String
 });
 
+console.log(props.properties)
 // let props.properties = ref(JSON.parse(props.properties));
 // this is used as backup of the current props.properties,
 let _properties = ref([]);
 let editMode = ref(false);
 let saving = ref(false);
-let warnings = ref([]);
 let messages = ref([]);
 
 const showWarning = (msg) => {
-    messages.value.push({type: 'warning', visible: true, content: msg});
+    messages.value.push({ type: 'warning', visible: true, content: msg });
 }
 
 const showError = (msg) => {
-    messages.value.push({type: 'danger', visible: true, content: msg});
+    messages.value.push({ type: 'danger', visible: true, content: msg });
 }
 
 const enterEditMode = () => {
@@ -50,13 +51,14 @@ const saveChanges = () => {
     // Remove props.properties with empty names of empty values
     props.properties = props.properties.filter((property) => !(property.name === "" || property.value === ""));
 
-    // Patch request to store json String
-    // This is just a prove of concept, we should probably save the data in a safer structure...
-
     saving.value = true;
-    axios.patch(props.surfaceUrl, {
-       'properties': props.properties
-    }).then(response => {
+    props.properties.forEach(element => {
+        console.log(element.name)
+    });
+
+    axios.post(props.surfaceUrl, {
+        'properties': props.properties
+    }).then(_response => {
         editMode.value = false;
     }).catch(error => {
         showError("A Error occurred: " + error.message)
@@ -73,7 +75,7 @@ const addProperty = () => {
     // Add new empty property if there is no empty last property
     const len = props.properties.length;
     if (len === 0 || (props.properties[len - 1].name != '' && props.properties[len - 1].value != '')) {
-        props.properties.push({name: "", value: ""});
+        props.properties.push({ name: "", value: "" });
     }
 }
 
@@ -89,10 +91,14 @@ const isEditable = computed(() => {
     return ['edit', 'full'].includes(props.permission);
 })
 
+function isNumeric(property) {
+    return /^-?\d*\.?\d+$/.test(property.value);
+}
+
+
 </script>
 
 <template>
-    {{ props.properties }} 
     <b-card>
         <template #header>
             <div class="d-flex">
@@ -116,27 +122,35 @@ const isEditable = computed(() => {
                 <div class="d-flex" v-for="(property, index) in props.properties">
                     <div class="flex-shrink-1 d-flex">
                         <b-button v-if="editMode" @click="removeProperty(index)" class="m-1 align-self-center" size="sm"
-                                  variant="danger" title="remove property">
+                            variant="danger" title="remove property">
                             <i class="fa fa-minus"></i>
                         </b-button>
                         <i v-else class="p-2 align-self-center fa fa-bars"></i>
                     </div>
                     <div class="w-25 d-flex ms-1">
                         <b-form-input v-if="editMode" size="sm" placeholder="Property name" class="align-self-center"
-                                      v-model="property.name"></b-form-input>
+                            v-model="property.name"></b-form-input>
                         <div v-else class="p-2">
-                            <span v-if="property.name===''" class="fw-lighter">
+                            <span v-if="property.name === ''" class="fw-lighter">
                                 Property name
                             </span>
                             <span v-else>{{ property.name }} </span>
                         </div>
                     </div>
-                    <div class="d-flex ms-1">
+                    <div class="w-25 d-flex ms-1">
                         <b-form-input v-if="editMode" size="sm" placeholder="Property value" class="align-self-center"
-                                      v-model="property.value"></b-form-input>
+                            v-model="property.value"></b-form-input>
                         <div v-else class="p-2">
-                            <span v-if="property.value===''" class="fw-lighter">Property value</span>
+                            <span v-if="property.value === ''" class="fw-lighter">Property value</span>
                             <span v-else> {{ property.value }} </span>
+                        </div>
+                    </div>
+                    <div v-if="isNumeric(property)" class="d-flex ms-1">
+                        <b-form-input v-if="editMode" size="sm" placeholder="dimensionless" class="align-self-center"
+                            v-model="property.unit"></b-form-input>
+                        <div v-else class="p-2">
+                            <span v-if="property.unit === ''" class="fw-lighter"></span>
+                            <span v-else> [{{ property.unit }}] </span>
                         </div>
                     </div>
                 </div>
@@ -161,7 +175,7 @@ const isEditable = computed(() => {
 <style scoped>
 .highlight-on-hover {
     border: 1px solid rgba(0, 0, 0, 0);
-    transition: background-color 0.3s; /* Optional: Add a smooth transition effect */
+    transition: background-color 0.3s;
 }
 
 .highlight-on-hover:hover {
