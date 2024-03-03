@@ -33,6 +33,12 @@ let added = ref([]);
 
 let messages = ref([]);
 
+let formIsValid = computed(() => {
+    return props.properties.every((property) => {
+        return property.name != "" && property.value != "";
+    })
+});
+
 const showWarning = (msg) => {
     messages.value.push({ type: 'warning', visible: true, content: msg });
 }
@@ -184,7 +190,7 @@ const save = () => {
                     <b-button v-if="state === 'edit'" @click="discardChanges" variant="danger">
                         Discard
                     </b-button>
-                    <b-button @click="save" variant="success">
+                    <b-button :disabled="!formIsValid" @click="save" variant="success">
                         <b-spinner v-if="state === 'save'" small />
                         SAVE
                     </b-button>
