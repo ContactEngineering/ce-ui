@@ -64,7 +64,7 @@ const addProperty = () => {
     const len = props.properties.length;
     if (len === 0 || (props.properties[len - 1].name != '' && props.properties[len - 1].value != '')) {
         added.value.push(props.properties.length);
-        props.properties.push({ name: "", value: "", surface: surfaceUrl});
+        props.properties.push({ name: "", value: "", surface: surfaceUrl });
     }
 }
 
@@ -77,7 +77,7 @@ const editProperty = (index) => {
 const deleteProperty = (index) => {
     if (index < backup_properties.length) {
         deleted.value.push(index);
-    }else {
+    } else {
         props.properties.splice(index, 1);
         added.value = added.value.filter((idx) => {
             return idx != index;
@@ -89,8 +89,8 @@ const deleteProperty = (index) => {
 }
 
 const syncPropertyCreate = (index) => {
-    const property = {...props.properties[index]};
-    axios.post('/manager/api/property/', {...property}).catch(error => {
+    const property = { ...props.properties[index] };
+    axios.post('/manager/api/property/', { ...property }).catch(error => {
         showError(`A Error occurred: ${error.message}`);
         console.log(error);
         props.properties.splice(index, 1);
@@ -102,7 +102,7 @@ const syncPropertyCreate = (index) => {
 }
 
 const syncPropertyDelete = (index) => {
-    const property = {...props.properties[index]};
+    const property = { ...props.properties[index] };
     axios.delete(property.url).catch(error => {
         showError(`A Error occurred: ${error.message}`);
         console.log(error);
@@ -114,9 +114,9 @@ const syncPropertyDelete = (index) => {
     });
 }
 const syncPropertyUpdate = (index) => {
-    const property = {...props.properties[index]};
+    const property = { ...props.properties[index] };
     // numeric -> categorical
-    if (isNumeric(backup_properties[index]) && !isNumeric(property)){
+    if (isNumeric(backup_properties[index]) && !isNumeric(property)) {
         delete property.unit;
     }
     axios.put(property.url, {
@@ -142,6 +142,7 @@ const enterEditMode = () => {
 const discardChanges = () => {
     deleted.value = [];
     edited.value = [];
+    added.value = [];
     props.properties.splice(backup_properties.length);
     for (let index = 0; index < props.properties.length; index++) {
         props.properties[index] = backup_properties[index];
@@ -162,10 +163,10 @@ const save = () => {
     }
     // cleanup data
     for (let index = 0; index < props.properties.length; index++) {
-        if (isNumeric(props.properties[index] )){
+        if (isNumeric(props.properties[index])) {
             props.properties[index].value = parseFloat(props.properties[index].value);
-            if (props.properties[index] .unit == null){
-                props.properties[index] .unit = "";
+            if (props.properties[index].unit == null) {
+                props.properties[index].unit = "";
             }
         }
     }
@@ -198,9 +199,6 @@ const save = () => {
             </div>
         </template>
         <b-card-body>
-            edited: {{ edited }} <br>
-            deleted: {{ deleted }} <br>
-            added: {{ added }}
             <div class="border rounded-3 mb-3 p-3">
                 <div class="d-flex">
 
@@ -226,8 +224,8 @@ const save = () => {
                 <div v-for="(property, index) in props.properties" :key="property.url">
                     <div v-if="!deleted.includes(index)" class="d-flex">
                         <div class="flex-shrink-1 d-flex">
-                            <b-button v-if="state === 'edit'" @click="deleteProperty(index)" class="m-1 align-self-center"
-                                size="sm" variant="danger" title="remove property">
+                            <b-button v-if="state === 'edit'" @click="deleteProperty(index)"
+                                class="m-1 align-self-center" size="sm" variant="danger" title="remove property">
                                 <i class="fa fa-minus"></i>
                             </b-button>
                             <i v-else class="p-2 align-self-center fa fa-bars"></i>
@@ -261,7 +259,8 @@ const save = () => {
                                 <span v-else> [{{ property.unit }}] </span>
                             </div>
                         </div>
-                        <i v-if="edited.includes(index) || added.includes(index)" class="p-2 align-self-center fa fa-upload"></i>
+                        <i v-if="edited.includes(index) || added.includes(index)"
+                            class="p-2 align-self-center fa fa-upload"></i>
                     </div>
                 </div>
                 <div v-if="isEditable" @click="addProperty" class="d-flex highlight-on-hover rounded-3">
@@ -292,4 +291,5 @@ const save = () => {
     border: 1px solid #000000;
     background: var(--bs-secondary-bg-subtle);
     cursor: pointer;
-}</style>
+}
+</style>
