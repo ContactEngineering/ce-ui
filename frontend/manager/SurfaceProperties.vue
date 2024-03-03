@@ -196,6 +196,27 @@ const save = () => {
             deleted: {{ deleted }} <br>
             added: {{ added }}
             <div class="border rounded-3 mb-3 p-3">
+                <div class="d-flex">
+
+                    <div class="flex-shrink-1 d-flex">
+                        <i class="p-2 align-self-center fa-solid fa-hashtag"></i>
+                    </div>
+                    <div class="w-25 d-flex ms-1 p-2">
+                        <span class="fw-bold">
+                            key
+                        </span>
+                    </div>
+                    <div class="w-25 d-flex ms-1 p-2">
+                        <span class="fw-bold">
+                            value
+                        </span>
+                    </div>
+                    <div class="d-flex ms-1 p-2">
+                        <span class="fw-bold">
+                            unit
+                        </span>
+                    </div>
+                </div>
                 <div v-for="(property, index) in props.properties" :key="property.url">
                     <div v-if="!deleted.includes(index)" class="d-flex">
                         <div class="flex-shrink-1 d-flex">
