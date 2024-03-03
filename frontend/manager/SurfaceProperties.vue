@@ -188,6 +188,7 @@ const save = () => {
                     <i class="fa fa-pen"></i>
                 </b-button>
                 <b-button-group v-else-if="isEditable" size="sm">
+                    <span :hidden="formIsValid" class="fst-italic me-5 align-self-center"> (Saving disabled. Empty key's or values' are not allowed) </span>
                     <b-button v-if="state === 'edit'" @click="discardChanges" variant="danger">
                         Discard
                     </b-button>
