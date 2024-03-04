@@ -2,7 +2,6 @@
 import { BCard, BCardBody, BButton, BButtonGroup, BSpinner, BFormInput, BAlert } from 'bootstrap-vue-next';
 import { ref, computed } from 'vue';
 import axios from "axios";
-import cloneDeep from 'lodash/cloneDeep';
 
 
 const props = defineProps({
@@ -30,6 +29,8 @@ let deleted = ref([]);
 let edited = ref([]);
 //this array hold the indexes of the added properties
 let added = ref([]);
+// count the number of async jobs
+let jobs = ref(0);
 
 let messages = ref([]);
 
@@ -37,6 +38,27 @@ let formIsValid = computed(() => {
     return props.properties.every((property) => {
         return property.name != "" && property.value != "";
     })
+});
+
+const cleanUpAfterSave = () => {
+    // clear deletion list and remove elements
+    deleted.value.sort(function (a, b) {
+        return b - a;
+    });
+    deleted.value.forEach(index => {
+        props.properties.splice(index, 1);
+    });
+    edited.value = [];
+    added.value = [];
+    deleted.value = [];
+    state.value = 'view'
+}
+
+let inSync = computed(() => {
+    if (state.value === 'save' && jobs.value == 0) {
+        cleanUpAfterSave();
+    }
+    return jobs == 0
 });
 
 const showWarning = (msg) => {
@@ -77,11 +99,20 @@ const editProperty = (index) => {
 const deleteProperty = (index) => {
     if (index < backup_properties.length) {
         deleted.value.push(index);
-    } else {
+    } else { // added property
+        // remove prop
         props.properties.splice(index, 1);
+        // remove idx from added list
         added.value = added.value.filter((idx) => {
             return idx != index;
         })
+        // decrease each index higher than the removed
+        added.value = added.value.map((idx) => {
+            if (idx > index) {
+                return idx - 1;
+            }
+            return idx;
+        });
     }
     edited.value = edited.value.filter((idx) => {
         return idx != index;
@@ -90,29 +121,32 @@ const deleteProperty = (index) => {
 
 const syncPropertyCreate = (index) => {
     const property = { ...props.properties[index] };
-    axios.post('/manager/api/property/', { ...property }).catch(error => {
-        showError(`A Error occurred: ${error.message}`);
+    axios.post('/manager/api/property/', {
+        ...property
+    }).then(response => {
+        // this is important because the response obj contains the update url!
+        props.properties[index] = response.data
+    }).catch(error => {
+        showError(`A Error occurred while adding the property '${property.name}' : ${error.message}`);
         console.log(error);
-        props.properties.splice(index, 1);
+        deleted.value.push(index);
     }).finally(() => {
-        added.value = added.value.filter((idx) => {
-            return idx != index;
-        })
+        jobs.value--;
     });
 }
 
 const syncPropertyDelete = (index) => {
     const property = { ...props.properties[index] };
-    axios.delete(property.url).catch(error => {
-        showError(`A Error occurred: ${error.message}`);
-        console.log(error);
-        props.properties[index] = backup_properties[index];
-    }).finally(() => {
-        deleted.value = deleted.value.filter((idx) => {
-            return idx != index;
-        })
-    });
+    axios.delete(property.url)
+        .catch(error => {
+            showError(`A Error occurred while deleting the property '${property.name}' : ${error.message}`);
+            console.log(error);
+            props.properties[index] = backup_properties[index];
+        }).finally(() => {
+            jobs.value--;
+        });
 }
+
 const syncPropertyUpdate = (index) => {
     const property = { ...props.properties[index] };
     // numeric -> categorical
@@ -123,12 +157,10 @@ const syncPropertyUpdate = (index) => {
         ...property
     }).catch(error => {
         props.properties[index] = backup_properties[index];
-        showError(`A Error occurred: ${error.message}`);
+        showError(`A Error occurred updating the property '${property.name}': ${error.message}`);
         console.log(error);
     }).finally(() => {
-        edited.value = edited.value.filter((idx) => {
-            return idx != index;
-        })
+        jobs.value--;
     });
 }
 
@@ -143,7 +175,9 @@ const discardChanges = () => {
     deleted.value = [];
     edited.value = [];
     added.value = [];
+    // remove added properties
     props.properties.splice(backup_properties.length);
+    // restore the others
     for (let index = 0; index < props.properties.length; index++) {
         props.properties[index] = backup_properties[index];
     }
@@ -152,6 +186,8 @@ const discardChanges = () => {
 
 // edit -> save -> edit | view
 const save = () => {
+
+    // the state is set to view in the inSync computed prop
     state.value = 'save'
     // Check for empty names and give warning
     if (props.properties.filter((property) => property.name === "").length > 0) {
@@ -170,11 +206,11 @@ const save = () => {
             }
         }
     }
+
+    jobs.value = added.value.length + deleted.value.length + edited.value.length;
     edited.value.forEach(syncPropertyUpdate);
     deleted.value.forEach(syncPropertyDelete);
     added.value.forEach(syncPropertyCreate);
-
-    state.value = 'view';
 }
 </script>
 
@@ -188,7 +224,8 @@ const save = () => {
                     <i class="fa fa-pen"></i>
                 </b-button>
                 <b-button-group v-else-if="isEditable" size="sm">
-                    <span :hidden="formIsValid" class="fst-italic me-5 align-self-center"> (Saving disabled. Empty key's or values' are not allowed) </span>
+                    <span :hidden="formIsValid" class="fst-italic me-5 align-self-center"> (Saving disabled. Empty key's
+                        or values' are not allowed) </span>
                     <b-button v-if="state === 'edit'" @click="discardChanges" variant="danger">
                         Discard
                     </b-button>
@@ -263,8 +300,10 @@ const save = () => {
                                 <span v-else> [{{ property.unit }}] </span>
                             </div>
                         </div>
-                        <i v-if="edited.includes(index) || added.includes(index)"
-                            class="p-2 align-self-center fa fa-upload"></i>
+                        <div v-if="edited.includes(index) || added.includes(index)">
+                            <i v-if="state === 'edit'" class="p-2 align-self-center fa fa-upload"></i>
+                            <b-spinner v-else-if="state === 'save'" small />
+                        </div>
                     </div>
                 </div>
                 <div v-if="isEditable" @click="addProperty" class="d-flex highlight-on-hover rounded-3">
