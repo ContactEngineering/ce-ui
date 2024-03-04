@@ -200,7 +200,10 @@ const save = () => {
             </div>
         </template>
         <b-card-body>
-            <div class="border rounded-3 mb-3 p-3">
+            <div v-if="!isEditable && props.properties.length == 0">
+                There exist no properties for this digital surface twin yet.
+            </div>
+            <div v-else class="border rounded-3 mb-3 p-3">
                 <div class="d-flex">
 
                     <div class="flex-shrink-1 d-flex">
