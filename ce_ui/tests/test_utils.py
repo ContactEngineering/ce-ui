@@ -1,12 +1,13 @@
 import pytest
 from django.shortcuts import reverse
-
 from topobank.manager.models import Surface, Topography
-from topobank.manager.tests.utils import Topography1DFactory, Topography2DFactory, SurfaceFactory, TagFactory, \
-    UserFactory
+from topobank.manager.tests.utils import (SurfaceFactory, TagFactory,
+                                          Topography1DFactory,
+                                          Topography2DFactory, UserFactory)
 
-from ..utils import selection_to_instances, instances_to_selection, tags_for_user, \
-    instances_to_topographies, instances_to_surfaces, current_selection_as_surface_list, surface_collection_name
+from ..utils import (current_selection_as_surface_list, instances_to_selection,
+                     instances_to_surfaces, instances_to_topographies,
+                     selection_to_instances, tags_for_user)
 
 
 @pytest.fixture
@@ -25,7 +26,7 @@ def testuser(django_user_model):
 
 @pytest.mark.skip('Mocking does not seem to work properly here')
 def test_selection_to_instances(testuser, mock_topos):
-    from topobank.manager.models import Topography, Surface, Tag
+    from topobank.manager.models import Surface, Tag, Topography
 
     selection = ('topography-1', 'topography-2', 'surface-1', 'surface-3', 'tag-1', 'tag-2', 'tag-4')
     selection_to_instances(selection)
@@ -213,15 +214,3 @@ def test_related_surfaces_for_selection(rf):
     assert current_selection_as_surface_list(get_request(topographies=[topo1a],
                                                          surfaces=[surf1],
                                                          tags=[tag2])) == [surf1]
-
-
-@pytest.mark.parametrize(["surface_names", "exp_name", "max_total_length"], [
-    (["A"], "Surface 'A'", 11),
-    (["A", "B"], "Surface 'A', Surface 'B'", 30),
-    (["AAAAA"], "Surface 'AAAAA'", 15),
-    (["AAAAAA"], "Surface 'A...", 14),
-    (["AAA", "BBB", "CCCCCCCCCCCCCCCCCCCCCCCC"],
-     "Surface 'AAA', Surface 'BBB' and 1 more", 40),
-])
-def test_surface_collection_name(surface_names, exp_name, max_total_length):
-    assert surface_collection_name(surface_names, max_total_length=max_total_length) == exp_name
