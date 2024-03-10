@@ -30,7 +30,7 @@ def test_instances(test_analysis_function):
 
 
 @pytest.mark.django_db
-def test_welcome_page_statistics(client, test_instances, handle_usage_statistics):
+def test_welcome_page_statistics(client, test_instances, handle_usage_statistics, orcid_socialapp):
     (user_1, user_2), (surface_1, surface_2), (topography_1,) = test_instances
     surface_2.share(user_2)
 

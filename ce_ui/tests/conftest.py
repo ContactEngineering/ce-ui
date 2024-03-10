@@ -5,6 +5,8 @@ from topobank.manager.tests.utils import two_topos, user_three_topographies_thre
     UserFactory  # noqa: F401
 from topobank.organizations.tests.utils import OrganizationFactory
 
+from .fixtures import orcid_socialapp  # noqa: F401
+
 
 @pytest.mark.django_db
 @pytest.fixture
