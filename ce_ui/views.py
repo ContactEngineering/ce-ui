@@ -26,7 +26,7 @@ from trackstats.models import Metric, Period
 from topobank.analysis.models import AnalysisFunction
 from topobank.analysis.registry import AnalysisRegistry
 from topobank.manager.containers import write_surface_container
-from topobank.manager.models import Topography, Surface, TagModel
+from topobank.manager.models import Topography, Surface, Tag
 from topobank.manager.utils import surfaces_for_user, subjects_from_base64
 from topobank.manager.utils import get_reader_infos
 from topobank.usage_stats.utils import increase_statistics_by_date, increase_statistics_by_date_and_object, \
@@ -591,7 +591,7 @@ def set_tag_select_status(request, pk, select_status):
     """
     try:
         pk = int(pk)
-        tag = TagModel.objects.get(pk=pk)
+        tag = Tag.objects.get(pk=pk)
     except ValueError:
         raise PermissionDenied()
 

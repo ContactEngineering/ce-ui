@@ -5,7 +5,7 @@ import pytest
 from django.shortcuts import reverse
 from rest_framework.test import APIRequestFactory
 
-from topobank.manager.tests.utils import SurfaceFactory, UserFactory, Topography1DFactory, TagModelFactory
+from topobank.manager.tests.utils import SurfaceFactory, UserFactory, Topography1DFactory, TagFactory
 from topobank.utils import assert_no_form_errors
 
 from ..utils import selected_instances
@@ -161,7 +161,7 @@ def test_try_to_select_tag_but_not_allowed():
     user1 = UserFactory()
     user2 = UserFactory()
 
-    tag1 = TagModelFactory()
+    tag1 = TagFactory()
     SurfaceFactory(creator=user1, tags=[tag1])
 
     factory = APIRequestFactory()
@@ -307,8 +307,8 @@ def test_unselect_topography():
 def test_select_tag():
     user = UserFactory()
 
-    tag1 = TagModelFactory()
-    tag2 = TagModelFactory()
+    tag1 = TagFactory()
+    tag2 = TagFactory()
 
     # we use the tags, so the user is allowed to select it
     SurfaceFactory(creator=user, tags=[tag1, tag2])
@@ -351,8 +351,8 @@ def test_select_tag():
 def test_unselect_tag():
     user = UserFactory()
 
-    tag1 = TagModelFactory()
-    tag2 = TagModelFactory()
+    tag1 = TagFactory()
+    tag2 = TagFactory()
 
     # we use the tags, so the user is allowed to select it
     SurfaceFactory(creator=user, tags=[tag1, tag2])
@@ -380,7 +380,7 @@ def test_unselect_tag():
 def test_unselect_all():
     user = UserFactory()
 
-    tag1 = TagModelFactory()
+    tag1 = TagFactory()
 
     # we use the tags, so the user is allowed to select it
     surface1 = SurfaceFactory(creator=user, tags=[tag1])

@@ -6,7 +6,7 @@ from guardian.shortcuts import get_perms
 from rest_framework import serializers
 from tagulous.contrib.drf import TagRelatedManagerField
 
-from topobank.manager.models import Surface, Topography, TagModel
+from topobank.manager.models import Surface, Topography, Tag
 from topobank.manager.serializers import SurfaceSerializer, TopographySerializer
 from topobank.manager.utils import subjects_to_base64
 
@@ -237,7 +237,7 @@ class SurfaceSearchSerializer(serializers.ModelSerializer):
 
 class TagSearchSerizalizer(serializers.ModelSerializer):
     class Meta:
-        model = TagModel
+        model = Tag
         fields = ['id', 'key', 'type', 'title', 'name', 'children', 'folder', 'urls', 'selected', 'version',
                   'publication_date', 'publication_authors', 'label']
 
