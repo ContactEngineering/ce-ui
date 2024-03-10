@@ -215,7 +215,7 @@ function surfaceHrefForVersion(version) {
 function deleteSurface() {
     axios.delete(_surface.value.url).then(response => {
         emit('delete:surface', _surface.value.url);
-        window.location.href = `/ui/html/select/`;
+        window.location.href = `/ui/html/dataset-list/`;
     }).catch(error => {
         _error.value = error;
     });
