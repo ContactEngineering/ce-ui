@@ -1,7 +1,9 @@
 <script setup>
-import { BCard, BCardBody, BButton, BButtonGroup, BSpinner, BFormInput, BAlert } from 'bootstrap-vue-next';
-import { ref, computed } from 'vue';
+
 import axios from "axios";
+import {ref, computed} from 'vue';
+
+import {BCard, BCardBody, BButton, BButtonGroup, BSpinner, BFormInput, BAlert} from 'bootstrap-vue-next';
 
 
 const props = defineProps({
@@ -11,28 +13,28 @@ const props = defineProps({
 });
 
 
-const copyProperties = () => {
+function copyProperties() {
     return props.properties.map(property => {
-        return { ...property }
+        return {...property}
     });
 }
 
 
 // this var holds the sate of the editor: view | edit | save
-let state = ref('view');
+let _isEditing = ref(false);
+// count the number of async save jobs
+let _nbSaveJobs = ref(0);
 // this array holds a backup of the currenty "up to date" properties
 // when the state changes this array shall be updated
-let backup_properties = copyProperties();
+let _backupProperties = copyProperties();
 // this array holds the indexes of the propertie to delet when saved
-let deleted = ref([]);
+let _deleted = ref([]);
 // this array holds the indexes of the changed properties, no index shall be in edited and deleted
-let edited = ref([]);
+let _edited = ref([]);
 //this array hold the indexes of the added properties
-let added = ref([]);
-// count the number of async jobs
-let jobs = ref(0);
+let _added = ref([]);
 
-let messages = ref([]);
+let _messages = ref([]);
 
 let formIsValid = computed(() => {
     return props.properties.every((property) => {
@@ -40,33 +42,33 @@ let formIsValid = computed(() => {
     })
 });
 
-const cleanUpAfterSave = () => {
+function cleanUpAfterSave() {
     // clear deletion list and remove elements
-    deleted.value.sort(function (a, b) {
+    _deleted.value.sort(function (a, b) {
         return b - a;
     });
-    deleted.value.forEach(index => {
+    _deleted.value.forEach(index => {
         props.properties.splice(index, 1);
     });
-    edited.value = [];
-    added.value = [];
-    deleted.value = [];
-    state.value = 'view'
+    _edited.value = [];
+    _added.value = [];
+    _deleted.value = [];
+    _isEditing.value = false;
 }
 
-let inSync = computed(() => {
-    if (state.value === 'save' && jobs.value == 0) {
+function saveJobFinished() {
+    _nbSaveJobs.value--;
+    if (_nbSaveJobs.value === 0) {
         cleanUpAfterSave();
     }
-    return jobs == 0
-});
-
-const showWarning = (msg) => {
-    messages.value.push({ type: 'warning', visible: true, content: msg });
 }
 
-const showError = (msg) => {
-    messages.value.push({ type: 'danger', visible: true, content: msg });
+function showWarning(msg) {
+    _messages.value.push({type: 'warning', visible: true, content: msg});
+}
+
+function showError(msg) {
+    _messages.value.push({type: 'danger', visible: true, content: msg});
 }
 
 const isEditable = computed(() => {
@@ -77,118 +79,120 @@ function isNumeric(property) {
     return /^-?\d*\.?\d+$/.test(property.value);
 }
 
-const addProperty = () => {
+function addProperty() {
     // Enter state === 'edit'
-    if (!(state.value === 'edit')) {
-        enterEditMode();
-    }
+    enterEditMode();
     // Add new empty property if there is no empty last property
     const len = props.properties.length;
     if (len === 0 || (props.properties[len - 1].name != '' && props.properties[len - 1].value != '')) {
-        added.value.push(props.properties.length);
-        props.properties.push({ name: "", value: "", surface: surfaceUrl });
+        _added.value.push(props.properties.length);
+        props.properties.push({name: "", value: "", surface: surfaceUrl});
     }
 }
 
-const editProperty = (index) => {
-    if (!edited.value.includes(index) && index < backup_properties.length) {
-        edited.value.push(index);
+function editProperty(index) {
+    if (!_edited.value.includes(index) && index < _backupProperties.length) {
+        _edited.value.push(index);
     }
 }
 
-const deleteProperty = (index) => {
-    if (index < backup_properties.length) {
-        deleted.value.push(index);
+function deleteProperty(index) {
+    if (index < _backupProperties.length) {
+        _deleted.value.push(index);
     } else { // added property
         // remove prop
         props.properties.splice(index, 1);
         // remove idx from added list
-        added.value = added.value.filter((idx) => {
+        _added.value = _added.value.filter((idx) => {
             return idx != index;
         })
         // decrease each index higher than the removed
-        added.value = added.value.map((idx) => {
+        _added.value = _added.value.map((idx) => {
             if (idx > index) {
                 return idx - 1;
             }
             return idx;
         });
     }
-    edited.value = edited.value.filter((idx) => {
+    _edited.value = _edited.value.filter((idx) => {
         return idx != index;
     })
 }
 
-const syncPropertyCreate = (index) => {
-    const property = { ...props.properties[index] };
+function syncPropertyCreate(index) {
+    const property = {...props.properties[index]};
+    _nbSaveJobs.value++;
     axios.post('/manager/api/property/', {
         ...property
     }).then(response => {
         // this is important because the response obj contains the update url!
         props.properties[index] = response.data
     }).catch(error => {
-        showError(`A Error occurred while adding the property '${property.name}' : ${error.message}`);
+        _isEditing.value = true;
+        showError(`A Error occurred while adding the property '${property.name}' : ${error.response.data.message}`);
         console.log(error);
-        deleted.value.push(index);
+        _deleted.value.push(index);
     }).finally(() => {
-        jobs.value--;
+        saveJobFinished();
     });
 }
 
-const syncPropertyDelete = (index) => {
-    const property = { ...props.properties[index] };
-    axios.delete(property.url)
-        .catch(error => {
-            showError(`A Error occurred while deleting the property '${property.name}' : ${error.message}`);
-            console.log(error);
-            props.properties[index] = backup_properties[index];
-        }).finally(() => {
-            jobs.value--;
-        });
+function syncPropertyDelete(index) {
+    const property = {...props.properties[index]};
+    _nbSaveJobs.value++;
+    axios.delete(property.url).catch(error => {
+        _isEditing.value = true;
+        showError(`A Error occurred while deleting the property '${property.name}' : ${error.response.data.message}`);
+        console.log(error);
+        props.properties[index] = _backupProperties[index];
+    }).finally(() => {
+        saveJobFinished();
+    });
 }
 
-const syncPropertyUpdate = (index) => {
-    const property = { ...props.properties[index] };
+function syncPropertyUpdate(index) {
+    const property = {...props.properties[index]};
     // numeric -> categorical
-    if (isNumeric(backup_properties[index]) && !isNumeric(property)) {
+    if (isNumeric(_backupProperties[index]) && !isNumeric(property)) {
         delete property.unit;
     }
+    _nbSaveJobs.value++;
     axios.put(property.url, {
         ...property
     }).catch(error => {
-        props.properties[index] = backup_properties[index];
-        showError(`A Error occurred updating the property '${property.name}': ${error.message}`);
+        _isEditing.value = true;
+        props.properties[index] = _backupProperties[index];
+        showError(`A Error occurred updating the property '${property.name}': ${error.response.data.message}`);
         console.log(error);
     }).finally(() => {
-        jobs.value--;
+        saveJobFinished();
     });
 }
 
 // view -> edit
-const enterEditMode = () => {
-    state.value = 'edit';
-    backup_properties = copyProperties();
+function enterEditMode() {
+    if (!_isEditing.value) {
+        _isEditing.value = true;
+        _backupProperties = copyProperties();
+    }
 }
 
 // edit -> view
-const discardChanges = () => {
-    deleted.value = [];
-    edited.value = [];
-    added.value = [];
+function discardChanges() {
+    _deleted.value = [];
+    _edited.value = [];
+    _added.value = [];
     // remove added properties
-    props.properties.splice(backup_properties.length);
+    props.properties.splice(_backupProperties.length);
     // restore the others
     for (let index = 0; index < props.properties.length; index++) {
-        props.properties[index] = backup_properties[index];
+        props.properties[index] = _backupProperties[index];
     }
-    state.value = 'view';
+    _isEditing.value = false;
 }
 
 // edit -> save -> edit | view
-const save = () => {
-
-    // the state is set to view in the inSync computed prop
-    state.value = 'save'
+function save() {
     // Check for empty names and give warning
     if (props.properties.filter((property) => property.name === "").length > 0) {
         showWarning("The property name can not be empty");
@@ -207,10 +211,10 @@ const save = () => {
         }
     }
 
-    jobs.value = added.value.length + deleted.value.length + edited.value.length;
-    edited.value.forEach(syncPropertyUpdate);
-    deleted.value.forEach(syncPropertyDelete);
-    added.value.forEach(syncPropertyCreate);
+    _isEditing.value = false;
+    _edited.value.forEach(syncPropertyUpdate);
+    _deleted.value.forEach(syncPropertyDelete);
+    _added.value.forEach(syncPropertyCreate);
 }
 </script>
 
@@ -219,18 +223,16 @@ const save = () => {
         <template #header>
             <div class="d-flex">
                 <h5 class="flex-grow-1">Properties</h5>
-                <b-button size="sm" v-if="state === 'view' && isEditable" @click="enterEditMode"
-                    variant="outline-secondary">
+                <b-button size="sm" v-if="!_isEditing && isEditable" @click="enterEditMode"
+                          variant="outline-secondary">
                     <i class="fa fa-pen"></i>
                 </b-button>
                 <b-button-group v-else-if="isEditable" size="sm">
-                    <span :hidden="formIsValid" class="fst-italic me-5 align-self-center"> (Saving disabled. Empty key's
-                        or values' are not allowed) </span>
-                    <b-button v-if="state === 'edit'" @click="discardChanges" variant="danger">
+                    <b-button v-if="_isEditing && _nbSaveJobs === 0" @click="discardChanges" variant="danger">
                         Discard
                     </b-button>
                     <b-button :disabled="!formIsValid" @click="save" variant="success">
-                        <b-spinner v-if="state === 'save'" small />
+                        <b-spinner v-if="_nbSaveJobs > 0" small/>
                         SAVE
                     </b-button>
                 </b-button-group>
@@ -238,71 +240,70 @@ const save = () => {
         </template>
         <b-card-body>
             <div v-if="!isEditable && props.properties.length == 0">
-                There exist no properties for this digital surface twin yet.
+                This digital surface twin does not have properties.
             </div>
             <div v-else class="border rounded-3 mb-3 p-3">
                 <div class="d-flex">
-
                     <div class="flex-shrink-1 d-flex">
                         <i class="p-2 align-self-center fa-solid fa-hashtag"></i>
                     </div>
                     <div class="w-25 d-flex ms-1 p-2">
                         <span class="fw-bold">
-                            key
+                            Key
                         </span>
                     </div>
                     <div class="w-25 d-flex ms-1 p-2">
                         <span class="fw-bold">
-                            value
+                            Value
                         </span>
                     </div>
                     <div class="d-flex ms-1 p-2">
                         <span class="fw-bold">
-                            unit
+                            Unit
                         </span>
                     </div>
                 </div>
                 <div v-for="(property, index) in props.properties" :key="property.url">
-                    <div v-if="!deleted.includes(index)" class="d-flex">
+                    <div v-if="!_deleted.includes(index)" class="d-flex">
                         <div class="flex-shrink-1 d-flex">
-                            <b-button v-if="state === 'edit'" @click="deleteProperty(index)"
-                                class="m-1 align-self-center" size="sm" variant="danger" title="remove property">
+                            <b-button v-if="_isEditing" @click="deleteProperty(index)"
+                                      class="m-1 align-self-center" size="sm" variant="danger" title="remove property">
                                 <i class="fa fa-minus"></i>
                             </b-button>
                             <i v-else class="p-2 align-self-center fa fa-bars"></i>
                         </div>
                         <div class="w-25 d-flex ms-1">
-                            <b-form-input v-if="state === 'edit'" @input="editProperty(index)" size="sm"
-                                placeholder="Property name" class="align-self-center"
-                                v-model="property.name"></b-form-input>
+                            <b-form-input v-if="_isEditing" @input="editProperty(index)" size="sm"
+                                          placeholder="Property name" class="align-self-center"
+                                          v-model="property.name"></b-form-input>
                             <div v-else class="p-2">
                                 <span v-if="property.name === ''" class="fw-lighter">
                                     Property name
                                 </span>
-                                <span v-else>{{ property.name }} </span>
+                                <span v-else>{{ property.name }}</span>
                             </div>
                         </div>
                         <div class="w-25 d-flex ms-1">
-                            <b-form-input v-if="state === 'edit'" @input="editProperty(index)" size="sm"
-                                placeholder="Property value" class="align-self-center"
-                                v-model="property.value"></b-form-input>
+                            <b-form-input v-if="_isEditing" @input="editProperty(index)" size="sm"
+                                          placeholder="Property value" class="align-self-center"
+                                          v-model="property.value"></b-form-input>
                             <div v-else class="p-2">
                                 <span v-if="property.value === ''" class="fw-lighter">Property value</span>
-                                <span v-else> {{ property.value }} </span>
+                                <span v-else>{{ property.value }}</span>
                             </div>
                         </div>
                         <div v-if="isNumeric(property)" class="d-flex ms-1">
-                            <b-form-input v-if="state === 'edit'" @input="editProperty(index)" size="sm"
-                                placeholder="dimensionless" class="align-self-center"
-                                v-model="property.unit"></b-form-input>
+                            <b-form-input v-if="_isEditing" @input="editProperty(index)" size="sm"
+                                          placeholder="dimensionless" class="align-self-center"
+                                          v-model="property.unit"></b-form-input>
                             <div v-else class="p-2">
                                 <span v-if="property.unit === ''" class="fw-lighter"></span>
-                                <span v-else> [{{ property.unit }}] </span>
+                                <span v-else>{{ property.unit }}</span>
                             </div>
                         </div>
-                        <div v-if="edited.includes(index) || added.includes(index)">
-                            <i v-if="state === 'edit'" class="p-2 align-self-center fa fa-upload"></i>
-                            <b-spinner v-else-if="state === 'save'" small />
+                        <div v-if="_edited.includes(index) || _added.includes(index)">
+                            <i v-if="_isEditing" class="p-2 align-self-center fa fa-upload"></i>
+                            <b-spinner v-else-if="_nbSaveJobs > 0" small/>
                         </div>
                     </div>
                 </div>
@@ -315,7 +316,7 @@ const save = () => {
                     </div>
                 </div>
             </div>
-            <div v-for="message in messages">
+            <div v-for="message in _messages">
                 <b-alert v-model="message.visible" dismissible :variant="message.type">
                     {{ message.content }}
                 </b-alert>
