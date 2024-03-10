@@ -10,39 +10,13 @@ from rest_framework.reverse import reverse
 from guardian.shortcuts import get_users_with_perms
 
 from topobank.manager.utils import subjects_to_dict, surfaces_for_user
-from topobank.manager.models import SurfaceCollection, TagModel, Topography, Surface
+from topobank.manager.models import Tag, Topography, Surface
 
 _log = logging.getLogger(__name__)
 
 DEFAULT_DATASOURCE_NAME = 'Default'
 MAX_LEN_SEARCH_TERM = 200
 SELECTION_SESSION_VARNAME = 'selection'
-
-
-def surface_collection_name(surface_names, max_total_length=SurfaceCollection.MAX_LENGTH_NAME):
-    """For a given list of names, return a length-limited collection name."""
-    num_surfaces = len(surface_names)
-    k = 0
-    coll_name_prefix = ""
-    last_coll_name = ""
-    while k < num_surfaces:
-        coll_name_prefix += f"Surface '{surface_names[k]}'"
-        num_rest = num_surfaces - (k + 1)
-        coll_name = coll_name_prefix[:]
-        if num_rest > 0:
-            coll_name += f" and {num_rest} more"
-        if len(coll_name) > max_total_length:
-            if last_coll_name == "":
-                coll_name = coll_name_prefix[:max_total_length - 4] + "..."
-            else:
-                coll_name = last_coll_name
-            break
-        else:
-            last_coll_name = coll_name
-            coll_name_prefix += ", "
-            k += 1  # add one more and try if it still fits
-
-    return coll_name
 
 
 def selection_from_session(session):
@@ -62,7 +36,7 @@ def instances_to_selection(topographies=[], surfaces=[], tags=[]):
 
     :param topographies: sequence of Topography instances
     :param surfaces: sequence of Surface instances
-    :param tags: sequence of TagModel instances
+    :param tags: sequence of Tag instances
     :return: list of str, alphabetically sorted
     """
     selection = []
@@ -171,7 +145,7 @@ def selection_to_instances(selection):
 
     topographies = Topography.objects.filter(id__in=topography_ids)
     surfaces = Surface.objects.filter(id__in=surface_ids)
-    tags = TagModel.objects.filter(id__in=tag_ids)
+    tags = Tag.objects.filter(id__in=tag_ids)
 
     return topographies, surfaces, tags
 
@@ -409,7 +383,7 @@ def tags_for_user(user, surfaces=None, topographies=None):
     if topographies is None:
         topographies = Topography.objects.filter(surface__in=surfaces)
 
-    tags = TagModel.objects.filter(Q(surface__in=surfaces) | Q(topography__in=topographies))
+    tags = Tag.objects.filter(Q(surface__in=surfaces) | Q(topography__in=topographies))
 
     # add parent tags not already included
     for t in tags:
@@ -420,9 +394,6 @@ def tags_for_user(user, surfaces=None, topographies=None):
 
 def selection_to_subjects_dict(request):
     """Convert current selection into list of subjects as json.
-
-    If 2 or more surfaces are created, also adds a SurfaceCollection
-    instance to the subjects.
 
     Parameters
     ----------
@@ -455,35 +426,9 @@ def selection_to_subjects_dict(request):
     effective_topographies = [t for t in effective_topographies if t.surface in surfaces_with_view_permission]
     effective_surfaces = [s for s in effective_surfaces if s in surfaces_with_view_permission]
 
-    if len(effective_surfaces) > 1:
-        # In order to find a matching SurfaceCollection, we need to search first
-        # for all surface collections with same number of surfaces, then filtering
-        # for the exact surfaces
-        # (see https://stackoverflow.com/questions/16324362/django-queryset-get-exact-manytomany-lookup)
-        surf_collections = SurfaceCollection.objects.annotate(surface_count=Count('surfaces')) \
-            .filter(surface_count=len(effective_surfaces))
-        for s in effective_surfaces:
-            surf_collections = surf_collections.filter(surfaces__pk=s.pk)
-
-        if surf_collections.count() > 0:  # should be exactly 0 or 1 but let's keep it robust here
-            _log.info(f"Found existing surface collection for surfaces {[s.id for s in effective_surfaces]}.")
-            coll = surf_collections.first()
-            if surf_collections.count() > 1:
-                _log.warning("More than on surface collection instance for surfaces "
-                             f"{[s.id for s in effective_surfaces]} found.")
-        else:
-            coll = SurfaceCollection.objects.create(name=surface_collection_name([s.name for s in effective_surfaces]))
-            coll.surfaces.set(effective_surfaces)
-            coll.save()
-            _log.info(f"Created new surface collection for surfaces {[s.id for s in effective_surfaces]}.")
-
-        effective_surface_collections = [coll]
-    else:
-        effective_surface_collections = []
-
     # we collect effective topographies and surfaces because we have so far implementations
     # for analysis functions for topographies and surfaces
-    subjects_ids = subjects_to_dict(effective_topographies + effective_surfaces + effective_surface_collections)
+    subjects_ids = subjects_to_dict(effective_topographies + effective_surfaces)
 
     return effective_topographies, effective_surfaces, subjects_ids
 

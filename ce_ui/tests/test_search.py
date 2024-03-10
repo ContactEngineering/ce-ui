@@ -5,7 +5,7 @@ import pytest
 from django.shortcuts import reverse
 from rest_framework.test import APIRequestFactory
 
-from topobank.manager.models import TagModel
+from topobank.manager.models import Tag
 from topobank.manager.utils import subjects_to_base64
 
 from topobank.manager.tests.utils import ordereddicts_to_dicts, Topography1DFactory, UserFactory, SurfaceFactory
@@ -813,11 +813,11 @@ def test_tag_search_with_request_factory(user_three_surfaces_four_topographies):
                  'unselect': f'/ui/api/selection/surface/{surface1.id}/unselect/'}
     }
 
-    bike_pk = TagModel.objects.get(name='bike').pk
-    train_pk = TagModel.objects.get(name='train').pk
-    train_ice_pk = TagModel.objects.get(name='train/ice').pk
-    train_tgv_pk = TagModel.objects.get(name='train/tgv').pk
-    train_ice_restaurant_pk = TagModel.objects.get(name='train/ice/restaurant').pk
+    bike_pk = Tag.objects.get(name='bike').pk
+    train_pk = Tag.objects.get(name='train').pk
+    train_ice_pk = Tag.objects.get(name='train/ice').pk
+    train_tgv_pk = Tag.objects.get(name='train/tgv').pk
+    train_ice_restaurant_pk = Tag.objects.get(name='train/ice/restaurant').pk
 
     bike_select_prefix = f"/ui/api/selection/tag/{bike_pk}/"
     train_select_prefix = f"/ui/api/selection/tag/{train_pk}/"
@@ -1048,7 +1048,7 @@ def test_tag_search_with_request_factory(user_three_surfaces_four_topographies):
     surface4.save()
     surface4.share(user)
 
-    shared_pk = TagModel.objects.get(name='shared').pk
+    shared_pk = Tag.objects.get(name='shared').pk
     shared_prefix = f"/ui/html/tag/{shared_pk}/"
     surface4_prefix = f"/ui/html/surface/{surface4.pk}/"
 

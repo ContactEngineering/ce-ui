@@ -2,7 +2,7 @@ import pytest
 from django.shortcuts import reverse
 
 from topobank.manager.models import Surface, Topography
-from topobank.manager.tests.utils import Topography1DFactory, Topography2DFactory, SurfaceFactory, TagModelFactory, \
+from topobank.manager.tests.utils import Topography1DFactory, Topography2DFactory, SurfaceFactory, TagFactory, \
     UserFactory
 
 from ..utils import selection_to_instances, instances_to_selection, tags_for_user, \
@@ -13,7 +13,7 @@ from ..utils import selection_to_instances, instances_to_selection, tags_for_use
 def mock_topos(mocker):
     mocker.patch('topobank.manager.models.Topography', autospec=True)
     mocker.patch('topobank.manager.models.Surface', autospec=True)
-    mocker.patch('topobank.manager.models.TagModel', autospec=True)
+    mocker.patch('topobank.manager.models.Tag', autospec=True)
 
 
 @pytest.fixture
@@ -25,22 +25,22 @@ def testuser(django_user_model):
 
 @pytest.mark.skip('Mocking does not seem to work properly here')
 def test_selection_to_instances(testuser, mock_topos):
-    from topobank.manager.models import Topography, Surface, TagModel
+    from topobank.manager.models import Topography, Surface, Tag
 
     selection = ('topography-1', 'topography-2', 'surface-1', 'surface-3', 'tag-1', 'tag-2', 'tag-4')
     selection_to_instances(selection)
 
     Topography.objects.filter.assert_called_with(id__in={1, 2})
     Surface.objects.filter.assert_called_with(id__in={1, 3})  # set instead of list
-    TagModel.objects.filter.assert_called_with(id__in={1, 2, 4})  # set instead of list
+    Tag.objects.filter.assert_called_with(id__in={1, 2, 4})  # set instead of list
 
 
 @pytest.mark.django_db
 def test_instances_to_selection():
     user = UserFactory()
 
-    tag1 = TagModelFactory()
-    tag2 = TagModelFactory()
+    tag1 = TagFactory()
+    tag2 = TagFactory()
 
     surface1 = SurfaceFactory(creator=user, tags=[tag1, tag2])
     surface2 = SurfaceFactory(creator=user)
@@ -83,9 +83,9 @@ def test_tags_for_user(two_topos):
     topo1.tags = ['rough', 'projects/a']
     topo1.save()
 
-    from topobank.manager.models import TagModel
+    from topobank.manager.models import Tag
     print("Tags of topo1:", topo1.tags)
-    print(TagModel.objects.all())
+    print(Tag.objects.all())
 
     topo2 = Topography.objects.get(name="Example 4 - Default")
     topo2.tags = ['interesting']
@@ -177,8 +177,8 @@ def test_related_surfaces_for_selection(rf):
     user = UserFactory()
 
     # create tags
-    tag1 = TagModelFactory(name='apple')
-    tag2 = TagModelFactory(name='banana')
+    tag1 = TagFactory(name='apple')
+    tag2 = TagFactory(name='banana')
 
     # create surfaces
     surf1 = SurfaceFactory(creator=user, tags=[tag1])
