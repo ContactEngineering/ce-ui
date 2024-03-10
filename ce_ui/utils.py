@@ -1,16 +1,13 @@
 import logging
 
-from django.db.models import Count, Q, Value, TextField, Subquery
-from django.db.models.functions import Replace
+from django.contrib.postgres.search import SearchQuery, SearchVector
 from django.core.exceptions import PermissionDenied
-from django.contrib.postgres.search import SearchVector, SearchQuery
-
-from rest_framework.reverse import reverse
-
+from django.db.models import Q, Subquery, TextField, Value
+from django.db.models.functions import Replace
 from guardian.shortcuts import get_users_with_perms
-
+from rest_framework.reverse import reverse
+from topobank.manager.models import Surface, Tag, Topography
 from topobank.manager.utils import subjects_to_dict, surfaces_for_user
-from topobank.manager.models import Tag, Topography, Surface
 
 _log = logging.getLogger(__name__)
 
