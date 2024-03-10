@@ -4,6 +4,7 @@
 
 - ENH: Properties as key-value pairs with categorical and numerical values,
   including units
+- BUG: Fix breadcrumb navigation when not logged in (#48)
 - BUG: Fix redirect after deleting digital surface twin (#51)
 
 ## 1.6.1 (2024-01-30)
