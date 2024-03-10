@@ -63,13 +63,6 @@ function saveJobFinished() {
     }
 }
 
-let inSync = computed(() => {
-    if (!_isEditing.value && _nbSaveJobs.value === 0) {
-        cleanUpAfterSave();
-    }
-    return _nbSaveJobs.value === 0
-});
-
 function showWarning(msg) {
     _messages.value.push({type: 'warning', visible: true, content: msg});
 }
@@ -315,9 +308,6 @@ function save() {
                         </div>
                     </div>
                 </div>
-                <b-alert v-if="formIsValid" class="fst-italic me-5 align-self-center">
-                    Empty keys or values are not allowed.
-                </b-alert>
                 <div v-if="isEditable" @click="addProperty" class="d-flex highlight-on-hover rounded-3">
                     <div class="p-2 flex-shrink-1">
                         <i class="fa fa-plus"></i>
