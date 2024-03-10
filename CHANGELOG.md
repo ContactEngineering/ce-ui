@@ -1,5 +1,10 @@
 # Changelog for plugin *ce-ui*
 
+## 1.7.0 (not yet released)
+
+- ENH: Properties as key-value pairs with categorical and numerical values,
+  including units
+
 ## 1.6.1 (2024-01-30)
 
 - MAINT: Cosmetic fixes to the user interface
