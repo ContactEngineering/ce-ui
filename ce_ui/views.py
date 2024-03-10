@@ -3,40 +3,41 @@ from html import unescape
 from io import BytesIO
 
 from django.core.exceptions import PermissionDenied
-from django.db.models import Q, Value, TextField, Subquery
+from django.db.models import Q, Subquery, TextField, Value
 from django.db.models.functions import Replace
 from django.http import HttpResponse
 from django.urls import reverse
 from django.views.generic import DetailView, TemplateView
-
+from guardian.compat import get_user_model as guardian_user_model
+from guardian.shortcuts import get_objects_for_user
+from guardian.utils import get_user_obj_perms_model
 from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.utils.urls import remove_query_param, replace_query_param
-
-from guardian.compat import get_user_model as guardian_user_model
-from guardian.shortcuts import get_objects_for_user
-from guardian.utils import get_user_obj_perms_model
-
 from termsandconditions.models import TermsAndConditions
-from termsandconditions.views import TermsView as OrigTermsView, AcceptTermsView
-from trackstats.models import Metric, Period
-
+from termsandconditions.views import AcceptTermsView
+from termsandconditions.views import TermsView as OrigTermsView
 from topobank.analysis.models import AnalysisFunction
 from topobank.analysis.registry import AnalysisRegistry
 from topobank.manager.containers import write_surface_container
-from topobank.manager.models import Topography, Surface, Tag
-from topobank.manager.utils import surfaces_for_user, subjects_from_base64
-from topobank.manager.utils import get_reader_infos
-from topobank.usage_stats.utils import increase_statistics_by_date, increase_statistics_by_date_and_object, \
-    current_statistics
+from topobank.manager.models import Surface, Tag, Topography
+from topobank.manager.utils import (get_reader_infos, subjects_from_base64,
+                                    surfaces_for_user)
+from topobank.usage_stats.utils import (current_statistics,
+                                        increase_statistics_by_date,
+                                        increase_statistics_by_date_and_object)
 from topobank.users.models import User
+from trackstats.models import Metric, Period
 
-from .serializers import TagSearchSerizalizer, SurfaceSearchSerializer
-from .utils import instances_to_selection, selected_instances, tags_for_user, current_selection_as_basket_items, \
-    filtered_topographies, get_search_term, get_category, get_order_by, get_sharing_status, get_tree_mode, \
-    filter_queryset_by_search_term, selection_to_subjects_dict
+from .serializers import SurfaceSearchSerializer, TagSearchSerizalizer
+from .utils import (current_selection_as_basket_items,
+                    filter_queryset_by_search_term, filtered_topographies,
+                    get_category, get_order_by, get_search_term,
+                    get_sharing_status, get_tree_mode, instances_to_selection,
+                    selected_instances, selection_to_subjects_dict,
+                    tags_for_user)
 
 # create dicts with labels and option values for Select tab
 CATEGORY_FILTER_CHOICES = {'all': 'All categories',
@@ -315,6 +316,7 @@ class SurfaceDetailView(TemplateView):
                 'icon_style_prefix': 'far',
                 'href': f"{reverse('ce_ui:surface-detail')}?surface={surface.pk}",
                 'active': True,
+                'login_required': False,
                 'tooltip': f"Properties of surface '{surface.label}'"
             }
         ]
