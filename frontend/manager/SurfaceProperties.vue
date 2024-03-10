@@ -244,7 +244,6 @@ function save() {
             </div>
             <div v-else class="border rounded-3 mb-3 p-3">
                 <div class="d-flex">
-
                     <div class="flex-shrink-1 d-flex">
                         <i class="p-2 align-self-center fa-solid fa-hashtag"></i>
                     </div>
