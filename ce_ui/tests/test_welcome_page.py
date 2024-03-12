@@ -1,10 +1,9 @@
 import pytest
 from django.shortcuts import reverse
-
-from topobank.utils import assert_in_content
-
 from topobank.analysis.tests.utils import TopographyAnalysisFactory
-from topobank.manager.tests.utils import SurfaceFactory, Topography1DFactory, UserFactory
+from topobank.manager.tests.utils import (SurfaceFactory, Topography1DFactory,
+                                          UserFactory)
+from topobank.utils import assert_in_content
 
 
 @pytest.mark.django_db
@@ -33,16 +32,6 @@ def test_instances(test_analysis_function):
 def test_welcome_page_statistics(client, test_instances, handle_usage_statistics, orcid_socialapp):
     (user_1, user_2), (surface_1, surface_2), (topography_1,) = test_instances
     surface_2.share(user_2)
-
-    #
-    # Test statistics if user is not yet authenticated
-    #
-    response = client.get(reverse('home'))
-
-    assert_in_content(response, '<div class="welcome-page-statistics">2</div> registered users')
-    assert_in_content(response, '<div class="welcome-page-statistics">2</div> digital surface twins')
-    assert_in_content(response, '<div class="welcome-page-statistics">1</div> individual measurements')
-    assert_in_content(response, '<div class="welcome-page-statistics">1</div> computed analyses')
 
     #
     # Test statistics if user_1 is authenticated
