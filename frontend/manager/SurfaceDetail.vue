@@ -21,6 +21,7 @@ import {
 import {filterTopographyForPatchRequest, getIdFromUrl, subjectsToBase64} from "../utils/api";
 import {ccLicenseInfo} from "../utils/data";
 
+import Attachments from './Attachments.vue';
 import BandwidthPlot from './BandwidthPlot.vue';
 import DropZone from '../components/DropZone.vue';
 import SurfaceDescription from './SurfaceDescription.vue';
@@ -110,7 +111,7 @@ function getOriginalSurfaceId() {
 
 function updateCard() {
     /* Fetch JSON describing the card */
-    axios.get(`${props.surfaceUrl}?children=yes&permissions=yes&properties=yes`).then(response => {
+    axios.get(`${props.surfaceUrl}?children=yes&permissions=yes&properties=yes&attachments=yes`).then(response => {
         _surface.value = response.data;
         _permissions.value = response.data.permissions;
         _topographies.value = response.data.topography_set;
@@ -152,6 +153,7 @@ function filesDropped(files) {
 function uploadNewTopography(file) {
     axios.post(props.newTopographyUrl, {surface: props.surfaceUrl, name: file.name}).then(response => {
         let upload = response.data;
+        console.log(upload);
         upload.file = file;  // need to know which file to upload
         _topographies.value.push(upload);  // this will trigger showing a topography-upload-card
         _selected.value.push(false);  // initially unselected
@@ -371,6 +373,13 @@ const allSelected = computed({
                                             :properties="_surface.properties"
                                             :permission="_permissions.current_user.permission">
                         </surface-properties>
+                    </b-tab>
+                    <b-tab title="Attachments">
+                        <attachments v-if="_surface != null"
+                                     :surface-url="_surface.url"
+                                     :attachments="_surface.attachments"
+                                     :permission="_permissions.current_user.permission">
+                        </attachments>
                     </b-tab>
                     <b-tab v-if="_surface != null"
                            title="Permissions">
