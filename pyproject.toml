@@ -39,7 +39,7 @@ homepage = 'https://contact.engineering'
 repository = 'https://github.com/ContactEngineering/ce-ui'
 
 [project.entry-points.'topobank.plugins']
-ce_ui = 'topobank_contact.apps.CEUIPluginConfig'
+ce_ui = 'ce_ui.apps.CEUIPluginConfig'
 
 [project.entry-points.'topobank.third_party_apps']
 termsandconditions = 'termsandconditions'
