@@ -6,7 +6,7 @@ build-backend = "flit_core.buildapi"
 name = 'ce-ui'
 description = 'The user-facing interface of contact.engineering.'
 requires-python = '>=3.8.0'
-dynamic = ['dependencies', 'entry-points', 'optional-dependencies', 'version']
+dynamic = ['version']
 readme = 'README.rst'
 license = { file = 'LICENSE' }
 authors = [
