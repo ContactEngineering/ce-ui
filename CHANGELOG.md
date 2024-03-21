@@ -1,5 +1,10 @@
 # Changelog for plugin *ce-ui*
 
+## 1.7.1 (2024-03-21)
+
+- MAINT: preventing property name duplications in editor
+- BUILD: Changed build system to flit
+
 ## 1.7.0 (2024-03-12)
 
 - ENH: Properties as key-value pairs with categorical and numerical values,
