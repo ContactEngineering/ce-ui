@@ -1,14 +1,6 @@
-import importlib.metadata
-import logging
-
 from topobank.plugins import PluginConfig
 
-try:
-    __version__ = importlib.metadata.version('ce-ui')
-except importlib.metadata.PackageNotFoundError:
-    __version__ = '0.0.0'
-
-_log = logging.Logger(__file__)
+from .version import __version__
 
 
 class CEUIPluginConfig(PluginConfig):
