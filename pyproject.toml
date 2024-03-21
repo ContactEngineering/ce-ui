@@ -1,6 +1,6 @@
 [build-system]
-requires = ['setuptools>=40.8.0', 'setuptools_scm[toml]>=6.2', 'wheel']
-build-backend = 'setuptools.build_meta:__legacy__'
+requires = ["flit_core>=3.2"]
+build-backend = "flit_core.buildapi"
 
 [project]
 name = 'ce-ui'
@@ -30,12 +30,24 @@ classifiers = [
     'Topic :: Internet :: WWW/HTTP',
     'Topic :: Internet :: WWW/HTTP :: Dynamic Content'
 ]
+dependencies = [
+    'django-termsandconditions>=2.0.8'
+]
 
 [project.urls]
 homepage = 'https://contact.engineering'
 repository = 'https://github.com/ContactEngineering/ce-ui'
 
-[tool.setuptools]
-py-modules = ['ce_ui']
+[project.entry-points.'topobank.plugins']
+ce_ui = 'topobank_contact.apps.CEUIPluginConfig'
 
-[tool.setuptools_scm]
+[project.entry-points.'topobank.third_party_apps']
+termsandconditions = 'termsandconditions'
+
+[project.entry-points.'topobank.middleware']
+termsandconditions = 'termsandconditions.middleware.TermsAndConditionsRedirectMiddleware'
+
+[project.entry-points.'topobank.context_processors']
+fixed_tabs = 'ce_ui.context_processors.fixed_tabs_processor'
+versions = 'ce_ui.context_processors.versions_processor'
+basket = 'ce_ui.context_processors.basket_processor'
