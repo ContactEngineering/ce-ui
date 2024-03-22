@@ -1,5 +1,9 @@
 # Changelog for plugin *ce-ui*
 
+## 1.7.2 (2024-03-22)
+
+- BUG: Fixed version discovery
+
 ## 1.7.1 (2024-03-21)
 
 - MAINT: preventing property name duplications in editor
