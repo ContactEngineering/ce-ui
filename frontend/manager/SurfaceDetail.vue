@@ -153,7 +153,6 @@ function filesDropped(files) {
 function uploadNewTopography(file) {
     axios.post(props.newTopographyUrl, {surface: props.surfaceUrl, name: file.name}).then(response => {
         let upload = response.data;
-        console.log(upload);
         upload.file = file;  // need to know which file to upload
         _topographies.value.push(upload);  // this will trigger showing a topography-upload-card
         _selected.value.push(false);  // initially unselected

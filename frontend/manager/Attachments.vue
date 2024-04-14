@@ -13,9 +13,65 @@ const props = defineProps({
     permission: String
 });
 
+
+
+function onProgress(e) {
+    console.log(e);
+}
+
+function uploadStart({ fileName, fileType }) {
+    return axios.post("/manager/api/upload/direct/start/",
+        {
+            surface: props.surfaceUrl,
+            kind: "att",
+            file_name: fileName,
+            file_type: fileType
+        }
+    );
+}
+
+function uploadDo({ data, file }) {
+    if (data.method === 'POST') {
+        return axios.postForm(
+            data.url,
+            { ...data.fields, file: file },
+            { onUploadProgress: onProgress }
+        );
+    } else if (data.method === 'PUT') {
+        return axios.put(
+            data.url,
+            file,
+            {
+                headers: { 'Content-Type': 'binary/octet-stream' },
+                onUploadProgress: onProgress
+            }
+        );
+    } else {
+        alert(`Unknown upload method: "${data.method}`);
+    }
+}
+
+function uploadFinish({ data }) {
+    return axios.post("/manager/api/upload/direct/finish/", { file_id: data.id });
+}
+
 function handleFileDrop(files) {
     for (const file of files) {
-        console.log(file);
+        uploadStart({
+            fileName: file.name,
+            fileType: file.type
+        })
+            .then((response) => {
+                uploadDo({ data: response.data, file })
+                    .then(() => uploadFinish({ data: response.data }))
+                    .then(() => {
+                        console.log("upload completed");
+                    })
+            })
+            .catch((error) => {
+                console.log("error while uploading");
+                console.log(error);
+            });
     }
 }
 
@@ -47,8 +103,7 @@ const isEditable = computed(() => {
             <div class="border p-3 rounded mt-5">
                 <div v-for="attachment in attachments">
                     <div class="d-flex">
-                        <a :href="attachment.file"><i class="fa-solid fa-paperclip me-3"></i>{{ attachment.name }}
-                        </a>
+                        <a :href="attachment.file"><i class="fa-solid fa-paperclip me-3"></i>{{ attachment.name }} </a>
                         <span class="ms-auto"> created: {{ formatDateTime(attachment.created) }}</span>
                     </div>
                 </div>
