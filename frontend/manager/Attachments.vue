@@ -14,9 +14,15 @@ const props = defineProps({
 });
 
 
-
 function onProgress(e) {
     console.log(e);
+}
+
+function addFileToList({ id }) {
+    axios.get(`/manager/api/file/${id}`)
+        .then((response) => {
+            props.attachments.push(response.data)
+        });
 }
 
 function uploadStart({ fileName, fileType }) {
@@ -65,7 +71,7 @@ function handleFileDrop(files) {
                 uploadDo({ data: response.data, file })
                     .then(() => uploadFinish({ data: response.data }))
                     .then(() => {
-                        console.log("upload completed");
+                        addFileToList({ id: response.data.id });
                     })
             })
             .catch((error) => {
