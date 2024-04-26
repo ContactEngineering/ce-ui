@@ -15,6 +15,7 @@ const props = defineProps({
 
 
 const deleteAttachmentIdx = ref(-1);
+const infoAttachmentIdx = ref(-1);
 
 function onProgress(e) {
     console.log(e);
@@ -106,12 +107,18 @@ const isEditable = computed(() => {
 })
 
 const attachmentToDelete = computed(() => {
-    if (deleteAttachmentIdx.value >= 0) {
+    if (deleteAttachmentIdx.value >= 0 && deleteAttachmentIdx.value < props.attachments.length) {
         return props.attachments[deleteAttachmentIdx.value];
     }
     return null;
 })
 
+const attachmentToShowInfo = computed(() => {
+    if (infoAttachmentIdx.value >= 0 && infoAttachmentIdx.value < props.attachments.length) {
+        return props.attachments[infoAttachmentIdx.value];
+    }
+    return null;
+})
 </script>
 
 <template>
@@ -130,8 +137,11 @@ const attachmentToDelete = computed(() => {
                     <div class="d-flex align-items-center my-1 border rounded px-2 py-1">
                         <a :href="attachment.file"><i class="fa-solid fa-paperclip me-3"></i>{{ attachment.name }}
                         </a>
-                        <span class="ms-auto"> created: {{ formatDateTime(attachment.created) }}</span>
-                        <b-button size="sm" class="ms-3" title="delete" variant="outline-danger" data
+                        <b-button size="sm" class="ms-auto" title="information" variant="outline-info" data
+                            data-toggle="modal" data-target="#infoModal" @click="infoAttachmentIdx = index">
+                            <i class="fa-solid fa-circle-info"></i> Info
+                        </b-button>
+                        <b-button size="sm" class="ms-2" title="delete" variant="outline-danger" data
                             data-toggle="modal" data-target="#deleteModal" @click="deleteAttachmentIdx = index">
                             <i class="fa-solid fa-trash"></i> Delete
                         </b-button>
@@ -146,7 +156,7 @@ const attachmentToDelete = computed(() => {
         </b-card-body>
     </b-card>
 
-    <div id="deleteModal" v-if="deleteAttachmentIdx != -1" class="modal fade" tabindex="-1" role="dialog"
+    <div id="deleteModal" v-if="attachmentToDelete" class="modal fade" tabindex="-1" role="dialog"
         aria-labelledby="deleteModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
@@ -154,6 +164,7 @@ const attachmentToDelete = computed(() => {
                     <h5 class="modal-title" id="deleteModalLabel">
                         Delete Attachment
                     </h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="d-flex flex-column align-items-center">
@@ -169,6 +180,62 @@ const attachmentToDelete = computed(() => {
                     <b-button size="xl" class="ms-2" variant="outline-danger" data-dismiss="modal"
                         @click="deleteAttachment(deleteAttachmentIdx)">
                         Delete
+                    </b-button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="infoModal" v-if="attachmentToShowInfo" class="modal fade" tabindex="-1" role="dialog"
+        aria-labelledby="infoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="infoModalLabel">
+                        Attachment Info
+                    </h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <div class="row">
+                            <div class="col-3 fw-bold">
+                                Name:
+                            </div>
+                            <div class="col">
+                                {{ attachmentToShowInfo.name }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-3 fw-bold">
+                                Created by:
+                            </div>
+                            <div class="col">
+                                {{ attachmentToShowInfo.creator_name }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-3 fw-bold">
+                                Created:
+                            </div>
+                            <div class="col">
+                                {{ formatDateTime(attachmentToShowInfo.created) }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-3 fw-bold">
+                                Updated:
+                            </div>
+                            <div class="col">
+                                {{ formatDateTime(attachmentToShowInfo.updated) }}
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <b-button size="xl" variant="outline-secondary" data-dismiss="modal">
+                        Close
                     </b-button>
                 </div>
             </div>
