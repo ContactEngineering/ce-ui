@@ -20,7 +20,7 @@ const infoAttachmentIdx = ref(-1);
 const uploadIndicator = ref({});
 
 function addFileToList({ id }) {
-    axios.get(`/manager/api/file/${id}`)
+    return axios.get(`/manager/api/file/${id}`)
         .then((response) => {
             props.attachments.push(response.data)
         });
@@ -74,8 +74,8 @@ function handleFileDrop(files) {
                 uploadDo({ data: response.data, file })
                     .then(() => uploadFinish({ data: response.data }))
                     .then(() => {
-                        addFileToList({ id: fileId });
-                        delete uploadIndicator.value[fileId];
+                        addFileToList({ id: fileId })
+                            .then(() => delete uploadIndicator.value[fileId]);
                     })
                     .catch((error) => {
                         // ToDo tell user that the upload failed
@@ -140,7 +140,7 @@ const attachmentToShowInfo = computed(() => {
             <div class=" mt-5">
                 <div v-for="(attachment, index) in attachments" :key="attachment.id">
                     <div class="d-flex align-items-center my-1 border rounded px-2 py-1">
-                        <a :href="attachment.file"><i class="fa-solid fa-paperclip me-3"></i>{{ attachment.name }}
+                        <a :href="attachment.file"><i class="fa-solid fa-paperclip me-3"></i>{{ attachment.file_name }}
                         </a>
                         <b-button size="sm" class="ms-auto" title="information" variant="outline-info" data
                             data-toggle="modal" data-target="#infoModal" @click="infoAttachmentIdx = index">
@@ -183,7 +183,7 @@ const attachmentToShowInfo = computed(() => {
                 <div class="modal-body">
                     <div class="d-flex flex-column align-items-center">
                         <span class="fw-bold"> This operation will permanently delete the attachment:</span>
-                        <span class="fst-italic"> "{{ attachmentToDelete.name }}" </span>
+                        <span class="fst-italic"> "{{ attachmentToDelete.file_name }}" </span>
                         <span>The operation cannot be undone!</span>
                     </div>
                 </div>
@@ -217,7 +217,7 @@ const attachmentToShowInfo = computed(() => {
                                 Name:
                             </div>
                             <div class="col">
-                                {{ attachmentToShowInfo.name }}
+                                {{ attachmentToShowInfo.file_name }}
                             </div>
                         </div>
                         <div class="row">
