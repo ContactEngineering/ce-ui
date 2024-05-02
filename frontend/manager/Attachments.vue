@@ -4,7 +4,7 @@ import axios from "axios";
 import DropZone from '../components/DropZone.vue';
 import { ref, computed } from 'vue';
 
-import { BCard, BCardBody, BButton, BButtonGroup, BSpinner, BFormInput, BAlert } from 'bootstrap-vue-next';
+import { BCard, BCardBody, BButton, BButtonGroup, BSpinner, BFormInput, BAlert, BProgress } from 'bootstrap-vue-next';
 
 
 const props = defineProps({
@@ -17,9 +17,7 @@ const props = defineProps({
 const deleteAttachmentIdx = ref(-1);
 const infoAttachmentIdx = ref(-1);
 
-function onProgress(e) {
-    console.log(e);
-}
+const uploadIndicator = ref({});
 
 function addFileToList({ id }) {
     axios.get(`/manager/api/file/${id}`)
@@ -52,7 +50,7 @@ function uploadDo({ data, file }) {
             file,
             {
                 headers: { 'Content-Type': 'binary/octet-stream' },
-                onUploadProgress: onProgress
+                onUploadProgress: (e) => uploadIndicator.value[data.id].loaded = e.loaded / e.total * 100
             }
         );
     } else {
@@ -71,14 +69,21 @@ function handleFileDrop(files) {
             fileType: file.type
         })
             .then((response) => {
+                const fileId = response.data.id;
+                uploadIndicator.value[fileId] = { filename: file.name, loaded: 0 };
                 uploadDo({ data: response.data, file })
                     .then(() => uploadFinish({ data: response.data }))
                     .then(() => {
-                        addFileToList({ id: response.data.id });
+                        addFileToList({ id: fileId });
+                        delete uploadIndicator.value[fileId];
                     })
+                    .catch((error) => {
+                        // ToDo tell user that the upload failed
+                        delete uploadIndicator.value[fileId];
+                    });
             })
             .catch((error) => {
-                console.log("error while uploading");
+                console.log("error while initiating upload");
                 console.log(error);
             });
     }
@@ -119,8 +124,8 @@ const attachmentToShowInfo = computed(() => {
     }
     return null;
 })
-</script>
 
+</script>
 <template>
     <b-card>
         <template #header>
@@ -145,6 +150,15 @@ const attachmentToShowInfo = computed(() => {
                             data-toggle="modal" data-target="#deleteModal" @click="deleteAttachmentIdx = index">
                             <i class="fa-solid fa-trash"></i> Delete
                         </b-button>
+                    </div>
+                </div>
+                <div v-for="indicator in uploadIndicator">
+                    <div class="d-flex align-items-center my-1 border rounded px-2 py-1">
+                        <div class="text-muted">
+                            <i class="fa-solid fa-paperclip me-3"></i>
+                        </div>
+                        <b-progress class="flex-grow-1 ms-2" show-progress animated
+                            :value="indicator.loaded"></b-progress>
                     </div>
                 </div>
                 <div v-if="attachments.length == 0">
