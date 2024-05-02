@@ -4,7 +4,7 @@ import axios from "axios";
 import DropZone from '../components/DropZone.vue';
 import { ref, computed } from 'vue';
 
-import { BCard, BCardBody, BButton, BButtonGroup, BSpinner, BFormInput, BAlert, BProgress } from 'bootstrap-vue-next';
+import { BCard, BCardBody, BButton, BButtonGroup, BSpinner, BFormInput, BAlert, BProgress, BModal } from 'bootstrap-vue-next';
 
 
 const props = defineProps({
@@ -18,6 +18,9 @@ const deleteAttachmentIdx = ref(-1);
 const infoAttachmentIdx = ref(-1);
 
 const uploadIndicator = ref({});
+
+const deleteModal = ref(false)
+const infoModal = ref(false)
 
 function addFileToList({ id }) {
     return axios.get(`/manager/api/file/${id}`)
@@ -142,12 +145,12 @@ const attachmentToShowInfo = computed(() => {
                     <div class="d-flex align-items-center my-1 border rounded px-2 py-1">
                         <a :href="attachment.file"><i class="fa-solid fa-paperclip me-3"></i>{{ attachment.file_name }}
                         </a>
-                        <b-button size="sm" class="ms-auto" title="information" variant="outline-info" data
-                            data-toggle="modal" data-target="#infoModal" @click="infoAttachmentIdx = index">
+                        <b-button size="sm" class="ms-auto" title="information" variant="outline-info"
+                            @click="infoAttachmentIdx = index; infoModal = true;">
                             <i class="fa-solid fa-circle-info"></i> Info
                         </b-button>
-                        <b-button size="sm" class="ms-2" title="delete" variant="outline-danger" data
-                            data-toggle="modal" data-target="#deleteModal" @click="deleteAttachmentIdx = index">
+                        <b-button size="sm" class="ms-2" title="delete" variant="outline-danger"
+                            @click="deleteAttachmentIdx = index; deleteModal = true;">
                             <i class="fa-solid fa-trash"></i> Delete
                         </b-button>
                     </div>
@@ -170,89 +173,57 @@ const attachmentToShowInfo = computed(() => {
         </b-card-body>
     </b-card>
 
-    <div id="deleteModal" v-if="attachmentToDelete" class="modal fade" tabindex="-1" role="dialog"
-        aria-labelledby="deleteModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deleteModalLabel">
-                        Delete Attachment
-                    </h5>
-                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+    <b-modal v-model="deleteModal" v-if="attachmentToDelete" centered title="Delete Attachment">
+        <div class="d-flex flex-column align-items-center">
+            <span class="fw-bold"> This operation will permanently delete the attachment:</span>
+            <span class="fst-italic"> "{{ attachmentToDelete.file_name }}" </span>
+            <span>The operation cannot be undone!</span>
+        </div>
+        <template #footer>
+            <b-button size="xl" variant="outline-secondary" @click="deleteModal = false">
+                Cancel
+            </b-button>
+            <b-button size="xl" class="ms-2" variant="outline-danger"
+                @click="deleteModal = false; deleteAttachment(deleteAttachmentIdx)">
+                Delete
+            </b-button>
+        </template>
+    </b-modal>
+
+    <b-modal v-model="infoModal" v-if="attachmentToShowInfo" centered ok-only title="Attachment Info">
+        <div>
+            <div class="row">
+                <div class="col-3 fw-bold">
+                    Name:
                 </div>
-                <div class="modal-body">
-                    <div class="d-flex flex-column align-items-center">
-                        <span class="fw-bold"> This operation will permanently delete the attachment:</span>
-                        <span class="fst-italic"> "{{ attachmentToDelete.file_name }}" </span>
-                        <span>The operation cannot be undone!</span>
-                    </div>
+                <div class="col">
+                    {{ attachmentToShowInfo.file_name }}
                 </div>
-                <div class="modal-footer">
-                    <b-button size="xl" variant="outline-secondary" data-dismiss="modal">
-                        Cancel
-                    </b-button>
-                    <b-button size="xl" class="ms-2" variant="outline-danger" data-dismiss="modal"
-                        @click="deleteAttachment(deleteAttachmentIdx)">
-                        Delete
-                    </b-button>
+            </div>
+            <div class="row">
+                <div class="col-3 fw-bold">
+                    Created by:
+                </div>
+                <div class="col">
+                    {{ attachmentToShowInfo.creator_name }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-3 fw-bold">
+                    Created:
+                </div>
+                <div class="col">
+                    {{ formatDateTime(attachmentToShowInfo.created) }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-3 fw-bold">
+                    Updated:
+                </div>
+                <div class="col">
+                    {{ formatDateTime(attachmentToShowInfo.updated) }}
                 </div>
             </div>
         </div>
-    </div>
-
-    <div id="infoModal" v-if="attachmentToShowInfo" class="modal fade" tabindex="-1" role="dialog"
-        aria-labelledby="infoModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="infoModalLabel">
-                        Attachment Info
-                    </h5>
-                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div>
-                        <div class="row">
-                            <div class="col-3 fw-bold">
-                                Name:
-                            </div>
-                            <div class="col">
-                                {{ attachmentToShowInfo.file_name }}
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-3 fw-bold">
-                                Created by:
-                            </div>
-                            <div class="col">
-                                {{ attachmentToShowInfo.creator_name }}
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-3 fw-bold">
-                                Created:
-                            </div>
-                            <div class="col">
-                                {{ formatDateTime(attachmentToShowInfo.created) }}
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-3 fw-bold">
-                                Updated:
-                            </div>
-                            <div class="col">
-                                {{ formatDateTime(attachmentToShowInfo.updated) }}
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-                <div class="modal-footer">
-                    <b-button size="xl" variant="outline-secondary" data-dismiss="modal">
-                        Close
-                    </b-button>
-                </div>
-            </div>
-        </div>
-    </div>
+    </b-modal>
 </template>
