@@ -134,10 +134,10 @@ const attachmentToShowInfo = computed(() => {
             </div>
         </template>
         <b-card-body>
-            <drop-zone @files-dropped="handleFileDrop">
+            <drop-zone v-if="isEditable" @files-dropped="handleFileDrop" class="mb-5">
                 Drop your attachments here or
             </drop-zone>
-            <div class=" mt-5">
+            <div>
                 <div v-for="(attachment, index) in attachments" :key="attachment.id">
                     <div class="d-flex align-items-center my-1 border rounded px-2 py-1">
                         <a :href="attachment.file"><i class="fa-solid fa-paperclip me-3"></i>{{ attachment.file_name }}
