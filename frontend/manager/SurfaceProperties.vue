@@ -37,9 +37,23 @@ let _added = ref([]);
 let _messages = ref([]);
 
 let formIsValid = computed(() => {
-    return props.properties.every((property) => {
-        return property.name != "" && property.value != "";
+    // Property names and values cant be empty
+    const emptyFields = props.properties.some((property) => {
+        return property.name === "" || property.value === "";
     })
+
+    //Property names should be uniqe for a digital surface twin
+    const hashMap = {}
+    const nameDuplicates = props.properties.some(property => {
+        if (hashMap[property.name]){
+            return true
+        }
+        hashMap[property.name] = true;
+
+    });
+
+    return !(emptyFields || nameDuplicates);
+
 });
 
 function cleanUpAfterSave() {
