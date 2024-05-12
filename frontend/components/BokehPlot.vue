@@ -12,7 +12,6 @@ import {computed, onMounted, ref, watch} from "vue";
 import {
     AjaxDataSource,
     Circle,
-    CustomJS,
     CustomJSTickFormatter,
     HoverTool,
     Legend,
@@ -30,15 +29,19 @@ import {
     BFormGroup,
     BFormInput,
     BFormSelect,
-    BFormSelectOption
+    BFormSelectOption,
+    BTab,
+    BTabs
 } from "bootstrap-vue-next";
 
 import {formatExponential} from "topobank/utils/formatting";
 import {applyDefaultBokehStyle} from "topobank/utils/bokeh";
 
-const emit = defineEmits([
-    'selected'
-]);
+// Bookkeeping of pending ajax requests for displaying spinners
+const nbPendingAjaxRequests = defineModel('nbPendingAjaxRequests', {required: false, default: 0});
+
+// Emitted when a dataset is selected
+const emit = defineEmits(['selected']);
 
 const props = defineProps({
     categories: {
@@ -357,13 +360,9 @@ function createFigures() {
 
         /* Add tap tool if item should be selectable */
         if (props.selectable) {
-            const code = "on_tap(cb_obj, cb_data);";
             tools.push(new TapTool({
                 behavior: "select",
-                callback: new CustomJS({
-                    args: {on_tap: onTap},
-                    code: code
-                })
+                callback: {execute: onTap}
             }));
         }
 
@@ -460,49 +459,75 @@ function createPlots() {
                 alpha: dataSource.isTopographyAnalysis ? Number(_opacity.value) : dataSource.alpha
             };
 
-            /* Default is x and y as columns for the scatter plot */
-            let xData = plot.xData === undefined ? "data.x" : plot.xData;
-            let yData = plot.yData === undefined ? "data.y" : plot.yData;
-
-            /* Scale data if scale factor is given */
-            if (dataSource.xScaleFactor !== undefined) {
-                xData += ".map((value) => " + dataSource.xScaleFactor + " * value)";
-            }
-            if (dataSource.yScaleFactor !== undefined) {
-                yData += ".map((value) => " + dataSource.yScaleFactor + " * value)";
-            }
-
-            /* Construct conversion function */
-            let code = "const data = cb_data.response; return { x: " + xData + ", y: " + yData;
-            if (plot.auxiliaryDataColumns !== undefined) {
-                for (const [columnName, auxData] of Object.entries(plot.auxiliaryDataColumns)) {
-                    code += ", " + columnName + ": " + auxData;
-                }
-            }
-            if (plot.alphaData !== undefined) {
-                code += ", alpha: " + plot.alphaData;
-                attrs.alpha = {field: "alpha"};
-            }
-            if (dataSource.subjectName !== undefined) {
-                // For each data point, add the same subject_name
-                code += ", subjectName: " + xData + ".map((value) => '" + dataSource.subjectName + "')";
-            }
-            let seriesName = "-";
-            if (dataSource.seriesName !== undefined) {
-                seriesName = dataSource.seriesName;
-            }
-            // For each data point, add the same seriesName
-            code += ", seriesName: " + xData + ".map((value) => '" + seriesName + "')";
-            code += " }";
-
             /* Data source: AJAX GET request to storage system retrieving a JSON */
+            nbPendingAjaxRequests.value++;
             const source = new AjaxDataSource({
                 name: dataSource.sourceName,
                 data_url: dataSource.url,
                 method: "GET",
                 content_type: "",
                 syncable: false,
-                adapter: new CustomJS({code})
+                adapter: {
+                    execute(obj, cb_data) {
+                        nbPendingAjaxRequests.value--;
+
+                        const data = cb_data.response;
+
+                        /* Default is x and y as columns for the scatter plot */
+                        let xData = plot.xData === undefined ? data['x'] : data[plot.xData];
+                        let yData = plot.yData === undefined ? data['y'] : data[plot.yData];
+
+                        /* Apply map if map function given */
+                        if (plot.xDataMap != null) {
+                            xData = xData.map(plot.xDataMap);
+                        }
+                        if (plot.yDataMap != null) {
+                            yData = yData.map(plot.yDataMap);
+                        }
+
+                        /* Scale data if scale factor is given */
+                        if (dataSource.xScaleFactor !== undefined) {
+                            xData = xData.map((value) => dataSource.xScaleFactor * value);
+                        }
+                        if (dataSource.yScaleFactor !== undefined) {
+                            yData = yData.map((value) => dataSource.yScaleFactor * value);
+                        }
+
+                        /* Return dictionary */
+                        let retvals = {
+                            x: xData,
+                            y: yData
+                        };
+
+                        /* Add auxiliary columns */
+                        if (plot.auxiliaryDataColumns != null) {
+                            for (const [columnName, auxData] of Object.entries(plot.auxiliaryDataColumns)) {
+                                retvals[columnName] = data[auxData];
+                            }
+                        }
+                        if (plot.alphaData != null) {
+                            let alphaData = data[plot.alphaData];
+                            if (plot.alphaDataMap != null) {
+                                alphaData = alphaData.map(plot.alphaDataMap);
+                            }
+                            retvals['alpha'] = alphaData;
+                            attrs.alpha = {field: "alpha"};
+                        }
+                        if (dataSource.subjectName != null) {
+                            /* For each data point, add the same subject_name */
+                            retvals['subjectName'] = xData.map(() => dataSource.subjectName);
+                        }
+                        let seriesName = "-";
+                        if (dataSource.seriesName != null) {
+                            seriesName = dataSource.seriesName;
+                        }
+                        /* For each data point, add the same seriesName */
+                        retvals['seriesName'] = xData.map(() => seriesName);
+
+                        /* Return dictionary */
+                        return retvals;
+                    }
+                }
             });
             figure.sources.unshift(source);
 
@@ -650,103 +675,94 @@ function onTap(obj, data) {
 </script>
 
 <template>
-    <div class="tab-content">
-        <div v-for="(plot, index) in plots" :class="(index == 0)?'tab-pane fade show active':'tab-pane fade'"
-             :id="`plot-${uid}-${index}`" role="tabpanel" :aria-labelledby="`plot-tab-${uid}-${index}`">
-            <div :id="`bokeh-figure-${uid}-${index}`" ref="plot"></div>
-        </div>
-    </div>
-    <div v-if="plots.length > 1" class="card mb-2">
-        <div class="card-body plot-controls-card-header">
-            <h6 class="m-1">
-                <!-- Navigation pills for each individual plot, but only if there is more than one -->
-                <ul v-if="plots.length > 1" class="nav nav-pills">
-                    <li v-for="(plot, index) in plots" class="nav-item">
-                        <a :class="(index == 0)?'nav-link active':'nav-link'" :id="'plot-tab-'+uid+'-'+index"
-                           :href="`#plot-${uid}-${index}`" data-toggle="tab" role="tab"
-                           :aria-controls="`plot-${uid}-${index}`"
-                           :aria-selected="index == 0">
-                            {{ plot.title }}
-                        </a>
-                    </li>
-                </ul>
-            </h6>
-        </div>
-    </div>
-    <b-accordion>
-        <b-accordion-item v-for="[categoryIndex, category] in _categoryElements.entries()"
-                          :title="category.title">
-            <b-form-checkbox v-for="element in category.elements"
-                             v-model="element.selected">
+    <div v-if="plots.length === 1" :id="`bokeh-figure-${uid}-0`"></div>
+    <BTabs v-if="plots.length > 1">
+        <BTab v-for="(plot, index) in plots"
+              :key="index"
+              :title="plot.title"
+              :active="index === 0">
+            <div :id="`bokeh-figure-${uid}-${index}`"></div>
+        </BTab>
+    </BTabs>
+    <BAccordion>
+        <BAccordionItem v-for="[categoryIndex, category] in _categoryElements.entries()"
+                        :title="category.title">
+            <BFormCheckbox v-for="element in category.elements"
+                           v-model="element.selected">
                 <span v-if="element.color != null"
                       class="dot" :style="`background-color: #${element.color.toString(16)}`"></span>
                 <span v-if="element.hasParent">└─</span>
                 {{ element.title }}
-            </b-form-checkbox>
-        </b-accordion-item>
-        <b-accordion-item title="Plot options">
-            <b-form-group v-if="optionsWidgets.includes('layout')"
-                          label="Plot layout"
-                          label-cols="4"
-                          content-cols="8">
-                <b-form-select v-model="_layout">
-                    <b-form-select-option value="web">
+            </BFormCheckbox>
+        </BAccordionItem>
+        <BAccordionItem title="Plot options">
+            <BFormGroup v-if="optionsWidgets.includes('layout')"
+                        class="mt-2"
+                        label="Plot layout"
+                        label-cols="4"
+                        content-cols="8">
+                <BFormSelect v-model="_layout">
+                    <BFormSelectOption value="web">
                         Optimize plot for web (plot scales with window size)
-                    </b-form-select-option>
-                    <b-form-select-option value="print-single">
+                    </BFormSelectOption>
+                    <BFormSelectOption value="print-single">
                         Optimize plot for print (single-column layout)
-                    </b-form-select-option>
-                    <b-form-select-option value="print-double">
+                    </BFormSelectOption>
+                    <BFormSelectOption value="print-double">
                         Optimize plot for print (two-column layout)
-                    </b-form-select-option>
-                </b-form-select>
-            </b-form-group>
+                    </BFormSelectOption>
+                </BFormSelect>
+            </BFormGroup>
 
-            <b-form-group v-if="optionsWidgets.includes('legend')"
-                          label="Legend"
-                          label-cols="4"
-                          content-cols="8">
-                <b-form-select v-model="_legendLocation">
-                    <b-form-select-option value="off">Do not show legend</b-form-select-option>
-                    <b-form-select-option value="top_right">Show legend top right</b-form-select-option>
-                    <b-form-select-option value="top_left">Show legend top left</b-form-select-option>
-                    <b-form-select-option value="bottom_right">Show legend bottom right</b-form-select-option>
-                    <b-form-select-option value="bottom_left">Show legend bottom left</b-form-select-option>
-                </b-form-select>
-            </b-form-group>
+            <BFormGroup v-if="optionsWidgets.includes('legend')"
+                        class="mt-2"
+                        label="Legend"
+                        label-cols="4"
+                        content-cols="8">
+                <BFormSelect v-model="_legendLocation">
+                    <BFormSelectOption value="off">Do not show legend</BFormSelectOption>
+                    <BFormSelectOption value="top_right">Show legend top right</BFormSelectOption>
+                    <BFormSelectOption value="top_left">Show legend top left</BFormSelectOption>
+                    <BFormSelectOption value="bottom_right">Show legend bottom right</BFormSelectOption>
+                    <BFormSelectOption value="bottom_left">Show legend bottom left</BFormSelectOption>
+                </BFormSelect>
+            </BFormGroup>
 
-            <b-form-group v-if="optionsWidgets.includes('lineWidth')"
-                          label="Line width"
-                          label-cols="4"
-                          content-cols="8">
-                <b-form-input type="range"
-                              min="0.1"
-                              max="3.0"
-                              step="0.1"
-                              v-model="_lineWidth"/>
-            </b-form-group>
+            <BFormGroup v-if="optionsWidgets.includes('lineWidth')"
+                        class="mt-2"
+                        label="Line width"
+                        label-cols="4"
+                        content-cols="8">
+                <BFormInput type="range"
+                            min="0.1"
+                            max="3.0"
+                            step="0.1"
+                            v-model="_lineWidth"/>
+            </BFormGroup>
 
-            <b-form-group v-if="optionsWidgets.includes('symbolSize')"
-                          label="Symbol size"
-                          label-cols="4"
-                          content-cols="8">
-                <b-form-input type="range"
-                              min="1"
-                              max="20"
-                              step="1"
-                              v-model="_symbolSize"/>
-            </b-form-group>
+            <BFormGroup v-if="optionsWidgets.includes('symbolSize')"
+                        class="mt-2"
+                        label="Symbol size"
+                        label-cols="4"
+                        content-cols="8">
+                <BFormInput type="range"
+                            min="1"
+                            max="20"
+                            step="1"
+                            v-model="_symbolSize"/>
+            </BFormGroup>
 
-            <b-form-group v-if="optionsWidgets.includes('opacity')"
-                          label="Opacity of lines/symbols (measurements only)"
-                          label-cols="4"
-                          content-cols="8">
-                <b-form-input type="range"
-                              min="0"
-                              max="1"
-                              step="0.1"
-                              v-model="_opacity"/>
-            </b-form-group>
-        </b-accordion-item>
-    </b-accordion>
+            <BFormGroup v-if="optionsWidgets.includes('opacity')"
+                        class="mt-2"
+                        label="Opacity of lines/symbols (measurements only)"
+                        label-cols="4"
+                        content-cols="8">
+                <BFormInput type="range"
+                            min="0"
+                            max="1"
+                            step="0.1"
+                            v-model="_opacity"/>
+            </BFormGroup>
+        </BAccordionItem>
+    </BAccordion>
 </template>

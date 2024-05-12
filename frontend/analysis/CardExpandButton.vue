@@ -1,20 +1,21 @@
-<script>
+<script setup>
 
-export default {
-    name: 'card-expand-button',
-    props: {
-        detailUrl: String,
-        functionId: Number,
-        subjects: String
-    }
-};
+import {BButton} from 'bootstrap-vue-next';
+
+const props = defineProps({
+    detailUrl: String,
+    functionId: Number,
+    subjects: String
+});
+
 </script>
 
 <template>
-    <div class="btn-group btn-group-sm float-end">
+    <BButton variant="outline-secondary"
+             size="sm">
         <a :href="`${detailUrl}${functionId}/?subjects=${subjects}`"
-           class="btn btn-default float-end">
+           class="text-reset">
             <i class="fa fa-expand"></i>
         </a>
-    </div>
+    </BButton>
 </template>
