@@ -23,9 +23,11 @@ onMounted(() => {
     _activeCards.value = new Set(_visibleCards.value);
     const subjects = JSON.parse(atob(props.subjects));
     let queryParams = '';
+    /*
     if (Object.entries(subjects).length === 1) {
         queryParams = '?subject_type=' + Object.keys(subjects)[0];
     }
+    */
     axios.get(`${props.apiRegistryUrl}${queryParams}`).then(response => {
         _cards.value = response.data;
     });
@@ -46,6 +48,7 @@ function updateSelection() {
             <b-form-group>
                 <b-form-checkbox-group v-model="_visibleCards">
                     <b-form-checkbox v-for="card in _cards"
+                                     :key="card.id"
                                      :value="card.id"
                                      @change="updateSelection">
                         {{ card.name }}
@@ -56,6 +59,7 @@ function updateSelection() {
     </div>
     <div class="row">
         <div v-for="card in _cards"
+             :key="card.id"
              :class="{ 'col-lg-6': true, 'mb-4': true, 'd-none': !_visibleCards.includes(card.id) }">
             <component v-if="_activeCards.has(card.id)"
                        :is="`${card.visualization_type}-card`"
