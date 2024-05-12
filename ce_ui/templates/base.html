@@ -46,9 +46,9 @@
             <div class="collapse navbar-collapse" id="navbar_supported_content">
 
                 {# Search Bar #}
-                <div class="navbar-nav flex-grow-1">
-                    <form class="form-inline" action="{% url 'ce_ui:select' %}" method="get">
-                        <div class="input-group" id="global-search">
+                <div class="navbar-nav flex-grow-1 ms-5 me-5">
+                    <form class="form-inline w-100" action="{% url 'ce_ui:select' %}" method="get">
+                        <div class="input-group w-100" id="global-search">
                             <label class="sr-only" for="global-search-input">Search Term</label>
                             <input class="form-control" type="search" id="global-search-input"
                                    placeholder="Search names, descriptions, and tags" name="search">
@@ -179,22 +179,23 @@
 <footer class="sticky-footer">
     <div class="container my-auto">
         <div class="copyright text-center my-auto">
-            <a href="https://pastewka.org/" target="_blank">
+            <a href="https://pastewka.org/" target="_blank" class="text-decoration-none">
                 <img src="{% static 'images/uni_freiburg_logo.png' %}" height="64px"></img>
             </a>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <a href="http://www.engineering.pitt.edu/TevisJacobs/" target="_blank">
+            <a href="http://www.engineering.pitt.edu/TevisJacobs/" target="_blank" class="text-decoration-none">
                 <img src="{% static 'images/pitt_logo.png' %}" height="64px"></img>
             </a>
             &nbsp&nbsp&nbsp&#8213;&nbsp&nbsp&nbsp
             Funding by
             &nbsp&nbsp&nbsp
-            <a href="https://cordis.europa.eu/project/rcn/212185_en.html" target="_blank">
+            <a href="https://erc.europa.eu/" target="_blank" class="text-decoration-none">
                 <img src="{% static 'images/erc_logo.png' %}" height="64px"></img>
             </a>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <a href="https://www.livmats.uni-freiburg.de/" target="_blank">
+            <a href="https://www.livmats.uni-freiburg.de/" target="_blank" class="text-decoration-none">
                 <img src="{% static 'images/logo_livmats_small.jpg' %}" height="64px"></img>
+            </a>
+            <a href="https://www.nsf.gov/" target="_blank" class="text-decoration-none">
+                <img src="{% static 'images/nsf_logo.png' %}" height="64px"></img>
             </a>
         </div>
     </div>
