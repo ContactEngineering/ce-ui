@@ -24,14 +24,35 @@
                 {% if request.user.is_anonymous %}
                     <div class="row">
                         <div class="col-6">
-                            <a href="/ui/html/analysis-detail/14/?subjects=eyJzdXJmYWNlIjogWzE1MDVdfQ==">
-                                <img src="{% static 'images/screenshot_psd.png' %}" width="100%"/>
-                            </a>
+                            <div class="opacity-container">
+                                <a href="/ui/html/analysis-detail/14/?subjects=eyJzdXJmYWNlIjogWzE1MDVdfQ==">
+                                    <img class="image"
+                                         src="{% static 'images/screenshot_psd.png' %}"
+                                         width="100%"/>
+                                </a>
+                                <div class="middle">
+                                    <a href="/ui/html/analysis-detail/14/?subjects=eyJzdXJmYWNlIjogWzE1MDVdfQ=="
+                                       class="btn btn-secondary">
+                                        Combine analyses on multiple measurements into a complete
+                                        statistical representation of a surface.
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-6">
-                            <a href="/ui/html/analysis-detail/18/?subjects=eyJ0b3BvZ3JhcGh5IjpbMTk1OV19">
-                                <img src="{% static 'images/screenshot_contact_mechanics.png' %}" width="100%"/>
-                            </a>
+                            <div class="opacity-container">
+                                <a href="/ui/html/analysis-detail/18/?subjects=eyJ0b3BvZ3JhcGh5IjpbMTk1OV19">
+                                    <img class="image"
+                                         src="{% static 'images/screenshot_contact_mechanics.png' %}"
+                                         width="100%"/>
+                                </a>
+                                <div class="middle">
+                                    <a href="/ui/html/analysis-detail/18/?subjects=eyJ0b3BvZ3JhcGh5IjpbMTk1OV19"
+                                       class="btn btn-secondary">
+                                        Carry out contact mechanical calculations with the boundary element method.
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 {% else %}
@@ -44,7 +65,9 @@
                                             <i class="fa fa-fw fa-gem"></i>
                                         </div>
                                         <div class="me-2">
-                                            You have <div class="welcome-page-statistics">{{ num_surfaces }}</div> digital surface twins.
+                                            You have
+                                            <div class="welcome-page-statistics">{{ num_surfaces }}</div>
+                                            digital surface twins.
                                         </div>
                                     </div>
                                 </div>
@@ -58,7 +81,9 @@
                                             <i class="fa fa-fw fa-edit"></i>
                                         </div>
                                         <div class="me-2">
-                                            You have <div class="welcome-page-statistics">{{ num_topographies }}</div> individual measurements.
+                                            You have
+                                            <div class="welcome-page-statistics">{{ num_topographies }}</div>
+                                            individual measurements.
                                         </div>
                                     </div>
                                 </div>
@@ -72,7 +97,9 @@
                                             <i class="fa fa-chart-area"></i>
                                         </div>
                                         <div class="me-2">
-                                            You have <div class="welcome-page-statistics">{{ num_analyses }}</div> computed analyses.
+                                            You have
+                                            <div class="welcome-page-statistics">{{ num_analyses }}</div>
+                                            computed analyses.
                                         </div>
                                     </div>
                                 </div>
@@ -86,7 +113,9 @@
                                             <i class="fa fa-fw fa-share-alt"></i>
                                         </div>
                                         <div class="me-2">
-                                            You have access to <div class="welcome-page-statistics">{{ num_shared_surfaces }}</div> digital twins of other users.
+                                            You have access to
+                                            <div class="welcome-page-statistics">{{ num_shared_surfaces }}</div>
+                                            digital twins of other users.
                                         </div>
                                     </div>
                                 </div>
@@ -136,8 +165,18 @@
                                 for everyone.</p>
                         </div>
                     {% else %}
-                        <div class="col-md-12">
-                            <h2>Login via ORCID</h2>
+                        <div class="col-md-6">
+                            <h2>Browse published digital surface twins</h2>
+                            <p>A <em>digital surface twin</em> combines multiple measurements of a real-life surface,
+                                together with descriptive metadata.
+                            <p>
+                                <a id="orcid-log-in-link" class="btn btn-secondary" href="{% url 'ce_ui:select' %}">
+                                    Browse digital surface twins
+                                </a>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h2>Sign in to upload measurements</h2>
                             <p>
                                 Please allow the ORCID site to authenticate yourself to contact.engineering.
                                 If you don't have an ORCID account yet, you will be able to register.
