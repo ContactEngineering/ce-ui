@@ -1,5 +1,11 @@
 # Changelog for plugin *ce-ui*
 
+## 1.8.0 (2024-05-12)
+
+- MAINT: Simplified Vue components but introducing a parent `AnalysisCard`
+  component, switching to the composition API throughout and making use of
+  bootstrap-vue-next components
+
 ## 1.7.2 (2024-03-22)
 
 - BUG: Fixed version discovery
