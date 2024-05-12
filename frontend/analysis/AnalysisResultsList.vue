@@ -21,7 +21,7 @@ onMounted(() => {
     const visibleCards = $cookies.get("topobank-visible-cards");
     _visibleCards.value = visibleCards === null ? [] : visibleCards;
     _activeCards.value = new Set(_visibleCards.value);
-    const subjects = JSON.parse(atob(props.subjects));
+    //const subjects = JSON.parse(atob(props.subjects));
     let queryParams = '';
     /*
     if (Object.entries(subjects).length === 1) {
