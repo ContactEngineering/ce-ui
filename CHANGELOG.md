@@ -1,5 +1,10 @@
 # Changelog for plugin *ce-ui*
 
+## 1.8.1 (2024-05-13)
+
+- BUG: Screenshots are now JPG files, not PNG
+- MAINT: Cosmetics on home screen text
+
 ## 1.8.0 (2024-05-12)
 
 - MAINT: Simplified Vue components but introducing a parent `AnalysisCard`
