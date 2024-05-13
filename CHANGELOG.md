@@ -1,5 +1,9 @@
 # Changelog for plugin *ce-ui*
 
+## 1.8.3 (2024-05-13)
+
+- BUG: Fixed unit conversion in contact mechanics distributions plots
+
 ## 1.8.2 (2024-05-13)
 
 - BUG: `task_progress` can be null
