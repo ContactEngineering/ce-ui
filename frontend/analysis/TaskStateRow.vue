@@ -1,7 +1,7 @@
 <script setup>
 
 import axios from "axios";
-import {computed, onMounted, ref} from "vue";
+import {computed, onMounted, ref, watch} from "vue";
 
 import {BButton} from "bootstrap-vue-next";
 
@@ -89,6 +89,10 @@ function renew() {
 
 const taskMemoryPretty = computed(() => {
     return prettyBytes(analysis.value.task_memory);
+});
+
+watch(() => analysis.value, () => {
+    scheduleStateCheck();
 });
 
 </script>
