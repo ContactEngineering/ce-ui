@@ -50,7 +50,7 @@ function scheduleStateCheck() {
         }
     }
 
-    if (analysis.value.task_state === 'pe' || analysis.value.task_state === 'st') {
+    if (analysis.value.task_state == null || analysis.value.task_state === 'pe' || analysis.value.task_state === 'st') {
         setTimeout(checkState, props.pollingInterval);
     } else if (analysis.value.task_state === 'fa') {
         // This is a failure. Query reason.
