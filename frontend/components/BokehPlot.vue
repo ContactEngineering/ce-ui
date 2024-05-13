@@ -62,8 +62,8 @@ const props = defineProps({
         type: Array, default() {
             return [{
                 title: "default",  // Title will be used to distinguish between multiple plots. Can be omitted for single plot.
-                xData: "data.x",  // JS code that yields x data
-                yData: "data.y",  // JS code that yields y data
+                xData: data => data.x,  // JS code that yields x data
+                yData: data => data.y,  // JS code that yields y data
                 auxiliaryDataColumns: undefined,  // Auxiliary data columns
                 alphaData: undefined,  // JS code that yields alpha information
                 xAxisType: "linear",  // "log" or "linear"
@@ -474,16 +474,8 @@ function createPlots() {
                         const data = cb_data.response;
 
                         /* Default is x and y as columns for the scatter plot */
-                        let xData = plot.xData === undefined ? data['x'] : data[plot.xData];
-                        let yData = plot.yData === undefined ? data['y'] : data[plot.yData];
-
-                        /* Apply map if map function given */
-                        if (plot.xDataMap != null) {
-                            xData = xData.map(plot.xDataMap);
-                        }
-                        if (plot.yDataMap != null) {
-                            yData = yData.map(plot.yDataMap);
-                        }
+                        let xData = plot.xData(data);
+                        let yData = plot.yData(data);
 
                         /* Scale data if scale factor is given */
                         if (dataSource.xScaleFactor !== undefined) {
@@ -506,11 +498,7 @@ function createPlots() {
                             }
                         }
                         if (plot.alphaData != null) {
-                            let alphaData = data[plot.alphaData];
-                            if (plot.alphaDataMap != null) {
-                                alphaData = alphaData.map(plot.alphaDataMap);
-                            }
-                            retvals['alpha'] = alphaData;
+                            retvals['alpha'] = plot.alphaData(data);
                             attrs.alpha = {field: "alpha"};
                         }
                         if (dataSource.subjectName != null) {
