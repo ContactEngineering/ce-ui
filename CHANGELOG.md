@@ -1,5 +1,10 @@
 # Changelog for plugin *ce-ui*
 
+## 1.8.2 (2024-05-13)
+
+- BUG: `task_progress` can be null
+- BUG: Need to watch for changes in analysis status 
+
 ## 1.8.1 (2024-05-13)
 
 - BUG: Screenshots are now JPG files, not PNG
