@@ -28,6 +28,8 @@ onMounted(() => {
 
 function scheduleStateCheck() {
     // Tasks are still pending or running if this state check is scheduled
+
+    // Get function information if we don't have it yet
     if (_function.value == null) {
         axios.get(analysis.value.function)
             .then(response => {
@@ -35,6 +37,7 @@ function scheduleStateCheck() {
             });
     }
 
+    // Get subject information if we don't have it yet
     if (_subject.value == null) {
         const subject = analysis.value.subject;
         const subjectUrl = subject.topography != null ?
@@ -93,7 +96,7 @@ const taskMemoryPretty = computed(() => {
 <template>
     <tr>
         <td>
-            <ProgressIndicator :value="analysis.task_progress.percent"
+            <ProgressIndicator :value="analysis.task_progress == null ? 0 : analysis.task_progress.percent"
                                :state="analysis.task_state">
             </ProgressIndicator>
         </td>
