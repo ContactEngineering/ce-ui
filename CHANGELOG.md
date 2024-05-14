@@ -1,5 +1,9 @@
 # Changelog for plugin *ce-ui*
 
+## 1.8.4 (2024-05-14)
+- 
+- BUG: Displaying plots with unspecified `xData` and `yData`
+
 ## 1.8.3 (2024-05-13)
 
 - BUG: Fixed unit conversion in contact mechanics distributions plots
