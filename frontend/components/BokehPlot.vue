@@ -62,10 +62,10 @@ const props = defineProps({
         type: Array, default() {
             return [{
                 title: "default",  // Title will be used to distinguish between multiple plots. Can be omitted for single plot.
-                xData: data => data.x,  // JS code that yields x data
-                yData: data => data.y,  // JS code that yields y data
-                auxiliaryDataColumns: undefined,  // Auxiliary data columns
-                alphaData: undefined,  // JS code that yields alpha information
+                xData: null,  // JS code that yields x data
+                yData: null,  // JS code that yields y data
+                auxiliaryDataColumns: null,  // Auxiliary data columns
+                alphaData: null,  // JS code that yields alpha information
                 xAxisType: "linear",  // "log" or "linear"
                 yAxisType: "linear",  // "log" or "linear"
                 xAxisLabel: "x", // Label for the x-axis.
@@ -225,7 +225,7 @@ function legendLabel(dataSource) {
 
     /* Find a label for the legend */
     let legendLabel = dataSource.source_name;
-    if (dataSource.legendLabel !== undefined) {
+    if (dataSource.legendLabel != null) {
         legendLabel = dataSource.legendLabel;
     } else if (props.categories.length > 0) {
         legendLabel = dataSource[props.categories[0].key];
@@ -371,16 +371,16 @@ function createFigures() {
         tools.push(saveTool);
 
         /* Determine type of x and y-axis */
-        const xAxisType = plot.xAxisType === undefined ? "linear" : plot.xAxisType;
-        const yAxisType = plot.yAxisType === undefined ? "linear" : plot.yAxisType;
+        const xAxisType = plot.xAxisType == null ? "linear" : plot.xAxisType;
+        const yAxisType = plot.yAxisType == null ? "linear" : plot.yAxisType;
 
         /* Create and style figure */
         const figure = new Plotting.Figure({
             height: props.height,
             sizing_mode: props.sizingMode,
             aspect_ratio: props.aspectRatio,
-            x_axis_label: plot.xAxisLabel === undefined ? "x" : plot.xAxisLabel,
-            y_axis_label: plot.yAxisLabel === undefined ? "y" : plot.yAxisLabel,
+            x_axis_label: plot.xAxisLabel == null ? "x" : plot.xAxisLabel,
+            y_axis_label: plot.yAxisLabel == null ? "y" : plot.yAxisLabel,
             x_axis_type: xAxisType,
             y_axis_type: yAxisType,
             tools: tools,
@@ -474,14 +474,14 @@ function createPlots() {
                         const data = cb_data.response;
 
                         /* Default is x and y as columns for the scatter plot */
-                        let xData = plot.xData(data);
-                        let yData = plot.yData(data);
+                        let xData = plot.xData == null ? data.x : plot.xData(data);
+                        let yData = plot.yData == null ? data.y : plot.yData(data);
 
                         /* Scale data if scale factor is given */
-                        if (dataSource.xScaleFactor !== undefined) {
+                        if (dataSource.xScaleFactor != null) {
                             xData = xData.map((value) => dataSource.xScaleFactor * value);
                         }
-                        if (dataSource.yScaleFactor !== undefined) {
+                        if (dataSource.yScaleFactor != null) {
                             yData = yData.map((value) => dataSource.yScaleFactor * value);
                         }
 
@@ -563,7 +563,7 @@ function createPlots() {
                         symbolAttrs);
                 }
                 const alphaAttrs = {};
-                if (plot.alphaData !== undefined) {
+                if (plot.alphaData != null) {
                     alphaAttrs.fill_alpha = {field: "alpha"};
                 }
                 symbols.selection_glyph = new Circle({
