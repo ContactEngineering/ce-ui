@@ -1,7 +1,6 @@
 <script setup>
 
 import axios from "axios";
-import {v4 as uuid4} from 'uuid';
 import {computed, onMounted, ref} from "vue";
 
 import {BDropdownDivider, BDropdownItem} from 'bootstrap-vue-next';
@@ -24,13 +23,7 @@ const props = defineProps({
     },
     functionId: Number,
     functionName: String,
-    subjects: String,
-    uid: {
-        type: String,
-        default() {
-            return uuid4();
-        }
-    }
+    subjects: String
 });
 
 // Information about analyses that this card display
