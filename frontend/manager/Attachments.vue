@@ -82,6 +82,8 @@ function handleFileDrop(files) {
                     })
                     .catch((error) => {
                         // ToDo tell user that the upload failed
+                        console.log("Upload failed!");
+                        console.log(error);
                         delete uploadIndicator.value[fileId];
                     });
             })
