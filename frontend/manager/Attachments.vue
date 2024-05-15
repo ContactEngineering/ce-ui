@@ -45,7 +45,7 @@ function uploadDo({ data, file }) {
         return axios.postForm(
             data.url,
             { ...data.fields, file: file },
-            { onUploadProgress: onProgress }
+            { onUploadProgress:  (e) => uploadIndicator.value[data.id].loaded = e.loaded / e.total * 100 }
         );
     } else if (data.method === 'PUT') {
         return axios.put(
