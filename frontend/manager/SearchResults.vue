@@ -79,8 +79,6 @@ const _treeModeInfos = {
 };
 
 onMounted(() => {
-    console.log(props.orderBy);
-
     // init fancytree
     _tree.value = createTree('#surface-tree', {
             extensions: ["glyph", "table"],
@@ -125,7 +123,6 @@ onMounted(() => {
                 cache: false
             },
             postProcess(event, data) {
-                console.log("PostProcess: ", data);
                 _numPages.value = data.response.num_pages;
                 _numItems.value = data.response.num_items;
                 _currentPage.value = data.response.current_page;
@@ -337,15 +334,11 @@ const searchUrl = computed(() => {
     queryParams.set('page', currentPage.value);
     queryParams.set('tree_mode', _treeMode.value);
     url.search = queryParams.toString();
-    // url = url.toString();
-
-    console.log("Requested search URL: " + url.toString());
 
     return url;
 });
 
 function clearSearchTerm() {
-    console.log("Clearing search term...");
     _searchTerm.value = '';
     reload();
 }
@@ -376,7 +369,6 @@ function setSelectedByKey(key, selected) {
 
 function setSelectedKeys(keys) {
     // Select on all nodes with key in `keys`
-    console.log(_tree.value);
     _tree.value.visit(function (node) {
         node.setSelected(keys.includes(node.key), {noEvents: true});
     })
@@ -482,28 +474,28 @@ function createSurface() {
             </div>
         </div>
         <div class="col-md-4">
-            <b-pagination v-model="currentPage"
-                          :disabled="_isLoading"
-                          :limit="9"
-                          :total-rows="_numItems"
-                          :per-page="_pageSize">
-            </b-pagination>
+            <BPagination v-model="currentPage"
+                         :disabled="_isLoading"
+                         :limit="9"
+                         :total-rows="_numItems"
+                         :per-page="_pageSize">
+            </BPagination>
         </div>
         <div class="col-md-4">
-            <b-input-group prepend="Page size">
-                <b-form-select v-model="pageSize"
-                               :disabled="_isLoading"
-                               :options="[10, 25, 50, 100]">
-                </b-form-select>
-            </b-input-group>
+            <BInputGroup prepend="Page size">
+                <BFormSelect v-model="pageSize"
+                             :disabled="_isLoading"
+                             :options="[10, 25, 50, 100]">
+                </BFormSelect>
+            </BInputGroup>
         </div>
         <div class="col-md-4">
-            <b-input-group prepend="Sort by">
-                <b-form-select v-model="orderBy"
-                               :disabled="_isLoading"
-                               :options="orderByFilterChoices">
-                </b-form-select>
-            </b-input-group>
+            <BInputGroup prepend="Sort by">
+                <BFormSelect v-model="orderBy"
+                             :disabled="_isLoading"
+                             :options="orderByFilterChoices">
+                </BFormSelect>
+            </BInputGroup>
         </div>
     </div>
 

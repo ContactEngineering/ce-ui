@@ -1,5 +1,6 @@
 import axios from "axios";
 import {createApp} from 'vue';
+import {createBootstrap} from "bootstrap-vue-next";
 
 import mitt from "mitt";
 
@@ -10,6 +11,7 @@ const eventHub = mitt();
 
 export function createTopographyDetailApp(el, csrfToken, props) {
     let app = createApp(TopographyDetail, props);
+    app.use(createBootstrap());
     axios.defaults.headers.common['X-CSRFToken'] = csrfToken;
     app.provide('csrfToken', csrfToken);
     app.provide('eventHub', eventHub);

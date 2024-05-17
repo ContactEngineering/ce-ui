@@ -15,6 +15,7 @@ dom.watch();
 
 // Vue & Bokeh
 import {createApp} from 'vue';
+import {createBootstrap} from 'bootstrap-vue-next'
 import * as Bokeh from '@bokeh/bokehjs';
 
 window.Bokeh = Bokeh;
@@ -25,7 +26,6 @@ import Basket from './Basket.vue'
 import SearchResults from './SearchResults.vue';
 
 import 'topobank/scss/custom.scss';
-
 /**
  * Event bus for initiating DZI download
  */
@@ -46,6 +46,7 @@ export function getEventHub() {
  */
 export function createDeepZoomImage(el, csrfToken, props) {
     let app = createApp(DeepZoomImage, props);
+    app.use(createBootstrap());
     axios.defaults.headers.common['X-CSRFToken'] = csrfToken;
     app.provide('csrfToken', csrfToken);
     app.provide('eventHub', eventHub);
@@ -58,6 +59,7 @@ export function createDeepZoomImage(el, csrfToken, props) {
  */
 export function createSearchResultsApp(el, csrfToken, props) {
     let app = createApp(SearchResults, props);
+    app.use(createBootstrap());
     axios.defaults.headers.common['X-CSRFToken'] = csrfToken;
     app.provide('csrfToken', csrfToken);
     app.provide('eventHub', eventHub);

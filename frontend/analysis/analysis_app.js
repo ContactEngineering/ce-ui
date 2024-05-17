@@ -1,4 +1,5 @@
 import {createApp} from 'vue';
+import {createBootstrap} from 'bootstrap-vue-next';
 import VueCookies from 'vue-cookies';
 
 import AnalysisResultsList from './AnalysisResultsList.vue';
@@ -21,6 +22,7 @@ export function registerAnalysisCardComponents(app) {
 
 export function createAnalysisResultsListApp(el, csrfToken, props) {
     let app = createApp(AnalysisResultsList, props);
+    app.use(createBootstrap());
     app.use(VueCookies);
     axios.defaults.headers.common['X-CSRFToken'] = csrfToken;
     app.provide('csrfToken', csrfToken);
@@ -32,6 +34,7 @@ export function createAnalysisResultsListApp(el, csrfToken, props) {
 
 export function createAnalysisResultsDetailApp(el, csrfToken, props) {
     let app = createApp(AnalysisResultsDetail, props);
+    app.use(createBootstrap());
     app.use(VueCookies);
     axios.defaults.headers.common['X-CSRFToken'] = csrfToken;
     app.provide('csrfToken', csrfToken);
