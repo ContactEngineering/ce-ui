@@ -1,4 +1,4 @@
-[{% extends 'base.html' %}
+{% extends 'base.html' %}
 {% load icon_tags %}
 {% load guardian_tags %}
 {% load static i18n %}
@@ -71,7 +71,7 @@
         const sharing_status_filter_choices = JSON.parse(document.getElementById('sharing-status-filter-choices').textContent);
         const base_urls = JSON.parse(document.getElementById('base-urls').textContent);
         const initial_select_tab_state = JSON.parse(document.getElementById('initial-select-tab-state').textContent);
-        
+
         topobank.base.createSearchResultsApp(
             '#search-results', '{{ csrf_token }}', {
                 baseUrls: base_urls,
