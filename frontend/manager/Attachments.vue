@@ -4,7 +4,7 @@ import axios from "axios";
 import DropZone from '../components/DropZone.vue';
 import { ref, computed } from 'vue';
 
-import { BCard, BCardBody, BButton, BButtonGroup, BSpinner, BFormInput, BAlert, BProgress, BModal } from 'bootstrap-vue-next';
+import { BCard, BCardBody, BButton, BButtonGroup, BSpinner, BFormInput, BAlert, BProgress, BModal, useToast } from 'bootstrap-vue-next';
 
 
 const props = defineProps({
@@ -13,6 +13,7 @@ const props = defineProps({
     permission: String
 });
 
+const { show } = useToast()
 
 const deleteAttachmentIdx = ref(-1);
 const infoAttachmentIdx = ref(-1);
@@ -45,7 +46,7 @@ function uploadDo({ data, file }) {
         return axios.postForm(
             data.url,
             { ...data.fields, file: file },
-            { onUploadProgress:  (e) => uploadIndicator.value[data.id].loaded = e.loaded / e.total * 100 }
+            { onUploadProgress: (e) => uploadIndicator.value[data.id].loaded = e.loaded / e.total * 100 }
         );
     } else if (data.method === 'PUT') {
         return axios.put(
@@ -75,21 +76,27 @@ function handleFileDrop(files) {
                 const fileId = response.data.id;
                 uploadIndicator.value[fileId] = { filename: file.name, loaded: 0 };
                 uploadDo({ data: response.data, file })
-                    .then(() => uploadFinish({ data: response.data }))
                     .then(() => {
-                        addFileToList({ id: fileId })
-                            .then(() => delete uploadIndicator.value[fileId]);
+                        uploadFinish({ data: response.data })
+                            .then(() => {
+                                addFileToList({ id: fileId })
+                                    .then(() => delete uploadIndicator.value[fileId]);
+                            })
+                            .catch((error) => {
+                                show?.({ props: { title: "Error while finishing upload", body: "The following Error occured during the upload finilazation: " + error.message, variant: 'danger', pos: 'bottom-right' } });
+                                console.error(error);
+                                delete uploadIndicator.value[fileId]
+                            });
                     })
                     .catch((error) => {
-                        // ToDo tell user that the upload failed
-                        console.log("Upload failed!");
-                        console.log(error);
-                        delete uploadIndicator.value[fileId];
+                        show?.({ props: { title: "Error while uploading", body: "The following Error occured during the upload: " + error.message, variant: 'danger', pos: 'bottom-right' } });
+                        console.error(error);
+                        delete uploadIndicator.value[fileId]
                     });
             })
             .catch((error) => {
-                console.log("error while initiating upload");
-                console.log(error);
+                show?.({ props: { title: "Error while initiating upload", body: "The following Error occured during the upload initialization: " + error.message, variant: 'danger', pos: 'bottom-right' } });
+                console.error(error);
             });
     }
 }

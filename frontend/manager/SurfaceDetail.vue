@@ -16,6 +16,7 @@ import {
     BSpinner,
     BTab,
     BTabs,
+    BToastOrchestrator
 } from 'bootstrap-vue-next';
 
 import {filterTopographyForPatchRequest, getIdFromUrl, subjectsToBase64} from "../utils/api";
@@ -283,6 +284,7 @@ const allSelected = computed({
 </script>
 
 <template>
+    <BToastOrchestrator />
     <div class="container">
         <div v-if="_surface == null"
              class="d-flex justify-content-center mt-5">
