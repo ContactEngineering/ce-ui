@@ -1023,3 +1023,26 @@ input[type=number] {
 .fancytree-statusnode-loading {
     display: none;
 }
+
+.opacity-container {
+  position: relative;
+}
+
+.opacity-container:hover .image {
+  opacity: 0.3;
+}
+
+.opacity-container:hover .middle {
+  opacity: 1;
+}
+
+.middle {
+  transition: .5s ease;
+  opacity: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  text-align: center;
+}

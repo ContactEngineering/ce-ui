@@ -76,19 +76,20 @@
             '#search-results', '{{ csrf_token }}', {
                 baseUrls: base_urls,
                 category: initial_select_tab_state.category,
-                categoryFilterChoices: category_filter_choices,
+                categoryFilterChoices: Object.entries(category_filter_choices).map(([x, y]) => { return {value: x, text: y}; }),
                 currentPage: initial_select_tab_state.current_page,
                 isAnonymous: {{ request.user.is_anonymous|yesno:'true,false' }},
                 initialSelection: {{ basket_items_json | safe }},
                 orderBy: initial_select_tab_state.order_by,
-                orderByFilterChoices: order_by_filter_choices,
+                orderByFilterChoices: Object.entries(order_by_filter_choices).map(([x, y]) => { return {value: x, text: y}; }),
                 pageSize: initial_select_tab_state.page_size,
                 searchTerm: initial_select_tab_state.search_term,
                 sharingStatus: initial_select_tab_state.sharing_status,
-                sharingStatusFilterChoices: sharing_status_filter_choices,
+                sharingStatusFilterChoices: Object.entries(sharing_status_filter_choices).map(([x, y]) => { return {value: x, text: y}; }),
                 treeMode: initial_select_tab_state.tree_mode
             }
         );
     </script>
 
 {% endblock javascript %}
+]

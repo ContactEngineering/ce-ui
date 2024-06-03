@@ -1,23 +1,12 @@
-<script>
+<script setup>
 
-import AnalysisCards from 'config/analysis_cards';
+const props = defineProps({
+    functionId: Number,
+    functionName: String,
+    visualizationType: String,
+    subjects: String
+});
 
-export default {
-    name: 'analysis-results-detail',
-    components: AnalysisCards,
-    props: {
-        functionId: Number,
-        functionName: String,
-        visualizationType: String,
-        subjects: String
-    },
-    data() {
-        return {
-            _cards: [],
-            _visible: []
-        }
-    }
-};
 </script>
 
 <template>
