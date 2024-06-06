@@ -158,7 +158,7 @@ const attachmentToShowInfo = computed(() => {
                             @click="infoAttachmentIdx = index; infoModal = true;">
                             <i class="fa-solid fa-circle-info"></i> Info
                         </b-button>
-                        <b-button size="sm" class="ms-2" title="delete" variant="outline-danger"
+                        <b-button v-if="isEditable" size="sm" class="ms-2" title="delete" variant="outline-danger"
                             @click="deleteAttachmentIdx = index; deleteModal = true;">
                             <i class="fa-solid fa-trash"></i> Delete
                         </b-button>
