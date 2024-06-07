@@ -9,6 +9,7 @@ import { BCard, BCardBody, BButton, BButtonGroup, BSpinner, BFormInput, BAlert, 
 
 const props = defineProps({
     surfaceUrl: String,
+    topographyUrl: String,
     attachments: Array,
     permission: String
 });
@@ -31,14 +32,30 @@ function addFileToList({ id }) {
 }
 
 function uploadStart({ fileName, fileType }) {
-    return axios.post("/manager/api/upload/direct/start/",
-        {
-            surface: props.surfaceUrl,
-            kind: "att",
-            file_name: fileName,
-            file_type: fileType
-        }
-    );
+    if (props.surfaceUrl != undefined) {
+        return axios.post("/manager/api/upload/direct/start/",
+            {
+                surface: props.surfaceUrl,
+                kind: "att",
+                file_name: fileName,
+                file_type: fileType
+            }
+        );
+    }
+    else if (props.topographyUrl != undefined) {
+        return axios.post("/manager/api/upload/direct/start/",
+            {
+                topography: props.topographyUrl,
+                kind: "att",
+                file_name: fileName,
+                file_type: fileType
+            }
+        );
+    }
+    else {
+        console.error("topographyUrl and surfaceUrl are undefinde, thats very bad");
+
+    }
 }
 
 function uploadDo({ data, file }) {
@@ -112,6 +129,10 @@ function deleteAttachment(index) {
             props.attachments.splice(index, 1);
             deleteAttachmentIdx.value = -1;
         })
+        .catch((error) => {
+            show?.({ props: { title: "Error while deleting", body: "The following Error occured during the deletion: " + error.message, variant: 'danger', pos: 'bottom-right' } });
+            console.error(error);
+        });
 }
 
 function formatDateTime(dateTimeString) {

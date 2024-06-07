@@ -11,6 +11,7 @@ import {
 import {filterTopographyForPatchRequest, subjectsToBase64} from "../utils/api";
 
 import TopographyBadges from "./TopographyBadges.vue";
+import Attachments from './Attachments.vue';
 
 const props = defineProps({
     batchEdit: {type: Boolean, default: false},
@@ -48,6 +49,7 @@ const selectedModel = computed({
 const _descriptionVisible = ref(props.enlarged);
 const _filtersVisible = ref(props.enlarged);
 const _instrumentVisible = ref(props.enlarged);
+const _attachmentsVisible = ref(props.enlarged);
 
 // GUI logic
 const _editing = ref(props.batchEdit);
@@ -307,6 +309,10 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                         @click="_filtersVisible = !_filtersVisible">
                     Filters
                 </button>
+                <button v-if="!enlarged" class="btn btn-outline-secondary" :class="{ active: _attachmentsVisible }"
+                    @click="_attachmentsVisible = !_attachmentsVisible">
+                    Attachments
+                </button>
             </div>
         </div>
         <div class="card-body">
@@ -520,6 +526,11 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                        <div v-if="_attachmentsVisible" class="container">
+                            <attachments :topography-url="topography.url" :attachments="topography.attachments"
+                                :permission="topography.permissions.current_user.permission">
+                            </attachments>
                         </div>
                     </div>
                 </div>
