@@ -16,11 +16,13 @@ import {
     BSpinner,
     BTab,
     BTabs,
+    BToastOrchestrator
 } from 'bootstrap-vue-next';
 
 import {filterTopographyForPatchRequest, getIdFromUrl, subjectsToBase64} from "../utils/api";
 import {ccLicenseInfo} from "../utils/data";
 
+import Attachments from './Attachments.vue';
 import BandwidthPlot from './BandwidthPlot.vue';
 import DropZone from '../components/DropZone.vue';
 import SurfaceDescription from './SurfaceDescription.vue';
@@ -110,7 +112,7 @@ function getOriginalSurfaceId() {
 
 function updateCard() {
     /* Fetch JSON describing the card */
-    axios.get(`${props.surfaceUrl}?children=yes&permissions=yes&properties=yes`).then(response => {
+    axios.get(`${props.surfaceUrl}?children=yes&permissions=yes&properties=yes&attachments=yes`).then(response => {
         _surface.value = response.data;
         _permissions.value = response.data.permissions;
         _topographies.value = response.data.topography_set;
@@ -282,6 +284,7 @@ const allSelected = computed({
 </script>
 
 <template>
+    <BToastOrchestrator />
     <div class="container">
         <div v-if="_surface == null"
              class="d-flex justify-content-center mt-5">
@@ -371,6 +374,12 @@ const allSelected = computed({
                                             :properties="_surface.properties"
                                             :permission="_permissions.current_user.permission">
                         </surface-properties>
+                    </b-tab>
+                    <b-tab title="Attachments">
+                        <attachments v-if="_surface != null" :file-parent-type="'surface'"
+                            :file-parent-url="_surface.url" :attachments="_surface.attachments"
+                            :permission="_permissions.current_user.permission">
+                        </attachments>
                     </b-tab>
                     <b-tab v-if="_surface != null"
                            title="Permissions">
