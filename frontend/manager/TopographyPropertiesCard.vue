@@ -528,7 +528,8 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                             </div>
                         </div>
                         <div v-if="_attachmentsVisible" class="container">
-                            <attachments :topography-url="topography.url" :attachments="topography.attachments"
+                            <attachments :file-parent-type="'topography'" :file-parent-url="topography.url"
+                                :attachments="topography.attachments"
                                 :permission="topography.permissions.current_user.permission">
                             </attachments>
                         </div>

@@ -376,10 +376,9 @@ const allSelected = computed({
                         </surface-properties>
                     </b-tab>
                     <b-tab title="Attachments">
-                        <attachments v-if="_surface != null"
-                                     :surface-url="_surface.url"
-                                     :attachments="_surface.attachments"
-                                     :permission="_permissions.current_user.permission">
+                        <attachments v-if="_surface != null" :file-parent-type="'surface'"
+                            :file-parent-url="_surface.url" :attachments="_surface.attachments"
+                            :permission="_permissions.current_user.permission">
                         </attachments>
                     </b-tab>
                     <b-tab v-if="_surface != null"

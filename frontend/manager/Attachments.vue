@@ -8,8 +8,8 @@ import { BCard, BCardBody, BButton, BButtonGroup, BSpinner, BFormInput, BAlert, 
 
 
 const props = defineProps({
-    surfaceUrl: String,
-    topographyUrl: String,
+    fileParentType: String,
+    fileParentUrl: String,
     attachments: Array,
     permission: String
 });
@@ -32,30 +32,13 @@ function addFileToList({ id }) {
 }
 
 function uploadStart({ fileName, fileType }) {
-    if (props.surfaceUrl != undefined) {
-        return axios.post("/manager/api/upload/direct/start/",
-            {
-                surface: props.surfaceUrl,
-                kind: "att",
-                file_name: fileName,
-                file_type: fileType
-            }
-        );
+    const body = {
+        kind: "att",
+        file_name: fileName,
+        file_type: fileType
     }
-    else if (props.topographyUrl != undefined) {
-        return axios.post("/manager/api/upload/direct/start/",
-            {
-                topography: props.topographyUrl,
-                kind: "att",
-                file_name: fileName,
-                file_type: fileType
-            }
-        );
-    }
-    else {
-        console.error("topographyUrl and surfaceUrl are undefinde, thats very bad");
-
-    }
+    body[props.fileParentType] = props.fileParentUrl
+    return axios.post("/manager/api/upload/direct/start/", body);
 }
 
 function uploadDo({ data, file }) {
