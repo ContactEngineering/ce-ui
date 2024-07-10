@@ -32,7 +32,8 @@ classifiers = [
 ]
 dependencies = [
     'DiscoverVersion',
-    'django-termsandconditions>=2.0.8'
+    'django-termsandconditions>=2.0.8',
+    'celery[redis]'
 ]
 
 [project.urls]
