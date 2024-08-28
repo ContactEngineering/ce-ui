@@ -1,16 +1,16 @@
 """Test related to Find&elect tab except of searching"""
 
 import pytest
-
 from django.shortcuts import reverse
 from rest_framework.test import APIRequestFactory
-
-from topobank.manager.tests.utils import SurfaceFactory, UserFactory, Topography1DFactory, TagFactory
-from topobank.utils import assert_no_form_errors
+from topobank.testing.factories import (SurfaceFactory, TagFactory,
+                                        Topography1DFactory, UserFactory)
+from topobank.testing.utils import assert_no_form_errors
 
 from ..utils import selected_instances
-from ..views import select_surface, unselect_surface, select_topography, unselect_topography, select_tag, \
-    unselect_tag, unselect_all, DEFAULT_SELECT_TAB_STATE
+from ..views import (DEFAULT_SELECT_TAB_STATE, select_surface, select_tag,
+                     select_topography, unselect_all, unselect_surface,
+                     unselect_tag, unselect_topography)
 
 
 @pytest.mark.django_db

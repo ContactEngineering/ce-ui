@@ -1,6 +1,5 @@
 from django.shortcuts import reverse
-
-from topobank.manager.tests.utils import ordereddicts_to_dicts
+from topobank.testing.utils import ordereddicts_to_dicts
 
 from ..views import SurfaceListView
 

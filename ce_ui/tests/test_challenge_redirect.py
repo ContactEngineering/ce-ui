@@ -1,9 +1,7 @@
 import pytest
-
-from django.test import SimpleTestCase
 from django.conf import settings
-
-from topobank.manager.tests.utils import UserFactory
+from django.test import SimpleTestCase
+from topobank.testing.factories import UserFactory
 
 
 @pytest.mark.skipif(settings.CHALLENGE_REDIRECT_URL == '', reason="No URL for challenge given in settings.")

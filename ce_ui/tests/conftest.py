@@ -1,9 +1,12 @@
 import pytest
-
-from topobank.fixtures import handle_usage_statistics, sync_analysis_functions, test_analysis_function  # noqa: F401
-from topobank.manager.tests.utils import two_topos, user_three_topographies_three_surfaces_three_tags, \
-    UserFactory  # noqa: F401
-from topobank.organizations.tests.utils import OrganizationFactory
+from topobank.testing.factories import OrganizationFactory  # noqa: F401
+from topobank.testing.factories import UserFactory
+from topobank.testing.fixtures import handle_usage_statistics  # noqa: F401
+from topobank.testing.fixtures import sync_analysis_functions  # noqa: F401
+from topobank.testing.fixtures import test_analysis_function  # noqa: F401
+from topobank.testing.fixtures import two_topos  # noqa: F401
+from topobank.testing.fixtures import \
+    user_three_topographies_three_surfaces_three_tags  # noqa: F401
 
 from .fixtures import orcid_socialapp  # noqa: F401
 

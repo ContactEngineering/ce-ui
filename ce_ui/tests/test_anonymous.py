@@ -1,14 +1,12 @@
 import pytest
 from django.shortcuts import reverse
 from django.utils import timezone
-
-from topobank.utils import assert_in_content, assert_not_in_content
 from termsandconditions.models import TermsAndConditions
-
+from topobank.testing.utils import assert_in_content, assert_not_in_content
 
 #
-# The code in these tests rely on a middleware which replaces
-# Django's AnonymousUser by the one of django guardian
+# The code in this library relies on a middleware which replaces
+# Django's AnonymousUser by our own anonymous user (that has a database id)
 #
 
 

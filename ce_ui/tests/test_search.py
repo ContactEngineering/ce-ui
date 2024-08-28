@@ -1,17 +1,15 @@
 """Test related to searching"""
 
 import pytest
-
 from django.shortcuts import reverse
 from rest_framework.test import APIRequestFactory
-
 from topobank.manager.models import Tag
 from topobank.manager.utils import subjects_to_base64
+from topobank.testing.factories import (SurfaceFactory, Topography1DFactory,
+                                        UserFactory)
+from topobank.testing.utils import ordereddicts_to_dicts
 
-from topobank.manager.tests.utils import ordereddicts_to_dicts, Topography1DFactory, UserFactory, SurfaceFactory
-
-from ..views import SurfaceSearchPaginator, SurfaceListView, TagTreeView
-
+from ..views import SurfaceListView, SurfaceSearchPaginator, TagTreeView
 from .utils import search_surfaces
 
 
@@ -87,7 +85,7 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
 
     assert response.status_code == 200
 
-    user_url = request.build_absolute_uri(user.get_absolute_url())
+    user_url = user.get_absolute_url(request)
 
     topo1a_analyze = f"/ui/html/analysis-list/?subjects={subjects_to_base64([topo1a])}"
     topo1b_analyze = f"/ui/html/analysis-list/?subjects={subjects_to_base64([topo1b])}"
@@ -606,7 +604,7 @@ def test_tag_search_with_request_factory(user_three_surfaces_four_topographies):
 
     assert response.status_code == 200
 
-    user_url = request.build_absolute_uri(user.get_absolute_url())
+    user_url = user.get_absolute_url(request)
 
     topo1a_analyze = f"/ui/html/analysis-list/?subjects={subjects_to_base64([topo1a])}"
     topo1b_analyze = f"/ui/html/analysis-list/?subjects={subjects_to_base64([topo1b])}"
@@ -1230,7 +1228,7 @@ def test_search_for_user_with_request_factory():
     #
     # User1 shares his surface with user2
     #
-    surf1.set_permissions(user2, 'edit')
+    surf1.grant_permission(user2, 'edit')
 
     # User 2 searches, now surface of user 1 is also visible
     result = search_surfaces(request_factory, user2, "Bob")

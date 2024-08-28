@@ -1,16 +1,14 @@
 import logging
 
 from django import shortcuts
-
-from guardian.shortcuts import get_perms
 from rest_framework import serializers
 from tagulous.contrib.drf import TagRelatedManagerField
-
-from topobank.manager.models import Surface, Topography, Tag
-from topobank.manager.serializers import SurfaceSerializer, TopographySerializer
+from topobank.manager.models import Surface, Tag, Topography
+from topobank.manager.serializers import (SurfaceSerializer,
+                                          TopographySerializer)
 from topobank.manager.utils import subjects_to_base64
 
-from .utils import get_search_term, filtered_topographies
+from .utils import filtered_topographies, get_search_term
 
 _log = logging.getLogger(__name__)
 
@@ -28,8 +26,7 @@ class TopographySearchSerializer(serializers.ModelSerializer):
 
     creator = serializers.HyperlinkedRelatedField(
         read_only=True,
-        view_name='users:detail',
-        lookup_field='username',
+        view_name='users:user-api-detail',
         default=serializers.CurrentUserDefault()
     )
 
@@ -59,16 +56,13 @@ class TopographySearchSerializer(serializers.ModelSerializer):
         :return: dict with { url_name: url }
         """
         user = self.context['request'].user
-        surface = obj.surface
-
-        perms = get_perms(user, surface)  # TODO are permissions needed here?
 
         urls = {
             'select': shortcuts.reverse('ce_ui:topography-select', kwargs=dict(pk=obj.pk)),
             'unselect': shortcuts.reverse('ce_ui:topography-unselect', kwargs=dict(pk=obj.pk))
         }
 
-        if 'view_surface' in perms:
+        if obj.has_permission(user, 'view'):
             urls['detail'] = f"{shortcuts.reverse('ce_ui:topography-detail')}?topography={obj.pk}"
             urls['analyze'] = f"{shortcuts.reverse('ce_ui:results-list')}?subjects={subjects_to_base64([obj])}"
 
@@ -113,8 +107,7 @@ class SurfaceSearchSerializer(serializers.ModelSerializer):
 
     creator = serializers.HyperlinkedRelatedField(
         read_only=True,
-        view_name='users:detail',
-        lookup_field='username',
+        view_name='users:user-api-detail',
         default=serializers.CurrentUserDefault()
     )
 
@@ -172,13 +165,12 @@ class SurfaceSearchSerializer(serializers.ModelSerializer):
     def get_urls(self, obj):
 
         user = self.context['request'].user
-        perms = get_perms(user, obj)  # TODO are permissions needed here?
 
         urls = {
             'select': shortcuts.reverse('ce_ui:surface-select', kwargs=dict(pk=obj.pk)),
             'unselect': shortcuts.reverse('ce_ui:surface-unselect', kwargs=dict(pk=obj.pk))
         }
-        if 'view_surface' in perms:
+        if obj.has_permission(user, 'view'):
             urls['detail'] = f"{shortcuts.reverse('ce_ui:surface-detail')}?surface={obj.pk}"
             if obj.num_topographies() > 0:
                 urls.update({
