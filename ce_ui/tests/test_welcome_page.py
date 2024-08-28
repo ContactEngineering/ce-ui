@@ -24,7 +24,6 @@ def test_instances(test_analysis_function):
     return users, surfaces, topographies
 
 
-@pytest.mark.skip
 @pytest.mark.django_db
 def test_welcome_page_statistics(
     client, test_instances, handle_usage_statistics, orcid_socialapp
