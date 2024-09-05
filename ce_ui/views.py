@@ -18,7 +18,8 @@ from termsandconditions.models import TermsAndConditions
 from termsandconditions.views import AcceptTermsView
 from termsandconditions.views import TermsView as OrigTermsView
 from topobank.analysis.models import AnalysisFunction
-from topobank.analysis.registry import AnalysisRegistry
+from topobank.analysis.registry import (
+    get_analysis_function_names, get_visualization_type_for_function_name)
 from topobank.manager.containers import write_surface_container
 from topobank.manager.models import Surface, Tag, Topography
 from topobank.manager.utils import get_reader_infos, subjects_from_base64
@@ -778,8 +779,7 @@ class AnalysisResultDetailView(DetailView):
 
         function = self.object
         # Check if user is allowed to use this function
-        reg = AnalysisRegistry()
-        if function.name not in reg.get_analysis_function_names(self.request.user):
+        if function.name not in get_analysis_function_names(self.request.user):
             raise PermissionDenied()
 
         # filter subjects to those this user is allowed to see
@@ -789,7 +789,7 @@ class AnalysisResultDetailView(DetailView):
 
         # get analysis result type
         visualization_app_name, visualization_type = (
-            reg.get_visualization_type_for_function_name(function.name)
+            get_visualization_type_for_function_name(function.name)
         )
 
         context["function"] = function
