@@ -30,17 +30,20 @@ function emitUpdateTopography() {
     let t = cloneDeep(props.topography);
     // Remove upload instructions
     delete t.file;
-    delete t.upload_instructions;
+    delete t.datafile.upload_instructions;
     // Notify that topography has changed
     emit('update:topography', t);
 }
 
 onMounted(() => {
     // Start upload
-    if (props.topography.upload_instructions.method === 'POST') {
+    if (props.topography.datafile.upload_instructions.method === 'POST') {
         axios.postForm(
-            props.topography.upload_instructions.url,
-            {...props.topography.upload_instructions.fields, file: props.topography.file},
+            props.topography.datafile.upload_instructions.url,
+            {
+                ...props.topography.datafile.upload_instructions.fields,
+                file: props.topography.file
+            },
             {onUploadProgress: onProgress}
         ).then(response => {
             // Upload successfully finished
@@ -49,9 +52,9 @@ onMounted(() => {
             // Upload failed
             _error.value = error;
         });
-    } else if (props.topography.upload_instructions.method === 'PUT') {
+    } else if (props.topography.datafile.upload_instructions.method === 'PUT') {
         axios.put(
-            props.topography.upload_instructions.url,
+            props.topography.datafile.upload_instructions.url,
             props.topography.file,
             {
                 headers: {'Content-Type': 'binary/octet-stream'},
@@ -65,7 +68,7 @@ onMounted(() => {
             _error.value = error;
         });
     } else {
-        alert(`Unknown upload method: "${props.topography.upload_instructions.method}`);
+        alert(`Unknown upload method: "${props.topography.datafile.upload_instructions.method}`);
     }
 });
 
@@ -80,7 +83,7 @@ onMounted(() => {
         </div>
         <div class="card-body">
             <b-alert :model-value="_error != null"
-                  variant="danger">
+                     variant="danger">
                 {{ _error.message }}: {{ _error.response.statusText }}
             </b-alert>
             <b-progress v-if="_error == null"

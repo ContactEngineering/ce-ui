@@ -52,13 +52,13 @@ onMounted(() => {
 });
 
 const isUploading = computed(() => {
-    return props.topography !== null && props.topography.upload_instructions != null;
+    return props.topography !== null && props.topography.datafile.upload_instructions != null;
 });
 
 function scheduleStateCheck(topography) {
     if (topography === null) {
         checkState();
-    } else if (topography.upload_instructions == null && ['no', 'pe', 'st'].includes(topography.task_state)) {
+    } else if (topography.datafile.upload_instructions == null && ['no', 'pe', 'st'].includes(topography.task_state)) {
         if (_currentTimeout != null) {
             clearTimeout(_currentTimeout);
         }
