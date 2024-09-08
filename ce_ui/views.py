@@ -18,8 +18,8 @@ from termsandconditions.models import TermsAndConditions
 from termsandconditions.views import AcceptTermsView
 from termsandconditions.views import TermsView as OrigTermsView
 from topobank.analysis.models import AnalysisFunction
-from topobank.analysis.registry import (
-    get_analysis_function_names, get_visualization_type_for_function_name)
+from topobank.analysis.registry import (get_analysis_function_names,
+                                        get_visualization_type)
 from topobank.manager.containers import write_surface_container
 from topobank.manager.models import Surface, Tag, Topography
 from topobank.manager.utils import get_reader_infos, subjects_from_base64
@@ -788,8 +788,8 @@ class AnalysisResultDetailView(DetailView):
         )
 
         # get analysis result type
-        visualization_app_name, visualization_type = (
-            get_visualization_type_for_function_name(function.name)
+        visualization_app_name, visualization_type = get_visualization_type(
+            function.name
         )
 
         context["function"] = function
