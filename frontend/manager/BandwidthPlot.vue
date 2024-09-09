@@ -124,7 +124,7 @@ onMounted(() => {
     setPlotData(props.topographies);
 });
 
-watch(props.topographies, (newValue, oldValue) => {
+watch(() => props.topographies, (newValue, oldValue) => {
     setPlotData(newValue);
 });
 
