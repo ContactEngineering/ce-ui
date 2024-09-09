@@ -5,7 +5,9 @@ import {cloneDeep} from "lodash";
 import {onMounted, ref} from "vue";
 
 import {
-    BAlert,
+    BButton,
+    BButtonGroup,
+    BCard,
     BProgress
 } from 'bootstrap-vue-next';
 
@@ -72,25 +74,35 @@ onMounted(() => {
     }
 });
 
+function deleteTopography() {
+    axios.delete(props.topography.url);
+    this.$emit('delete:topography', props.topography.url);
+}
+
 </script>
 
 <template>
-    <div class="card mb-1">
-        <div class="card-header">
-            <div>
-                <h5 class="d-inline">{{ topography.name }}</h5>
-            </div>
+    <BCard class="mb-1"
+           :class="{ 'text-white bg-danger': _error != null }">
+        <template #header>
+            <h5 class="float-start">{{ topography.name }}</h5>
+            <BButtonGroup v-if="_error != null"
+                          size="sm" class="float-end">
+                <BButton variant="outline-light"
+                         class="text-white float-end ms-2"
+                         @click="deleteTopography">
+                    <i class="fa fa-trash"></i>
+                </BButton>
+            </BButtonGroup>
+        </template>
+        <div v-if="_error != null">
+            <b>Upload failed:</b> {{ _error.message }}
+            ({{ _error.response.statusText }})
         </div>
-        <div class="card-body">
-            <b-alert :model-value="_error != null"
-                     variant="danger">
-                {{ _error.message }}: {{ _error.response.statusText }}
-            </b-alert>
-            <b-progress v-if="_error == null"
-                        show-progress animated
-                        :value="_loaded"
-                        :max="_total">
-            </b-progress>
-        </div>
-    </div>
+        <b-progress v-if="_error == null"
+                    show-progress animated
+                    :value="_loaded"
+                    :max="_total">
+        </b-progress>
+    </BCard>
 </template>
