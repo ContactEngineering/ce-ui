@@ -60,9 +60,9 @@ const _error = ref(null);
 const _saving = ref(false);
 const _showDeleteModal = ref(false);
 
-const _showDescription = ref(false);
-const _showInstrument = ref(false);
-const _showFilters = ref(false);
+const _descriptionVisible = ref(props.enlarged);
+const _instrumentVisible = ref(props.enlarged);
+const _filtersVisible = ref(props.enlarged);
 
 // Old topography data (used to restore data when "Discard" is clicked)
 let _savedTopography = null;
@@ -296,17 +296,17 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
             </BButtonGroup>
             <BButtonGroup size="sm" class="float-end me-2">
                 <BButton v-if="!enlarged"
-                         v-model:pressed="_showDescription"
+                         v-model:pressed="_descriptionVisible"
                          variant="outline-secondary">
                     Description
                 </BButton>
                 <BButton v-if="!enlarged"
-                         v-model:pressed="_showInstrument"
+                         v-model:pressed="_instrumentVisible"
                          variant="outline-secondary">
                     Instrument
                 </BButton>
                 <BButton v-if="!enlarged"
-                         v-model:pressed="_showFilters"
+                         v-model:pressed="_filtersVisible"
                          variant="outline-secondary">
                     Filters
                 </BButton>
@@ -405,7 +405,7 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                 </div>
             </div>
         </div>
-        <div v-if="_showDescription">
+        <div v-if="_descriptionVisible">
             <label for="input-description">Description</label>
             <BFormTextarea id="input-description"
                            placeholder="Please provide a short description of this measurement"
@@ -415,7 +415,7 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                            rows="5">
             </BFormTextarea>
         </div>
-        <div v-if="_showInstrument">
+        <div v-if="_instrumentVisible">
             <div class="row">
                 <div class="col-6">
                     <label for="input-instrument-name">Instrument name</label>
@@ -478,7 +478,7 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                 </div>
             </div>
         </div>
-        <div v-if="_showFilters">
+        <div v-if="_filtersVisible">
             <div class="row">
                 <div class="col-6 mt-1">
                     <label for="input-detrending">Detrending</label>
