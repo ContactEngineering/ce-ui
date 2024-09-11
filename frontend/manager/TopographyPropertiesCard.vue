@@ -78,8 +78,14 @@ const _units = [
     {value: "pm", text: 'pm'}
 ];
 const _instrumentChoices = [
-    {value: 'undefined', text: 'Instrument of unknown type - all data considered as reliable'},
-    {value: 'microscope-based', text: 'Microscope-based instrument with known resolution'},
+    {
+        value: 'undefined',
+        text: 'Instrument of unknown type - all data considered as reliable'
+    },
+    {
+        value: 'microscope-based',
+        text: 'Microscope-based instrument with known resolution'
+    },
     {value: 'contact-based', text: 'Contact-based instrument with known tip radius'}
 ];
 const _detrendChoices = [
@@ -89,7 +95,10 @@ const _detrendChoices = [
 ];
 const _undefinedDataChoices = [
     {value: 'do-not-fill', text: 'Do not fill undefined data points'},
-    {value: 'harmonic', text: 'Interpolate undefined data points with harmonic functions'}
+    {
+        value: 'harmonic',
+        text: 'Interpolate undefined data points with harmonic functions'
+    }
 ];
 
 function saveEdits() {
@@ -209,6 +218,8 @@ const instrumentParametersResolutionUnit = instrumentParameterModel('resolution'
 const instrumentParametersTipRadiusValue = instrumentParameterModel('tip_radius', 'value');
 const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius', 'unit');
 
+const hasThumbnail = computed(() => props.topography.thumbnail != null && props.topography.thumbnail.file != null);
+
 </script>
 
 <template>
@@ -220,24 +231,26 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                                :disabled="_editing"
                                size="sm">
                 </BFormCheckbox>
-                <BFormSelect v-if="topography.channel_names != null && topography.channel_names.length > 0"
-                             :options="channelOptions"
-                             v-model="topography.data_source"
-                             :disabled="!_editing"
-                             size="sm">
+                <BFormSelect
+                    v-if="topography.channel_names != null && topography.channel_names.length > 0"
+                    :options="channelOptions"
+                    v-model="topography.data_source"
+                    :disabled="!_editing"
+                    size="sm">
                 </BFormSelect>
             </div>
             <div v-if="batchEdit" class="float-start fs-5 fw-bold">
                 Batch edit
             </div>
-            <BButtonGroup v-if="!batchEdit && topography != null && !_editing && !_saving && !saving && !enlarged"
-                          size="sm" class="float-end">
-                    <BButton v-if="!selected"
-                             class="float-end ms-2"
-                             variant="outline-secondary"
-                             :href="`/ui/html/topography/?topography=${topography.id}`">
-                        <i class="fa fa-expand"></i>
-                    </BButton>
+            <BButtonGroup
+                v-if="!batchEdit && topography != null && !_editing && !_saving && !saving && !enlarged"
+                size="sm" class="float-end">
+                <BButton v-if="!selected"
+                         class="float-end ms-2"
+                         variant="outline-secondary"
+                         :href="`/ui/html/topography/?topography=${topography.id}`">
+                    <i class="fa fa-expand"></i>
+                </BButton>
                 <BButton v-if="selected"
                          class="float-end ms-2"
                          variant="outline-secondary"
@@ -245,8 +258,9 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                     <i class="fa fa-expand"></i>
                 </BButton>
             </BButtonGroup>
-            <BButtonGroup v-if="!batchEdit && topography != null && !_editing && !_saving && !saving"
-                          size="sm" class="float-end">
+            <BButtonGroup
+                v-if="!batchEdit && topography != null && !_editing && !_saving && !saving"
+                size="sm" class="float-end">
                 <BButton v-if="!disabled"
                          variant="outline-secondary"
                          :disabled="selected"
@@ -276,7 +290,8 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                     <i class="fa fa-trash"></i>
                 </BButton>
             </BButtonGroup>
-            <BButtonGroup v-if="_editing || _saving || saving" size="sm" class="float-end">
+            <BButtonGroup v-if="_editing || _saving || saving" size="sm"
+                          class="float-end">
                 <BButton v-if="_editing"
                          variant="danger"
                          @click="discardEdits">
@@ -320,14 +335,14 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
             Please wait...
         </div>
         <div v-if="topography != null" class="row">
-            <div v-if="topography.thumbnail.file != null" class="col-2">
+            <div v-if="hasThumbnail" class="col-2">
                 <a :href="`/ui/html/topography/?topography=${topography.id}`">
                     <img class="img-thumbnail mw-100"
                          :src="topography.thumbnail.file">
                 </a>
             </div>
             <div
-                :class="{ 'col-10': topography.thumbnail.file != null, 'col-12': topography.thumbnail.file == null }">
+                :class="{ 'col-10': hasThumbnail, 'col-12': hasThumbnail }">
                 <div class="container">
                     <div class="row">
                         <div class="col-6">
@@ -368,16 +383,18 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                                             v-model="topography.size_x"
                                             :disabled="!_editing || !topography.size_editable">
                                 </BFormInput>
-                                <span v-if="batchEdit || topography.resolution_y != null"
-                                      class="input-group-text">
+                                <span
+                                    v-if="batchEdit || topography.resolution_y != null"
+                                    class="input-group-text">
                                             &times;
                                         </span>
-                                <BFormInput v-if="batchEdit || topography.resolution_y != null"
-                                            type="number"
-                                            step="any"
-                                            :class="highlightInput('size_y')"
-                                            v-model="topography.size_y"
-                                            :disabled="!_editing || !topography.size_editable">
+                                <BFormInput
+                                    v-if="batchEdit || topography.resolution_y != null"
+                                    type="number"
+                                    step="any"
+                                    :class="highlightInput('size_y')"
+                                    v-model="topography.size_y"
+                                    :disabled="!_editing || !topography.size_editable">
                                 </BFormInput>
                                 <BFormSelect class="unit-select"
                                              :options="_units"
@@ -387,7 +404,8 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                                 </BFormSelect>
                             </div>
                             <small v-if="batchEdit">
-                                When batch editing line scans, only the first entry of the physical size
+                                When batch editing line scans, only the first entry of
+                                the physical size
                                 will be used to set the overall length of the line scan.
                             </small>
                         </div>
@@ -437,7 +455,8 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
             </div>
             <div v-if="topography.instrument_type == 'microscope-based'" class="row">
                 <div class="col-12 mt-1">
-                    <label for="input-instrument-resolution">Lateral instrument resolution</label>
+                    <label for="input-instrument-resolution">Lateral instrument
+                        resolution</label>
                     <div id="input-instrument-resolution" class="input-group mb-1">
                         <BFormInput type="number"
                                     step="any"
@@ -503,11 +522,15 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
             </div>
         </div>
         <template #footer>
-            <TopographyBadges v-if="!batchEdit && !enlarged" :topography="topography"></TopographyBadges>
-            <small v-if="batchEdit">You are about to change the metadata of multiple measurements. Note that batch
+            <TopographyBadges v-if="!batchEdit && !enlarged"
+                              :topography="topography"></TopographyBadges>
+            <small v-if="batchEdit">You are about to change the metadata of multiple
+                measurements. Note that batch
                 editing will only
-                update entries that are editable, i.e. that are not fixed by the contents of the data file. This
-                includes physical sizes, unit or the height scale and may differ between the measurements you are
+                update entries that are editable, i.e. that are not fixed by the
+                contents of the data file. This
+                includes physical sizes, unit or the height scale and may differ between
+                the measurements you are
                 updating.</small>
         </template>
     </BCard>
