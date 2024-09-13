@@ -67,39 +67,39 @@ const base64Subjects = computed(() => {
                 <p>Loading...</p>
             </div>
         </div>
-        <b-alert :model-value="_error != null"
+        <BAlert :model-value="_error != null"
                  variant="danger">
             {{ _error.message }}: {{ _error.response.statusText }}
-        </b-alert>
+        </BAlert>
         <div v-if="_topography !== null"
              class="row">
             <div class="col-12">
-                <b-tabs class="nav-pills-custom"
+                <BTabs class="nav-pills-custom"
                         content-class="w-100"
                         fill
                         pills
                         vertical>
-                    <b-tab title="Visualization">
-                        <line-scan-plot v-if="_topography.size_y === null"
-                                        :topography="_topography">
-                        </line-scan-plot>
-                        <deep-zoom-image v-if="_topography.size_y !== null"
-                                         :colorbar="true"
-                                         :prefix-url="`${_topography.url}dzi/`">
-                        </deep-zoom-image>
-                    </b-tab>
-                    <b-tab title="Properties">
-                        <topography-card :topography-url="_topography.url"
-                                         v-model:topography="_topography"
-                                         :enlarged="true"
-                                         :disabled="_disabled">
-                        </topography-card>
-                    </b-tab>
-                    <b-tab title="Attachments">
+                    <BTab title="Visualization">
+                        <LineScanPlot v-if="_topography.size_y === null"
+                                      :topography="_topography">
+                        </LineScanPlot>
+                        <DeepZoomImage v-if="_topography.size_y !== null"
+                                       :colorbar="true"
+                                       :folder-url="_topography.deepzoom">
+                        </DeepZoomImage>
+                    </BTab>
+                    <BTab title="Properties">
+                        <TopographyCard :topography-url="_topography.url"
+                                        v-model:topography="_topography"
+                                        :enlarged="true"
+                                        :disabled="_disabled">
+                        </TopographyCard>
+                    </BTab>
+                    <BTab title="Attachments">
                         <attachments :topography-url="_topography.url" :attachments="_topography.attachments"
                             :permission="_topography.permissions.current_user.permission">
                         </attachments>
-                    </b-tab>
+                    </BTab>
                     <template #tabs-end>
                         <hr/>
                         <a :href="`/ui/html/analysis-list/?subjects=${base64Subjects}`"
@@ -120,19 +120,20 @@ const base64Subjects = computed(() => {
                         <hr/>
                         <div class="card mt-2">
                             <div class="card-body">
-                                <topography-badges :topography="_topography"></topography-badges>
+                                <topography-badges
+                                    :topography="_topography"></topography-badges>
                             </div>
                         </div>
                     </template>
-                </b-tabs>
+                </BTabs>
             </div>
         </div>
     </div>
-    <b-modal v-if="_topography !== null"
+    <BModal v-if="_topography !== null"
              v-model="_showDeleteModal"
              @ok="deleteTopography"
              title="Delete measurement">
         You are about to delete the measurement with name <b>{{ _topography.name }}</b>.
         Are you sure you want to proceed?
-    </b-modal>
+    </BModal>
 </template>

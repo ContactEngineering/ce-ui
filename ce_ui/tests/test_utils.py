@@ -1,13 +1,14 @@
 import pytest
 from django.shortcuts import reverse
 from topobank.manager.models import Surface, Topography
-from topobank.manager.tests.utils import (SurfaceFactory, TagFactory,
-                                          Topography1DFactory,
-                                          Topography2DFactory, UserFactory)
+from topobank.testing.factories import (SurfaceFactory, TagFactory,
+                                        Topography1DFactory,
+                                        Topography2DFactory, UserFactory)
 
-from ..utils import (current_selection_as_surface_list, instances_to_selection,
-                     instances_to_surfaces, instances_to_topographies,
-                     selection_to_instances, tags_for_user)
+from ce_ui.utils import (current_selection_as_surface_list,
+                         instances_to_selection, instances_to_surfaces,
+                         instances_to_topographies, selection_to_instances,
+                         tags_for_user)
 
 
 @pytest.fixture
@@ -28,7 +29,9 @@ def testuser(django_user_model):
 def test_selection_to_instances(testuser, mock_topos):
     from topobank.manager.models import Surface, Tag, Topography
 
-    selection = ('topography-1', 'topography-2', 'surface-1', 'surface-3', 'tag-1', 'tag-2', 'tag-4')
+    selection = (
+        'topography-1', 'topography-2', 'surface-1', 'surface-3', 'tag-1', 'tag-2',
+        'tag-4')
     selection_to_instances(selection)
 
     Topography.objects.filter.assert_called_with(id__in={1, 2})
@@ -74,8 +77,10 @@ def test_instances_to_selection():
     assert s == [f'tag-{tag1.id}', f'tag-{tag2.id}']
 
     # Also mixed with other instances
-    s = instances_to_selection(tags=[tag2, tag1], topographies=[topo1], surfaces=[surface2])
-    assert s == [f'surface-{surface2.id}', f'tag-{tag1.id}', f'tag-{tag2.id}', f'topography-{topo1.id}']
+    s = instances_to_selection(tags=[tag2, tag1], topographies=[topo1],
+                               surfaces=[surface2])
+    assert s == [f'surface-{surface2.id}', f'tag-{tag1.id}', f'tag-{tag2.id}',
+                 f'topography-{topo1.id}']
 
 
 @pytest.mark.django_db
@@ -106,8 +111,10 @@ def test_tags_for_user(two_topos):
 
     tags = tags_for_user(user)
 
-    assert set(t.name for t in tags) == {'a long tag with spaces', 'interesting', 'rare', 'rough',
-                                         'projects/a', 'projects/b', 'projects/c', 'projects'}
+    assert set(t.name for t in tags) == {'a long tag with spaces', 'interesting',
+                                         'rare', 'rough',
+                                         'projects/a', 'projects/b', 'projects/c',
+                                         'projects'}
 
 
 @pytest.mark.django_db
@@ -128,10 +135,13 @@ def test_instances_to_topographies(user_three_topographies_three_surfaces_three_
     assert list(instances_to_topographies([], [surface1], [])) == [topo1a, topo1b]
 
     # only two surfaces given
-    assert list(instances_to_topographies([], [surface2, surface1], [])) == [topo1a, topo1b, topo2a]
+    assert list(instances_to_topographies([], [surface2, surface1], [])) == [topo1a,
+                                                                             topo1b,
+                                                                             topo2a]
 
     # an empty surface makes no difference here
-    assert list(instances_to_topographies([], [surface2, surface1, surface3], [])) == [topo1a, topo1b, topo2a]
+    assert list(instances_to_topographies([], [surface2, surface1, surface3], [])) == [
+        topo1a, topo1b, topo2a]
 
     # an additional topography makes no difference
     assert list(instances_to_topographies([topo1a], [surface1], [])) == [topo1a, topo1b]
@@ -205,10 +215,12 @@ def test_related_surfaces_for_selection(rf):
         return request
 
     # tag 'apple' should return all three surfaces
-    assert current_selection_as_surface_list(get_request(tags=[tag1])) == [surf1, surf2, surf3]
+    assert current_selection_as_surface_list(get_request(tags=[tag1])) == [surf1, surf2,
+                                                                           surf3]
 
     # one topography should return its surface
-    assert current_selection_as_surface_list(get_request(topographies=[topo1a])) == [surf1]
+    assert current_selection_as_surface_list(get_request(topographies=[topo1a])) == [
+        surf1]
 
     # We should be able to mix tags, topographies and surfaces
     assert current_selection_as_surface_list(get_request(topographies=[topo1a],

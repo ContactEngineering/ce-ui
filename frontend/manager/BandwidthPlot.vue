@@ -1,11 +1,8 @@
 <script setup>
 
-import {v4 as uuid4} from 'uuid';
 import {onMounted, ref, watch} from "vue";
 import {ColumnDataSource, HoverTool, OpenURL, Plotting, TapTool} from "@bokeh/bokehjs";
 import {applyDefaultBokehStyle} from "../utils/bokeh";
-
-const uid = ref(uuid4());
 
 const props = defineProps({
     topographies: {
@@ -13,6 +10,8 @@ const props = defineProps({
         default: []
     }
 });
+
+const _bokehPlotElement = ref(null);
 
 // Hover tool
 const hover_tool = new HoverTool({
@@ -30,16 +29,6 @@ const tap_tool = new TapTool({
     })
 });
 
-// Bokeh figure
-const figure = new Plotting.Figure({
-    x_axis_label: 'Bandwidth (m)',
-    x_axis_type: 'log',
-    output_backend: 'svg',
-    sizing_mode: 'stretch_width',
-    tools: [hover_tool, tap_tool],
-    toolbar_location: null,
-});
-
 // Construct data source
 const bw_source = new ColumnDataSource({
     data: {
@@ -51,45 +40,6 @@ const bw_source = new ColumnDataSource({
         thumbnail: [],
         link: []
     }
-});
-
-// Apply default settings
-applyDefaultBokehStyle(figure);
-
-// Adjust properties not accessible in the constructor
-figure.yaxis.visible = false;
-figure.grid.visible = false;
-figure.outline_line_color = null;
-figure.legend.location = "top_left";
-figure.legend.title = "Measurement artifacts";
-figure.legend.title_text_font_style = "bold";
-figure.legend.background_fill_color = "#f0f0f0";
-figure.legend.border_line_width = 3;
-figure.legend.border_line_cap = "round";
-
-// Construct glyphs
-figure.hbar({
-    y: {field: 'y'},
-    left: {field: 'left'},
-    right: {field: 'right'},
-    height: 1.0,
-    color: '#2c90d9',
-    name: 'bandwidths',
-    legend_label: "Reliable",
-    level: "underlay",
-    source: bw_source
-});
-
-figure.hbar({
-    y: {field: 'y'},
-    left: {field: 'left'},
-    right: {field: 'cutoff'},
-    height: 1.0,
-    color: '#dc3545',
-    name: 'bandwidths',
-    legend_label: "Unreliable",
-    level: "underlay",
-    source: bw_source
 });
 
 function setPlotData(topographies) {
@@ -111,25 +61,74 @@ function setPlotData(topographies) {
         cutoff: filtered_topographies.map(t => t.short_reliability_cutoff),
         right: filtered_topographies.map(t => t.bandwidth_upper),
         name: filtered_topographies.map(t => t.name),
-        thumbnail: filtered_topographies.map(t => t.thumbnail),
+        thumbnail: filtered_topographies.map(t => t.thumbnail.file),
         link: filtered_topographies.map(t => `/ui/html/topography/?topography=${t.id}`),
     };
 }
 
 onMounted(() => {
+    // Bokeh figure
+    const figure = new Plotting.Figure({
+        x_axis_label: 'Bandwidth (m)',
+        x_axis_type: 'log',
+        output_backend: 'svg',
+        sizing_mode: 'stretch_width',
+        tools: [hover_tool, tap_tool],
+        toolbar_location: null,
+    });
+
+    // Apply default settings
+    applyDefaultBokehStyle(figure);
+
+    // Adjust properties not accessible in the constructor
+    figure.yaxis.visible = false;
+    figure.grid.visible = false;
+    figure.outline_line_color = null;
+    figure.legend.location = "top_left";
+    figure.legend.title = "Measurement artifacts";
+    figure.legend.title_text_font_style = "bold";
+    figure.legend.background_fill_color = "#f0f0f0";
+    figure.legend.border_line_width = 3;
+    figure.legend.border_line_cap = "round";
+
+    // Construct glyphs
+    figure.hbar({
+        y: {field: 'y'},
+        left: {field: 'left'},
+        right: {field: 'right'},
+        height: 1.0,
+        color: '#2c90d9',
+        name: 'bandwidths',
+        legend_label: "Reliable",
+        level: "underlay",
+        source: bw_source
+    });
+
+    figure.hbar({
+        y: {field: 'y'},
+        left: {field: 'left'},
+        right: {field: 'cutoff'},
+        height: 1.0,
+        color: '#dc3545',
+        name: 'bandwidths',
+        legend_label: "Unreliable",
+        level: "underlay",
+        source: bw_source
+    });
+
     // Render to component
-    Plotting.show(figure, `#plot-${uid.value}`);
+    Plotting.show(figure, _bokehPlotElement.value);
 
     // Set data
     setPlotData(props.topographies);
 });
 
-watch(props.topographies, (newValue, oldValue) => {
+watch(() => props.topographies, (newValue, oldValue) => {
     setPlotData(newValue);
 });
 
 </script>
 
 <template>
-    <div :id="`plot-${uid}`"></div>
+    <div ref="_bokehPlotElement"></div>
 </template>

@@ -100,48 +100,52 @@ watch(() => analysis.value, () => {
 <template>
     <tr>
         <td>
-            <ProgressIndicator :value="analysis.task_progress == null ? 0 : analysis.task_progress.percent"
-                               :state="analysis.task_state">
+            <ProgressIndicator
+                :value="analysis.task_progress == null ? 0 : analysis.task_progress.percent"
+                :state="analysis.task_state">
             </ProgressIndicator>
         </td>
         <td v-if="analysis == null">
             <p>Fetching analysis status, please wait...</p>
         </td>
         <td v-if="analysis != null">
-            <p v-if="_function == null || _subject == null">
+            <div v-if="_function == null || _subject == null">
                 <div class="spinner"></div>
                 Retrieving function information...
-            </p>
-            <p v-if="_function != null && _subject != null">
-                <b>Function <i>{{ _function.name }}</i> on subject <i>{{ _subject.name }}</i></b>
-            </p>
-            <p>
+            </div>
+            <div v-if="_function != null && _subject != null">
+                <b>Function <i>{{ _function.name }}</i> on subject <i>{{
+                        _subject.name
+                    }}</i></b>
+            </div>
+            <div>
                 <b>Parameters:</b> {{ analysis.kwargs }}
-            </p>
-            <p v-if="analysis.task_state === 'su'">
+            </div>
+            <div v-if="analysis.task_state === 'su'">
                 <span><b>Created on:</b> {{ new Date(analysis.creation_time) }}
                     &#8212; <b>Started at:</b> {{ new Date(analysis.start_time) }}
                     &#8212; <b>Duration:</b> {{ Math.round(analysis.duration) }} seconds</span>
                 <span v-if="analysis.task_memory != null">
                     &#8212; <b>Peak memory usage:</b> {{ taskMemoryPretty }}
                 </span>
-            </p>
-            <p v-if="analysis.task_state === 'fa'">
+            </div>
+            <div v-if="analysis.task_state === 'fa'">
                 This task was created on {{ new Date(analysis.creation_time) }},
                 started running {{ new Date(analysis.start_time) }}
                 but failed.
                 <span v-if="_error != null">
             with message: <i>{{ _error }}</i>
           </span>
-            </p>
-            <p v-if="analysis.task_state === 'pe'">
-                This task was created on {{ new Date(analysis.creation_time) }} and is currently waiting to be started.
-            </p>
-            <p v-if="analysis.task_state === 'st'">
+            </div>
+            <div v-if="analysis.task_state === 'pe'">
+                This task was created on {{ new Date(analysis.creation_time) }} and is
+                currently waiting to be started.
+            </div>
+            <div v-if="analysis.task_state === 'st'">
                 This task was created on {{ new Date(analysis.creation_time) }}, started
                 {{ new Date(analysis.start_time) }}
                 and is currently running.
-            </p>
+            </div>
         </td>
         <td>
             <BButton @click="renew">

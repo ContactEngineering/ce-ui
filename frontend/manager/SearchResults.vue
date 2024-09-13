@@ -91,7 +91,10 @@ onMounted(() => {
                 }
             },
             types: {
-                "surface": {icon: "far fa-gem", iconTooltip: "This is a digital surface twin"},
+                "surface": {
+                    icon: "far fa-gem",
+                    iconTooltip: "This is a digital surface twin"
+                },
                 "topography": {icon: "far fa-file", iconTooltip: "This is a measurement"},
                 "tag": {icon: "fas fa-tag", iconTooltip: "This is a tag"},
             },
@@ -404,31 +407,25 @@ function createSurface() {
             </button>
         </div>
 
-        <div class="form-group">
-            <select name="category"
-                    class="form-control"
-                    v-model="_category"
-                    @change="reload"
-                    :disabled="_isLoading">
-                <option v-for="(choiceLabel, choiceVal) in categoryFilterChoices"
-                        v-bind:value="choiceVal" v-bind:selected="choiceVal==_category">
-                    {{ choiceLabel }}
-                </option>
-            </select>
-        </div>
+        <BFormGroup>
+            <BFormSelect name="category"
+                         class="form-control"
+                         v-model="_category"
+                         @change="reload"
+                         :disabled="_isLoading"
+                         :options="categoryFilterChoices">
+            </BFormSelect>
+        </BFormGroup>
 
-        <div class="form-group">
-            <select name="sharing_status"
-                    class="form-control"
-                    v-model="_sharingStatus"
-                    @change="reload"
-                    :disabled="_isLoading">
-                <option v-for="(choiceLabel, choiceVal) in sharingStatusFilterChoices"
-                        v-bind:value="choiceVal" v-bind:selected="choiceVal==_sharingStatus">
-                    {{ choiceLabel }}
-                </option>
-            </select>
-        </div>
+        <BFormGroup>
+            <BFormSelect name="sharing_status"
+                         class="form-control"
+                         v-model="_sharingStatus"
+                         @change="reload"
+                         :disabled="_isLoading"
+                         :options="sharingStatusFilterChoices">
+            </BFormSelect>
+        </BFormGroup>
 
         <div class="col-md-4">
             <div v-if="isAnonymous" class="form-group">
@@ -438,7 +435,8 @@ function createSurface() {
                     Create new digital surface twin
                 </button>
             </div>
-            <div v-if="!isAnonymous" class="form-group" title="Create a new digital surface twin">
+            <div v-if="!isAnonymous" class="form-group"
+                 title="Create a new digital surface twin">
                 <button class="btn btn-primary form-control"
                         @click="createSurface"
                         :disabled="_isLoading">
@@ -469,7 +467,9 @@ function createSurface() {
                            v-bind:value="choice.value"
                            v-model="_treeMode"
                            @change="reload">
-                    <span><i v-bind:class="choice.icon_class"></i> {{ choice.label }}</span>
+                    <span><i v-bind:class="choice.icon_class"></i> {{
+                            choice.label
+                        }}</span>
                 </label>
             </div>
         </div>
@@ -527,7 +527,9 @@ function createSurface() {
     </div>
     <div>
     <span v-if="!_isLoading">
-      Showing {{ _numItemsOnCurrentPage }} {{ _treeModeInfos[_treeMode].element_kind }} out of {{ _numItems }}.
+      Showing {{ _numItemsOnCurrentPage }} {{ _treeModeInfos[_treeMode].element_kind }} out of {{
+            _numItems
+        }}.
       {{ _treeModeInfos[_treeMode].hint }}
     </span>
     </div>
