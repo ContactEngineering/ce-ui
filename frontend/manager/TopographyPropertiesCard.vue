@@ -21,6 +21,7 @@ import {
 import {filterTopographyForPatchRequest, subjectsToBase64} from "../utils/api";
 
 import TopographyBadges from "./TopographyBadges.vue";
+import Attachments from './Attachments.vue';
 
 const props = defineProps({
     batchEdit: {type: Boolean, default: false},
@@ -53,6 +54,12 @@ const selectedModel = computed({
         emit('update:selected', value);
     }
 });
+
+// Switches controlling visibility
+const _descriptionVisible = ref(props.enlarged);
+const _filtersVisible = ref(props.enlarged);
+const _instrumentVisible = ref(props.enlarged);
+const _attachmentsVisible = ref(props.enlarged);
 
 // GUI logic
 const _editing = ref(props.batchEdit);
@@ -324,6 +331,10 @@ const hasThumbnail = computed(() => props.topography.thumbnail != null && props.
                          v-model:pressed="_filtersVisible"
                          variant="outline-secondary">
                     Filters
+                </button>
+                <button v-if="!enlarged" class="btn btn-outline-secondary" :class="{ active: _attachmentsVisible }"
+                    @click="_attachmentsVisible = !_attachmentsVisible">
+                    Attachments
                 </BButton>
             </BButtonGroup>
         </template>
@@ -520,6 +531,12 @@ const hasThumbnail = computed(() => props.topography.thumbnail != null && props.
                     </div>
                 </div>
             </div>
+        </div>
+        <div v-if="_attachmentsVisible" class="container">
+            <attachments :file-parent-type="'topography'" :file-parent-url="topography.url"
+                         :attachments="topography.attachments"
+                         :permission="topography.permissions.current_user.permission">
+            </attachments>
         </div>
         <template #footer>
             <TopographyBadges v-if="!batchEdit && !enlarged"

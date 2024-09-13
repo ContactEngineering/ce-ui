@@ -5,7 +5,9 @@ import axios from "axios";
 import {computed, onMounted, ref, watch} from "vue";
 import {BAlert, BModal, BSpinner, BTab, BTabs} from "bootstrap-vue-next";
 
-import {getIdFromUrl, subjectsToBase64} from "topobank/utils/api.js";
+import { getIdFromUrl, subjectsToBase64 } from "topobank/utils/api.js";
+
+import Attachments from './Attachments.vue';
 
 import DeepZoomImage from "../components/DeepZoomImage.vue";
 import LineScanPlot from "../components/LineScanPlot.vue";
@@ -29,7 +31,7 @@ onMounted(() => {
 
 function updateCard() {
     /* Fetch JSON describing the card */
-    axios.get(`${props.topographyUrl}?permissions=yes`).then(response => {
+    axios.get(`${props.topographyUrl}?permissions=yes&attachments=yes`).then(response => {
         _topography.value = response.data;
         _disabled.value = _topography.value === null || _topography.value.permissions.current_user.permission === 'view';
     }).catch(error => {
@@ -56,6 +58,7 @@ const base64Subjects = computed(() => {
 </script>
 
 <template>
+    <BToastOrchestrator />
     <div class="container">
         <div v-if="_topography == null"
              class="d-flex justify-content-center mt-5">
@@ -91,6 +94,11 @@ const base64Subjects = computed(() => {
                                         :enlarged="true"
                                         :disabled="_disabled">
                         </TopographyCard>
+                    </BTab>
+                    <BTab title="Attachments">
+                        <attachments :topography-url="_topography.url" :attachments="_topography.attachments"
+                            :permission="_topography.permissions.current_user.permission">
+                        </attachments>
                     </BTab>
                     <template #tabs-end>
                         <hr/>
