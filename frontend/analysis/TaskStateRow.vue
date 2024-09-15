@@ -21,6 +21,7 @@ const props = defineProps({
 const _error = ref(null);
 const _function = ref(null);
 const _subject = ref(null);
+let _timeoutID = null;
 
 onMounted(() => {
     scheduleStateCheck();
@@ -54,14 +55,18 @@ function scheduleStateCheck() {
     }
 
     if (analysis.value.task_state == null || analysis.value.task_state === 'pe' || analysis.value.task_state === 'st') {
-        setTimeout(checkState, props.pollingInterval);
+        if (_timeoutID == null) {
+            _timeoutID = setTimeout(checkState, props.pollingInterval);
+        }
     } else if (analysis.value.task_state === 'fa') {
         // This is a failure. Query reason.
         if (analysis.value.error == null) {
             // The analysis function did not raise an exception itself. This means it actually finished and
             // we have a result.json, that should contain an error message.
-            axios.get(`${analysis.value.data_prefix}result.json`).then(response => {
-                _error.value = response.data.message;
+            axios.get(analysis.value.folder).then(response => {
+                axios.get(response.data["result.json"].url).then(response => {
+                    _error.value = response.data.message;
+                });
             });
         } else {
             // The analysis function failed and we have an error message (Python exception).
@@ -71,10 +76,10 @@ function scheduleStateCheck() {
 }
 
 function checkState() {
+    _timeoutID = null;  // Indicate that no timer is currently running
     axios.get(analysis.value.url).then(response => {
         // Update current state of the analysis
-        analysis.value = response.data;
-        scheduleStateCheck();
+        analysis.value = response.data;  // This will trigger a check throw a watch
     });
 }
 
@@ -82,8 +87,7 @@ function renew() {
     analysis.value.task_state = 'pe';
     // A PUT request triggers renewal of the analysis
     axios.put(analysis.value.url).then(response => {
-        analysis.value = response.data;
-        scheduleStateCheck();
+        analysis.value = response.data;  // This will trigger a check throw a watch
     });
 }
 
@@ -132,10 +136,11 @@ watch(() => analysis.value, () => {
             <div v-if="analysis.task_state === 'fa'">
                 This task was created on {{ new Date(analysis.creation_time) }},
                 started running {{ new Date(analysis.start_time) }}
-                but failed.
+                but failed
                 <span v-if="_error != null">
-            with message: <i>{{ _error }}</i>
-          </span>
+                    with message: <i>{{ _error }}</i>
+                </span>
+                <span v-if="_error == null">.</span>
             </div>
             <div v-if="analysis.task_state === 'pe'">
                 This task was created on {{ new Date(analysis.creation_time) }} and is

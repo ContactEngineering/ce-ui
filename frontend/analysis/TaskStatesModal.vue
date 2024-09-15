@@ -28,9 +28,9 @@ const analyses = defineModel('analyses', {required: true});
                 </tr>
                 </thead>
                 <tbody>
-                <task-state-row v-for="(analysis, i) in analyses"
+                <TaskStateRow v-for="(analysis, i) in analyses"
                                 v-model:analysis="analyses[i]">
-                </task-state-row>
+                </TaskStateRow>
                 </tbody>
             </table>
         </small>
