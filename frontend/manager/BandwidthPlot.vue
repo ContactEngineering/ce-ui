@@ -61,7 +61,7 @@ function setPlotData(topographies) {
         cutoff: filtered_topographies.map(t => t.short_reliability_cutoff),
         right: filtered_topographies.map(t => t.bandwidth_upper),
         name: filtered_topographies.map(t => t.name),
-        thumbnail: filtered_topographies.map(t => t.thumbnail.file),
+        thumbnail: filtered_topographies.map(t => t.thumbnail == null ? null : t.thumbnail.file),
         link: filtered_topographies.map(t => `/ui/html/topography/?topography=${t.id}`),
     };
 }

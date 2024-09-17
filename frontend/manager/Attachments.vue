@@ -10,7 +10,7 @@ import { BCard, BCardBody, BButton, BButtonGroup, BSpinner, BFormInput, BAlert, 
 const props = defineProps({
     fileParentType: String,
     fileParentUrl: String,
-    attachments: Array,
+    attachments: String,
     permission: String
 });
 

@@ -5,7 +5,7 @@ import axios from "axios";
 import {computed, onMounted, ref, watch} from "vue";
 import {BAlert, BModal, BSpinner, BTab, BTabs} from "bootstrap-vue-next";
 
-import { getIdFromUrl, subjectsToBase64 } from "topobank/utils/api.js";
+import {getIdFromUrl, subjectsToBase64} from "topobank/utils/api.js";
 
 import Attachments from './Attachments.vue';
 
@@ -58,7 +58,7 @@ const base64Subjects = computed(() => {
 </script>
 
 <template>
-    <BToastOrchestrator />
+    <BToastOrchestrator/>
     <div class="container">
         <div v-if="_topography == null"
              class="d-flex justify-content-center mt-5">
@@ -68,17 +68,17 @@ const base64Subjects = computed(() => {
             </div>
         </div>
         <BAlert :model-value="_error != null"
-                 variant="danger">
+                variant="danger">
             {{ _error.message }}: {{ _error.response.statusText }}
         </BAlert>
         <div v-if="_topography !== null"
              class="row">
             <div class="col-12">
                 <BTabs class="nav-pills-custom"
-                        content-class="w-100"
-                        fill
-                        pills
-                        vertical>
+                       content-class="w-100"
+                       fill
+                       pills
+                       vertical>
                     <BTab title="Visualization">
                         <LineScanPlot v-if="_topography.size_y === null"
                                       :topography="_topography">
@@ -96,8 +96,9 @@ const base64Subjects = computed(() => {
                         </TopographyCard>
                     </BTab>
                     <BTab title="Attachments">
-                        <attachments :topography-url="_topography.url" :attachments="_topography.attachments"
-                            :permission="_topography.permissions.current_user.permission">
+                        <attachments :topography-url="_topography.url"
+                                     :attachments="_topography.attachments"
+                                     :permission="_topography.permissions.current_user.permission">
                         </attachments>
                     </BTab>
                     <template #tabs-end>
@@ -130,9 +131,9 @@ const base64Subjects = computed(() => {
         </div>
     </div>
     <BModal v-if="_topography !== null"
-             v-model="_showDeleteModal"
-             @ok="deleteTopography"
-             title="Delete measurement">
+            v-model="_showDeleteModal"
+            @ok="deleteTopography"
+            title="Delete measurement">
         You are about to delete the measurement with name <b>{{ _topography.name }}</b>.
         Are you sure you want to proceed?
     </BModal>

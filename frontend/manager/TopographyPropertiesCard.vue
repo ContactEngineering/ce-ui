@@ -67,10 +67,6 @@ const _error = ref(null);
 const _saving = ref(false);
 const _showDeleteModal = ref(false);
 
-const _descriptionVisible = ref(props.enlarged);
-const _instrumentVisible = ref(props.enlarged);
-const _filtersVisible = ref(props.enlarged);
-
 // Old topography data (used to restore data when "Discard" is clicked)
 let _savedTopography = null;
 
@@ -331,9 +327,10 @@ const hasThumbnail = computed(() => props.topography.thumbnail != null && props.
                          v-model:pressed="_filtersVisible"
                          variant="outline-secondary">
                     Filters
-                </button>
-                <button v-if="!enlarged" class="btn btn-outline-secondary" :class="{ active: _attachmentsVisible }"
-                    @click="_attachmentsVisible = !_attachmentsVisible">
+                </BButton>
+                <BButton v-if="!enlarged"
+                         v-model:pressed="_attachmentsVisible"
+                         variant="outline-secondary">
                     Attachments
                 </BButton>
             </BButtonGroup>
@@ -533,7 +530,8 @@ const hasThumbnail = computed(() => props.topography.thumbnail != null && props.
             </div>
         </div>
         <div v-if="_attachmentsVisible" class="container">
-            <attachments :file-parent-type="'topography'" :file-parent-url="topography.url"
+            <attachments :file-parent-type="'topography'"
+                         :file-parent-url="topography.url"
                          :attachments="topography.attachments"
                          :permission="topography.permissions.current_user.permission">
             </attachments>
