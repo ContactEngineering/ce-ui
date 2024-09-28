@@ -490,7 +490,6 @@ def get_search_term(request) -> str:
     String with search term, an empty string if no term was given.
 
     """
-    print("GET", request.GET)
     search_term = request.GET.get("search", default="")
     search_term = search_term[:MAX_LEN_SEARCH_TERM]
     return search_term.strip()
