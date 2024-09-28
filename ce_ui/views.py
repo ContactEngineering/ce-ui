@@ -4,7 +4,7 @@ from io import BytesIO
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count, Q, Subquery, TextField, Value
+from django.db.models import Q, Subquery, TextField, Value
 from django.db.models.functions import Replace
 from django.http import HttpResponse
 from django.urls import reverse
@@ -45,11 +45,9 @@ CATEGORY_FILTER_CHOICES = {
 ORDER_BY_CHOICES = {"name": "name", "-creation_datetime": "date"}
 SHARING_STATUS_FILTER_CHOICES = {
     "all": "All accessible datasets",
-    "own": "Only my datasets",
-    "shared_ingress": "Only datasets shared with you",
-    "published_ingress": "Only datasets published by others",
-    "shared_egress": "Only datasets shared by you",
-    "published_egress": "Only datasets published by you",
+    "own": "Unpublished datasets created by me",
+    "others": "Unpublished datasets created by others",
+    "published": "Published datasets",
 }
 TREE_MODE_CHOICES = ["surface list", "tag tree"]
 
@@ -103,32 +101,27 @@ def filtered_surfaces(request):
         qs = qs.filter(category=category)
 
     sharing_status = get_sharing_status(request)
-
-    match sharing_status:
-        case "own":
-            qs = qs.filter(creator=user)
-        case "shared_ingress":
-            qs = qs.filter(~Q(creator=user))
-            if hasattr(Surface, "publication"):
-                qs = qs.exclude(
-                    publication__isnull=False
-                )  # exclude published and own surfaces
-        case "published_ingress":
-            if hasattr(Surface, "publication"):
-                qs = qs.exclude(publication__isnull=True)
-            qs = qs.exclude(creator=user)  # exclude unpublished and own surfaces
-        case "shared_egress":
-            qs = qs.annotate(nb_users=Count("permissions__user")).filter(nb_users__gt=1)
-            if hasattr(Surface, "publication"):
-                qs = qs.exclude(
-                    publication__isnull=False
-                )  # own surfaces, shared with others, unpublished
-        case "published_egress":
-            if hasattr(Surface, "publication"):
-                qs = qs.filter(publication__isnull=False)
-            qs = qs.filter(creator=user)
-        case "all":
-            pass
+    if sharing_status == "own":
+        qs = qs.filter(creator=user)
+        if hasattr(Surface, "publication"):
+            qs = qs.exclude(
+                publication__isnull=False
+            )  # exclude published and own surfaces
+    elif sharing_status == "others":
+        qs = qs.exclude(creator=user)
+        if hasattr(Surface, "publication"):
+            qs = qs.exclude(
+                publication__isnull=False
+            )  # exclude published and own surfaces
+    elif sharing_status == "published":
+        if hasattr(Surface, "publication"):
+            qs = qs.filter(publication__isnull=False)
+        else:
+            qs = Surface.objects.none()
+    elif sharing_status == "all":
+        pass
+    else:
+        raise ValueError(f"Unknown sharing status '{sharing_status}'.")
 
     #
     # Filter by search term
