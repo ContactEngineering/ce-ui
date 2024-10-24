@@ -297,10 +297,10 @@ class DataSetListView(TemplateView):
         if self.request.user.is_anonymous:
             # Anonymous user have only one choice
             context["sharing_status_filter_choices"] = {
-                "published_ingress": SHARING_STATUS_FILTER_CHOICES["published_ingress"]
+                "published": SHARING_STATUS_FILTER_CHOICES["published"]
             }
             select_tab_state["sharing_status"] = (
-                "published_ingress"  # this only choice should be selected
+                "published"  # this only choice should be selected
             )
         else:
             context["sharing_status_filter_choices"] = (

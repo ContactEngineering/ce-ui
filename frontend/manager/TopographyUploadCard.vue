@@ -8,8 +8,13 @@ import {
     BButton,
     BButtonGroup,
     BCard,
-    BProgress
+    BProgress,
+    useToast
 } from 'bootstrap-vue-next';
+
+import {uploadFile} from "topobank/utils/upload";
+
+const {show} = useToast();
 
 const emit = defineEmits([
     'update:topography'
@@ -39,39 +44,24 @@ function emitUpdateTopography() {
 
 onMounted(() => {
     // Start upload
-    if (props.topography.datafile.upload_instructions.method === 'POST') {
-        axios.postForm(
-            props.topography.datafile.upload_instructions.url,
-            {
-                ...props.topography.datafile.upload_instructions.fields,
-                file: props.topography.file
-            },
-            {onUploadProgress: onProgress}
-        ).then(response => {
-            // Upload successfully finished
-            emitUpdateTopography();
-        }).catch(error => {
-            // Upload failed
-            _error.value = error;
-        });
-    } else if (props.topography.datafile.upload_instructions.method === 'PUT') {
-        axios.put(
-            props.topography.datafile.upload_instructions.url,
-            props.topography.file,
-            {
-                headers: {'Content-Type': 'binary/octet-stream'},
-                onUploadProgress: onProgress
+    uploadFile({
+        uploadInstructions: props.topography.datafile.upload_instructions,
+        file: props.topography.file,
+        onUploadProgress: onProgress
+    }).then(response => {
+        // Upload successfully finished
+        emitUpdateTopography();
+    }).catch(error => {
+        // Upload failed
+        _error.value = error;
+        show?.({
+            props: {
+                title: "Error while uploading",
+                body: error.message,
+                variant: 'danger'
             }
-        ).then(response => {
-            // Upload successfully finished
-            emitUpdateTopography();
-        }).catch(error => {
-            // Upload failed
-            _error.value = error;
         });
-    } else {
-        alert(`Unknown upload method: "${props.topography.datafile.upload_instructions.method}`);
-    }
+    });
 });
 
 function deleteTopography() {

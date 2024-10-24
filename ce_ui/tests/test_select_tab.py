@@ -408,7 +408,7 @@ def test_select_tab_state_should_be_default_after_login(client, orcid_socialapp)
     # first request the site anonymously .. select tab state is set to that of
     # an anonymous user
     response = client.get(reverse('ce_ui:select'))
-    assert response.context['select_tab_state']['sharing_status'] == 'published_ingress'
+    assert response.context['select_tab_state']['sharing_status'] == 'published'
 
     # Then login as authenticated user
     password = "abcd"

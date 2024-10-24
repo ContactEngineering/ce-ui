@@ -530,9 +530,7 @@ const hasThumbnail = computed(() => props.topography.thumbnail != null && props.
             </div>
         </div>
         <div v-if="_attachmentsVisible" class="container">
-            <attachments :file-parent-type="'topography'"
-                         :file-parent-url="topography.url"
-                         :attachments="topography.attachments"
+            <attachments :attachments-url="topography.attachments"
                          :permission="topography.permissions.current_user.permission">
             </attachments>
         </div>

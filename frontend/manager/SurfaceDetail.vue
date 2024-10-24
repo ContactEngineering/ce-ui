@@ -19,7 +19,11 @@ import {
     BToastOrchestrator
 } from 'bootstrap-vue-next';
 
-import {filterTopographyForPatchRequest, getIdFromUrl, subjectsToBase64} from "../utils/api";
+import {
+    filterTopographyForPatchRequest,
+    getIdFromUrl,
+    subjectsToBase64
+} from "../utils/api";
 import {ccLicenseInfo} from "../utils/data";
 
 import Attachments from './Attachments.vue';
@@ -152,7 +156,10 @@ function filesDropped(files) {
 }
 
 function uploadNewTopography(file) {
-    axios.post(props.newTopographyUrl, {surface: props.surfaceUrl, name: file.name}).then(response => {
+    axios.post(props.newTopographyUrl, {
+        surface: props.surfaceUrl,
+        name: file.name
+    }).then(response => {
         let upload = response.data;
         upload.file = file;  // need to know which file to upload
         _topographies.value.push(upload);  // this will trigger showing a topography-upload-card
@@ -284,7 +291,7 @@ const allSelected = computed({
 </script>
 
 <template>
-    <BToastOrchestrator />
+    <BToastOrchestrator/>
     <div class="container">
         <div v-if="_surface == null"
              class="d-flex justify-content-center mt-5">
@@ -346,10 +353,14 @@ const allSelected = computed({
                                 <b-alert :model-value="_topographies.length == 0" info>
                                     This surface has no measurements yet.
                                 </b-alert>
-                                <b-alert :model-value="_topographies.length > 0" secondary>
-                                    This bandwidth plot shows the range of length scales that have been measured for
-                                    this digital surface twin. Each of the blocks below represents one measurement.
-                                    Part of the bandwidth shown may be unreliable due to the configured instrument's
+                                <b-alert :model-value="_topographies.length > 0"
+                                         secondary>
+                                    This bandwidth plot shows the range of length scales
+                                    that have been measured for
+                                    this digital surface twin. Each of the blocks below
+                                    represents one measurement.
+                                    Part of the bandwidth shown may be unreliable due to
+                                    the configured instrument's
                                     measurement capacities.
                                 </b-alert>
                                 <bandwidth-plot v-if="_topographies.length > 0"
@@ -360,12 +371,12 @@ const allSelected = computed({
                     </b-tab>
                     <b-tab title="Description">
                         <surface-description v-if="_surface != null"
-                                            :surface-url="_surface.url"
-                                            :name="_surface.name"
-                                            :description="_surface.description"
-                                            :category="_surface.category"
-                                            :tags="_surface.tags"
-                                            :permission="_permissions.current_user.permission">
+                                             :surface-url="_surface.url"
+                                             :name="_surface.name"
+                                             :description="_surface.description"
+                                             :category="_surface.category"
+                                             :tags="_surface.tags"
+                                             :permission="_permissions.current_user.permission">
                         </surface-description>
                     </b-tab>
                     <b-tab title="Properties">
@@ -376,10 +387,10 @@ const allSelected = computed({
                         </surface-properties>
                     </b-tab>
                     <b-tab title="Attachments">
-                        <attachments v-if="_surface != null" :file-parent-type="'surface'"
-                            :file-parent-url="_surface.url" :attachments="_surface.attachments"
-                            :permission="_permissions.current_user.permission">
-                        </attachments>
+                        <Attachments v-if="_surface != null"
+                                     :attachments-url="_surface.attachments"
+                                     :permission="_permissions.current_user.permission">
+                        </Attachments>
                     </b-tab>
                     <b-tab v-if="_surface != null"
                            title="Permissions">
@@ -393,7 +404,8 @@ const allSelected = computed({
                                 <h5 class="float-start">Permissions</h5>
                             </template>
                             <b-card-body>
-                                This dataset is published. It is visible to everyone (even without logging into the
+                                This dataset is published. It is visible to everyone
+                                (even without logging into the
                                 system) and can no longer be modified.
                             </b-card-body>
                         </b-card>
@@ -407,15 +419,17 @@ const allSelected = computed({
                             <b-card-body>
                                 <p class="mb-5">
                                     <a :href="ccLicenseInfo[_publication.license].descriptionUrl">
-                                        <img :src="`/static/images/cc/${_publication.license}.svg`"
-                                             :title="`Dataset can be reused under the terms of the ${ccLicenseInfo[_publication.license].title}.`"
-                                             style="float:right; margin-left: 0.25rem;"/>
+                                        <img
+                                            :src="`/static/images/cc/${_publication.license}.svg`"
+                                            :title="`Dataset can be reused under the terms of the ${ccLicenseInfo[_publication.license].title}.`"
+                                            style="float:right; margin-left: 0.25rem;"/>
                                     </a>
                                     This dataset can be reused under the terms of the
                                     <a :href="ccLicenseInfo[_publication.license].descriptionUrl">
                                         {{ ccLicenseInfo[_publication.license].title }}
                                     </a>.
-                                    When reusing this dataset, please cite the original source.
+                                    When reusing this dataset, please cite the original
+                                    source.
                                 </p>
                                 <b-accordion>
                                     <b-accordion-item title="Citation" visible>
@@ -428,12 +442,16 @@ const allSelected = computed({
                                     </b-accordion-item>
                                     <b-accordion-item title="BibTeX">
                                         <code>
-                                            <pre>{{ _publication.citation.bibtex }}</pre>
+                                            <pre>{{
+                                                    _publication.citation.bibtex
+                                                }}</pre>
                                         </code>
                                     </b-accordion-item>
                                     <b-accordion-item title="BibLaTeX">
                                         <code>
-                                            <pre>{{ _publication.citation.biblatex }}</pre>
+                                            <pre>{{
+                                                    _publication.citation.biblatex
+                                                }}</pre>
                                         </code>
                                     </b-accordion-item>
                                 </b-accordion>
@@ -469,7 +487,8 @@ const allSelected = computed({
                              class="card mt-2">
                             <div class="card-body">
                                 <div>
-                                    <span class="badge bg-secondary surface-category-headline">
+                                    <span
+                                        class="badge bg-secondary surface-category-headline">
                                         {{ category }}
                                     </span>
                                 </div>
@@ -484,10 +503,11 @@ const allSelected = computed({
                                         {{ tag.name }}
                                     </span>
                                 </div>
-                                <b-dropdown v-if="_versions == null || _versions.length > 0"
-                                            class="mt-2"
-                                            variant="info"
-                                            :text="versionString">
+                                <b-dropdown
+                                    v-if="_versions == null || _versions.length > 0"
+                                    class="mt-2"
+                                    variant="info"
+                                    :text="versionString">
                                     <b-dropdown-item
                                         v-if="_publication == null || _publication.has_access_to_original_surface"
                                         :href="hrefOriginalSurface"
@@ -516,7 +536,9 @@ const allSelected = computed({
              v-model="_showDeleteModal"
              @ok="deleteSurface"
              title="Delete digital surface twin">
-        You are about to delete the digital surface twin with name <b>{{ _surface.name }}</b> and all contained
+        You are about to delete the digital surface twin with name <b>{{
+            _surface.name
+        }}</b> and all contained
         measurements. Are you sure you want to proceed?
     </b-modal>
 </template>
