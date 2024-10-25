@@ -71,6 +71,20 @@ function handleFileDrop(files) {
             }).then(response => {
                 attachments.value[manifest.filename] = manifest;
                 uploadIndicator.value = {};
+                // We need to fetch the manifest information again to have a link to
+                // the file
+                axios.get(manifest.url).then(response => {
+                    attachments.value[manifest.filename] = response.data;
+                }).catch(error => {
+                    show?.({
+                        props: {
+                            title: "Error while fetching attachment",
+                            body: error.message,
+                            variant: 'danger'
+                        }
+                    });
+                    console.error(error);
+                });
             }).catch(error => {
                 show?.({
                     props: {
