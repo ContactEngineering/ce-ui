@@ -27,7 +27,7 @@ import BandwidthPlot from './BandwidthPlot.vue';
 import DropZone from '../components/DropZone.vue';
 import SurfaceDescription from './SurfaceDescription.vue';
 import SurfacePermissions from './SurfacePermissions.vue';
-import SurfaceProperties from './SurfacePropertiesNew.vue';
+import SurfaceProperties from './SurfaceProperties.vue';
 import TopographyCard from "./TopographyCard.vue";
 import TopographyPropertiesCard from "./TopographyPropertiesCard.vue";
 
