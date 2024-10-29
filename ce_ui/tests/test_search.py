@@ -2,6 +2,7 @@
 
 import pytest
 from django.shortcuts import reverse
+from django.test import override_settings
 from rest_framework.test import APIRequestFactory
 from topobank.manager.models import Tag
 from topobank.manager.utils import subjects_to_base64
@@ -55,6 +56,7 @@ def user_three_surfaces_four_topographies():
     return user, surface1, surface2, surface3, topo1a, topo1b, topo2a, topo2b
 
 
+@override_settings(DELETE_EXISTING_FILES=True)
 @pytest.mark.django_db
 def test_surface_search_with_request_factory(user_three_surfaces_four_topographies):
     user, surface1, surface2, surface3, topo1a, topo1b, topo2a, topo2b = user_three_surfaces_four_topographies
@@ -573,6 +575,7 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
     assert resulted_dicts == expected_dicts
 
 
+@override_settings(DELETE_EXISTING_FILES=True)
 @pytest.mark.django_db
 def test_tag_search_with_request_factory(user_three_surfaces_four_topographies):
     user, surface1, surface2, surface3, topo1a, topo1b, topo2a, topo2b = user_three_surfaces_four_topographies
@@ -1102,6 +1105,7 @@ def test_tag_search_with_request_factory(user_three_surfaces_four_topographies):
     ]
 
 
+@override_settings(DELETE_EXISTING_FILES=True)
 @pytest.mark.django_db
 def test_search_expressions_with_request_factory():
     user = UserFactory()
@@ -1184,6 +1188,7 @@ def test_search_expressions_with_request_factory():
     assert result[0]['children'][0]["name"] == topo1b.name  # topo1d is excluded because of 'not me'
 
 
+@override_settings(DELETE_EXISTING_FILES=True)
 @pytest.mark.django_db
 def test_search_for_user_with_request_factory():
     user1 = UserFactory(name="Bob Marley")

@@ -1,51 +1,61 @@
 <script setup>
 
 import axios from "axios";
-import {ref, computed} from 'vue';
+import {computed, ref} from 'vue';
 
-import {BCard, BCardBody, BButton, BButtonGroup, BSpinner, BFormInput, BAlert} from 'bootstrap-vue-next';
+import {
+    BAlert,
+    BButton,
+    BButtonGroup,
+    BCard,
+    BCardBody,
+    BFormInput,
+    BSpinner,
+    useToastController
+} from 'bootstrap-vue-next';
 
+const {show} = useToastController();
+
+const properties = defineModel({
+    properties: Object,
+    default: {}
+});
 
 const props = defineProps({
     surfaceUrl: String,
-    properties: Array,
     permission: String
 });
 
-
 function copyProperties() {
-    return props.properties.map(property => {
-        return {...property}
+    return Object.entries(properties.value).map(([name, property]) => {
+        return {name: name, ...property};
     });
 }
 
-
 // this var holds the sate of the editor: view | edit | save
-let _isEditing = ref(false);
+const _isEditing = ref(false);
 // count the number of async save jobs
-let _nbSaveJobs = ref(0);
+const _nbSaveJobs = ref(0);
 // this array holds a backup of the currenty "up to date" properties
 // when the state changes this array shall be updated
-let _backupProperties = copyProperties();
+const _properties = ref(copyProperties());
 // this array holds the indexes of the propertie to delet when saved
-let _deleted = ref([]);
+const _deleted = ref([]);
 // this array holds the indexes of the changed properties, no index shall be in edited and deleted
-let _edited = ref([]);
+const _edited = ref([]);
 //this array hold the indexes of the added properties
-let _added = ref([]);
-
-let _messages = ref([]);
+const _added = ref([]);
 
 let formIsValid = computed(() => {
     // Property names and values cant be empty
-    const emptyFields = props.properties.some((property) => {
+    const emptyFields = _properties.value.some((property) => {
         return property.name === "" || property.value === "";
     })
 
     //Property names should be uniqe for a digital surface twin
     const hashMap = {}
-    const nameDuplicates = props.properties.some(property => {
-        if (hashMap[property.name]){
+    const nameDuplicates = _properties.value.some(property => {
+        if (hashMap[property.name]) {
             return true
         }
         hashMap[property.name] = true;
@@ -62,7 +72,7 @@ function cleanUpAfterSave() {
         return b - a;
     });
     _deleted.value.forEach(index => {
-        props.properties.splice(index, 1);
+        _properties.value.splice(index, 1);
     });
     _edited.value = [];
     _added.value = [];
@@ -78,11 +88,21 @@ function saveJobFinished() {
 }
 
 function showWarning(msg) {
-    _messages.value.push({type: 'warning', visible: true, content: msg});
+    show?.({
+        props: {
+            body: msg,
+            variant: "warning"
+        }
+    });
 }
 
 function showError(msg) {
-    _messages.value.push({type: 'danger', visible: true, content: msg});
+    show?.({
+        props: {
+            body: msg,
+            variant: "danger"
+        }
+    });
 }
 
 const isEditable = computed(() => {
@@ -97,25 +117,25 @@ function addProperty() {
     // Enter state === 'edit'
     enterEditMode();
     // Add new empty property if there is no empty last property
-    const len = props.properties.length;
-    if (len === 0 || (props.properties[len - 1].name != '' && props.properties[len - 1].value != '')) {
-        _added.value.push(props.properties.length);
-        props.properties.push({name: "", value: "", surface: surfaceUrl});
+    const len = _properties.value.length;
+    if (len === 0 || (_properties.value[len - 1].name != '' && _properties.value[len - 1].value != '')) {
+        _added.value.push(_properties.value.length);
+        _properties.value.push({name: "", value: "", surface: surfaceUrl});
     }
 }
 
 function editProperty(index) {
-    if (!_edited.value.includes(index) && index < _backupProperties.length) {
+    if (!_edited.value.includes(index) && index < properties.value.length) {
         _edited.value.push(index);
     }
 }
 
 function deleteProperty(index) {
-    if (index < _backupProperties.length) {
+    if (index < properties.value.length) {
         _deleted.value.push(index);
     } else { // added property
         // remove prop
-        props.properties.splice(index, 1);
+        _properties.value.splice(index, 1);
         // remove idx from added list
         _added.value = _added.value.filter((idx) => {
             return idx != index;
@@ -134,13 +154,13 @@ function deleteProperty(index) {
 }
 
 function syncPropertyCreate(index) {
-    const property = {...props.properties[index]};
+    const property = {..._properties.value[index]};
     _nbSaveJobs.value++;
     axios.post('/manager/api/property/', {
         ...property
     }).then(response => {
         // this is important because the response obj contains the update url!
-        props.properties[index] = response.data
+        _properties.value[index] = response.data
     }).catch(error => {
         _isEditing.value = true;
         showError(`A Error occurred while adding the property '${property.name}' : ${error.response.data.message}`);
@@ -152,22 +172,22 @@ function syncPropertyCreate(index) {
 }
 
 function syncPropertyDelete(index) {
-    const property = {...props.properties[index]};
+    const property = {..._properties.value[index]};
     _nbSaveJobs.value++;
     axios.delete(property.url).catch(error => {
         _isEditing.value = true;
         showError(`A Error occurred while deleting the property '${property.name}' : ${error.response.data.message}`);
         console.log(error);
-        props.properties[index] = _backupProperties[index];
+        _properties.value[index] = properties.value[property.name];
     }).finally(() => {
         saveJobFinished();
     });
 }
 
 function syncPropertyUpdate(index) {
-    const property = {...props.properties[index]};
+    const property = {..._properties.value[index]};
     // numeric -> categorical
-    if (isNumeric(_backupProperties[index]) && !isNumeric(property)) {
+    if (isNumeric(properties.value[property.name]) && !isNumeric(property)) {
         delete property.unit;
     }
     _nbSaveJobs.value++;
@@ -175,7 +195,7 @@ function syncPropertyUpdate(index) {
         ...property
     }).catch(error => {
         _isEditing.value = true;
-        props.properties[index] = _backupProperties[index];
+        _properties.value[index] = properties.value[property.name];
         showError(`A Error occurred updating the property '${property.name}': ${error.response.data.message}`);
         console.log(error);
     }).finally(() => {
@@ -187,7 +207,7 @@ function syncPropertyUpdate(index) {
 function enterEditMode() {
     if (!_isEditing.value) {
         _isEditing.value = true;
-        _backupProperties = copyProperties();
+        _properties.value = copyProperties();
     }
 }
 
@@ -197,10 +217,10 @@ function discardChanges() {
     _edited.value = [];
     _added.value = [];
     // remove added properties
-    props.properties.splice(_backupProperties.length);
+    _properties.value.splice(properties.value.length);
     // restore the others
-    for (let index = 0; index < props.properties.length; index++) {
-        props.properties[index] = _backupProperties[index];
+    for (let index = 0; index < _properties.value.length; index++) {
+        _properties.value[index] = properties.value[property.name];
     }
     _isEditing.value = false;
 }
@@ -208,19 +228,19 @@ function discardChanges() {
 // edit -> save -> edit | view
 function save() {
     // Check for empty names and give warning
-    if (props.properties.filter((property) => property.name === "").length > 0) {
+    if (_properties.value.filter((property) => property.name === "").length > 0) {
         showWarning("The property name can not be empty");
     }
     // Check for empty values and give warning
-    if (props.properties.filter((property) => property.value === "").length > 0) {
+    if (_properties.value.filter((property) => property.value === "").length > 0) {
         showWarning("The property value can not be empty");
     }
     // cleanup data
-    for (let index = 0; index < props.properties.length; index++) {
-        if (isNumeric(props.properties[index])) {
-            props.properties[index].value = parseFloat(props.properties[index].value);
-            if (props.properties[index].unit == null) {
-                props.properties[index].unit = "";
+    for (let index = 0; index < _properties.value.length; index++) {
+        if (isNumeric(_properties.value[index])) {
+            _properties.value[index].value = parseFloat(_properties.value[index].value);
+            if (_properties.value[index].unit == null) {
+                _properties.value[index].unit = "";
             }
         }
     }
@@ -237,12 +257,14 @@ function save() {
         <template #header>
             <div class="d-flex">
                 <h5 class="flex-grow-1">Properties</h5>
-                <b-button size="sm" v-if="!_isEditing && isEditable" @click="enterEditMode"
+                <b-button size="sm" v-if="!_isEditing && isEditable"
+                          @click="enterEditMode"
                           variant="outline-secondary">
                     <i class="fa fa-pen"></i>
                 </b-button>
                 <b-button-group v-else-if="isEditable" size="sm">
-                    <b-button v-if="_isEditing && _nbSaveJobs === 0" @click="discardChanges" variant="danger">
+                    <b-button v-if="_isEditing && _nbSaveJobs === 0"
+                              @click="discardChanges" variant="danger">
                         Discard
                     </b-button>
                     <b-button :disabled="!formIsValid" @click="save" variant="success">
@@ -253,7 +275,7 @@ function save() {
             </div>
         </template>
         <b-card-body>
-            <div v-if="!isEditable && props.properties.length == 0">
+            <div v-if="!isEditable && _properties.length == 0">
                 This digital surface twin does not have properties.
             </div>
             <div v-else class="border rounded-3 mb-3 p-3">
@@ -277,18 +299,21 @@ function save() {
                         </span>
                     </div>
                 </div>
-                <div v-for="(property, index) in props.properties" :key="property.url">
+                <div v-for="(property, index) in _properties" :key="property.name">
                     <div v-if="!_deleted.includes(index)" class="d-flex">
                         <div class="flex-shrink-1 d-flex">
                             <b-button v-if="_isEditing" @click="deleteProperty(index)"
-                                      class="m-1 align-self-center" size="sm" variant="danger" title="remove property">
+                                      class="m-1 align-self-center" size="sm"
+                                      variant="danger" title="remove property">
                                 <i class="fa fa-minus"></i>
                             </b-button>
                             <i v-else class="p-2 align-self-center fa fa-bars"></i>
                         </div>
                         <div class="w-25 d-flex ms-1">
-                            <b-form-input v-if="_isEditing" @input="editProperty(index)" size="sm"
-                                          placeholder="Property name" class="align-self-center"
+                            <b-form-input v-if="_isEditing" @input="editProperty(index)"
+                                          size="sm"
+                                          placeholder="Property name"
+                                          class="align-self-center"
                                           v-model="property.name"></b-form-input>
                             <div v-else class="p-2">
                                 <span v-if="property.name === ''" class="fw-lighter">
@@ -298,8 +323,10 @@ function save() {
                             </div>
                         </div>
                         <div class="w-25 d-flex ms-1">
-                            <b-form-input v-if="_isEditing" @input="editProperty(index)" size="sm"
-                                          placeholder="Property value" class="align-self-center"
+                            <b-form-input v-if="_isEditing" @input="editProperty(index)"
+                                          size="sm"
+                                          placeholder="Property value"
+                                          class="align-self-center"
                                           v-model="property.value"></b-form-input>
                             <div v-else class="p-2">
                                 <span v-if="property.value === ''" class="fw-lighter">Property value</span>
@@ -307,21 +334,26 @@ function save() {
                             </div>
                         </div>
                         <div v-if="isNumeric(property)" class="d-flex ms-1">
-                            <b-form-input v-if="_isEditing" @input="editProperty(index)" size="sm"
-                                          placeholder="dimensionless" class="align-self-center"
+                            <b-form-input v-if="_isEditing" @input="editProperty(index)"
+                                          size="sm"
+                                          placeholder="dimensionless"
+                                          class="align-self-center"
                                           v-model="property.unit"></b-form-input>
                             <div v-else class="p-2">
-                                <span v-if="property.unit === ''" class="fw-lighter"></span>
+                                <span v-if="property.unit === ''"
+                                      class="fw-lighter"></span>
                                 <span v-else>{{ property.unit }}</span>
                             </div>
                         </div>
                         <div v-if="_edited.includes(index) || _added.includes(index)">
-                            <i v-if="_isEditing" class="p-2 align-self-center fa fa-upload"></i>
+                            <i v-if="_isEditing"
+                               class="p-2 align-self-center fa fa-upload"></i>
                             <b-spinner v-else-if="_nbSaveJobs > 0" small/>
                         </div>
                     </div>
                 </div>
-                <div v-if="isEditable" @click="addProperty" class="d-flex highlight-on-hover rounded-3">
+                <div v-if="isEditable" @click="addProperty"
+                     class="d-flex highlight-on-hover rounded-3">
                     <div class="p-2 flex-shrink-1">
                         <i class="fa fa-plus"></i>
                     </div>
@@ -329,11 +361,6 @@ function save() {
                         Add property
                     </div>
                 </div>
-            </div>
-            <div v-for="message in _messages">
-                <b-alert v-model="message.visible" dismissible :variant="message.type">
-                    {{ message.content }}
-                </b-alert>
             </div>
         </b-card-body>
     </b-card>

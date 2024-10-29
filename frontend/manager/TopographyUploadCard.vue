@@ -9,12 +9,12 @@ import {
     BButtonGroup,
     BCard,
     BProgress,
-    useToast
+    useToastController
 } from 'bootstrap-vue-next';
 
 import {uploadFile} from "topobank/utils/upload";
 
-const {show} = useToast();
+const {show} = useToastController();
 
 const emit = defineEmits([
     'update:topography'

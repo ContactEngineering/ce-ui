@@ -307,12 +307,12 @@ const allSelected = computed({
         <div v-if="_surface != null"
              class="row">
             <div class="col-12">
-                <b-tabs class="nav-pills-custom"
+                <BTabs class="nav-pills-custom"
                         content-class="w-100"
                         fill
                         pills
                         vertical>
-                    <b-tab title="Measurements">
+                    <BTab title="Measurements">
                         <drop-zone v-if="isEditable && !anySelected"
                                    @files-dropped="filesDropped">
                         </drop-zone>
@@ -343,8 +343,8 @@ const allSelected = computed({
                                              v-model:selected="_selected[index]">
                             </topography-card>
                         </div>
-                    </b-tab>
-                    <b-tab title="Bandwidths">
+                    </BTab>
+                    <BTab title="Bandwidths">
                         <b-card class="w-100">
                             <template #header>
                                 <h5 class="float-start">Bandwidths</h5>
@@ -368,31 +368,31 @@ const allSelected = computed({
                                 </bandwidth-plot>
                             </b-card-body>
                         </b-card>
-                    </b-tab>
-                    <b-tab title="Description">
-                        <surface-description v-if="_surface != null"
+                    </BTab>
+                    <BTab title="Description">
+                        <SurfaceDescription v-if="_surface != null"
                                              :surface-url="_surface.url"
                                              :name="_surface.name"
                                              :description="_surface.description"
                                              :category="_surface.category"
                                              :tags="_surface.tags"
                                              :permission="_permissions.current_user.permission">
-                        </surface-description>
-                    </b-tab>
-                    <b-tab title="Properties">
-                        <surface-properties v-if="_surface != null"
+                        </SurfaceDescription>
+                    </BTab>
+                    <BTab title="Properties">
+                        <SurfaceProperties v-if="_surface != null"
+                                            v-model:properties="_surface.properties"
                                             :surface-url="_surface.url"
-                                            :properties="_surface.properties"
                                             :permission="_permissions.current_user.permission">
-                        </surface-properties>
-                    </b-tab>
-                    <b-tab title="Attachments">
+                        </SurfaceProperties>
+                    </BTab>
+                    <BTab title="Attachments">
                         <Attachments v-if="_surface != null"
                                      :attachments-url="_surface.attachments"
                                      :permission="_permissions.current_user.permission">
                         </Attachments>
-                    </b-tab>
-                    <b-tab v-if="_surface != null"
+                    </BTab>
+                    <BTab v-if="_surface != null"
                            title="Permissions">
                         <surface-permissions v-if="_surface.publication == null"
                                              :surface-url="_surface.url"
@@ -409,8 +409,8 @@ const allSelected = computed({
                                 system) and can no longer be modified.
                             </b-card-body>
                         </b-card>
-                    </b-tab>
-                    <b-tab v-if="isPublication"
+                    </BTab>
+                    <BTab v-if="isPublication"
                            title="How to cite">
                         <b-card class="w-100">
                             <template #header>
@@ -457,7 +457,7 @@ const allSelected = computed({
                                 </b-accordion>
                             </b-card-body>
                         </b-card>
-                    </b-tab>
+                    </BTab>
                     <template #tabs-end>
                         <hr/>
                         <a :href="`/ui/html/analysis-list/?subjects=${base64Subjects}`"
@@ -528,7 +528,7 @@ const allSelected = computed({
                             </div>
                         </div>
                     </template>
-                </b-tabs>
+                </BTabs>
             </div>
         </div>
     </div>

@@ -6,6 +6,7 @@ import pytest
 import yaml
 from django.conf import settings
 from django.shortcuts import reverse
+from django.test import override_settings
 from rest_framework.test import APIRequestFactory
 from topobank.testing.factories import (SurfaceFactory, Topography1DFactory,
                                         Topography2DFactory, UserFactory)
@@ -14,6 +15,7 @@ from trackstats.models import Metric, Period
 from ..views import DEFAULT_CONTAINER_FILENAME
 
 
+@override_settings(DELETE_EXISTING_FILES=True)
 @pytest.mark.django_db
 def test_download_selection(client, mocker, handle_usage_statistics):
     record_mock = mocker.patch(

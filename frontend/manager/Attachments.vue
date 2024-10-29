@@ -14,7 +14,7 @@ import {
     BAlert,
     BProgress,
     BModal,
-    useToast
+    useToastController
 } from 'bootstrap-vue-next';
 
 
@@ -23,7 +23,7 @@ const props = defineProps({
     permission: String
 });
 
-const {show} = useToast();
+const {show} = useToastController();
 
 const attachments = ref({});
 
