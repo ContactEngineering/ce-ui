@@ -2,6 +2,7 @@
 
 import pytest
 from django.shortcuts import reverse
+from django.test import override_settings
 from rest_framework.test import APIRequestFactory
 from topobank.testing.factories import (SurfaceFactory, TagFactory,
                                         Topography1DFactory, UserFactory)
@@ -114,6 +115,7 @@ def test_unselect_surface():
     assert selected_instances(request)[1] == [surface2]
 
 
+@override_settings(DELETE_EXISTING_FILES=True)
 @pytest.mark.django_db
 def test_try_to_select_surface_but_not_allowed():
     user1 = UserFactory()
@@ -408,7 +410,7 @@ def test_select_tab_state_should_be_default_after_login(client, orcid_socialapp)
     # first request the site anonymously .. select tab state is set to that of
     # an anonymous user
     response = client.get(reverse('ce_ui:select'))
-    assert response.context['select_tab_state']['sharing_status'] == 'published_ingress'
+    assert response.context['select_tab_state']['sharing_status'] == 'published'
 
     # Then login as authenticated user
     password = "abcd"
