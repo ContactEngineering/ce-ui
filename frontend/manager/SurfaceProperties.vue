@@ -1,5 +1,4 @@
 <script setup>
-
 import axios from "axios";
 import {computed, ref} from 'vue';
 
@@ -58,13 +57,17 @@ let formIsValid = computed(() => {
         if (hashMap[property.name]) {
             return true
         }
-        hashMap[property.name] = true;
-
     });
+}
 
-    return !(emptyFields || nameDuplicates);
+// Pull Properties from API and sync table
+pullProperties()
+    .then(
+        syncPropertiesTable
+    );
 
-});
+let _isEditing = ref(false);
+let _isSaving = ref(false);
 
 function cleanUpAfterSave() {
     // clear deletion list and remove elements
@@ -80,10 +83,10 @@ function cleanUpAfterSave() {
     _isEditing.value = false;
 }
 
-function saveJobFinished() {
-    _nbSaveJobs.value--;
-    if (_nbSaveJobs.value === 0) {
-        cleanUpAfterSave();
+function enterEditMode() {
+    if (!_isEditing.value) {
+        _isEditing.value = true;
+        syncPropertiesTable();
     }
 }
 
@@ -114,7 +117,6 @@ function isNumeric(property) {
 }
 
 function addProperty() {
-    // Enter state === 'edit'
     enterEditMode();
     // Add new empty property if there is no empty last property
     const len = _properties.value.length;
@@ -151,7 +153,6 @@ function deleteProperty(index) {
     _edited.value = _edited.value.filter((idx) => {
         return idx != index;
     })
-}
 
 function syncPropertyCreate(index) {
     const property = {..._properties.value[index]};
@@ -182,7 +183,6 @@ function syncPropertyDelete(index) {
     }).finally(() => {
         saveJobFinished();
     });
-}
 
 function syncPropertyUpdate(index) {
     const property = {..._properties.value[index]};
@@ -225,7 +225,6 @@ function discardChanges() {
     _isEditing.value = false;
 }
 
-// edit -> save -> edit | view
 function save() {
     // Check for empty names and give warning
     if (_properties.value.filter((property) => property.name === "").length > 0) {
@@ -243,15 +242,23 @@ function save() {
                 _properties.value[index].unit = "";
             }
         }
-    }
-
-    _isEditing.value = false;
-    _edited.value.forEach(syncPropertyUpdate);
-    _deleted.value.forEach(syncPropertyDelete);
-    _added.value.forEach(syncPropertyCreate);
+        else {
+            propertiesDict[property.name] = {
+                value: property.value
+            };
+        }
+    });
+    axios.patch(props.surfaceUrl, { properties: propertiesDict }).then((res) => {
+        pullProperties()
+            .then(
+                syncPropertiesTable
+            );
+        _isEditing.value = false;
+        _isSaving.value = false;
+    });
 }
-</script>
 
+</script>
 <template>
     <b-card>
         <template #header>
@@ -268,7 +275,7 @@ function save() {
                         Discard
                     </b-button>
                     <b-button :disabled="!formIsValid" @click="save" variant="success">
-                        <b-spinner v-if="_nbSaveJobs > 0" small/>
+                        <b-spinner v-if="_isSaving" small />
                         SAVE
                     </b-button>
                 </b-button-group>
@@ -349,6 +356,7 @@ function save() {
                             <i v-if="_isEditing"
                                class="p-2 align-self-center fa fa-upload"></i>
                             <b-spinner v-else-if="_nbSaveJobs > 0" small/>
+
                         </div>
                     </div>
                 </div>
