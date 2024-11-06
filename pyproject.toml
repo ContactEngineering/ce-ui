@@ -5,13 +5,13 @@ build-backend = "flit_core.buildapi"
 [project]
 name = 'ce-ui'
 description = 'The user-facing interface of contact.engineering.'
-requires-python = '>=3.8.0'
+requires-python = '>=3.9.0'
 dynamic = ['version']
 readme = 'README.rst'
 license = { file = 'LICENSE' }
 authors = [
     { name = "Michael Röttger", email = "info@michael-roettger.de" },
-    { name = "Lars Pastewka", email = "lars.pastewka@imtek.uni-freiburg.de" }
+    { name = "Lars Pastewka", email = "lars.pastewka@imtek.uni-freiburg.de" },
 ]
 classifiers = [
     'Development Status :: 5 - Production/Stable',
@@ -25,15 +25,17 @@ classifiers = [
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
     'Programming Language :: Python :: 3 :: Only',
-    'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
     'Topic :: Internet :: WWW/HTTP',
-    'Topic :: Internet :: WWW/HTTP :: Dynamic Content'
+    'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
 ]
 dependencies = [
     'DiscoverVersion',
     'django-termsandconditions>=2.0.8',
-    'celery[redis]'
+    'celery[redis]',
 ]
 
 [project.urls]

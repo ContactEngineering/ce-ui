@@ -1,7 +1,7 @@
 <script setup>
 
 import axios from "axios";
-import {computed, onMounted, ref} from "vue";
+import { computed, onMounted, ref } from "vue";
 
 import {
     BAccordion,
@@ -19,8 +19,8 @@ import {
     BToastOrchestrator
 } from 'bootstrap-vue-next';
 
-import {filterTopographyForPatchRequest, getIdFromUrl, subjectsToBase64} from "../utils/api";
-import {ccLicenseInfo} from "../utils/data";
+import { filterTopographyForPatchRequest, getIdFromUrl, subjectsToBase64 } from "../utils/api";
+import { ccLicenseInfo } from "../utils/data";
 
 import Attachments from './Attachments.vue';
 import BandwidthPlot from './BandwidthPlot.vue';
@@ -112,7 +112,7 @@ function getOriginalSurfaceId() {
 
 function updateCard() {
     /* Fetch JSON describing the card */
-    axios.get(`${props.surfaceUrl}?children=yes&permissions=yes&properties=yes&attachments=yes`).then(response => {
+    axios.get(`${props.surfaceUrl}?children=yes&permissions=yes&attachments=yes`).then(response => {
         _surface.value = response.data;
         _permissions.value = response.data.permissions;
         _topographies.value = response.data.topography_set;
@@ -152,7 +152,7 @@ function filesDropped(files) {
 }
 
 function uploadNewTopography(file) {
-    axios.post(props.newTopographyUrl, {surface: props.surfaceUrl, name: file.name}).then(response => {
+    axios.post(props.newTopographyUrl, { surface: props.surfaceUrl, name: file.name }).then(response => {
         let upload = response.data;
         upload.file = file;  // need to know which file to upload
         _topographies.value.push(upload);  // this will trigger showing a topography-upload-card
@@ -235,7 +235,7 @@ const category = computed(() => {
 });
 
 const base64Subjects = computed(() => {
-    return subjectsToBase64({surface: [_surface.value.id]});
+    return subjectsToBase64({ surface: [_surface.value.id] });
 });
 
 const versionString = computed(() => {
@@ -286,54 +286,37 @@ const allSelected = computed({
 <template>
     <BToastOrchestrator />
     <div class="container">
-        <div v-if="_surface == null"
-             class="d-flex justify-content-center mt-5">
+        <div v-if="_surface == null" class="d-flex justify-content-center mt-5">
             <div class="flex-column text-center">
-                <b-spinner/>
+                <b-spinner />
                 <p>Loading...</p>
             </div>
         </div>
-        <b-alert :model-value="_error != null"
-                 variant="danger">
+        <b-alert :model-value="_error != null" variant="danger">
             {{ _error.message }}: {{ _error.response.statusText }}
         </b-alert>
-        <div v-if="_surface != null"
-             class="row">
+        <div v-if="_surface != null" class="row">
             <div class="col-12">
-                <b-tabs class="nav-pills-custom"
-                        content-class="w-100"
-                        fill
-                        pills
-                        vertical>
+                <b-tabs class="nav-pills-custom" content-class="w-100" fill pills vertical>
                     <b-tab title="Measurements">
-                        <drop-zone v-if="isEditable && !anySelected"
-                                   @files-dropped="filesDropped">
+                        <drop-zone v-if="isEditable && !anySelected" @files-dropped="filesDropped">
                         </drop-zone>
-                        <topography-properties-card v-if="anySelected"
-                                                    :batch-edit="true"
-                                                    :saving="_saving"
-                                                    v-model:topography="_batchEditTopography"
-                                                    @save:edit="saveBatchEdit"
-                                                    @discard:edit="discardBatchEdit">
+                        <topography-properties-card v-if="anySelected" :batch-edit="true" :saving="_saving"
+                            v-model:topography="_batchEditTopography" @save:edit="saveBatchEdit"
+                            @discard:edit="discardBatchEdit">
                         </topography-properties-card>
-                        <div v-if="isEditable && _topographies.length > 0"
-                             class="d-flex mb-1">
+                        <div v-if="isEditable && _topographies.length > 0" class="d-flex mb-1">
                             <b-card>
-                                <b-form-checkbox size="sm"
-                                                 :indeterminate="someSelected"
-                                                 v-model="allSelected">
+                                <b-form-checkbox size="sm" :indeterminate="someSelected" v-model="allSelected">
                                     Select all
                                 </b-form-checkbox>
                             </b-card>
                         </div>
                         <div v-for="(topography, index) in _topographies">
-                            <topography-card v-if="topography != null"
-                                             :selectable="isEditable"
-                                             :topography-url="topography.url"
-                                             :disabled="!isEditable"
-                                             @delete:topography="() => deleteTopography(index)"
-                                             v-model:topography="_topographies[index]"
-                                             v-model:selected="_selected[index]">
+                            <topography-card v-if="topography != null" :selectable="isEditable"
+                                :topography-url="topography.url" :disabled="!isEditable"
+                                @delete:topography="() => deleteTopography(index)"
+                                v-model:topography="_topographies[index]" v-model:selected="_selected[index]">
                             </topography-card>
                         </div>
                     </b-tab>
@@ -352,43 +335,33 @@ const allSelected = computed({
                                     Part of the bandwidth shown may be unreliable due to the configured instrument's
                                     measurement capacities.
                                 </b-alert>
-                                <bandwidth-plot v-if="_topographies.length > 0"
-                                                :topographies="_topographies">
+                                <bandwidth-plot v-if="_topographies.length > 0" :topographies="_topographies">
                                 </bandwidth-plot>
                             </b-card-body>
                         </b-card>
                     </b-tab>
                     <b-tab title="Description">
-                        <surface-description v-if="_surface != null"
-                                            :surface-url="_surface.url"
-                                            :name="_surface.name"
-                                            :description="_surface.description"
-                                            :category="_surface.category"
-                                            :tags="_surface.tags"
-                                            :permission="_permissions.current_user.permission">
+                        <surface-description v-if="_surface != null" :surface-url="_surface.url" :name="_surface.name"
+                            :description="_surface.description" :category="_surface.category" :tags="_surface.tags"
+                            :permission="_permissions.current_user.permission">
                         </surface-description>
                     </b-tab>
                     <b-tab title="Properties">
-                        <surface-properties v-if="_surface != null"
-                                            :surface-url="_surface.url"
-                                            :properties="_surface.properties"
-                                            :permission="_permissions.current_user.permission">
+                        <surface-properties v-if="_surface != null" :surface-url="_surface.url"
+                            :permission="_permissions.current_user.permission">
                         </surface-properties>
                     </b-tab>
                     <b-tab title="Attachments">
                         <attachments v-if="_surface != null" :file-parent-type="'surface'"
-                            :file-parent-url="_surface.url" :attachments="_surface.attachments"
+                            :file-parent-url="_surface.url" :folderUrl="_surface.attachments"
                             :permission="_permissions.current_user.permission">
                         </attachments>
                     </b-tab>
-                    <b-tab v-if="_surface != null"
-                           title="Permissions">
-                        <surface-permissions v-if="_surface.publication == null"
-                                             :surface-url="_surface.url"
-                                             v-model:permissions="_permissions">
+                    <b-tab v-if="_surface != null" title="Permissions">
+                        <surface-permissions v-if="_surface.publication == null" :surface-url="_surface.url"
+                            v-model:permissions="_permissions">
                         </surface-permissions>
-                        <b-card v-if="_surface.publication != null"
-                                class="w-100">
+                        <b-card v-if="_surface.publication != null" class="w-100">
                             <template #header>
                                 <h5 class="float-start">Permissions</h5>
                             </template>
@@ -398,8 +371,7 @@ const allSelected = computed({
                             </b-card-body>
                         </b-card>
                     </b-tab>
-                    <b-tab v-if="isPublication"
-                           title="How to cite">
+                    <b-tab v-if="isPublication" title="How to cite">
                         <b-card class="w-100">
                             <template #header>
                                 <h5 class="float-start">How to cite</h5>
@@ -408,8 +380,8 @@ const allSelected = computed({
                                 <p class="mb-5">
                                     <a :href="ccLicenseInfo[_publication.license].descriptionUrl">
                                         <img :src="`/static/images/cc/${_publication.license}.svg`"
-                                             :title="`Dataset can be reused under the terms of the ${ccLicenseInfo[_publication.license].title}.`"
-                                             style="float:right; margin-left: 0.25rem;"/>
+                                            :title="`Dataset can be reused under the terms of the ${ccLicenseInfo[_publication.license].title}.`"
+                                            style="float:right; margin-left: 0.25rem;" />
                                     </a>
                                     This dataset can be reused under the terms of the
                                     <a :href="ccLicenseInfo[_publication.license].descriptionUrl">
@@ -419,7 +391,7 @@ const allSelected = computed({
                                 </p>
                                 <b-accordion>
                                     <b-accordion-item title="Citation" visible>
-                                        <div v-html="_publication.citation.html"/>
+                                        <div v-html="_publication.citation.html" />
                                     </b-accordion-item>
                                     <b-accordion-item title="RIS">
                                         <code>
@@ -441,32 +413,26 @@ const allSelected = computed({
                         </b-card>
                     </b-tab>
                     <template #tabs-end>
-                        <hr/>
+                        <hr />
                         <a :href="`/ui/html/analysis-list/?subjects=${base64Subjects}`"
-                           class="btn btn-outline-danger mb-2 mt-2">
+                            class="btn btn-outline-danger mb-2 mt-2">
                             Analyze
                         </a>
 
-                        <a :href="`${surfaceUrl}download/`"
-                           class="btn btn-outline-secondary mb-2">
+                        <a :href="`${surfaceUrl}download/`" class="btn btn-outline-secondary mb-2">
                             Download
                         </a>
 
-                        <a v-if="!isPublication"
-                           :href="publishUrl"
-                           class="btn btn-outline-secondary mb-2">
+                        <a v-if="!isPublication" :href="publishUrl" class="btn btn-outline-secondary mb-2">
                             Publish
                         </a>
 
-                        <a v-if="_versions == null || _versions.length === 0"
-                           href="#"
-                           class="btn btn-outline-secondary mb-2"
-                           @click="_showDeleteModal = true">
+                        <a v-if="_versions == null || _versions.length === 0" href="#"
+                            class="btn btn-outline-secondary mb-2" @click="_showDeleteModal = true">
                             Delete
                         </a>
-                        <hr/>
-                        <div v-if="_surface != null"
-                             class="card mt-2">
+                        <hr />
+                        <div v-if="_surface != null" class="card mt-2">
                             <div class="card-body">
                                 <div>
                                     <span class="badge bg-secondary surface-category-headline">
@@ -479,29 +445,24 @@ const allSelected = computed({
                                     </span>
                                 </div>
                                 <div>
-                                    <span v-for="tag in _surface.tags"
-                                          class="badge bg-success">
+                                    <span v-for="tag in _surface.tags" class="badge bg-success">
                                         {{ tag.name }}
                                     </span>
                                 </div>
-                                <b-dropdown v-if="_versions == null || _versions.length > 0"
-                                            class="mt-2"
-                                            variant="info"
-                                            :text="versionString">
+                                <b-dropdown v-if="_versions == null || _versions.length > 0" class="mt-2" variant="info"
+                                    :text="versionString">
                                     <b-dropdown-item
                                         v-if="_publication == null || _publication.has_access_to_original_surface"
-                                        :href="hrefOriginalSurface"
-                                        :disabled="_publication == null">
+                                        :href="hrefOriginalSurface" :disabled="_publication == null">
                                         Work in progress
                                     </b-dropdown-item>
                                     <b-dropdown-item v-if="_versions == null">
-                                        <b-spinner small/>
+                                        <b-spinner small />
                                         Loading versions...
                                     </b-dropdown-item>
-                                    <b-dropdown-item v-if="_versions != null"
-                                                     v-for="version in _versions"
-                                                     :href="surfaceHrefForVersion(version)"
-                                                     :disabled="_publication != null && _publication.version === version.version">
+                                    <b-dropdown-item v-if="_versions != null" v-for="version in _versions"
+                                        :href="surfaceHrefForVersion(version)"
+                                        :disabled="_publication != null && _publication.version === version.version">
                                         Version {{ version.version }}
                                     </b-dropdown-item>
                                 </b-dropdown>
@@ -512,10 +473,7 @@ const allSelected = computed({
             </div>
         </div>
     </div>
-    <b-modal v-if="_surface != null"
-             v-model="_showDeleteModal"
-             @ok="deleteSurface"
-             title="Delete digital surface twin">
+    <b-modal v-if="_surface != null" v-model="_showDeleteModal" @ok="deleteSurface" title="Delete digital surface twin">
         You are about to delete the digital surface twin with name <b>{{ _surface.name }}</b> and all contained
         measurements. Are you sure you want to proceed?
     </b-modal>
