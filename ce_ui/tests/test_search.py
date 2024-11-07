@@ -37,6 +37,7 @@ def assert_dicts_equal(a, b):
         assert_dict_equal(x, y)
 
 
+@override_settings(DELETE_EXISTING_FILES=True)
 @pytest.fixture
 def user_three_surfaces_four_topographies():
     #
