@@ -3,6 +3,7 @@ import logging
 from django import shortcuts
 from rest_framework import serializers
 from tagulous.contrib.drf import TagRelatedManagerField
+from topobank.files.serializers import ManifestSerializer
 from topobank.manager.models import Surface, Tag, Topography
 from topobank.manager.serializers import (SurfaceSerializer,
                                           TopographySerializer)
@@ -31,6 +32,7 @@ class TopographySearchSerializer(serializers.ModelSerializer):
     )
 
     title = serializers.CharField(source='name', read_only=True)  # set this through name
+    thumbnail = ManifestSerializer(required=False)
 
     urls = serializers.SerializerMethodField()
     selected = serializers.SerializerMethodField()

@@ -1,6 +1,7 @@
 """Test related to searching"""
 
 import pytest
+from django.conf import settings
 from django.shortcuts import reverse
 from django.test import override_settings
 from rest_framework.test import APIRequestFactory
@@ -8,38 +9,16 @@ from topobank.manager.models import Tag
 from topobank.manager.utils import subjects_to_base64
 from topobank.testing.factories import (SurfaceFactory, Topography1DFactory,
                                         UserFactory)
-from topobank.testing.utils import ordereddicts_to_dicts
+from topobank.testing.utils import (ASSERT_EQUAL_IGNORE_VALUE,
+                                    assert_dicts_equal, ordereddicts_to_dicts)
 
 from ..views import SurfaceListView, SurfaceSearchPaginator, TagTreeView
 from .utils import search_surfaces
 
 
-def assert_dict_equal(a, b, key=None):
-    try:
-        keys_a = set(a.keys())
-        keys_b = set(b.keys())
-    except AttributeError:
-        assert a == b, f'The value of the following key differs: {key}'
-        return
-
-    assert keys_a == keys_b, f'The following keys are not present in both dictionaries: {keys_a ^ keys_b}'
-    for key in keys_a:
-        if isinstance(a[key], dict):
-            assert_dict_equal(a[key], b[key], key=key)
-        elif isinstance(a[key], list):
-            assert_dicts_equal(a[key], b[key])
-        else:
-            assert a[key] == b[key], f'The value of the following key differs: {key}'
-
-
-def assert_dicts_equal(a, b):
-    for x, y in zip(a, b):
-        assert_dict_equal(x, y)
-
-
-@override_settings(DELETE_EXISTING_FILES=True)
 @pytest.fixture
 def user_three_surfaces_four_topographies():
+    settings.DELETE_EXISTING_FILES = True
     #
     # Create some database objects
     #
@@ -119,7 +98,7 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
                  'title': topo1a.name,
                  'type': 'topography',
                  'version': None,
-                 'datafile_format': None,
+                 'datafile_format': 'xyz',
                  'height_scale': int(topo1a.height_scale),
                  'height_scale_editable': topo1a.height_scale_editable,
                  'instrument_name': '',
@@ -132,7 +111,7 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
                  'size_editable': topo1a.size_editable,
                  'size_x': topo1a.size_x,
                  'size_y': topo1a.size_y,
-                 'thumbnail': None,
+                 'thumbnail': ASSERT_EQUAL_IGNORE_VALUE,
                  'unit': topo1a.unit,
                  'unit_editable': topo1a.unit_editable,
                  'creation_datetime': topo1a.creation_datetime.astimezone().isoformat(),
@@ -158,7 +137,7 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
                  'title': topo1b.name,
                  'type': 'topography',
                  'version': None,
-                 'datafile_format': None,
+                 'datafile_format': 'xyz',
                  'height_scale': topo1b.height_scale,
                  'height_scale_editable': topo1b.height_scale_editable,
                  'instrument_name': '',
@@ -171,7 +150,7 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
                  'size_editable': topo1b.size_editable,
                  'size_x': topo1b.size_x,
                  'size_y': topo1b.size_y,
-                 'thumbnail': None,
+                 'thumbnail': ASSERT_EQUAL_IGNORE_VALUE,
                  'unit': topo1b.unit,
                  'unit_editable': topo1b.unit_editable,
                  'creation_datetime': topo1b.creation_datetime.astimezone().isoformat(),
@@ -230,7 +209,7 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
                  'title': topo2a.name,
                  'type': 'topography',
                  'version': None,
-                 'datafile_format': None,
+                 'datafile_format': 'xyz',
                  'height_scale': topo2a.height_scale,
                  'height_scale_editable': topo2a.height_scale_editable,
                  'instrument_name': '',
@@ -243,7 +222,7 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
                  'size_editable': topo2a.size_editable,
                  'size_x': topo2a.size_x,
                  'size_y': topo2a.size_y,
-                 'thumbnail': None,
+                 'thumbnail': ASSERT_EQUAL_IGNORE_VALUE,
                  'unit': topo2a.unit,
                  'unit_editable': topo2a.unit_editable,
                  'creation_datetime': topo2a.creation_datetime.astimezone().isoformat(),
@@ -269,7 +248,7 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
                  'title': topo2b.name,
                  'type': 'topography',
                  'version': None,
-                 'datafile_format': None,
+                 'datafile_format': 'xyz',
                  'height_scale': topo2b.height_scale,
                  'height_scale_editable': topo2b.height_scale_editable,
                  'instrument_name': '',
@@ -282,7 +261,7 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
                  'size_editable': topo2b.size_editable,
                  'size_x': topo2b.size_x,
                  'size_y': topo2b.size_y,
-                 'thumbnail': None,
+                 'thumbnail': ASSERT_EQUAL_IGNORE_VALUE,
                  'unit': topo2b.unit,
                  'unit_editable': topo2b.unit_editable,
                  'creation_datetime': topo2b.creation_datetime.astimezone().isoformat(),
@@ -351,7 +330,7 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
         },
     ]
 
-    assert ordereddicts_to_dicts(response.data['page_results']) == expected_dicts
+    assert_dicts_equal(ordereddicts_to_dicts(response.data['page_results']), expected_dicts)
 
     #
     # Do a search and check for reduced results because search for "topo2a"
@@ -389,7 +368,7 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
                  'title': topo2a.name,
                  'type': 'topography',
                  'version': None,
-                 'datafile_format': None,
+                 'datafile_format': 'xyz',
                  'height_scale': int(topo2a.height_scale),
                  'height_scale_editable': topo2a.height_scale_editable,
                  'instrument_name': '',
@@ -402,7 +381,7 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
                  'size_editable': topo2a.size_editable,
                  'size_x': topo2a.size_x,
                  'size_y': topo2a.size_y,
-                 'thumbnail': None,
+                 'thumbnail': ASSERT_EQUAL_IGNORE_VALUE,
                  'unit': topo2a.unit,
                  'unit_editable': topo2a.unit_editable,
                  'creation_datetime': topo2a.creation_datetime.astimezone().isoformat(),
@@ -442,7 +421,7 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
     ]
 
     resulted_dicts = ordereddicts_to_dicts(response.data['page_results'], sorted_by='title')
-    assert resulted_dicts == expected_dicts
+    assert_dicts_equal(resulted_dicts, expected_dicts)
 
     #
     # Do a search and check for reduced results because search for category "exp"
@@ -480,7 +459,7 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
                  'title': topo1a.name,
                  'type': 'topography',
                  'version': None,
-                 'datafile_format': None,
+                 'datafile_format': 'xyz',
                  'height_scale': int(topo1a.height_scale),
                  'height_scale_editable': topo1a.height_scale_editable,
                  'instrument_name': '',
@@ -493,7 +472,7 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
                  'size_editable': topo1a.size_editable,
                  'size_x': topo1a.size_x,
                  'size_y': topo1a.size_y,
-                 'thumbnail': None,
+                 'thumbnail': ASSERT_EQUAL_IGNORE_VALUE,
                  'unit': topo1a.unit,
                  'unit_editable': topo1a.unit_editable,
                  'creation_datetime': topo1a.creation_datetime.astimezone().isoformat(),
@@ -519,7 +498,7 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
                  'title': topo1b.name,
                  'type': 'topography',
                  'version': None,
-                 'datafile_format': None,
+                 'datafile_format': 'xyz',
                  'height_scale': int(topo1b.height_scale),
                  'height_scale_editable': topo1b.height_scale_editable,
                  'instrument_name': '',
@@ -532,7 +511,7 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
                  'size_editable': topo1b.size_editable,
                  'size_x': topo1b.size_x,
                  'size_y': topo1b.size_y,
-                 'thumbnail': None,
+                 'thumbnail': ASSERT_EQUAL_IGNORE_VALUE,
                  'unit': topo1b.unit,
                  'unit_editable': topo1b.unit_editable,
                  'creation_datetime': topo1b.creation_datetime.astimezone().isoformat(),
@@ -573,7 +552,7 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
     ]
 
     resulted_dicts = ordereddicts_to_dicts(response.data['page_results'], sorted_by='title')
-    assert resulted_dicts == expected_dicts
+    assert_dicts_equal(resulted_dicts, expected_dicts)
 
 
 @override_settings(DELETE_EXISTING_FILES=True)
@@ -634,7 +613,7 @@ def test_tag_search_with_request_factory(user_three_surfaces_four_topographies):
         'title': topo1a.name,
         'type': 'topography',
         'version': None,
-        'datafile_format': None,
+        'datafile_format': 'xyz',
         'height_scale': int(topo1a.height_scale),
         'height_scale_editable': topo1a.height_scale_editable,
         'instrument_name': '',
@@ -647,7 +626,7 @@ def test_tag_search_with_request_factory(user_three_surfaces_four_topographies):
         'size_editable': topo1a.size_editable,
         'size_x': topo1a.size_x,
         'size_y': topo1a.size_y,
-        'thumbnail': None,
+        'thumbnail': ASSERT_EQUAL_IGNORE_VALUE,
         'unit': topo1a.unit,
         'unit_editable': topo1a.unit_editable,
         'creation_datetime': topo1a.creation_datetime.astimezone().isoformat(),
@@ -675,7 +654,7 @@ def test_tag_search_with_request_factory(user_three_surfaces_four_topographies):
         'title': topo1b.name,
         'type': 'topography',
         'version': None,
-        'datafile_format': None,
+        'datafile_format': 'xyz',
         'height_scale': int(topo1b.height_scale),
         'height_scale_editable': topo1b.height_scale_editable,
         'instrument_name': '',
@@ -688,7 +667,7 @@ def test_tag_search_with_request_factory(user_three_surfaces_four_topographies):
         'size_editable': topo1b.size_editable,
         'size_x': topo1b.size_x,
         'size_y': topo1b.size_y,
-        'thumbnail': None,
+        'thumbnail': ASSERT_EQUAL_IGNORE_VALUE,
         'unit': topo1b.unit,
         'unit_editable': topo1b.unit_editable,
         'creation_datetime': topo1b.creation_datetime.astimezone().isoformat(),
@@ -717,7 +696,7 @@ def test_tag_search_with_request_factory(user_three_surfaces_four_topographies):
         'title': topo2a.name,
         'type': 'topography',
         'version': None,
-        'datafile_format': None,
+        'datafile_format': 'xyz',
         'height_scale': int(topo2a.height_scale),
         'height_scale_editable': topo2a.height_scale_editable,
         'instrument_name': '',
@@ -730,7 +709,7 @@ def test_tag_search_with_request_factory(user_three_surfaces_four_topographies):
         'size_editable': topo2a.size_editable,
         'size_x': topo2a.size_x,
         'size_y': topo2a.size_y,
-        'thumbnail': None,
+        'thumbnail': ASSERT_EQUAL_IGNORE_VALUE,
         'unit': topo2a.unit,
         'unit_editable': topo2a.unit_editable,
         'creation_datetime': topo2a.creation_datetime.astimezone().isoformat(),
@@ -759,7 +738,7 @@ def test_tag_search_with_request_factory(user_three_surfaces_four_topographies):
         'title': topo2b.name,
         'type': 'topography',
         'version': None,
-        'datafile_format': None,
+        'datafile_format': 'xyz',
         'height_scale': int(topo2b.height_scale),
         'height_scale_editable': topo2b.height_scale_editable,
         'instrument_name': '',
@@ -772,7 +751,7 @@ def test_tag_search_with_request_factory(user_three_surfaces_four_topographies):
         'size_editable': topo2b.size_editable,
         'size_x': topo2b.size_x,
         'size_y': topo2b.size_y,
-        'thumbnail': None,
+        'thumbnail': ASSERT_EQUAL_IGNORE_VALUE,
         'unit': topo2b.unit,
         'unit_editable': topo2b.unit_editable,
         'creation_datetime': topo2b.creation_datetime.astimezone().isoformat(),
@@ -936,7 +915,7 @@ def test_tag_search_with_request_factory(user_three_surfaces_four_topographies):
     ]
 
     resulted_dicts = ordereddicts_to_dicts(response.data['page_results'], sorted_by='title')
-    assert resulted_dicts == expected_dicts
+    assert_dicts_equal(resulted_dicts, expected_dicts)
 
     #
     # Now restrict result by query parameters, search for "topo2a"
@@ -1020,7 +999,7 @@ def test_tag_search_with_request_factory(user_three_surfaces_four_topographies):
 
     ]
     resulted_dicts = ordereddicts_to_dicts(response.data['page_results'], sorted_by='title')
-    assert resulted_dicts == expected_dicts
+    assert_dicts_equal(resulted_dicts, expected_dicts)
 
     #
     # Now restrict result by query parameters, search for category 'dum'
@@ -1048,13 +1027,13 @@ def test_tag_search_with_request_factory(user_three_surfaces_four_topographies):
     surface4 = SurfaceFactory(creator=user2)
     surface4.tags = ['shared']
     surface4.save()
-    surface4.share(user)
+    surface4.grant_permission(user)
 
     shared_pk = Tag.objects.get(name='shared').pk
     shared_prefix = f"/ui/html/tag/{shared_pk}/"
     surface4_prefix = f"/ui/html/surface/{surface4.pk}/"
 
-    request = factory.get(reverse('ce_ui:tag-list') + "?sharing_status=shared_ingress")
+    request = factory.get(reverse('ce_ui:tag-list') + "?sharing_status=others")
     request.user = user
     request.session = session
 

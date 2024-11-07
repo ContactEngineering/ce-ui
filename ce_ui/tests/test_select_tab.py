@@ -153,7 +153,7 @@ def test_try_to_select_topography_but_not_allowed():
     assert response.status_code == 403
 
     # if user 1 shares the surface with user 2, it is allowed
-    surface1.share(user2)
+    surface1.grant_permission(user2)
     response = select_topography(request, topo1.pk)
     assert response.status_code == 200
 
