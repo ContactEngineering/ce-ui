@@ -1,8 +1,7 @@
 import logging
 
-from django.dispatch import receiver
-
 from allauth.account.signals import user_logged_in
+from django.dispatch import receiver
 
 from .views import DEFAULT_SELECT_TAB_STATE
 
