@@ -2,7 +2,7 @@ import axios from "axios";
 import {createApp} from 'vue';
 import {createBootstrap} from "bootstrap-vue-next";
 
-import UserMenu from './UserMenuButton.vue';
+import UserMenu from './UserMenu.vue';
 
 export function createUserMenuApp(el, csrfToken, props) {
     let app = createApp(UserMenu, props);
