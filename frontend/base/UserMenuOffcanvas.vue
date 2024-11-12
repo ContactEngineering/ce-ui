@@ -28,7 +28,7 @@ const contactModal = ref(false);
         </template>
 
         <template #footer>
-            <BNavbarNav class="justify-content-end flex-grow-1 pe-3 mb-3">
+            <BNavbarNav class="justify-content-end flex-grow-1">
                 <BNavItem :href="`https://orcid.org/${orcid}`"
                           class="align-self-center">
                     <img src="/static/images/ORCID-iD_icon_vector.svg"
@@ -44,12 +44,12 @@ const contactModal = ref(false);
             </BNavbarNav>
         </template>
 
-        <BNavbarNav v-if="isStaff" class="justify-content-end flex-grow-1 pe-3 mb-3">
+        <BNavbarNav v-if="isStaff" class="justify-content-end flex-grow-1">
             <BNavItem :href="adminUrl">Admin interface</BNavItem>
             <BNavItem href="/watchman/dashboard/">Watchman dashboard</BNavItem>
             <BNavItem href="/watchman/">Watchman status (JSON)</BNavItem>
         </BNavbarNav>
-        <BNavbarNav class="justify-content-end flex-grow-1 pe-3 mb-3">
+        <BNavbarNav class="justify-content-end flex-grow-1">
             <BNavItem href="/termsandconditions/">Terms &amp; conditions</BNavItem>
             <BNavItem href="/help/">Help</BNavItem>
             <BNavItem href="https://github.com/ContactEngineering/TopoBank/discussions">
