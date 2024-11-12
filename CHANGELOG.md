@@ -1,5 +1,11 @@
 # Changelog for plugin *ce-ui*
 
+## 1.9.0 (2024-11-13)
+
+- ENH: Attachments for surfaces and topographies
+- ENH: Rewritten notification and user panels
+- MAINT: Updated for latest topobank
+
 ## 1.8.4 (2024-05-14)
 
 - BUG: Displaying plots with unspecified `xData` and `yData`
