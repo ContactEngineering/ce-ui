@@ -17,7 +17,13 @@ import axios from "axios";
 
 import {computed, onMounted, ref} from "vue";
 
-import {BFormSelect, BInputGroup, BPagination, BSpinner} from "bootstrap-vue-next";
+import {
+    BFormGroup,
+    BFormSelect,
+    BInputGroup,
+    BPagination,
+    BSpinner
+} from "bootstrap-vue-next";
 
 import {createTree} from 'jquery.fancytree';
 

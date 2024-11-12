@@ -12,18 +12,24 @@
 
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="Cloud service for storing and analysis surface topography measurements">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description"
+          content="Cloud service for storing and analysis surface topography measurements">
     <meta name="author" content="Michael Röttger, Lars Pastewka">
-    <meta name="keywords" content="roughness, surface finish, contact calculator, contact mechanics">
+    <meta name="keywords"
+          content="roughness, surface finish, contact calculator, contact mechanics">
 
-    <title>contact.engineering - Store and analyze surface topography measurements</title>
+    <title>contact.engineering - Store and analyze surface topography
+        measurements</title>
 
-    <link rel="icon" type="image/x-icon" href="{% static 'images/favicons/favicon.png' %}"/>
+    <link rel="icon" type="image/x-icon"
+          href="{% static 'images/favicons/favicon.png' %}"/>
 
     <script src="{% static 'js/base.bundle.js' %}"></script>
 
-    <link href="{% static 'tagulous/lib/select2-4/css/select2.min.css' %}" rel="stylesheet">
+    <link href="{% static 'tagulous/lib/select2-4/css/select2.min.css' %}"
+          rel="stylesheet">
 
     {% block extra_css %}{% endblock extra_css %}
 </head>
@@ -36,19 +42,25 @@
         <!-- Navbar -->
 
         {# Logo / name of the application #}
-        <a class="navbar-brand ms-3" href="{% url 'home' %}"><img src="{% static 'images/ce_logo.svg' %}" height="25px">&nbsp
+        <a class="navbar-brand ms-3" href="{% url 'home' %}"><img
+                src="{% static 'images/ce_logo.svg' %}" height="25px">&nbsp
             contact.engineering</a>
         {% if request %}  {# in case of error 500, there is no request #}
             <div class="collapse navbar-collapse" id="navbar_supported_content">
 
                 {# Search Bar #}
                 <div class="navbar-nav flex-grow-1 ms-5 me-5">
-                    <form class="form-inline w-100" action="{% url 'ce_ui:select' %}" method="get">
+                    <form class="form-inline w-100" action="{% url 'ce_ui:select' %}"
+                          method="get">
                         <div class="input-group w-100" id="global-search">
-                            <label class="sr-only" for="global-search-input">Search Term</label>
-                            <input class="form-control" type="search" id="global-search-input"
-                                   placeholder="Search names, descriptions, and tags" name="search">
-                            <button class="btn btn-outline-secondary" type="submit">{% fa5_icon 'search' %}</button>
+                            <label class="sr-only" for="global-search-input">Search
+                                Term</label>
+                            <input class="form-control" type="search"
+                                   id="global-search-input"
+                                   placeholder="Search names, descriptions, and tags"
+                                   name="search">
+                            <button class="btn btn-outline-secondary"
+                                    type="submit">{% fa5_icon 'search' %}</button>
                             <button class="btn btn-outline-secondary" type="button"
                                     data-toggle="modal" data-target="#search-help-modal"
                                     title="Tipps for searching">{% fa5_icon 'info-circle' %}</button>
@@ -72,10 +84,12 @@
                                 <li id="user-profile-details-content">
                                     {% if not request.user.is_anonymous and request.user.username %}
                                         <a class="btn btn-default" role="button"
-                                           href="{% url 'users:detail' request.user.username %}">User profile</a>
+                                           href="{% url 'users:detail' request.user.username %}">User
+                                            profile</a>
                                         {% if request.user.is_staff %}
                                             <div class="btn-group-vertical mt-2">
-                                                <a class="btn btn-default" role="button" href="{% url 'admin:index' %}">Admin
+                                                <a class="btn btn-default" role="button"
+                                                   href="{% url 'admin:index' %}">Admin
                                                     interface</a>
                                                 <a class="btn btn-default" role="button"
                                                    href="{% url 'watchman:dashboard' %}">Watchman
@@ -85,26 +99,36 @@
                                                     status (JSON)</a>
                                             </div>
                                         {% endif %}
-                                        <a class="btn btn-default mt-2" role="button" data-toggle="modal"
-                                           data-target="#version-modal">Version information</a>
-                                        <a class="btn btn-default mt-2" role="button" href="{% url 'terms' %}">Terms
+                                        <a class="btn btn-default mt-2" role="button"
+                                           data-toggle="modal"
+                                           data-target="#version-modal">Version
+                                            information</a>
+                                        <a class="btn btn-default mt-2" role="button"
+                                           href="{% url 'terms' %}">Terms
                                             &amp; conditions</a>
                                         <div class="btn-group-vertical mt-2">
-                                            <a class="btn btn-default" role="button" href="{% url 'help' %}">Help</a>
-                                            <a class="btn btn-default" role="button" target="_blank"
+                                            <a class="btn btn-default" role="button"
+                                               href="{% url 'help' %}">Help</a>
+                                            <a class="btn btn-default" role="button"
+                                               target="_blank"
                                                href="https://github.com/ContactEngineering/TopoBank/discussions">Feedback</a>
-                                            <a class="btn btn-default" role="button" data-toggle="modal"
+                                            <a class="btn btn-default" role="button"
+                                               data-toggle="modal"
                                                data-target="#contact-modal">Contact</a>
                                         </div>
-                                        <a class="btn btn-default mt-2" role="button" target="_blank"
-                                           href="https://doi.org/10.1088/2051-672X/ac860a">Read our
+                                        <a class="btn btn-default mt-2" role="button"
+                                           target="_blank"
+                                           href="https://doi.org/10.1088/2051-672X/ac860a">Read
+                                            our
                                             paper!</a>
-                                        <a class="btn btn-default mt-2" role="button" data-toggle="modal"
+                                        <a class="btn btn-default mt-2" role="button"
+                                           data-toggle="modal"
                                            data-target="#logout-modal">Sign
                                             Out</a>
                                     {% else %}
                                         <a class="btn btn-default" role="button"
-                                           href="{% provider_login_url 'orcid' method="oauth2" %}">Sign in</a>
+                                           href="{% provider_login_url 'orcid' method="oauth2" %}">Sign
+                                            in</a>
                                     {% endif %}
                                 </li>
 
@@ -117,22 +141,19 @@
 
                     {% if not request.user.is_anonymous %}
                         <li class="nav-item">
-                            <a class="nav-link" id="help-dropdown" role="button" onclick="toggleNotificationNav()">
+                            <a class="nav-link" id="help-dropdown" role="button"
+                               onclick="toggleNotificationNav()">
                                 {% live_notify_badge badge_class="badge bg-info rounded-pill live_notify_badge" %}
                                 <i class="fa fa-bell"></i>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link me-3" id="user-dropdown" role="button" onclick="toggleUserNav()">
-                                <i class="fa fa-user-circle fa-fw" aria-hidden="true"></i>
-                                {% if not request.user.is_anonymous %}
-                                    {{ request.user.name }}
-                                {% endif %}
-                            </a>
+                            <div id="user-menu"></div>
                         </li>
                     {% else %} {# user is anonymous #}
                         <li class="nav-item">
-                            <a class="btn btn-secondary me-3" href="{% provider_login_url 'orcid' method="oauth2" %}">
+                            <a class="btn btn-secondary me-3"
+                               href="{% provider_login_url 'orcid' method="oauth2" %}">
                                 Sign in
                             </a>
                         </li>
@@ -175,20 +196,26 @@
 <footer class="sticky-footer">
     <div class="container my-auto">
         <div class="copyright text-center my-auto">
-            <a href="https://pastewka.org/" target="_blank" class="text-decoration-none">
-                <img src="{% static 'images/uni_freiburg_logo.png' %}" height="64px"></img>
+            <a href="https://pastewka.org/" target="_blank"
+               class="text-decoration-none">
+                <img src="{% static 'images/uni_freiburg_logo.png' %}"
+                     height="64px"></img>
             </a>
-            <a href="http://www.engineering.pitt.edu/TevisJacobs/" target="_blank" class="text-decoration-none">
+            <a href="http://www.engineering.pitt.edu/TevisJacobs/" target="_blank"
+               class="text-decoration-none">
                 <img src="{% static 'images/pitt_logo.png' %}" height="64px"></img>
             </a>
             &nbsp&nbsp&nbsp&#8213;&nbsp&nbsp&nbsp
             Funding by
             &nbsp&nbsp&nbsp
-            <a href="https://erc.europa.eu/" target="_blank" class="text-decoration-none">
+            <a href="https://erc.europa.eu/" target="_blank"
+               class="text-decoration-none">
                 <img src="{% static 'images/erc_logo.png' %}" height="64px"></img>
             </a>
-            <a href="https://www.livmats.uni-freiburg.de/" target="_blank" class="text-decoration-none">
-                <img src="{% static 'images/logo_livmats_small.jpg' %}" height="64px"></img>
+            <a href="https://www.livmats.uni-freiburg.de/" target="_blank"
+               class="text-decoration-none">
+                <img src="{% static 'images/logo_livmats_small.jpg' %}"
+                     height="64px"></img>
             </a>
             <a href="https://www.nsf.gov/" target="_blank" class="text-decoration-none">
                 <img src="{% static 'images/nsf_logo.png' %}" height="64px"></img>
@@ -204,37 +231,48 @@
 </a>
 
 <!-- Logout Modal-->
-<div class="modal fade" id="logout-modal" tabindex="-1" role="dialog" aria-labelledby="example-modal-label"
+<div class="modal fade" id="logout-modal" tabindex="-1" role="dialog"
+     aria-labelledby="example-modal-label"
      aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="example-modal-label">Ready to Leave?</h5>
-                <button class="btn-close" type="button" data-dismiss="modal" aria-label="Close">
+                <button class="btn-close" type="button" data-dismiss="modal"
+                        aria-label="Close">
                     <span aria-hidden="true"></span>
                 </button>
             </div>
-            <div class="modal-body">Select "Sign Out" below if you are ready to end your current session.</div>
+            <div class="modal-body">Select "Sign Out" below if you are ready to end your
+                current session.
+            </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                <a class="btn btn-primary" href="{% url 'account_logout' %}">{% trans "Sign out" %}</a>
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">
+                    Cancel
+                </button>
+                <a class="btn btn-primary"
+                   href="{% url 'account_logout' %}">{% trans "Sign out" %}</a>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Version Modal-->
-<div class="modal modal-lg" id="version-modal" tabindex="-1" role="dialog" aria-labelledby="version-modal-label"
+<div class="modal modal-lg" id="version-modal" tabindex="-1" role="dialog"
+     aria-labelledby="version-modal-label"
      aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="version-modal-label">Version information</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title" id="version-modal-label">Version
+                    information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <p>
-                    This cloud platform builds on the open source software packages summarized in the following list.
+                    This cloud platform builds on the open source software packages
+                    summarized in the following list.
                 </p>
                 <table class="table table-striped">
                     <thead>
@@ -262,44 +300,53 @@
 
             </div>
             <div class="modal-footer">
-                <button class="btn btn-primary" type="button" data-dismiss="modal">Ok</button>
+                <button class="btn btn-primary" type="button" data-dismiss="modal">Ok
+                </button>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Contact Modal-->
-<div class="modal fade" id="contact-modal" tabindex="-1" role="dialog" aria-labelledby="contact-modal-label"
+<div class="modal fade" id="contact-modal" tabindex="-1" role="dialog"
+     aria-labelledby="contact-modal-label"
      aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="contact-modal-label">Contact</h5>
-                <button class="btn-close" type="button" data-dismiss="modal" aria-label="Close">
+                <button class="btn-close" type="button" data-dismiss="modal"
+                        aria-label="Close">
                     <span aria-hidden="true"></span>
                 </button>
             </div>
             <div class="modal-body">
                 <p>Is <em>contact.engineering</em> helpful for your research?</p>
-                <p>We would like to hear from you. Please contact us, if you have any comments, suggestions, or bug
+                <p>We would like to hear from you. Please contact us, if you have any
+                    comments, suggestions, or bug
                     reports!</p>
                 <div>
                     <ul>
-                        <li>Participate at <a href="https://github.com/ComputationalMechanics/TopoBank/discussions"
-                                              target="_blank">discussions
+                        <li>Participate at <a
+                                href="https://github.com/ComputationalMechanics/TopoBank/discussions"
+                                target="_blank">discussions
                             on GitHub</a>, or
                         </li>
-                        <li>open an <a href="https://github.com/ComputationalMechanics/TopoBank/issues" target="_blank">issue
+                        <li>open an <a
+                                href="https://github.com/ComputationalMechanics/TopoBank/issues"
+                                target="_blank">issue
                             on
                             GitHub</a>, or
                         </li>
-                        <li>drop us an <a href="mailto:{{ contact_email_address }}">email</a>.</li>
+                        <li>drop us an <a href="mailto:{{ contact_email_address }}">email</a>.
+                        </li>
                     </ul>
                 </div>
                 <p>Thank you! The <em>contact.engineering</em> development team.</p>
                 <p translate="no">
                     <em>
-                        <a href="https://pastewka.org/" target="_blank">Simulation Group</a><br>
+                        <a href="https://pastewka.org/" target="_blank">Simulation
+                            Group</a><br>
                         Department of Microsystems Engineering (IMTEK)<br>
                         University of Freiburg<br>
                         Georges-Koehler-Allee 103<br>
@@ -309,20 +356,24 @@
                 </p>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-primary" type="button" data-dismiss="modal">Ok</button>
+                <button class="btn btn-primary" type="button" data-dismiss="modal">Ok
+                </button>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Search Help Modal-->
-<div class="modal fade" id="search-help-modal" tabindex="-1" role="dialog" aria-labelledby="search-help-modal-label"
+<div class="modal fade" id="search-help-modal" tabindex="-1" role="dialog"
+     aria-labelledby="search-help-modal-label"
      aria-hidden="true">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="search-help-modal-label">Tips for Searching</h5>
-                <button class="btn-close" type="button" data-dismiss="modal" aria-label="Close">
+                <h5 class="modal-title" id="search-help-modal-label">Tips for
+                    Searching</h5>
+                <button class="btn-close" type="button" data-dismiss="modal"
+                        aria-label="Close">
                     <span aria-hidden="true"></span>
                 </button>
             </div>
@@ -334,8 +385,10 @@
                     <li>Descriptions of digital surface twins and measurements</li>
                 </ul>
 
-                <p>All texts in these fields are split into a vector of tokens. Searching means to find matches
-                    of the search expression among these tokens. You can build search expression from search terms
+                <p>All texts in these fields are split into a vector of tokens.
+                    Searching means to find matches
+                    of the search expression among these tokens. You can build search
+                    expression from search terms
                     as follows:</p>
 
                 <table class="table table-bordered table-condensed">
@@ -347,33 +400,47 @@
                     <tbody>
                     <tr>
                         <td>both <em>AFM</em> and <em>surface</em></td>
-                        <td><input type="text" value="AFM surface" size="40" readonly></td>
+                        <td><input type="text" value="AFM surface" size="40" readonly>
+                        </td>
                         <td>text not inside quote marks will be interpreted as AND</td>
                     </tr>
                     <tr>
                         <td>either <em>AFM</em> or <em>surface</em> or both</td>
-                        <td><input type="text" value="AFM OR surface" size="40" readonly></td>
+                        <td><input type="text" value="AFM OR surface" size="40"
+                                   readonly></td>
                         <td>logical OR, least precedence</td>
                     </tr>
                     <tr>
                         <td><em>AFM</em> but not <em>surface</em></td>
-                        <td><input type="text" value="AFM -surface" size="40" readonly></td>
-                        <td>the logical not operator is written by using -, has highest precedence</td>
+                        <td><input type="text" value="AFM -surface" size="40" readonly>
+                        </td>
+                        <td>the logical not operator is written by using -, has highest
+                            precedence
+                        </td>
                     </tr>
                     <tr>
                         <td>the phrase <em>AFM Surface</em></td>
-                        <td><input type="text" value='"AFM surface"' size="40" readonly></td>
-                        <td><em>AFM</em> and <em>surface</em> are found if next to each other</td>
+                        <td><input type="text" value='"AFM surface"' size="40" readonly>
+                        </td>
+                        <td><em>AFM</em> and <em>surface</em> are found if next to each
+                            other
+                        </td>
                     </tr>
                     <tr>
-                        <td><em>AFM Surface</em> as a phrase and <em>imported</em> somewhere else</td>
-                        <td><input type="text" value='"AFM surface" imported' size="40" readonly></td>
+                        <td><em>AFM Surface</em> as a phrase and <em>imported</em>
+                            somewhere else
+                        </td>
+                        <td><input type="text" value='"AFM surface" imported' size="40"
+                                   readonly></td>
                         <td></td>
                     </tr>
                     <tr>
-                        <td><em>AFM Surface</em> as a phrase and <em>imported</em> but not <em>material</em></td>
-                        <td><input type="text" value='"AFM surface" imported -material' size="40" readonly></td>
-                        <td>The above can also be combined. Parentheses are not allowed, all entries
+                        <td><em>AFM Surface</em> as a phrase and <em>imported</em> but
+                            not <em>material</em></td>
+                        <td><input type="text" value='"AFM surface" imported -material'
+                                   size="40" readonly></td>
+                        <td>The above can also be combined. Parentheses are not allowed,
+                            all entries
                             are valid search expressions.
                         </td>
                     </tr>
@@ -382,7 +449,8 @@
                 </table>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-primary" type="button" data-dismiss="modal">Ok</button>
+                <button class="btn btn-primary" type="button" data-dismiss="modal">Ok
+                </button>
             </div>
         </div>
     </div>
@@ -486,7 +554,15 @@
 
 {% block javascript %}{% endblock javascript %}
 <!--sidebar js -->
+<script src="{% static 'js/topnav_app.bundle.js' %}"></script>
 <script>
+    topobank.topnav_app.createUserMenuApp('#user-menu', '{{ csrf_token }}', {
+        isAnonymous: {{ request.user.is_anonymous|yesno:'true,false' }},
+        apiUrl: '{{ request.user.get_absolute_url }}',
+        userName: '{{ request.user.username }}',
+        name: '{{ request.user.name }}',
+    });
+
     function toggleNotificationNav() {
         let sidebarElement = document.getElementById("sidebar-main");
         let notificationContentElement = document.getElementById("notification-content");
@@ -501,22 +577,6 @@
             notificationContentElement.classList.remove("notification-block");
         }
     }
-
-    function toggleUserNav() {
-        let sidebarElement = document.getElementById("sidebar-main");
-        let notificationContentElement = document.getElementById("notification-content");
-        let userProfileElement = document.getElementById("user-profile-details-content");
-        if (!userProfileElement.classList.contains("user-block")) {
-            sidebarElement.classList.add("sidebar-main-block");
-            userProfileElement.classList.add("user-block");
-            notificationContentElement.classList.remove("notification-block");
-        } else {
-            sidebarElement.classList.remove("sidebar-main-block");
-            userProfileElement.classList.remove("user-block");
-            notificationContentElement.classList.remove("notification-block");
-        }
-    }
-
 </script>
 </body>
 
