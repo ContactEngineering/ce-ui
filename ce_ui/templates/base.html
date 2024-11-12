@@ -66,7 +66,16 @@
                         </div>
                     </form>
                 </ul>
-                <div id="user-menu"></div>
+                {% if request.user.is_anonymous %}
+                    <li class="nav-item">
+                        <a class="btn btn-secondary me-3"
+                           href="{% provider_login_url 'orcid' method="oauth2" %}">
+                            Sign in
+                        </a>
+                    </li>
+                {% else %} {# user is not anonymous #}
+                    <div id="user-menu"></div>
+                {% endif %} {# if user is anonymous #}
             </div>
         {% endif %}
     </nav>
