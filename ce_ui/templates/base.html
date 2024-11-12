@@ -81,57 +81,6 @@
                                         </div>
                                     </div>
                                 </li>
-                                <li id="user-profile-details-content">
-                                    {% if not request.user.is_anonymous and request.user.username %}
-                                        <a class="btn btn-default" role="button"
-                                           href="{% url 'users:detail' request.user.username %}">User
-                                            profile</a>
-                                        {% if request.user.is_staff %}
-                                            <div class="btn-group-vertical mt-2">
-                                                <a class="btn btn-default" role="button"
-                                                   href="{% url 'admin:index' %}">Admin
-                                                    interface</a>
-                                                <a class="btn btn-default" role="button"
-                                                   href="{% url 'watchman:dashboard' %}">Watchman
-                                                    dashboard</a>
-                                                <a class="btn btn-default" role="button"
-                                                   href="{% url 'watchman:status' %}">Watchman
-                                                    status (JSON)</a>
-                                            </div>
-                                        {% endif %}
-                                        <a class="btn btn-default mt-2" role="button"
-                                           data-toggle="modal"
-                                           data-target="#version-modal">Version
-                                            information</a>
-                                        <a class="btn btn-default mt-2" role="button"
-                                           href="{% url 'terms' %}">Terms
-                                            &amp; conditions</a>
-                                        <div class="btn-group-vertical mt-2">
-                                            <a class="btn btn-default" role="button"
-                                               href="{% url 'help' %}">Help</a>
-                                            <a class="btn btn-default" role="button"
-                                               target="_blank"
-                                               href="https://github.com/ContactEngineering/TopoBank/discussions">Feedback</a>
-                                            <a class="btn btn-default" role="button"
-                                               data-toggle="modal"
-                                               data-target="#contact-modal">Contact</a>
-                                        </div>
-                                        <a class="btn btn-default mt-2" role="button"
-                                           target="_blank"
-                                           href="https://doi.org/10.1088/2051-672X/ac860a">Read
-                                            our
-                                            paper!</a>
-                                        <a class="btn btn-default mt-2" role="button"
-                                           data-toggle="modal"
-                                           data-target="#logout-modal">Sign
-                                            Out</a>
-                                    {% else %}
-                                        <a class="btn btn-default" role="button"
-                                           href="{% provider_login_url 'orcid' method="oauth2" %}">Sign
-                                            in</a>
-                                    {% endif %}
-                                </li>
-
                             </ul>
                         </nav>
 
@@ -561,19 +510,18 @@
         apiUrl: '{{ request.user.get_absolute_url }}',
         userName: '{{ request.user.username }}',
         name: '{{ request.user.name }}',
+        orcid: '{{ request.user.orcid_id }}',
+        isStaff: '{{ request.user.is_staff }}'
     });
 
     function toggleNotificationNav() {
         let sidebarElement = document.getElementById("sidebar-main");
         let notificationContentElement = document.getElementById("notification-content");
-        let userProfileElement = document.getElementById("user-profile-details-content");
         if (!notificationContentElement.classList.contains("notification-block")) {
             sidebarElement.classList.add("sidebar-main-block");
             notificationContentElement.classList.add("notification-block");
-            userProfileElement.classList.remove("user-block")
         } else {
             sidebarElement.classList.remove("sidebar-main-block");
-            userProfileElement.classList.remove("user-block");
             notificationContentElement.classList.remove("notification-block");
         }
     }
