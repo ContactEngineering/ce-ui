@@ -179,139 +179,6 @@
     <i class="fa fa-angle-up"></i>
 </a>
 
-<!-- Logout Modal-->
-<div class="modal fade" id="logout-modal" tabindex="-1" role="dialog"
-     aria-labelledby="example-modal-label"
-     aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="example-modal-label">Ready to Leave?</h5>
-                <button class="btn-close" type="button" data-dismiss="modal"
-                        aria-label="Close">
-                    <span aria-hidden="true"></span>
-                </button>
-            </div>
-            <div class="modal-body">Select "Sign Out" below if you are ready to end your
-                current session.
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" type="button" data-dismiss="modal">
-                    Cancel
-                </button>
-                <a class="btn btn-primary"
-                   href="{% url 'account_logout' %}">{% trans "Sign out" %}</a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Version Modal-->
-<div class="modal modal-lg" id="version-modal" tabindex="-1" role="dialog"
-     aria-labelledby="version-modal-label"
-     aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="version-modal-label">Version
-                    information</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>
-                    This cloud platform builds on the open source software packages
-                    summarized in the following list.
-                </p>
-                <table class="table table-striped">
-                    <thead>
-                    <tr>
-                        <th>Module</th>
-                        <th>Version</th>
-                        {#  Maybe also add links? #}
-                        <th>License</th>
-                        <th>Links</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for key, value in versions.items %}
-                        <tr>
-                            <td>{{ key }}</td>
-                            <td>{{ value.version }}</td>
-                            <td>{{ value.license }}</td>
-                            <td>
-                                <a href="{{ value.homepage }}">Website</a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" type="button" data-dismiss="modal">Ok
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Contact Modal-->
-<div class="modal fade" id="contact-modal" tabindex="-1" role="dialog"
-     aria-labelledby="contact-modal-label"
-     aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="contact-modal-label">Contact</h5>
-                <button class="btn-close" type="button" data-dismiss="modal"
-                        aria-label="Close">
-                    <span aria-hidden="true"></span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>Is <em>contact.engineering</em> helpful for your research?</p>
-                <p>We would like to hear from you. Please contact us, if you have any
-                    comments, suggestions, or bug
-                    reports!</p>
-                <div>
-                    <ul>
-                        <li>Participate at <a
-                                href="https://github.com/ComputationalMechanics/TopoBank/discussions"
-                                target="_blank">discussions
-                            on GitHub</a>, or
-                        </li>
-                        <li>open an <a
-                                href="https://github.com/ComputationalMechanics/TopoBank/issues"
-                                target="_blank">issue
-                            on
-                            GitHub</a>, or
-                        </li>
-                        <li>drop us an <a href="mailto:{{ contact_email_address }}">email</a>.
-                        </li>
-                    </ul>
-                </div>
-                <p>Thank you! The <em>contact.engineering</em> development team.</p>
-                <p translate="no">
-                    <em>
-                        <a href="https://pastewka.org/" target="_blank">Simulation
-                            Group</a><br>
-                        Department of Microsystems Engineering (IMTEK)<br>
-                        University of Freiburg<br>
-                        Georges-Koehler-Allee 103<br>
-                        79110 Freiburg<br>
-                        Germany<br>
-                    </em>
-                </p>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" type="button" data-dismiss="modal">Ok
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Search Help Modal-->
 <div class="modal fade" id="search-help-modal" tabindex="-1" role="dialog"
      aria-labelledby="search-help-modal-label"
@@ -508,10 +375,11 @@
     topobank.topnav_app.createUserMenuApp('#user-menu', '{{ csrf_token }}', {
         isAnonymous: {{ request.user.is_anonymous|yesno:'true,false' }},
         apiUrl: '{{ request.user.get_absolute_url }}',
+        adminUrl: '{% url 'admin:index' %}',
         userName: '{{ request.user.username }}',
         name: '{{ request.user.name }}',
         orcid: '{{ request.user.orcid_id }}',
-        isStaff: '{{ request.user.is_staff }}'
+        isStaff: {{ request.user.is_staff|yesno:'true,false' }}
     });
 
     function toggleNotificationNav() {
