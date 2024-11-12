@@ -31,6 +31,7 @@ const messages = ref([]);
 
 onMounted(() => {
     setInterval(updateNotifications, props.pollingInterval);
+    updateNotifications();
 });
 
 function updateNotifications() {
@@ -44,8 +45,8 @@ function updateNotifications() {
 function clearNotifications() {
     axios.get(`${props.apiUrl}?mark_as_read=true`)
         .then(response => {
-            unreadCount.value = response.data.unread_count;
-            messages.value = response.data.unread_list;
+            unreadCount.value = 0;
+            messages.value = [];
         });
 }
 
