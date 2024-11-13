@@ -27,11 +27,6 @@ urlpatterns = [
         name="terms",
     ),
     path(
-        "help/",
-        views.HelpView.as_view(),
-        name="help",
-    ),
-    path(
         "search/",
         RedirectView.as_view(pattern_name='ce_ui:select'),
         name="search",

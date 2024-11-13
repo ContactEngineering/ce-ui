@@ -939,24 +939,6 @@ class TermsView(TemplateView):
         return context
 
 
-class HelpView(TemplateView):
-    template_name = "pages/help.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data()
-        context["reader_infos"] = get_reader_infos()
-        context["extra_tabs"] = [
-            {
-                "icon": "question-circle",
-                "title": "Help",
-                "href": self.request.path,
-                "active": True,
-                "login_required": False,
-            }
-        ]
-        return context
-
-
 #
 # The following two views are overwritten from
 # termsandconditions package in order to add context
