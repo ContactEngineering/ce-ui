@@ -781,7 +781,7 @@ class AnalysisResultDetailView(DetailView):
         )
 
         # get analysis result type
-        visualization_app_name, visualization_type = get_visualization_type(
+        visualization_type = get_visualization_type(
             function.name
         )
 
