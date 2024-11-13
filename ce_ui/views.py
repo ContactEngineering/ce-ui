@@ -22,7 +22,7 @@ from topobank.analysis.registry import (get_analysis_function_names,
                                         get_visualization_type)
 from topobank.manager.containers import write_surface_container
 from topobank.manager.models import Surface, Tag, Topography
-from topobank.manager.utils import get_reader_infos, subjects_from_base64
+from topobank.manager.utils import subjects_from_base64
 from topobank.usage_stats.utils import (current_statistics,
                                         increase_statistics_by_date,
                                         increase_statistics_by_date_and_object)
