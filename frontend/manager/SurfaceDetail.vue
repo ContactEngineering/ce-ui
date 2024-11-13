@@ -382,7 +382,7 @@ const allSelected = computed({
                     <BTab v-if="_surface != null"
                            title="Permissions">
                         <SurfacePermissions v-if="_surface.publication == null"
-                                             :surface-url="_surface.url"
+                                             :set-permissions-url="_surface.api.set_permissions"
                                              v-model:permissions="_permissions">
                         </SurfacePermissions>
                         <BCard v-if="_surface.publication != null" class="w-100">

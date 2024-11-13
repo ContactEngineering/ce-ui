@@ -18,7 +18,7 @@ import PermissionRow from "topobank/manager/PermissionRow.vue";
 const {show} = useToastController();
 
 const props = defineProps({
-    surfaceUrl: String,
+    setPermissionsUrl: String,
     permissions: Object
 });
 
@@ -35,7 +35,7 @@ const searchUser = ref(false);
 function saveCard() {
     isEditing.value = false;
     isSaving.value = true;
-    axios.patch(`${props.surfaceUrl}set-permissions/`, selfPermissions.value.other_users).then(response => {
+    axios.patch(props.setPermissionsUrl, selfPermissions.value.other_users).then(response => {
         emit('update:permissions', response.data);
     }).catch(error => {
         show?.({
@@ -53,7 +53,7 @@ function saveCard() {
 
 function addUser(user) {
     searchUser.value = false;
-    selfPermissions.value.other_users.push({user: user, permission: 'view'});
+    selfPermissions.value.other_users.push({user: user.url, permission: 'view'});
 }
 
 </script>
