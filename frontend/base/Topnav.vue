@@ -39,9 +39,10 @@ const searchInfoModal = ref(false);
             &nbsp contact.engineering
         </BNavbarBrand>
         <BNavbarNav>
-            <BNavForm :action="selectUrl" method="get" class="d-flex">
+            <form :action="selectUrl" method="get" class="d-flex">
                 <label class="col-form-label visually-hidden" for="inline-form-input-name">Search term</label>
                 <BFormInput type="search"
+                            name="search"
                             placeholder="Enter search expression">
                 </BFormInput>
                 <BButton class="ms-1"
@@ -55,7 +56,7 @@ const searchInfoModal = ref(false);
                          @click="searchInfoModal = true">
                     <i class="fa fa-info-circle" aria-hidden="true"></i>
                 </BButton>
-            </BNavForm>
+            </form>
         </BNavbarNav>
         <BNavbarNav v-if="isAnonymous">
             <BNavItem>
