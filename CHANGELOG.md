@@ -1,5 +1,12 @@
 # Changelog for plugin *ce-ui*
 
+## 1.9.1 (2024-11-13)
+
+- BUG: Fixed reporting task progress
+- BUG: Visualization app name was removed
+- MAINT: Added prefix to DeepZoomImage component
+- MAINT: Error reporting with toasts
+
 ## 1.9.0 (2024-11-13)
 
 - ENH: Attachments for surfaces and topographies
