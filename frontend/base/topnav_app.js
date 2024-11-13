@@ -2,9 +2,9 @@ import axios from "axios";
 import {createApp} from 'vue';
 import {createBootstrap} from "bootstrap-vue-next";
 
-import UserMenu from './UserMenu.vue';
+import UserMenu from './Topnav.vue';
 
-export function createUserMenuApp(el, csrfToken, props) {
+export function createTopnavApp(el, csrfToken, props) {
     let app = createApp(UserMenu, props);
     app.use(createBootstrap());
     axios.defaults.headers.common['X-CSRFToken'] = csrfToken;

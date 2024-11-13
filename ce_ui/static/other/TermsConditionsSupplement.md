@@ -10,7 +10,6 @@ By using our Services, you may provide us with information and files (your data)
 
 * Prof. Tevis Jacobs, University of Pittsburgh
 * Prof. Lars Pastewka, University of Freiburg, the operator of this site
-* Prof. Mark O. Robbins, Johns Hopkins University
 
 and by extension members of the respective research groups. By statistical analysis we mean, for example, computing global bounds on scalar roughness parameters such as the root-mean-square slope and height or classification using machine learning techniques such as the support vector machine. These analyses are part of a [research project](https://cordis.europa.eu/project/rcn/212185/factsheet/en) funded by the European Research Council on how surface roughness emerges. We want identify recurring patterns that would allow to identify, for example, the processing history of a piece of material from its surface, as practiced for example in fractography.
 

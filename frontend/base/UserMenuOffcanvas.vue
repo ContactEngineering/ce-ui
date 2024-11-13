@@ -51,7 +51,6 @@ const contactModal = ref(false);
         </BNavbarNav>
         <BNavbarNav class="justify-content-end flex-grow-1">
             <BNavItem href="/termsandconditions/">Terms &amp; conditions</BNavItem>
-            <BNavItem href="/help/">Help</BNavItem>
             <BNavItem href="https://github.com/ContactEngineering/TopoBank/discussions">
                 Feedback
             </BNavItem>
