@@ -3,7 +3,7 @@ export function countTaskStates(analyses, states) {
         return 0;
     }
     let count = 0;
-    for (let analysis of analyses) {
+    for (const analysis of analyses) {
         if (states.includes(analysis.task_state)) {
             count += 1;
         }

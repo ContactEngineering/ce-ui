@@ -5,12 +5,16 @@
  * Deep Zoom Image files and OpenSeadragon.
  */
 
-import {onMounted, ref, watch} from "vue";
-import {BSpinner} from "bootstrap-vue-next";
 import axios from "axios";
+import {onMounted, ref, watch} from "vue";
+import {BSpinner, useToastController} from "bootstrap-vue-next";
 
 const props = defineProps({
     folderUrl: String,
+    prefix: {
+        type: String,
+        default: ''
+    },
     colorbar: {
         type: Boolean,
         default: false
@@ -27,6 +31,7 @@ const props = defineProps({
     }
 });
 
+const {show} = useToastController();
 
 // The OpenSeadragon instance
 let viewer = null;
@@ -48,48 +53,73 @@ onMounted(() => {
     requestDzi();
 });
 
+
 watch(() => props.folderUrl, (newValue, oldValue) => {
-    // We are loading a new image
-    _isLoaded.value = false;
-
-    // Prefix URL changed - request new image and replace current one
-    fetch(newValue + 'dzi.json').then(response => {
-        return response.json();  // Image metadata
-    }).then(meta => {
-        meta.Image.Url = newValue + 'dzi_files/';  // Set URL for DZI files
-
-        viewer.addTiledImage({
-            tileSource: meta,
-            success: () => {
-                _isLoaded.value = true;
-            }
-        });
-    });
+    refreshDzi();
 });
 
 
-function requestDzi() {
+watch(() => props.prefix, (newValue, oldValue) => {
+    refreshDzi();
+});
+
+
+function getTileSource(meta) {
+    return {
+        // Custom tile source, see dzitilesource.js, line 324
+        height: parseInt(meta.Image.Size.Height, 10),
+        width: parseInt(meta.Image.Size.Width, 10),
+        tileWidth: parseInt(meta.Image.TileSize, 10),
+        tileHeight: parseInt(meta.Image.TileSize, 10),
+        tileOverlap: parseInt(meta.Image.Overlap, 10),
+        getTileUrl: function (level, x, y) {
+            const fn = `${props.prefix}dzi_files/${level}/${x}_${y}.jpg`;
+            return inventory[fn].file;
+        }
+    }
+}
+
+
+function refreshDzi() {
+    // We are loading a new image
+    _isLoaded.value = false;
+
+    // Request new image and replace current one
     axios.get(props.folderUrl).then(response => {
         inventory = response.data;
-        axios.get(inventory["dzi.json"].file).then(response => {
+        axios.get(inventory[`${props.prefix}dzi.json`].file).then(response => {
+            viewer.addTiledImage({
+                tileSource: getTileSource(response.data),
+                success: () => {
+                    _isLoaded.value = true;
+                }
+            });
+        });
+    }).catch(error => {
+        show?.({
+            props: {
+                title: "Error rendering zoomable image",
+                body: error.message,
+                variant: 'danger'
+            }
+        });
+    });
+}
+
+
+function requestDzi() {
+    _isLoaded.value = false;
+
+    axios.get(props.folderUrl).then(response => {
+        inventory = response.data;
+        axios.get(inventory[`${props.prefix}dzi.json`].file).then(response => {
             // DZI metadata
             const meta = response.data;
 
             // Create OpenSeadragon viewer
             viewer = new OpenSeadragon.Viewer({
                 element: _openSeadragonElement.value,
-                tileSources: {
-                    // Custom tile source, see dzitilesource.js, line 324
-                    height: parseInt(meta.Image.Size.Height, 10),
-                    width: parseInt(meta.Image.Size.Width, 10),
-                    tileWidth: parseInt(meta.Image.TileSize, 10),
-                    tileHeight: parseInt(meta.Image.TileSize, 10),
-                    tileOverlap: parseInt(meta.Image.Overlap, 10),
-                    getTileUrl: function (level, x, y) {
-                        const fn = `dzi_files/${level}/${x}_${y}.jpg`;
-                        return inventory[fn].file;
-                    }
-                },
+                tileSources: getTileSource(meta),
                 showNavigator: true,
                 navigatorPosition: 'TOP_LEFT',
                 navigatorSizeRatio: 0.1,
@@ -152,6 +182,14 @@ function requestDzi() {
             }
 
             _isLoaded.value = true;
+        }).catch(error => {
+            show?.({
+                props: {
+                    title: "Error rendering zoomable image",
+                    body: error.message,
+                    variant: 'danger'
+                }
+            });
         });
     }).catch(error => {
         let error_has_response = "response" in error;
@@ -174,6 +212,7 @@ function requestDzi() {
         }
     });
 }
+
 
 function download() {
     // Image download. Code has been adapted from:
