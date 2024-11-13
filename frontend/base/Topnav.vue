@@ -34,27 +34,27 @@ const searchInfoModal = ref(false);
 
 <template>
     <BNavbar variant="dark" class="navbar-dark">
-        <BNavbarBrand href="/">
+        <BNavbarBrand href="/" class="d-flex flex-grow-1">
             <img src="/static/images/ce_logo.svg" height="25px">
             &nbsp contact.engineering
         </BNavbarBrand>
-        <BNavbarNav class="flew-grow-1">
-            <BNavForm :action="selectUrl"
-                      method="get">
-                <BFormGroup>
+        <BNavbarNav>
+            <BNavForm :action="selectUrl" method="get" class="d-flex">
+                    <label class="col-form-label visually-hidden" for="inline-form-input-name">Search term</label>
                     <BFormInput type="search"
-                                placeholder="Search names, descriptions, and tags">
+                                placeholder="Enter search expression">
                     </BFormInput>
-                    <BButton variant="outline-secondary"
+                    <BButton class="ms-1"
+                             variant="outline-secondary"
                              type="submit">
                         <i class="fa fa-search" aria-hidden="true"></i>
                     </BButton>
-                    <BButton variant="outline-secondary"
+                    <BButton class="ms-1 me-5"
+                             variant="outline-secondary"
                              title="Tips for searching"
                              @click="searchInfoModal = true">
                         <i class="fa fa-info-circle" aria-hidden="true"></i>
                     </BButton>
-                </BFormGroup>
             </BNavForm>
         </BNavbarNav>
         <BNavItem v-if="isAnonymous" :href="loginUrl">
@@ -72,7 +72,10 @@ const searchInfoModal = ref(false);
     </BNavbar>
 
     <!-- Search Help Modal-->
-    <BModal title="Tips for searching" v-model="searchInfoModal" :ok-only="true">
+    <BModal title="Tips for searching"
+            v-model="searchInfoModal"
+            size="xl"
+            :ok-only="true">
         <p>Searching is performed over these fields:</p>
         <ul>
             <li>Names of surface and measurements</li>
@@ -80,8 +83,8 @@ const searchInfoModal = ref(false);
             <li>Descriptions of digital surface twins and measurements</li>
         </ul>
 
-        <p>All texts in these fields are split into a vector of tokens.
-            Searching means to find matches
+        <p>All texts in the search field is split into a list of tokens.
+            Searching finds matches
             of the search expression among these tokens. You can build
             search
             expression from search terms

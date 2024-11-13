@@ -23,14 +23,14 @@ onMounted(() => {
 
 <template>
     <div v-if="versions" class="pe-3 small">
-        Core:
+        <b>Core:</b>
         <a :href="versions.topobank.homepage">
             topobank
         </a> v{{ versions.topobank.version }},
         <a :href="versions.ce_ui.homepage">
             ui
         </a> v{{ versions.ce_ui.version }};
-        Plugins:
+        <b>Plugins:</b>
         <a :href="versions.topobank_statistics.homepage">
             statistics
         </a> v{{ versions.topobank_statistics.version }},
