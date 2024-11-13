@@ -1,5 +1,9 @@
 # Changelog for plugin *ce-ui*
 
+## 1.9.2 (2024-11-13)
+
+- BUG: Fixed user permission editor
+
 ## 1.9.1 (2024-11-13)
 
 - BUG: Fixed reporting task progress
