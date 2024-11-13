@@ -43,6 +43,6 @@ onMounted(() => {
         <b>Backend: </b>
         <a :href="versions.SurfaceTopography.homepage">
             SurfaceTopography
-        </a> v{{ versions.SurfaceTopography.version }},
+        </a> v{{ versions.SurfaceTopography.version }}
     </div>
 </template>
