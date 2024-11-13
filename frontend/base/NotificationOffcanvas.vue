@@ -5,7 +5,6 @@ import {onMounted, ref} from "vue";
 
 import {
     BAlert,
-    BAvatar,
     BListGroup,
     BListGroupItem,
     BNavbarNav,
@@ -71,9 +70,7 @@ function clearNotifications() {
             You have no unread notifications.
         </BAlert>
         <BListGroup>
-            <BListGroupItem v-for="message in messages" :href="message.data.href">
-                <BAvatar class="me-2"><i class="fa fa-envelope" aria-hidden="true"></i>
-                </BAvatar>
+            <BListGroupItem v-for="message in messages" :href="message.href">
                 {{ message.description }}
             </BListGroupItem>
         </BListGroup>
