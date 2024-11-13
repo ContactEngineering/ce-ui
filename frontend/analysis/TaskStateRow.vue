@@ -3,11 +3,13 @@
 import axios from "axios";
 import {computed, onMounted, ref, watch} from "vue";
 
-import {BButton} from "bootstrap-vue-next";
+import {BButton, useToastController} from "bootstrap-vue-next";
 
 import {prettyBytes} from "../utils/formatting.js";
 
 import ProgressIndicator from "topobank/components/ProgressIndicator.vue";
+
+const {show} = useToastController();
 
 const analysis = defineModel('analysis', {required: true});
 
@@ -35,7 +37,9 @@ function scheduleStateCheck() {
         axios.get(analysis.value.function)
             .then(response => {
                 _function.value = response.data;
-            });
+            }).catch(error => {
+            show?.({props: {title: "Request failed", body: error, variant: 'danger'}});
+        });
     }
 
     // Get subject information if we don't have it yet
@@ -50,7 +54,9 @@ function scheduleStateCheck() {
             axios.get(subjectUrl)
                 .then(response => {
                     _subject.value = response.data;
-                });
+                }).catch(error => {
+                show?.({props: {title: "Request failed", body: error, variant: 'danger'}});
+            });
         }
     }
 
@@ -80,6 +86,8 @@ function checkState() {
     axios.get(analysis.value.url).then(response => {
         // Update current state of the analysis
         analysis.value = response.data;  // This will trigger a check throw a watch
+    }).catch(error => {
+        show?.({props: {title: "Request failed", body: error, variant: 'danger'}});
     });
 }
 
@@ -88,6 +96,8 @@ function renew() {
     // A PUT request triggers renewal of the analysis
     axios.put(analysis.value.url).then(response => {
         analysis.value = response.data;  // This will trigger a check throw a watch
+    }).catch(error => {
+        show?.({props: {title: "Request failed", body: error, variant: 'danger'}});
     });
 }
 
@@ -105,7 +115,7 @@ watch(() => analysis.value, () => {
     <tr>
         <td>
             <ProgressIndicator
-                :value="analysis.task_progress == null ? 0 : analysis.task_progress.percent"
+                :value="analysis.task_progress == null ? 0 : analysis.task_progress"
                 :state="analysis.task_state">
             </ProgressIndicator>
         </td>
