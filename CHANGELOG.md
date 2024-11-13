@@ -4,6 +4,8 @@
 
 - ENH: Attachments for surfaces and topographies
 - ENH: Rewritten notification and user panels
+- MAINT: Removed outdated help page
+- MAINT: Single Vue.js application for top navigation bar
 - MAINT: Updated for latest topobank
 
 ## 1.8.4 (2024-05-14)
