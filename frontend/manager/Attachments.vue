@@ -41,7 +41,6 @@ onMounted(() => {
 
 function refreshAttachments() {
     axios.get(props.attachmentsUrl).then(response => {
-        console.log(response.data);
         attachments.value = response.data;
     }).catch(error => {
         show?.({

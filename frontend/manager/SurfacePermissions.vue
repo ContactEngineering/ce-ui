@@ -4,10 +4,18 @@ import axios from "axios";
 import {ref} from "vue";
 
 import {
-    BAlert, BButton, BButtonGroup, BCard, BCardBody, BForm, BFormSelect, BSpinner
+    BButton,
+    BButtonGroup,
+    BCard,
+    BCardBody,
+    BSpinner,
+    useToastController
 } from 'bootstrap-vue-next';
 
 import SearchUserModal from "../components/SearchUserModal.vue";
+import PermissionRow from "topobank/manager/PermissionRow.vue";
+
+const {show} = useToastController();
 
 const props = defineProps({
     surfaceUrl: String,
@@ -18,115 +26,91 @@ const emit = defineEmits([
     'updated:permissions'
 ]);
 
-const _editing = ref(false);
-const _error = ref(null);
-const _permissions = ref(props.permissions);
-const _savedPermissions = ref(props.permissions);
-const _saving = ref(false);
-const _searchUser = ref(false);
-const _options = ref([
-    {value: 'no-access', text: 'Revoke access (unshare digital surface twin)'},
-    {value: 'view', text: 'Allowed to view this digital surface twin'},
-    {value: 'edit', text: 'Can edit (add, remove, modify measurements)'},
-    {value: 'full', text: 'Full access (including publishing and access control)'}
-]);
+const isEditing = ref(false);
+const isSaving = ref(false);
+const permissions = ref(props.permissions);
+const savedPermissions = ref(props.permissions);
+const searchUser = ref(false);
 
 function saveCard() {
-    _editing.value = false;
-    _saving.value = true;
-    axios.patch(`${props.surfaceUrl}set-permissions/`, _permissions.value.other_users).then(response => {
-        _error.value = null;
+    isEditing.value = false;
+    isSaving.value = true;
+    axios.patch(`${props.surfaceUrl}set-permissions/`, permissions.value.other_users).then(response => {
         emit('update:permissions', response.data);
     }).catch(error => {
-        _error.value = error;
-        _permissions.value = this._savedPermissions;
+        show?.({
+            props: {
+                title: "Permission update failed",
+                body: error,
+                variant: 'danger'
+            }
+        });
+        permissions.value = this.savedPermissions;
     }).finally(() => {
-        _saving.value = false;
+        isSaving.value = false;
     });
 }
 
 function addUser(user) {
-    _searchUser.value = false;
-    _permissions.value.other_users.push({user: user, permission: 'view'});
+    searchUser.value = false;
+    permissions.value.other_users.push({user: user, permission: 'view'});
 }
 
 </script>
 
 <template>
-    <b-card>
+    <BCard>
         <template #header>
             <h5 class="float-start">Permissions</h5>
-            <b-button-group v-if="!_editing && !_saving && _permissions.current_user.permission === 'full'"
-                            class="float-end"
-                            size="sm">
-                <b-button variant="outline-secondary"
-                          @click="_savedPermissions = JSON.parse(JSON.stringify(_permissions)); _editing = true">
+            <BButtonGroup
+                v-if="!isEditing && !isSaving && permissions.current_user.permission === 'full'"
+                class="float-end"
+                size="sm">
+                <BButton variant="outline-secondary"
+                         @click="savedPermissions = JSON.parse(JSON.stringify(permissions)); isEditing = true">
                     <i class="fa fa-pen"></i>
-                </b-button>
-            </b-button-group>
-            <b-button-group v-if="_editing || _saving"
-                            class="float-end"
-                            size="sm">
-                <b-button v-if="_editing"
-                          variant="danger"
-                          @click="_editing = false; _permissions = _savedPermissions">
+                </BButton>
+            </BButtonGroup>
+            <BButtonGroup v-if="isEditing || isSaving"
+                          class="float-end"
+                          size="sm">
+                <BButton v-if="isEditing"
+                         variant="danger"
+                         @click="isEditing = false; permissions = savedPermissions">
                     Discard
-                </b-button>
-                <b-button variant="success"
-                          @click="saveCard">
-                    <b-spinner small v-if="_saving"></b-spinner>
-                    SAVE
-                </b-button>
-            </b-button-group>
-            <b-button-group v-if="_editing || _saving"
-                            class="float-end me-2"
-                            size="sm">
-                <b-button v-if="_editing"
-                          variant="outline-secondary"
-                          @click="_searchUser = !_searchUser">
+                </BButton>
+                <BButton variant="success"
+                         @click="saveCard">
+                    <BSpinner small v-if="isSaving"></BSpinner>
+                    Save
+                </BButton>
+            </BButtonGroup>
+            <BButtonGroup v-if="isEditing || isSaving"
+                          class="float-end me-2"
+                          size="sm">
+                <BButton v-if="isEditing"
+                         variant="outline-secondary"
+                         @click="searchUser = !searchUser">
                     Add user (share dataset)
-                </b-button>
-            </b-button-group>
+                </BButton>
+            </BButtonGroup>
         </template>
-        <b-card-body>
-            <b-alert :model-value="_error !== null"
-                     variant="danger">
-                {{ _error.message }}
-            </b-alert>
-            <div class="row mb-2">
-                <div class="col-4 my-auto">
-                    <b>{{ _permissions.current_user.user.name }}<br>({{ _permissions.current_user.user.orcid }})</b>
-                </div>
-                <div class="col-8">
-                    <b-form>
-                        <b-form-select v-model="_permissions.current_user.permission"
-                                       :options="_options"
-                                       disabled>
-                        </b-form-select>
-                    </b-form>
-                </div>
-            </div>
+        <BCardBody>
+            <PermissionRow :user-permission="permissions.current_user"
+                           :disabled="true">
+            </PermissionRow>
             <hr/>
-            <div v-if="_permissions.other_users.length == 0">
+            <div v-if="permissions.other_users.length === 0">
                 Only you can access this digital surface twin.
             </div>
-            <div v-if="_permissions.other_users.length > 0" v-for="permission in _permissions.other_users"
-                 class="row mb-2">
-                <div class="col-4 my-auto">
-                    {{ permission.user.name }}<br>({{ permission.user.orcid }})
-                </div>
-                <div class="col-8">
-                    <b-form>
-                        <b-form-select v-model="permission.permission"
-                                       :options="_options"
-                                       :disabled="!_editing">
-                        </b-form-select>
-                    </b-form>
-                </div>
-            </div>
-        </b-card-body>
-    </b-card>
-    <search-user-modal v-model="_searchUser"
-                       @user-selected="addUser">
-    </search-user-modal>
+            <PermissionRow v-if="permissions.other_users.length > 0"
+                           v-for="userPermission in permissions.other_users"
+                           v-model:user-permission="userPermission"
+                           :disabled="!isEditing">
+            </PermissionRow>
+        </BCardBody>
+    </BCard>
+    <SearchUserModal v-model="searchUser"
+                     @user-selected="addUser">
+    </SearchUserModal>
 </template>

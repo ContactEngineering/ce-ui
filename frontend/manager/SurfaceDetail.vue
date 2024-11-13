@@ -318,11 +318,11 @@ const allSelected = computed({
                             @discard:edit="discardBatchEdit">
                         </topography-properties-card>
                         <div v-if="isEditable && _topographies.length > 0" class="d-flex mb-1">
-                            <b-card>
+                            <BCard>
                                 <b-form-checkbox size="sm" :indeterminate="someSelected" v-model="allSelected">
                                     Select all
                                 </b-form-checkbox>
-                            </b-card>
+                            </BCard>
                         </div>
                         <div v-for="(topography, index) in _topographies">
                             <topography-card v-if="topography != null" :selectable="isEditable"
@@ -333,11 +333,11 @@ const allSelected = computed({
                         </div>
                     </BTab>
                     <BTab title="Bandwidths">
-                        <b-card class="w-100">
+                        <BCard class="w-100">
                             <template #header>
                                 <h5 class="float-start">Bandwidths</h5>
                             </template>
-                            <b-card-body>
+                            <BCardBody>
                                 <b-alert :model-value="_topographies.length == 0" info>
                                     This surface has no measurements yet.
                                 </b-alert>
@@ -353,8 +353,8 @@ const allSelected = computed({
                                 </b-alert>
                                 <bandwidth-plot v-if="_topographies.length > 0" :topographies="_topographies">
                                 </bandwidth-plot>
-                            </b-card-body>
-                        </b-card>
+                            </BCardBody>
+                        </BCard>
                     </BTab>
                     <BTab title="Description">
                         <SurfaceDescription v-if="_surface != null"
@@ -381,28 +381,28 @@ const allSelected = computed({
                     </BTab>
                     <BTab v-if="_surface != null"
                            title="Permissions">
-                        <surface-permissions v-if="_surface.publication == null"
+                        <SurfacePermissions v-if="_surface.publication == null"
                                              :surface-url="_surface.url"
                                              v-model:permissions="_permissions">
-                        </surface-permissions>
-                        <b-card v-if="_surface.publication != null" class="w-100">
+                        </SurfacePermissions>
+                        <BCard v-if="_surface.publication != null" class="w-100">
                             <template #header>
                                 <h5 class="float-start">Permissions</h5>
                             </template>
-                            <b-card-body>
+                            <BCardBody>
                                 This dataset is published. It is visible to everyone
                                 (even without logging into the
                                 system) and can no longer be modified.
-                            </b-card-body>
-                        </b-card>
+                            </BCardBody>
+                        </BCard>
                     </BTab>
                     <BTab v-if="isPublication"
                            title="How to cite">
-                        <b-card class="w-100">
+                        <BCard class="w-100">
                             <template #header>
                                 <h5 class="float-start">How to cite</h5>
                             </template>
-                            <b-card-body>
+                            <BCardBody>
                                 <p class="mb-5">
                                     <a :href="ccLicenseInfo[_publication.license].descriptionUrl">
                                         <img
@@ -441,8 +441,8 @@ const allSelected = computed({
                                         </code>
                                     </b-accordion-item>
                                 </b-accordion>
-                            </b-card-body>
-                        </b-card>
+                            </BCardBody>
+                        </BCard>
                     </BTab>
                     <template #tabs-end>
                         <hr />
