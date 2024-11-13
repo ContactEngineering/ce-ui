@@ -28,14 +28,14 @@ const emit = defineEmits([
 
 const isEditing = ref(false);
 const isSaving = ref(false);
-const permissions = ref(props.permissions);
+const selfPermissions = ref(props.permissions);
 const savedPermissions = ref(props.permissions);
 const searchUser = ref(false);
 
 function saveCard() {
     isEditing.value = false;
     isSaving.value = true;
-    axios.patch(`${props.surfaceUrl}set-permissions/`, permissions.value.other_users).then(response => {
+    axios.patch(`${props.surfaceUrl}set-permissions/`, selfPermissions.value.other_users).then(response => {
         emit('update:permissions', response.data);
     }).catch(error => {
         show?.({
@@ -45,7 +45,7 @@ function saveCard() {
                 variant: 'danger'
             }
         });
-        permissions.value = this.savedPermissions;
+        selfPermissions.value = this.savedPermissions;
     }).finally(() => {
         isSaving.value = false;
     });
@@ -53,7 +53,7 @@ function saveCard() {
 
 function addUser(user) {
     searchUser.value = false;
-    permissions.value.other_users.push({user: user, permission: 'view'});
+    selfPermissions.value.other_users.push({user: user, permission: 'view'});
 }
 
 </script>
@@ -63,11 +63,11 @@ function addUser(user) {
         <template #header>
             <h5 class="float-start">Permissions</h5>
             <BButtonGroup
-                v-if="!isEditing && !isSaving && permissions.current_user.permission === 'full'"
+                v-if="!isEditing && !isSaving && selfPermissions.current_user.permission === 'full'"
                 class="float-end"
                 size="sm">
                 <BButton variant="outline-secondary"
-                         @click="savedPermissions = JSON.parse(JSON.stringify(permissions)); isEditing = true">
+                         @click="savedPermissions = JSON.parse(JSON.stringify(selfPermissions)); isEditing = true">
                     <i class="fa fa-pen"></i>
                 </BButton>
             </BButtonGroup>
@@ -76,7 +76,7 @@ function addUser(user) {
                           size="sm">
                 <BButton v-if="isEditing"
                          variant="danger"
-                         @click="isEditing = false; permissions = savedPermissions">
+                         @click="isEditing = false; selfPermissions = savedPermissions">
                     Discard
                 </BButton>
                 <BButton variant="success"
@@ -96,16 +96,16 @@ function addUser(user) {
             </BButtonGroup>
         </template>
         <BCardBody>
-            <PermissionRow :user-permission="permissions.current_user"
+            <PermissionRow :user-permission="selfPermissions.current_user"
                            :disabled="true">
             </PermissionRow>
             <hr/>
-            <div v-if="permissions.other_users.length === 0">
+            <div v-if="selfPermissions.other_users.length === 0">
                 Only you can access this digital surface twin.
             </div>
-            <PermissionRow v-if="permissions.other_users.length > 0"
-                           v-for="userPermission in permissions.other_users"
-                           v-model:user-permission="userPermission"
+            <PermissionRow v-if="selfPermissions.other_users.length > 0"
+                           v-for="(userPermission, index) in selfPermissions.other_users"
+                           v-model:user-permission="selfPermissions.other_users[index]"
                            :disabled="!isEditing">
             </PermissionRow>
         </BCardBody>
