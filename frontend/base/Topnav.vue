@@ -40,26 +40,30 @@ const searchInfoModal = ref(false);
         </BNavbarBrand>
         <BNavbarNav>
             <BNavForm :action="selectUrl" method="get" class="d-flex">
-                    <label class="col-form-label visually-hidden" for="inline-form-input-name">Search term</label>
-                    <BFormInput type="search"
-                                placeholder="Enter search expression">
-                    </BFormInput>
-                    <BButton class="ms-1"
-                             variant="outline-secondary"
-                             type="submit">
-                        <i class="fa fa-search" aria-hidden="true"></i>
-                    </BButton>
-                    <BButton class="ms-1 me-5"
-                             variant="outline-secondary"
-                             title="Tips for searching"
-                             @click="searchInfoModal = true">
-                        <i class="fa fa-info-circle" aria-hidden="true"></i>
-                    </BButton>
+                <label class="col-form-label visually-hidden" for="inline-form-input-name">Search term</label>
+                <BFormInput type="search"
+                            placeholder="Enter search expression">
+                </BFormInput>
+                <BButton class="ms-1"
+                         variant="outline-secondary"
+                         type="submit">
+                    <i class="fa fa-search" aria-hidden="true"></i>
+                </BButton>
+                <BButton class="ms-1 me-5"
+                         variant="outline-secondary"
+                         title="Tips for searching"
+                         @click="searchInfoModal = true">
+                    <i class="fa fa-info-circle" aria-hidden="true"></i>
+                </BButton>
             </BNavForm>
         </BNavbarNav>
-        <BNavItem v-if="isAnonymous" :href="loginUrl">
-            Sign in
-        </BNavItem>
+        <BNavbarNav v-if="isAnonymous">
+            <BNavItem>
+                <BButton :href="loginUrl" variant="outline-secondary">
+                    Sign in
+                </BButton>
+            </BNavItem>
+        </BNavbarNav>
         <NotificationButton v-if="!isAnonymous"></NotificationButton>
         <UserMenuButton
             v-if="!isAnonymous"
