@@ -2,6 +2,7 @@
 
 ## 1.9.2 (2024-11-13)
 
+- BUG: Fixed user permission editor
 - BUG: Fix retrieval of user information in permission management
 - BUG: Fix hyperlinks in notifications
 
