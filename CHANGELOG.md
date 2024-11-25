@@ -6,6 +6,10 @@
 - BUG: Fix retrieval of user information in permission management
 - BUG: Fix hyperlinks in notifications
 
+## 1.9.2 (2024-11-25)
+
+- BUG: Enable toast orchestrator for analysis app
+
 ## 1.9.1 (2024-11-13)
 
 - BUG: Fixed reporting task progress

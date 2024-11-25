@@ -3,7 +3,13 @@
 import axios from "axios";
 import {onMounted, ref} from "vue";
 
-import {BForm, BFormCheckbox, BFormCheckboxGroup, BFormGroup} from "bootstrap-vue-next";
+import {
+    BForm,
+    BFormCheckbox,
+    BFormCheckboxGroup,
+    BFormGroup,
+    BToastOrchestrator
+} from "bootstrap-vue-next";
 
 const props = defineProps({
     apiRegistryUrl: {
@@ -43,6 +49,7 @@ function updateSelection() {
 </script>
 
 <template>
+    <BToastOrchestrator/>
     <div class="row mb-2">
         <b-form class="col-12">
             <b-form-group>

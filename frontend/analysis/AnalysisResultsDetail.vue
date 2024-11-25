@@ -1,5 +1,7 @@
 <script setup>
 
+import {BToastOrchestrator} from "bootstrap-vue-next";
+
 const props = defineProps({
     functionId: Number,
     functionName: String,
@@ -10,6 +12,7 @@ const props = defineProps({
 </script>
 
 <template>
+    <BToastOrchestrator />
     <div class="row">
         <div class="col-lg-12 mb-4">
             <component :is="`${visualizationType}-card`"
