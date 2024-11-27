@@ -1,6 +1,6 @@
 # Changelog for plugin *ce-ui*
 
-## 1.9.3 (2024-11-13)
+## 1.9.3 (2024-11-27)
 
 - BUG: Fixed user permission editor
 - BUG: Fix retrieval of user information in permission management
