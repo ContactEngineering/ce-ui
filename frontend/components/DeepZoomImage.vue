@@ -111,8 +111,13 @@ function requestDzi() {
     _isLoaded.value = false;
 
     axios.get(props.folderUrl).then(response => {
+        const dziJson = `${props.prefix}dzi.json`;
         inventory = response.data;
-        axios.get(inventory[`${props.prefix}dzi.json`].file).then(response => {
+        if (!(dziJson in inventory)) {
+            _errorMessage.value = `DZI metadata file ${dziJson} not found.`;
+            return;
+        }
+        axios.get(inventory[dziJson].file).then(response => {
             // DZI metadata
             const meta = response.data;
 
