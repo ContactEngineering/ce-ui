@@ -5,6 +5,7 @@
 - BUG: Fixed user permission editor
 - BUG: Fix retrieval of user information in permission management
 - BUG: Fix hyperlinks in notifications
+- BUG: Reporting proper error when DZI files are missing
 
 ## 1.9.2 (2024-11-25)
 
