@@ -1,5 +1,9 @@
 # Changelog for plugin *ce-ui*
 
+## 1.9.4 (2024-12-05)
+
+- BUG: Fix download of deep zoom images
+
 ## 1.9.3 (2024-11-27)
 
 - BUG: Fixed user permission editor
