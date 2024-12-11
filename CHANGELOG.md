@@ -1,5 +1,9 @@
 # Changelog for plugin *ce-ui*
 
+## 1.9.4 (To be released)
+
+- BUG: update used icons to fontawesome 6
+
 ## 1.9.3 (2024-11-27)
 
 - BUG: Fixed user permission editor
