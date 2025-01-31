@@ -15,7 +15,7 @@
 import $ from 'jquery';
 import axios from "axios";
 
-import {computed, onMounted, ref} from "vue";
+import { computed, onMounted, ref } from "vue";
 
 import {
     BFormGroup,
@@ -25,7 +25,7 @@ import {
     BSpinner
 } from "bootstrap-vue-next";
 
-import {createTree} from 'jquery.fancytree';
+import { createTree } from 'jquery.fancytree';
 
 import 'jquery.fancytree/dist/modules/jquery.fancytree.glyph';
 import 'jquery.fancytree/dist/modules/jquery.fancytree.table';
@@ -87,199 +87,199 @@ const _treeModeInfos = {
 onMounted(() => {
     // init fancytree
     _tree.value = createTree('#surface-tree', {
-            extensions: ["glyph", "table"],
-            glyph: {
-                preset: "awesome5",
-                map: {
-                    // Override distinct default icons here
-                    folder: "fa-folder",
-                    folderOpen: "fa-folder-open"
-                }
+        extensions: ["glyph", "table"],
+        glyph: {
+            preset: "awesome5",
+            map: {
+                // Override distinct default icons here
+                folder: "fa-folder",
+                folderOpen: "fa-folder-open"
+            }
+        },
+        types: {
+            "surface": {
+                icon: "far fa-gem",
+                iconTooltip: "This is a digital surface twin"
             },
-            types: {
-                "surface": {
-                    icon: "far fa-gem",
-                    iconTooltip: "This is a digital surface twin"
-                },
-                "topography": {icon: "far fa-file", iconTooltip: "This is a measurement"},
-                "tag": {icon: "fas fa-tag", iconTooltip: "This is a tag"},
-            },
-            icon(event, data) {
-                // data.typeInfo contains tree.types[node.type] (or {} if not found)
-                // Here we will return the specific icon for that type, or `undefined` if
-                // not type info is defined (in this case a default icon is displayed).
-                return data.typeInfo.icon;
-            },
-            iconTooltip(event, data) {
-                return data.typeInfo.iconTooltip; // set tooltip which appears when hovering an icon
-            },
-            table: {
-                checkboxColumnIdx: null,    // render the checkboxes into the this column index (default: nodeColumnIdx)
-                indentation: 20,            // indent every node level by these number of pixels
-                nodeColumnIdx: 0            // render node expander, icon, and title to this column (default: #0)
-            },
-            autoActivate: true,
-            titlesTabbable: false,
-            tabindex: -1,
-            focusOnSelect: false,
-            scrollParent: window,
-            autoScroll: true,
-            scrollOfs: {top: 200, bottom: 50},
-            checkbox: true,
-            selectMode: 2, // 'multi'
-            source: {
-                url: searchUrl.value.toString(),  // this is a computed property, see below
-                cache: false
-            },
-            postProcess(event, data) {
-                _numPages.value = data.response.num_pages;
-                _numItems.value = data.response.num_items;
-                _currentPage.value = data.response.current_page;
-                _numItemsOnCurrentPage.value = data.response.num_items_on_currentPage;
-                _pageRange.value = data.response.page_range;
-                _pageUrls.value = data.response.page_urls;
-                _pageSize.value = data.response.page_size;
-                // assuming the Ajax response contains a list of child nodes:
-                // We replace the result
-                data.result = data.response.page_results;
-                _isLoading.value = false;
-            },
-            select(event, data) {
-                const node = data.node;
-                const is_selected = node.isSelected();
-                if (node.data.urls !== undefined) {
-                    if (is_selected) {
-                        axios.post(node.data.urls.select)
-                            .then(response => {
-                                _selection.value = response.data;
-                                setSelectedByKey(node.key, true);
-                            })
-                            .catch(error => {
-                                console.error("Could not select: " + error);
-                            });
-                    } else {
-                        axios.post(node.data.urls.unselect)
-                            .then(response => {
-                                _selection.value = response.data;
-                                setSelectedByKey(node.key, false);
-                            })
-                            .catch(error => {
-                                console.error("Could not unselect: " + error);
-                            });
-                    }
+            "topography": { icon: "far fa-file", iconTooltip: "This is a measurement" },
+            "tag": { icon: "fas fa-tag", iconTooltip: "This is a tag" },
+        },
+        icon(event, data) {
+            // data.typeInfo contains tree.types[node.type] (or {} if not found)
+            // Here we will return the specific icon for that type, or `undefined` if
+            // not type info is defined (in this case a default icon is displayed).
+            return data.typeInfo.icon;
+        },
+        iconTooltip(event, data) {
+            return data.typeInfo.iconTooltip; // set tooltip which appears when hovering an icon
+        },
+        table: {
+            checkboxColumnIdx: null,    // render the checkboxes into the this column index (default: nodeColumnIdx)
+            indentation: 20,            // indent every node level by these number of pixels
+            nodeColumnIdx: 0            // render node expander, icon, and title to this column (default: #0)
+        },
+        autoActivate: true,
+        titlesTabbable: false,
+        tabindex: -1,
+        focusOnSelect: false,
+        scrollParent: window,
+        autoScroll: true,
+        scrollOfs: { top: 200, bottom: 50 },
+        checkbox: true,
+        selectMode: 2, // 'multi'
+        source: {
+            url: searchUrl.value.toString(),  // this is a computed property, see below
+            cache: false
+        },
+        postProcess(event, data) {
+            _numPages.value = data.response.num_pages;
+            _numItems.value = data.response.num_items;
+            _currentPage.value = data.response.current_page;
+            _numItemsOnCurrentPage.value = data.response.num_items_on_currentPage;
+            _pageRange.value = data.response.page_range;
+            _pageUrls.value = data.response.page_urls;
+            _pageSize.value = data.response.page_size;
+            // assuming the Ajax response contains a list of child nodes:
+            // We replace the result
+            data.result = data.response.page_results;
+            _isLoading.value = false;
+        },
+        select(event, data) {
+            const node = data.node;
+            const is_selected = node.isSelected();
+            if (node.data.urls !== undefined) {
+                if (is_selected) {
+                    axios.post(node.data.urls.select)
+                        .then(response => {
+                            _selection.value = response.data;
+                            setSelectedByKey(node.key, true);
+                        })
+                        .catch(error => {
+                            console.error("Could not select: " + error);
+                        });
                 } else {
-                    console.log("No urls defined for node. Cannot pass selection to session.");
+                    axios.post(node.data.urls.unselect)
+                        .then(response => {
+                            _selection.value = response.data;
+                            setSelectedByKey(node.key, false);
+                        })
+                        .catch(error => {
+                            console.error("Could not unselect: " + error);
+                        });
                 }
-            },
-            renderTitle(event, data) {
-                return " ";
-            },
-            renderColumns(event, data) {
-                const node = data.node;
-                const $tdList = $(node.tr).find(">td");
+            } else {
+                console.log("No urls defined for node. Cannot pass selection to session.");
+            }
+        },
+        renderTitle(event, data) {
+            return " ";
+        },
+        renderColumns(event, data) {
+            const node = data.node;
+            const $tdList = $(node.tr).find(">td");
 
-                /**
-                 Add special css classes to nodes depending on type
-                 */
+            /**
+             Add special css classes to nodes depending on type
+             */
 
-                let extra_classes = {
-                    surface: [],
-                    topography: [],
-                    tag: ['font-italic']
-                };
+            let extra_classes = {
+                surface: [],
+                topography: [],
+                tag: ['font-italic']
+            };
 
-                node.addClass('select-tree-item')
+            node.addClass('select-tree-item')
 
-                extra_classes[node.type].forEach(function (c) {
-                    node.addClass(c);
+            extra_classes[node.type].forEach(function (c) {
+                node.addClass(c);
+            });
+
+            let description_html = "";
+            // DOI badge added here
+            if (node.data.publication_doi) {
+                description_html += `<a class="badge bg-dark me-1 text-decoration-none" href=${node.data.publication_doi}">${node.data.publication_doi}</a>`;
+            }
+            // License image
+            if (node.data.publication_license) {
+                description_html += `<img src="/static/images/cc/${node.data.publication_license}.svg" title="Dataset can be reused under the terms of a Creative Commons license." style="float:right">`;
+            }
+
+            // Tags
+            if (node.data.category) {
+                description_html += `<p class='badge bg-light text-dark me-1'>${node.data.category_name}</p>`;
+            }
+
+            if (node.data.sharing_status == "own") {
+                description_html += `<p class='badge bg-info me-1'>Created by you</p>`;
+            } else if (node.data.sharing_status == "shared") {
+                description_html += `<p class='badge bg-info me-1'>Shared by ${node.data.creator_name}</p>`;
+            }
+
+            if (node.data.tags !== undefined) {
+                node.data.tags.forEach(function (tag) {
+                    description_html += "<p class='badge bg-success me-1'>" + tag + "</p>";
                 });
+            }
 
-                let description_html = "";
-                // DOI badge added here
-                if (node.data.publication_doi) {
-                    description_html += `<a class="badge bg-dark me-1 text-decoration-none" href="https://doi.org/${node.data.publication_doi}">${node.data.publication_doi}</a>`;
-                }
-                // License image
-                if (node.data.publication_license) {
-                    description_html += `<img src="/static/images/cc/${node.data.publication_license}.svg" title="Dataset can be reused under the terms of a Creative Commons license." style="float:right">`;
-                }
+            // Title
+            description_html += `<p class="select-tree-title">${node.data.name}</p>`;
 
-                // Tags
-                if (node.data.category) {
-                    description_html += `<p class='badge bg-light text-dark me-1'>${node.data.category_name}</p>`;
-                }
-
-                if (node.data.sharing_status == "own") {
-                    description_html += `<p class='badge bg-info me-1'>Created by you</p>`;
-                } else if (node.data.sharing_status == "shared") {
-                    description_html += `<p class='badge bg-info me-1'>Shared by ${node.data.creator_name}</p>`;
-                }
-
-                if (node.data.tags !== undefined) {
-                    node.data.tags.forEach(function (tag) {
-                        description_html += "<p class='badge bg-success me-1'>" + tag + "</p>";
-                    });
-                }
-
-                // Title
-                description_html += `<p class="select-tree-title">${node.data.name}</p>`;
-
-                let publication_info = "";
-                if (node.data.publication_authors) {
-                    const date = new Date(node.data.publication_date);
-                    publication_info += `${node.data.publication_authors} (published ${date.toISOString().substring(0, 10)})`;
-                } else {
-                    if (node.type == "surface") {
-                        publication_info += `This dataset is unpublished. It was created by ${node.data.creator_name}`;
-                        if (node.data.creation_datetime) {
-                            const date = new Date(node.data.creation_datetime);
-                            publication_info += ` on ${date.toISOString().substring(0, 10)}`;
-                        }
-                        publication_info += ".";
+            let publication_info = "";
+            if (node.data.publication_authors) {
+                const date = new Date(node.data.publication_date);
+                publication_info += `${node.data.publication_authors} (published ${date.toISOString().substring(0, 10)})`;
+            } else {
+                if (node.type == "surface") {
+                    publication_info += `This dataset is unpublished. It was created by ${node.data.creator_name}`;
+                    if (node.data.creation_datetime) {
+                        const date = new Date(node.data.creation_datetime);
+                        publication_info += ` on ${date.toISOString().substring(0, 10)}`;
                     }
+                    publication_info += ".";
                 }
+            }
 
-                if (publication_info) {
-                    description_html += `<p class="select-tree-authors">${publication_info}</p>`;
-                }
+            if (publication_info) {
+                description_html += `<p class="select-tree-authors">${publication_info}</p>`;
+            }
 
-                // Set column with description
-                if (node.data.description !== undefined) {
-                    description_html += `<p class='select-tree-description'>${node.data.description}</p>`;
-                }
+            // Set column with description
+            if (node.data.description !== undefined) {
+                description_html += `<p class='select-tree-description'>${node.data.description}</p>`;
+            }
 
-                let info_footer = "";
-                if (node.data.topography_count && node.data.version) {
-                    info_footer += `This is version ${node.data.version} of this digital surface twin and contains ${node.data.topography_count} measurements.`
-                } else if (node.data.version) {
-                    info_footer += `This is version ${node.data.version} of this dig77ital surface twin.`
-                } else if (node.data.topography_count) {
-                    info_footer += `This digital surface twin contains ${node.data.topography_count} measurements.`
-                }
-                if ((node.type == "topography") && (node.data.sharing_status != "published")) {
-                    info_footer += `Uploaded by ${node.data.creator_name}.`;
-                }
-                if (info_footer) {
-                    description_html += `<p class="select-tree-info">${info_footer}</p>`
-                }
+            let info_footer = "";
+            if (node.data.topography_count && node.data.version) {
+                info_footer += `This is version ${node.data.version} of this digital surface twin and contains ${node.data.topography_count} measurements.`
+            } else if (node.data.version) {
+                info_footer += `This is version ${node.data.version} of this dig77ital surface twin.`
+            } else if (node.data.topography_count) {
+                info_footer += `This digital surface twin contains ${node.data.topography_count} measurements.`
+            }
+            if ((node.type == "topography") && (node.data.sharing_status != "published")) {
+                info_footer += `Uploaded by ${node.data.creator_name}.`;
+            }
+            if (info_footer) {
+                description_html += `<p class="select-tree-info">${info_footer}</p>`
+            }
 
-                $tdList
-                    .eq(1)
-                    .html(description_html);
+            $tdList
+                .eq(1)
+                .html(description_html);
 
-                // Set columns with buttons:
-                if (node.type !== "tag") {
-                    const actions_html = `
+            // Set columns with buttons:
+            if (node.type !== "tag") {
+                const actions_html = `
                             <div class="btn-group-vertical btn-group-sm" role="group" aria-label="Actions">
                              ${item_buttons(node.data.urls)}
                             </div>
                           `;
-                    $tdList
-                        .eq(2)
-                        .html(actions_html);
-                }
-            },
-        }
+                $tdList
+                    .eq(2)
+                    .html(actions_html);
+            }
+        },
+    }
     ); // fancytree()
     _isLoading.value = true;
 });
@@ -371,7 +371,7 @@ function setSelectedByKey(key, selected) {
     _tree.value.findAll(function (node) {
         return node.key == key;
     }).forEach(function (node) {
-        node.setSelected(selected, {noEvents: true});
+        node.setSelected(selected, { noEvents: true });
         // we only want to set the checkbox here, we don't want to simulate the click
     })
 }
@@ -379,7 +379,7 @@ function setSelectedByKey(key, selected) {
 function setSelectedKeys(keys) {
     // Select on all nodes with key in `keys`
     _tree.value.visit(function (node) {
-        node.setSelected(keys.includes(node.key), {noEvents: true});
+        node.setSelected(keys.includes(node.key), { noEvents: true });
     })
 }
 
@@ -395,15 +395,12 @@ function createSurface() {
 </script>
 
 <template>
-    <basket :basket-items="_selection"
-            @unselect-successful="unselect">
+    <basket :basket-items="_selection" @unselect-successful="unselect">
     </basket>
     <div class="row row-cols-lg-auto mb-2">
         <div v-if="_searchTerm" class="form-group">
-            <button class="btn btn-warning form-control" type="button"
-                    id="clear-search-term-btn"
-                    @click="clearSearchTerm"
-                    :disabled="_isLoading">
+            <button class="btn btn-warning form-control" type="button" id="clear-search-term-btn"
+                @click="clearSearchTerm" :disabled="_isLoading">
                 Clear filter for <b>{{ _searchTerm }}</b>
             </button>
         </div>
@@ -414,38 +411,26 @@ function createSurface() {
         </div>
 
         <BFormGroup>
-            <BFormSelect name="category"
-                         class="form-control"
-                         v-model="_category"
-                         @change="reload"
-                         :disabled="_isLoading"
-                         :options="categoryFilterChoices">
+            <BFormSelect name="category" class="form-control" v-model="_category" @change="reload"
+                :disabled="_isLoading" :options="categoryFilterChoices">
             </BFormSelect>
         </BFormGroup>
 
         <BFormGroup>
-            <BFormSelect name="sharing_status"
-                         class="form-control"
-                         v-model="_sharingStatus"
-                         @change="reload"
-                         :disabled="_isLoading"
-                         :options="sharingStatusFilterChoices">
+            <BFormSelect name="sharing_status" class="form-control" v-model="_sharingStatus" @change="reload"
+                :disabled="_isLoading" :options="sharingStatusFilterChoices">
             </BFormSelect>
         </BFormGroup>
 
         <div class="col-md-4">
             <div v-if="isAnonymous" class="form-group">
-                <button class="btn btn-primary form-control disabled"
-                        title="Please sign-in to use this feature"
-                        disabled>
+                <button class="btn btn-primary form-control disabled" title="Please sign-in to use this feature"
+                    disabled>
                     Create new digital surface twin
                 </button>
             </div>
-            <div v-if="!isAnonymous" class="form-group"
-                 title="Create a new digital surface twin">
-                <button class="btn btn-primary form-control"
-                        @click="createSurface"
-                        :disabled="_isLoading">
+            <div v-if="!isAnonymous" class="form-group" title="Create a new digital surface twin">
+                <button class="btn btn-primary form-control" @click="createSurface" :disabled="_isLoading">
                     Create new digital surface twin
                 </button>
             </div>
@@ -455,60 +440,52 @@ function createSurface() {
         <div class="col-md-4">
             <div id="tree-selector" class="btn-group">
                 <label v-for="choice in
-                     [ { label: 'Surface list',
-                         value: 'surface list',
-                         icon_class: 'far fa-gem'},
-                       { label:'Tag tree',
-                         value: 'tag tree',
-                         icon_class: 'fas fa-tag'}]"
-                       v-bind:class="{active: _treeMode==choice.value,
-                                      'btn': true,
-                                      'btn-success': _treeMode==choice.value,
-                                      'btn-outline-success': _treeMode!=choice.value,
-                                      'disabled': _isLoading}">
-                    <input type="radio"
-                           class="btn-check"
-                           autocomplete="off"
-                           name="tree_mode"
-                           v-bind:value="choice.value"
-                           v-model="_treeMode"
-                           @change="reload">
+                    [{
+                        label: 'Surface list',
+                        value: 'surface list',
+                        icon_class: 'far fa-gem'
+                    },
+                    {
+                        label: 'Tag tree',
+                        value: 'tag tree',
+                        icon_class: 'fas fa-tag'
+                    }]" v-bind:class="{
+                        active: _treeMode == choice.value,
+                        'btn': true,
+                        'btn-success': _treeMode == choice.value,
+                        'btn-outline-success': _treeMode != choice.value,
+                        'disabled': _isLoading
+                    }">
+                    <input type="radio" class="btn-check" autocomplete="off" name="tree_mode"
+                        v-bind:value="choice.value" v-model="_treeMode" @change="reload">
                     <span><i v-bind:class="choice.icon_class"></i> {{
-                            choice.label
-                        }}</span>
+                        choice.label
+                    }}</span>
                 </label>
             </div>
         </div>
         <div class="col-md-4">
-            <BPagination v-model="currentPage"
-                         :disabled="_isLoading"
-                         :limit="9"
-                         :total-rows="_numItems"
-                         :per-page="_pageSize">
+            <BPagination v-model="currentPage" :disabled="_isLoading" :limit="9" :total-rows="_numItems"
+                :per-page="_pageSize">
             </BPagination>
         </div>
         <div class="col-md-4">
             <BInputGroup prepend="Page size">
-                <BFormSelect v-model="pageSize"
-                             :disabled="_isLoading"
-                             :options="[10, 25, 50, 100]">
+                <BFormSelect v-model="pageSize" :disabled="_isLoading" :options="[10, 25, 50, 100]">
                 </BFormSelect>
             </BInputGroup>
         </div>
         <div class="col-md-4">
             <BInputGroup prepend="Sort by">
-                <BFormSelect v-model="orderBy"
-                             :disabled="_isLoading"
-                             :options="orderByFilterChoices">
+                <BFormSelect v-model="orderBy" :disabled="_isLoading" :options="orderByFilterChoices">
                 </BFormSelect>
             </BInputGroup>
         </div>
     </div>
 
-    <div v-if="_isLoading"
-         class="d-flex justify-content-center mt-5">
+    <div v-if="_isLoading" class="d-flex justify-content-center mt-5">
         <div class="flex-column text-center">
-            <b-spinner/>
+            <b-spinner />
             <p>Loading...</p>
         </div>
     </div>
@@ -521,22 +498,22 @@ function createSurface() {
                 <col width="100rem">
             </colgroup>
             <thead>
-            <tr>
-                <th scope="col">Select</th>
-                <th scope="col">Description</th>
-                <th scope="col">Actions</th>
-            </tr>
+                <tr>
+                    <th scope="col">Select</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Actions</th>
+                </tr>
             </thead>
             <tbody>
             </tbody>
         </table>
     </div>
     <div>
-    <span v-if="!_isLoading">
-      Showing {{ _numItemsOnCurrentPage }} {{ _treeModeInfos[_treeMode].element_kind }} out of {{
-            _numItems
-        }}.
-      {{ _treeModeInfos[_treeMode].hint }}
-    </span>
+        <span v-if="!_isLoading">
+            Showing {{ _numItemsOnCurrentPage }} {{ _treeModeInfos[_treeMode].element_kind }} out of {{
+                _numItems
+            }}.
+            {{ _treeModeInfos[_treeMode].hint }}
+        </span>
     </div>
 </template>
