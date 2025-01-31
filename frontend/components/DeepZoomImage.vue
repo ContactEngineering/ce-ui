@@ -249,6 +249,10 @@ function download() {
     }
 }
 
+defineExpose({
+    download
+});
+
 </script>
 
 <template>
