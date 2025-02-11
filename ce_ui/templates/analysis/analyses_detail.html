@@ -7,7 +7,7 @@
         <div id="app" class="tab-pane active">
             <div class="card">
                 <div class="card-header">
-                    <h5>{{ function.name }}</h5>
+                    <h5>{{ function.display_name }}</h5>
                 </div>
                 <div class="card-body">
                     <span class="spinner"></span>
@@ -28,7 +28,7 @@
         const params = new URLSearchParams(window.location.search);
         topobank.analysis_app.createAnalysisResultsDetailApp('#app', '{{ csrf_token }}', {
             functionId: {{ function.id }},
-            functionName: '{{ function.name }}',
+            functionName: '{{ function.display_name }}',
             visualizationType: '{{ visualization_type }}',
             subjects: params.get('subjects')
         });

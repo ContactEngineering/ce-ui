@@ -788,7 +788,7 @@ class AnalysisResultDetailView(DetailView):
 
         # get analysis result type
         visualization_type = get_visualization_type(
-            function.name
+            name=function.name
         )
 
         context["function"] = function
@@ -809,12 +809,12 @@ class AnalysisResultDetailView(DetailView):
                     "tooltip": "Results for selected analysis functions",
                 },
                 {
-                    "title": f"{function.name}",
+                    "title": f"{function.display_name}",
                     "icon": "chart-area",
                     "href": f"{self.request.path}?subjects={self.request.GET.get('subjects')}",
                     "active": True,
                     "login_required": False,
-                    "tooltip": f"Results for analysis '{function.name}'",
+                    "tooltip": f"Results for analysis '{function.display_name}'",
                     "show_basket": True,
                 },
             ]

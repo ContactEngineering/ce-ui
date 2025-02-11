@@ -128,7 +128,7 @@ watch(() => analysis.value, () => {
                 Retrieving function information...
             </div>
             <div v-if="_function != null && _subject != null">
-                <b>Function <i>{{ _function.name }}</i> on subject <i>{{
+                <b>Function <i>{{ _function.display_name }}</i> on subject <i>{{
                         _subject.name
                     }}</i></b>
             </div>
