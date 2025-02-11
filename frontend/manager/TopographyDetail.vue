@@ -95,7 +95,7 @@ const base64Subjects = computed(() => {
                                        :folder-url="_topography.deepzoom">
                         </DeepZoomImage>
                     </BTab>
-                    <BTab title="Properties">
+                    <BTab title="Details">
                         <TopographyCard :topography-url="_topography.url"
                                         v-model:topography="_topography"
                                         :enlarged="true"
