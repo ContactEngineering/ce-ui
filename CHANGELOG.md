@@ -1,12 +1,11 @@
 # Changelog for plugin *ce-ui*
 
-## 1.9.5 (To be released)
-
-- BUG: update used icons to fontawesome 6
-
 ## 1.10.0 (2025-02-11)
 
 - MAINT: Updated for API changes in topobank v1.55.0
+- BUG: Update used icons to fontawesome 6
+- BUG: Fix DOI link
+- BUG: Raise permission error if object does not exist
 
 ## 1.9.4 (2024-12-05)
 
