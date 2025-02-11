@@ -1,5 +1,11 @@
 # Changelog for plugin *ce-ui*
 
+## 1.10.1 (2025-02-11)
+
+- BUG: Fix DOI badge
+- MAINT: Renamed topography card "Properties" tab to "Details" to avoid
+  confusion with surface properties
+
 ## 1.10.0 (2025-02-11)
 
 - MAINT: Updated for API changes in topobank v1.55.0
