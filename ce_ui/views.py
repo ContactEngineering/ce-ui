@@ -226,7 +226,10 @@ class TopographyDetailView(TemplateView):
         topography_id = self.request.GET.get("topography")
         if topography_id is None:
             return context
-        topography = Topography.objects.get(id=int(topography_id))
+        try:
+            topography = Topography.objects.get(id=int(topography_id))
+        except (ValueError, Topography.DoesNotExist):
+            raise PermissionDenied()
 
         #
         # Add context needed for tabs
@@ -325,7 +328,10 @@ class SurfaceDetailView(TemplateView):
         surface_id = self.request.GET.get("surface")
         if surface_id is None:
             return context
-        surface = Surface.objects.get(id=int(surface_id))
+        try:
+            surface = Surface.objects.get(id=int(surface_id))
+        except (ValueError, Surface.DoesNotExist):
+            raise PermissionDenied()
 
         context["extra_tabs"] = [
             {
@@ -632,7 +638,7 @@ def set_tag_select_status(request, pk, select_status):
     try:
         pk = int(pk)
         tag = Tag.objects.get(pk=pk)
-    except ValueError:
+    except (ValueError, Tag.DoesNotExist):
         raise PermissionDenied()
 
     if tag not in tags_for_user(request.user):
