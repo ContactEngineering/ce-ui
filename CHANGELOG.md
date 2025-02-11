@@ -4,6 +4,10 @@
 
 - BUG: update used icons to fontawesome 6
 
+## 1.10.0 (2025-02-11)
+
+- MAINT: Updated for API changes in topobank v1.55.0
+
 ## 1.9.4 (2024-12-05)
 
 - BUG: Fix download of deep zoom images

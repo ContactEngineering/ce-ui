@@ -14,7 +14,7 @@ import {
 const props = defineProps({
     apiRegistryUrl: {
         type: String,
-        default: '/analysis/api/function/'
+        default: '/analysis/api/workflow/'
     },
     subjects: String
 });
@@ -58,7 +58,7 @@ function updateSelection() {
                                      :key="card.id"
                                      :value="card.id"
                                      @change="updateSelection">
-                        {{ card.name }}
+                        {{ card.display_name }}
                     </b-form-checkbox>
                 </b-form-checkbox-group>
             </b-form-group>

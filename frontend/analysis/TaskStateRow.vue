@@ -136,16 +136,16 @@ watch(() => analysis.value, () => {
                 <b>Parameters:</b> {{ analysis.kwargs }}
             </div>
             <div v-if="analysis.task_state === 'su'">
-                <span><b>Created on:</b> {{ new Date(analysis.creation_time) }}
-                    &#8212; <b>Started at:</b> {{ new Date(analysis.start_time) }}
+                <span><b>Created on:</b> {{ new Date(analysis.creation_time).toLocaleString() }}
+                    &#8212; <b>Started at:</b> {{ new Date(analysis.start_time).toLocaleString() }}
                     &#8212; <b>Duration:</b> {{ Math.round(analysis.duration) }} seconds</span>
                 <span v-if="analysis.task_memory != null">
                     &#8212; <b>Peak memory usage:</b> {{ taskMemoryPretty }}
                 </span>
             </div>
             <div v-if="analysis.task_state === 'fa'">
-                This task was created on {{ new Date(analysis.creation_time) }},
-                started running {{ new Date(analysis.start_time) }}
+                This task was created on {{ new Date(analysis.creation_time).toLocaleString() }},
+                started running {{ new Date(analysis.start_time).toLocaleString() }}
                 but failed
                 <span v-if="_error != null">
                     with message: <i>{{ _error }}</i>
@@ -153,12 +153,12 @@ watch(() => analysis.value, () => {
                 <span v-if="_error == null">.</span>
             </div>
             <div v-if="analysis.task_state === 'pe'">
-                This task was created on {{ new Date(analysis.creation_time) }} and is
+                This task was created on {{ new Date(analysis.creation_time).toLocaleString() }} and is
                 currently waiting to be started.
             </div>
             <div v-if="analysis.task_state === 'st'">
-                This task was created on {{ new Date(analysis.creation_time) }}, started
-                {{ new Date(analysis.start_time) }}
+                This task was created on {{ new Date(analysis.creation_time).toLocaleString() }}, started
+                {{ new Date(analysis.start_time).toLocaleString() }}
                 and is currently running.
             </div>
         </td>
