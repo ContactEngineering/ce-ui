@@ -1,4 +1,5 @@
 import logging
+import json
 from html import unescape
 from io import BytesIO
 
@@ -21,14 +22,18 @@ from termsandconditions.models import TermsAndConditions
 from termsandconditions.views import AcceptTermsView
 from termsandconditions.views import TermsView as OrigTermsView
 from topobank.analysis.models import AnalysisFunction
-from topobank.analysis.registry import (get_analysis_function_names,
-                                        get_visualization_type)
+from topobank.analysis.registry import (
+    get_analysis_function_names,
+    get_visualization_type,
+)
 from topobank.manager.containers import write_surface_container
 from topobank.manager.models import Surface, Tag, Topography
-from topobank.manager.utils import subjects_from_base64
-from topobank.usage_stats.utils import (current_statistics,
-                                        increase_statistics_by_date,
-                                        increase_statistics_by_date_and_object)
+from topobank.manager.utils import get_reader_infos, subjects_from_base64
+from topobank.usage_stats.utils import (
+    current_statistics,
+    increase_statistics_by_date,
+    increase_statistics_by_date_and_object,
+)
 from topobank.users.models import User
 from trackstats.models import Metric, Period
 
@@ -301,6 +306,25 @@ class DataSetListView(TemplateView):
         return context
 
 
+class PublishView(TemplateView):
+    template_name = "publish/base.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["configured_for_doi_generation"] = (
+            "true" if settings.PUBLICATION_DOI_MANDATORY else "false"
+        )
+        context["user"] = json.dumps(
+            {
+                "firstName": self.request.user.first_name,
+                "lastName": self.request.user.last_name,
+                "orcidId": self.request.user.orcid_id,
+            }
+        )
+
+        return context
+
+
 class SurfaceDetailView(TemplateView):
     template_name = "manager/surface_detail.html"
 
@@ -342,7 +366,6 @@ class SurfaceSearchPaginator(PageNumberPagination):
     max_page_size = MAX_PAGE_SIZE
 
     def get_paginated_response(self, data):
-
         #
         # Save information about requested data in session
         #
