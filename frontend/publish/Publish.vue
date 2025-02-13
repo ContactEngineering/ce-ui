@@ -11,7 +11,7 @@ const props = defineProps({
   user: Object
 });
 
-const stage = ref(3);
+const stage = ref(1);
 
 </script>
 <template>
