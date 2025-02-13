@@ -1,10 +1,10 @@
 <script setup>
 import { ref, computed } from 'vue';
-import PublishStage1 from './Publish_stage_1.vue';
-import PublishStage2 from './Publish_stage_2.vue';
-import PublishStage3 from './Publish_stage_3.vue';
-import PublishStage4 from './Publish_stage_4.vue';
-import ProgessBar from './Publish_progess.vue';
+import PublishStage1 from './components/Publish_stage_1.vue';
+import PublishStage2 from './components/Publish_stage_2.vue';
+import PublishStage3 from './components/Publish_stage_3.vue';
+import PublishStage4 from './components/Publish_stage_4.vue';
+import ProgessBar from './components/Publish_progess.vue';
 
 const props = defineProps({
   configured_for_doi_generation: Boolean,
