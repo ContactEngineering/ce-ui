@@ -11,20 +11,39 @@ const emit = defineEmits(['back', 'continue'])
 
 const authors = ref(
   [
-    { firstName: "", lastName: "", orcidId: "" },
+    {
+      person:
+        { firstName: "", lastName: "", orcidId: "" },
+      affiliations: []
+    }
   ]);
 
-// TODO: Affiliations
-
-const valid = ref([{ firstName: null, lastName: null, orcidId: null }]);
+const valid = ref([{ person: { firstName: null, lastName: null, orcidId: null }, affiliations: [] }]);
 
 function fillAuthor(index) {
-  authors.value[index] = { ...props.user };
+  authors.value[index].person = { ...props.user };
 }
 
 function addAuthor() {
-  authors.value.push({ firstName: "", lastName: "", orcidId: "" });
-  valid.value.push({ firstName: null, lastName: null, orcidId: null });
+  authors.value.push(
+    {
+      person:
+        { firstName: "", lastName: "", orcidId: "" },
+      affiliations: []
+    }
+  );
+  valid.value.push({ person: { firstName: null, lastName: null, orcidId: null }, affiliations: [] });
+
+}
+
+function addAffiliation(index) {
+  authors.value[index].affiliations.push(
+    {
+      name: "",
+      rorId: ""
+    }
+  );
+  valid.value[index].affiliations.push({ name: null, rorId: null });
 }
 
 function removeAuthor(index) {
@@ -32,11 +51,24 @@ function removeAuthor(index) {
   valid.value.splice(index, 1);
 }
 
+function removeAffiliation(authorIndex, affiliationIndex) {
+  authors.value[authorIndex].affiliations.splice(affiliationIndex, 1);
+  valid.value[authorIndex].affiliations.splice(affiliationIndex, 1);
+}
+
 function moveAuthorUp(index) {
   if (index > 0) {
     const tmp = authors.value[index];
     authors.value[index] = authors.value[index - 1];
     authors.value[index - 1] = tmp;
+  }
+}
+
+function moveAffiliationUp(authorIndex, affiliationIndex) {
+  if (affiliationIndex > 0) {
+    const tmp = authors.value[authorIndex].affiliations[affiliationIndex];
+    authors.value[authorIndex].affiliations[affiliationIndex] = authors.value[authorIndex].affiliations[affiliationIndex - 1];
+    authors.value[authorIndex].affiliations[affiliationIndex - 1] = tmp;
   }
 }
 
@@ -49,14 +81,23 @@ function moveAuthorDown(index) {
   }
 }
 
+function moveAffiliationDown(authorIndex, affiliationIndex) {
+  if (affiliationIndex < authors.value[authorIndex].affiliations.length - 1) {
+    const tmp = authors.value[authorIndex].affiliations[affiliationIndex];
+    authors.value[authorIndex].affiliations[affiliationIndex] = authors.value[authorIndex].affiliations[affiliationIndex + 1];
+    authors.value[authorIndex].affiliations[affiliationIndex + 1] = tmp;
+  }
+}
+
+
 const orcidIdRegex = new RegExp("\\d{4}-\\d{4}-\\d{4}-\\d{4}");;
 function check_validity() {
   let is_valid = true;
   authors.value.forEach((author, index) => {
-    valid.value[index].firstName = author.firstName != "";
-    valid.value[index].lastName = author.lastName != "";
-    valid.value[index].orcidId = author.orcidId === "" || orcidIdRegex.test(author.orcidId);
-    is_valid = is_valid && valid.value[index].firstName && valid.value[index].lastName && valid.value[index].orcidId;
+    valid.value[index].person.firstName = author.person.firstName != "";
+    valid.value[index].person.lastName = author.person.lastName != "";
+    valid.value[index].person.orcidId = author.person.orcidId === "" || orcidIdRegex.test(author.person.orcidId);
+    is_valid = is_valid && valid.value[index].person.firstName && valid.value[index].person.lastName && valid.value[index].person.orcidId;
   })
   return is_valid;
 }
@@ -68,10 +109,10 @@ function nextStage() {
   emit('continue');
 }
 
-
 const authors_string = computed(() => {
-  return authors.value.map((author) => `${author.firstName} ${author.lastName}`).join(", ");
+  return authors.value.map((author) => `${author.person.firstName} ${author.person.lastName}`).join(", ");
 })
+
 </script>
 <template>
   <div v-if="props.stage == 1" class="mt-4">
@@ -100,58 +141,72 @@ const authors_string = computed(() => {
             <BButton v-if="index == 0" disabled>
               <i class="fa-solid fa-arrow-up"></i>
             </BButton>
-            <BButton v-else @click="moveAuthorUp(index)">
+            <BButton v-else @click="moveAuthorUp(index)" title="Move up">
               <i class="fa-solid fa-arrow-up"></i>
             </BButton>
             <BButton v-if="index == authors.length - 1" disabled>
               <i class="fa-solid fa-arrow-down"></i>
             </BButton>
-            <BButton v-else @click="moveAuthorDown(index)">
+            <BButton v-else @click="moveAuthorDown(index)" title="Move down">
               <i class="fa-solid fa-arrow-down"></i>
             </BButton>
           </BButtonGroup>
           <div class="d-flex flex-column">
             <span>First name*</span>
-            <BFormInput v-model="author.firstName" :state="valid[index].firstName"
+            <BFormInput v-model="author.person.firstName" :state="valid[index].person.firstName"
               aria-describedby="input-live-help input-live-feedback" placeholder="First name">
             </BFormInput>
           </div>
           <div class="d-flex flex-column">
             <span>Last name*</span>
-            <BFormInput v-model="author.lastName" :state="valid[index].lastName" placeholder="Last name">
+            <BFormInput v-model="author.person.lastName" :state="valid[index].person.lastName" placeholder="Last name">
             </BFormInput>
           </div>
           <div class="d-flex flex-column">
             <span>ORCID ID (optional)</span>
-            <BFormInput v-model="author.orcidId" :state="valid[index].orcidId" placeholder="xxxx-xxxx-xxxx-xxxx">
+            <BFormInput v-model="author.person.orcidId" :state="valid[index].person.orcidId"
+              placeholder="xxxx-xxxx-xxxx-xxxx">
             </BFormInput>
           </div>
         </div>
         <template #footer>
-          <h6 class="mb-0">Affiliations</h6>
-          <div class="d-flex flex-row justify-content-center align-items-end">
-            <BButtonGroup aria-label="Basic example" class="me-2">
-              <BButton variant="danger" title="Delete this author">
+          <h6 class="mb-0">{{ author.affiliations.length }} Affiliations</h6>
+          <div v-for="(affiliation, affiliation_index) in author.affiliations"
+            class="d-flex flex-row justify-content-center align-items-end mt-2">
+            <BButtonGroup class="me-2">
+              <BButton @click="removeAffiliation(index, affiliation_index)" variant="danger"
+                title="Delete this affiliation">
                 <i class="fa-solid fa-trash-can"></i>
               </BButton>
-              <BButton>
+              <BButton v-if="affiliation_index == 0" disabled>
                 <i class="fa-solid fa-arrow-up"></i>
               </BButton>
-              <BButton>
+              <BButton v-else @click="moveAffiliationUp(index, affiliation_index)">
+                <i class="fa-solid fa-arrow-up"></i>
+              </BButton>
+              <BButton v-if="affiliation_index == author.affiliations.length - 1" disabled>
+                <i class="fa-solid fa-arrow-down"></i>
+              </BButton>
+              <BButton v-else @click="moveAffiliationDown(index, affiliation_index)">
                 <i class="fa-solid fa-arrow-down"></i>
               </BButton>
             </BButtonGroup>
             <div class="d-flex flex-column me-2">
               <span>Affiliation name*</span>
-              <BFormInput placeholder="Name">
+              <BFormInput v-model="affiliation.name" placeholder="Name">
               </BFormInput>
             </div>
             <div class="d-flex flex-column">
               <span>ROR ID (optional)</span>
-              <BFormInput placeholder="0xxxxxxxx">
+              <BFormInput v-model="affiliation.rorId" placeholder="0xxxxxxxx">
               </BFormInput>
             </div>
           </div>
+
+          <BButton @click="addAffiliation(index)" variant="success" class="mt-2">
+            <i class="fa-solid fa-plus"></i>
+            One more affiliation
+          </BButton>
         </template>
       </BCard>
 
