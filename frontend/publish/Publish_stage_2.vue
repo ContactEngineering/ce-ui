@@ -14,6 +14,8 @@ const authors = ref(
     { firstName: "", lastName: "", orcidId: "" },
   ]);
 
+// TODO: Affiliations
+
 const valid = ref([{ firstName: null, lastName: null, orcidId: null }]);
 
 function fillAuthor(index) {
@@ -53,7 +55,7 @@ function check_validity() {
   authors.value.forEach((author, index) => {
     valid.value[index].firstName = author.firstName != "";
     valid.value[index].lastName = author.lastName != "";
-    valid.value[index].orcidId = orcidIdRegex.test(author.orcidId);
+    valid.value[index].orcidId = author.orcidId === "" || orcidIdRegex.test(author.orcidId);
     is_valid = is_valid && valid.value[index].firstName && valid.value[index].lastName && valid.value[index].orcidId;
   })
   return is_valid;
@@ -101,9 +103,8 @@ const authors_string = computed(() => {
             <BButton v-else @click="moveAuthorUp(index)">
               <i class="fa-solid fa-arrow-up"></i>
             </BButton>
-
             <BButton v-if="index == authors.length - 1" disabled>
-              <i class="fa-solid fa-arrow-up"></i>
+              <i class="fa-solid fa-arrow-down"></i>
             </BButton>
             <BButton v-else @click="moveAuthorDown(index)">
               <i class="fa-solid fa-arrow-down"></i>
@@ -164,7 +165,7 @@ const authors_string = computed(() => {
       <BButton @click="$emit('back')" variant="primary" size="lg">
         Back
       </BButton>
-      <BButton @click="nextStage()" variant="primary" size="lg">
+      <BButton @click="nextStage()" variant="primary">
         Continue
       </BButton>
     </div>
