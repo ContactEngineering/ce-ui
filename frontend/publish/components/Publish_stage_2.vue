@@ -90,14 +90,20 @@ function moveAffiliationDown(authorIndex, affiliationIndex) {
 }
 
 
-const orcidIdRegex = new RegExp("\\d{4}-\\d{4}-\\d{4}-\\d{4}");;
+const orcidIdRegex = new RegExp("^\\d{4}-\\d{4}-\\d{4}-\\d{4}$");
+const rorIdRegex = new RegExp("^0[a-z|0-9]{6}[0-9]{2}$");
 function check_validity() {
   let is_valid = true;
   authors.value.forEach((author, index) => {
     valid.value[index].person.firstName = author.person.firstName != "";
     valid.value[index].person.lastName = author.person.lastName != "";
     valid.value[index].person.orcidId = author.person.orcidId === "" || orcidIdRegex.test(author.person.orcidId);
-    is_valid = is_valid && valid.value[index].person.firstName && valid.value[index].person.lastName && valid.value[index].person.orcidId;
+    author.affiliations.forEach((affiliation, affIndex) => {
+      valid.value[index].affiliations[affIndex].name = affiliation.name != "";
+      valid.value[index].affiliations[affIndex].rorId = affiliation.rorId === "" || rorIdRegex.test(affiliation.rorId);
+    });
+    console.log(valid.value[index].affiliations)
+    is_valid = is_valid && Object.values(valid.value[index].person).every((x) => x) && valid.value[index].affiliations.every((affiliation) => Object.values(affiliation).every((x) => x))
   })
   return is_valid;
 }
@@ -193,12 +199,14 @@ const authors_string = computed(() => {
             </BButtonGroup>
             <div class="d-flex flex-column me-2">
               <span>Affiliation name*</span>
-              <BFormInput v-model="affiliation.name" placeholder="Name">
+              <BFormInput v-model="affiliation.name" :state="valid[index].affiliations[affiliation_index].name"
+                placeholder="Name">
               </BFormInput>
             </div>
             <div class="d-flex flex-column">
               <span>ROR ID (optional)</span>
-              <BFormInput v-model="affiliation.rorId" placeholder="0xxxxxxxx">
+              <BFormInput v-model="affiliation.rorId" :state="valid[index].affiliations[affiliation_index].rorId"
+                placeholder="0xxxxxxxx">
               </BFormInput>
             </div>
           </div>
