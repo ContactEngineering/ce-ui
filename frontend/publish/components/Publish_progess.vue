@@ -27,7 +27,7 @@ const stages = [
   <h3>Publish</h3>
   <div id="progress" class="d-flex flex-row justify-content-center">
     <div v-for="stage in [0, 1, 2, 3]" class="d-flex flex-row align-items-center">
-      <div class="position-relative"
+      <div class="position-relative" style="transition-property: color; transition-delay: 1s;"
         :class="stage < props.stage ? 'text-success' : (stage == props.stage ? 'text-primary' : 'text-muted')">
         <span class="fa-stack fa-lg">
           <i class="fa-regular fa-circle fa-stack-2x"></i>
@@ -38,8 +38,12 @@ const stages = [
         </span>
       </div>
 
-      <div v-if="stage != 3" :class="props.stage > stage ? 'bg-success' : 'bg-secondary'"
-        style="width:105px; height: 10px;"> </div>
+      <div v-if="stage != 3" class="bg-success" :style="{ width: stage < props.stage ? '120px' : '0px' }"
+        style="height: 10px; transition: width 1s ease-in-out;">
+      </div>
+      <div v-if="stage != 3" class="bg-secondary" :style="{ width: stage < props.stage ? '0' : '120px' }"
+        style="height: 10px; transition: width 1s ease-in-out;">
+      </div>
     </div>
   </div>
 </template>
