@@ -2,13 +2,16 @@ import logging
 from html import unescape
 from io import BytesIO
 
+from allauth.account.views import EmailView
 from django.contrib.auth import get_user_model
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q, Subquery, TextField, Value
 from django.db.models.functions import Replace
 from django.http import HttpResponse
 from django.urls import reverse
-from django.views.generic import DetailView, TemplateView
+from django.views.generic import (DetailView, ListView, RedirectView,
+                                  TemplateView, UpdateView)
 from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.pagination import PageNumberPagination
@@ -480,7 +483,7 @@ def _selection_set(request):
 
 
 def _surface_key(
-    pk,
+        pk,
 ):  # TODO use such a function everywhere: instance_key_for_selection()
     return "surface-{}".format(pk)
 
@@ -924,8 +927,8 @@ class TermsView(TemplateView):
             context["not_agreed_terms"] = active_terms.filter(
                 Q(userterms=None)
                 | (
-                    Q(userterms__date_accepted__isnull=True)
-                    & Q(userterms__user=self.request.user)
+                        Q(userterms__date_accepted__isnull=True)
+                        & Q(userterms__user=self.request.user)
                 )
             ).order_by("date_created")
 
@@ -992,3 +995,97 @@ class TermsDetailView(TabbedTermsMixin, OrigTermsView):
 
 class TermsAcceptView(TabbedTermsMixin, AcceptTermsView):
     pass
+
+
+class TabbedEmailView(EmailView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['extra_tabs'] = [
+            {
+                'title': "User profile",
+                'icon': "user",
+                'href': reverse('users:detail', kwargs=dict(username=self.request.user.username)),
+                'active': False
+            },
+            {
+                'title': "Edit e-mail addresses",
+                'icon': "edit",
+                'href': self.request.path,
+                'active': True
+            }
+        ]
+        return context
+
+
+class UserDetailView(LoginRequiredMixin, DetailView):
+    model = User
+    # These next two lines tell the view to index lookups by username
+    slug_field = "username"
+    slug_url_kwarg = "username"
+
+    def dispatch(self, request, *args, **kwargs):
+        # FIXME! Raise permission denied error if the two users have no shared datasets
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["extra_tabs"] = [
+            {
+                "title": "User profile",
+                "icon": "user",
+                "href": self.request.path,
+                "active": True,
+                "login_required": False,
+            }
+        ]
+        return context
+
+
+class UserRedirectView(LoginRequiredMixin, RedirectView):
+    permanent = False
+
+    def get_redirect_url(self):
+        return reverse("users:detail", kwargs={"username": self.request.user.username})
+
+
+class UserUpdateView(LoginRequiredMixin, UpdateView):
+    fields = ["name"]
+
+    # we already imported User in the view code above, remember?
+    model = User
+
+    # send the user back to their own page after a successful update
+
+    def get_success_url(self):
+        return reverse("users:detail", kwargs={"username": self.request.user.username})
+
+    def get_object(self, queryset=None):
+        # Only get the User record for the user making the request
+        return User.objects.get(username=self.request.user.username)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["extra_tabs"] = [
+            {
+                "title": "User Profile",
+                "icon": "user",
+                "href": reverse(
+                    "users:detail", kwargs=dict(username=self.request.user.username)
+                ),
+                "active": False,
+            },
+            {
+                "title": "Update user",
+                "icon": "edit",
+                "href": self.request.path,
+                "active": True,
+            },
+        ]
+        return context
+
+
+class UserListView(LoginRequiredMixin, ListView):
+    model = User
+    # These next two lines tell the view to index lookups by username
+    slug_field = "username"
+    slug_url_kwarg = "username"

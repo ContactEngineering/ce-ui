@@ -1,6 +1,6 @@
 from django.conf import settings
-from django.urls import include, re_path, path
-from django.views.generic import TemplateView, RedirectView
+from django.urls import include, path, re_path
+from django.views.generic import RedirectView, TemplateView
 
 from . import views
 
@@ -68,6 +68,20 @@ urlpatterns = [
 # Routes under the 'ui/' prefix
 #
 ui_urlpatterns = [
+    #
+    # User management
+    #
+    # path("", view=views.UserListView.as_view(), name="list"),
+    path("html/user-redirect/", view=views.UserRedirectView.as_view(), name="redirect"),
+    path("html/user-update/", view=views.UserUpdateView.as_view(), name="update"),
+    path(
+        "html/user/<str:username>/",
+        view=views.UserDetailView.as_view(),
+        name="detail",
+    ),
+    path(
+        "html/user-email/", views.TabbedEmailView.as_view(), name="account_email"
+    ),  # same as allauth.accounts.email.EmailView, but with tab data
     #
     # HTML routes
     #
