@@ -42,7 +42,6 @@ let inventory = null;
 // GUI logic
 const _openSeadragonElement = ref(null);
 const _isLoaded = ref(false);
-const _colorbar = ref(null);
 const _colorbarTitle = ref(null);
 const _colorbarTicks = ref([]);
 const _colormap = ref(null);
@@ -155,7 +154,7 @@ function requestDzi() {
             }
 
             // Configure color bar
-            if (_colorbar.value && meta.Image.ColorbarRange && meta.Image.ColorbarTitle && meta.Image.Colormap) {
+            if (props.colorbar && meta.Image.ColorbarRange && meta.Image.ColorbarTitle && meta.Image.Colormap) {
                 // Set title and colormap
                 _colorbarTitle.value = meta.Image.ColorbarTitle;
                 _colormap.value = meta.Image.Colormap;
@@ -269,7 +268,7 @@ defineExpose({
                 Could not load plot data. Error: {{ _errorMessage }}
             </div>
         </div>
-        <div v-if="_colorbar && _isLoaded" class="dzi-colorbar">
+        <div v-if="colorbar && _isLoaded" class="dzi-colorbar">
             <div class="dzi-colorbar-title">
                 {{ _colorbarTitle }}
             </div>
