@@ -319,17 +319,17 @@ const allSelected = computed({
                         </topography-properties-card>
                         <div v-if="isEditable && _topographies.length > 0" class="d-flex mb-1">
                             <BCard>
-                                <b-form-checkbox size="sm" :indeterminate="someSelected" v-model="allSelected">
+                                <BFormCheckbox size="sm" :indeterminate="someSelected" v-model="allSelected">
                                     Select all
-                                </b-form-checkbox>
+                                </BFormCheckbox>
                             </BCard>
                         </div>
                         <div v-for="(topography, index) in _topographies">
-                            <topography-card v-if="topography != null" :selectable="isEditable"
+                            <TopographyCard v-if="topography != null" :selectable="isEditable"
                                 :topography-url="topography.url" :disabled="!isEditable"
                                 @delete:topography="() => deleteTopography(index)"
                                 v-model:topography="_topographies[index]" v-model:selected="_selected[index]">
-                            </topography-card>
+                            </TopographyCard>
                         </div>
                     </BTab>
                     <BTab title="Bandwidths">

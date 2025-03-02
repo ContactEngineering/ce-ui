@@ -17,6 +17,7 @@ import {uploadFile} from "topobank/utils/upload";
 const {show} = useToastController();
 
 const emit = defineEmits([
+    'delete:topography',
     'update:topography'
 ]);
 
@@ -66,7 +67,7 @@ onMounted(() => {
 
 function deleteTopography() {
     axios.delete(props.topography.url);
-    this.$emit('delete:topography', props.topography.url);
+    emit('delete:topography', props.topography.url);
 }
 
 </script>
@@ -87,12 +88,11 @@ function deleteTopography() {
         </template>
         <div v-if="_error != null">
             <b>Upload failed:</b> {{ _error.message }}
-            ({{ _error.response.statusText }})
         </div>
-        <b-progress v-if="_error == null"
+        <BProgress v-if="_error == null"
                     show-progress animated
                     :value="_loaded"
                     :max="_total">
-        </b-progress>
+        </BProgress>
     </BCard>
 </template>

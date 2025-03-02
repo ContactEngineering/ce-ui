@@ -1,7 +1,7 @@
 <script setup>
 
 import axios from "axios";
-import {computed, onMounted, ref, watch} from "vue";
+import {computed, onMounted} from "vue";
 
 import TopographyErrorCard from "./TopographyErrorCard.vue";
 import TopographyPendingCard from "./TopographyPendingCard.vue";
@@ -100,26 +100,27 @@ const selectedModel = computed({
 </script>
 
 <template>
-    <topography-upload-card
+    <TopographyUploadCard
         v-if="topography !== null && isUploading"
+        @delete:topography="topographyDeleted"
         v-model:topography="topographyModel">
-    </topography-upload-card>
-    <topography-pending-card
+    </TopographyUploadCard>
+    <TopographyPendingCard
         v-if="topography !== null && !isUploading && topography.task_state !== 'su' && topography.task_state !== 'fa'"
         :url="topographyUrl"
         :name="topography.name"
         :task-state="topography.task_state"
         @delete:topography="topographyDeleted"
         v-model:topography="topographyModel">
-    </topography-pending-card>
-    <topography-error-card
+    </TopographyPendingCard>
+    <TopographyErrorCard
         v-if="topography !== null && !isUploading && topography.task_state === 'fa'"
         :topography-url="topographyUrl"
         :topography="topography"
         @delete:topography="topographyDeleted"
         v-model:topography="topographyModel">
-    </topography-error-card>
-    <topography-properties-card
+    </TopographyErrorCard>
+    <TopographyPropertiesCard
         v-if="topography !== null && !isUploading && topography.task_state === 'su'"
         :topography-url="topographyUrl"
         :topography="topography"
@@ -129,5 +130,5 @@ const selectedModel = computed({
         @delete:topography="topographyDeleted"
         v-model:topography="topographyModel"
         v-model:selected="selectedModel">
-    </topography-properties-card>
+    </TopographyPropertiesCard>
 </template>
