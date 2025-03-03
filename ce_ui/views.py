@@ -216,13 +216,21 @@ class TopographyDetailView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        #
         # Get surface instance
+        #
         topography_id = self.request.GET.get("topography")
         if topography_id is None:
             return context
         try:
             topography = Topography.objects.get(id=int(topography_id))
         except (ValueError, Topography.DoesNotExist):
+            raise PermissionDenied()
+
+        #
+        # Check permissions
+        #
+        if not topography.has_permission(self.request.user, "view"):
             raise PermissionDenied()
 
         #
@@ -299,7 +307,9 @@ class SurfaceDetailView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        #
         # Get surface instance
+        #
         surface_id = self.request.GET.get("surface")
         if surface_id is None:
             return context
@@ -308,6 +318,15 @@ class SurfaceDetailView(TemplateView):
         except (ValueError, Surface.DoesNotExist):
             raise PermissionDenied()
 
+        #
+        # Check permissions
+        #
+        if not surface.has_permission(self.request.user, "view"):
+            raise PermissionDenied()
+
+        #
+        # Breadcrumb navigation
+        #
         breadcrumb.add_surface(context, surface)
 
         return context

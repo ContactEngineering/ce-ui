@@ -1,5 +1,12 @@
 # Changelog for plugin *ce-ui*
 
+## 1.11.0 (2025-03-03)
+
+- ENH: Quickly switching to next measurement/topography (#94)
+- BUG: Fixed measurement/topography download (#89)
+- BUG: Don't leak DST name in 403 error (#75)
+- BUG: Proper error message when DST is not accessible (#93)
+
 ## 1.10.1 (2025-02-11)
 
 - BUG: Fix DOI badge

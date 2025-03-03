@@ -1,7 +1,16 @@
-{% block title %}Forbidden (403){% endblock %}
+{% extends 'base.html' %}
 
 {% block content %}
-<h1>Forbidden (403)</h1>
-
-<p>CSRF verification failed. Request aborted.</p>
+    <div class="container d-flex justify-content-center align-items-center h-100">
+        <div class="card bg-warning w-50">
+            <h3 class="card-header">
+                Forbidden (403)
+            </h3>
+            <div class="card-body">
+                <div class="alert alert-warning" role="alert">
+                    CSRF verification failed.
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock content %}

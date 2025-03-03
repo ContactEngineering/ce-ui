@@ -1,10 +1,17 @@
-{% extends "base.html" %}
-
-{% block title %}Page not found{% endblock %}
+{% extends 'base.html' %}
 
 {% block content %}
-<h1>Page not found</h1>
-
-<p>This is not the page you were looking for.
-  Maybe the URL is no longer valid because some resources have been deleted.</p>
+    <div class="container d-flex justify-content-center align-items-center h-100">
+        <div class="card bg-warning w-50">
+            <h3 class="card-header">
+                Not Found (404)
+            </h3>
+            <div class="card-body">
+                <div class="alert alert-warning" role="alert">
+                    This is not the page you were looking for.
+                    Maybe the URL is no longer valid because some resources have been deleted.
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock content %}

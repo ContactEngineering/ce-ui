@@ -2,7 +2,6 @@ import json
 
 from django.conf import settings
 from django.shortcuts import reverse
-
 from topobank.supplib.versions import get_versions
 
 from .utils import current_selection_as_basket_items
@@ -51,8 +50,8 @@ def fixed_tabs_processor(request):
     tabs += [{
         'login_required': False,
         'title': 'Datasets',
-        'icon': 'check-square',
-        'icon_style_prefix': 'far',
+        'icon': 'table-list',
+        'icon_style_prefix': 'fa',
         'href': SELECT_URL,
         'active': request.path == SELECT_URL,
         'tooltip': "Select surfaces and topographies for analysis or create new surfaces",
@@ -61,7 +60,7 @@ def fixed_tabs_processor(request):
 
     # Add default value for icon_style_prefix if missing
     for tab in tabs:
-        tab.setdefault('icon_style_prefix', 'fas')
+        tab.setdefault('icon_style_prefix', 'fa')
 
     return dict(fixed_tabs=tabs)
 
