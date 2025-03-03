@@ -272,7 +272,7 @@ const hasThumbnail = computed(() => props.topography.thumbnail != null && props.
                 </BButton>
                 <BButton v-if="!enlarged && !selected"
                          variant="outline-secondary"
-                         :href="topography.datafile">
+                         :href="topography.datafile.file">
                     <i class="fa fa-download"></i>
                 </BButton>
                 <BButton v-if="!disabled && selected"

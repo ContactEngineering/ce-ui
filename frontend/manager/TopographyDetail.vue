@@ -114,7 +114,7 @@ const base64Subjects = computed(() => {
                             Analyze
                         </a>
 
-                        <a :href="_topography.datafile"
+                        <a :href="_topography.datafile.file"
                            class="btn btn-outline-secondary mb-2">
                             Download
                         </a>
