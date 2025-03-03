@@ -495,29 +495,6 @@ def get_search_term(request) -> str:
     return search_term.strip()
 
 
-def get_category(request) -> str:
-    """Extract a surface category from given request.
-
-    Parameters
-    ----------
-    request
-
-    Returns
-    -------
-    String with requested category.
-
-    Raises
-    ------
-    PermissionDenied() if an unknown category was given.
-    """
-    from .views import CATEGORY_FILTER_CHOICES
-
-    category = request.GET.get("category", default="all")
-    if category not in CATEGORY_FILTER_CHOICES.keys():
-        raise PermissionDenied()
-    return category
-
-
 def get_order_by(request) -> str:
     """Extract sort by from given request.
     Parameters

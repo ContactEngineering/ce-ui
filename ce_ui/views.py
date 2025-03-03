@@ -37,16 +37,10 @@ from ce_ui import breadcrumb
 from .serializers import SurfaceSearchSerializer, TagSearchSerizalizer
 from .utils import (current_selection_as_basket_items,
                     filter_queryset_by_search_term, filtered_topographies,
-                    get_category, get_order_by, get_search_term,
-                    get_sharing_status, get_tree_mode, instances_to_selection,
-                    selected_instances, selection_to_subjects_dict,
-                    tags_for_user)
+                    get_order_by, get_search_term, get_sharing_status,
+                    get_tree_mode, instances_to_selection, selected_instances,
+                    selection_to_subjects_dict, tags_for_user)
 
-# create dicts with labels and option values for Select tab
-CATEGORY_FILTER_CHOICES = {
-    "all": "All categories",
-    **{cc[0]: cc[1] + " only" for cc in Surface.CATEGORY_CHOICES},
-}
 ORDER_BY_CHOICES = {"name": "name", "-creation_datetime": "date"}
 SHARING_STATUS_FILTER_CHOICES = {
     "all": "All accessible datasets",
@@ -61,7 +55,6 @@ DEFAULT_PAGE_SIZE = 10
 
 DEFAULT_SELECT_TAB_STATE = {
     "search_term": "",  # empty string means: no search
-    "category": "all",
     "order_by": "-creation_datetime",
     "sharing_status": "all",
     "tree_mode": "surface list",
@@ -81,7 +74,7 @@ def filtered_surfaces(request):
 
     Surfaces should be
     - readable by the current user
-    - filtered by category and sharing status
+    - filtered by sharing status
     - filtered by search expression, if given
 
     Parameters
@@ -99,12 +92,8 @@ def filtered_surfaces(request):
     qs = Surface.objects.for_user(user)
 
     #
-    # Filter by category and sharing status
+    # Filter by sharing status
     #
-    category = get_category(request)
-    if category != "all":
-        qs = qs.filter(category=category)
-
     sharing_status = get_sharing_status(request)
     if sharing_status == "own":
         qs = qs.filter(creator=user)
@@ -281,7 +270,6 @@ class DataSetListView(TemplateView):
             "tag tree": self.request.build_absolute_uri(reverse("ce_ui:tag-list")),
         }
 
-        context["category_filter_choices"] = CATEGORY_FILTER_CHOICES.copy()
         context["order_by_filter_choices"] = ORDER_BY_CHOICES.copy()
 
         if self.request.user.is_anonymous:
@@ -350,7 +338,6 @@ class SurfaceSearchPaginator(PageNumberPagination):
         # as second parameter.
 
         select_tab_state["search_term"] = get_search_term(self.request)
-        select_tab_state["category"] = get_category(self.request)
         select_tab_state["order_by"] = get_order_by(self.request)
         select_tab_state["sharing_status"] = get_sharing_status(self.request)
         select_tab_state["tree_mode"] = get_tree_mode(self.request)
@@ -370,7 +357,6 @@ class SurfaceSearchPaginator(PageNumberPagination):
                 "num_items_on_current_page": len(self.page.object_list),
                 "page_size": page_size,
                 "search_term": select_tab_state["search_term"],
-                "category": select_tab_state["category"],
                 "order_by": select_tab_state["order_by"],
                 "sharing_status": select_tab_state["sharing_status"],
                 "tree_mode": select_tab_state["tree_mode"],
@@ -457,7 +443,7 @@ def _selection_set(request):
 
 
 def _surface_key(
-        pk,
+    pk,
 ):  # TODO use such a function everywhere: instance_key_for_selection()
     return "surface-{}".format(pk)
 
@@ -764,9 +750,7 @@ class AnalysisResultDetailView(DetailView):
         )
 
         # get analysis result type
-        visualization_type = get_visualization_type(
-            name=function.name
-        )
+        visualization_type = get_visualization_type(name=function.name)
 
         context["function"] = function
         context["visualization_type"] = visualization_type
@@ -901,8 +885,8 @@ class TermsView(TemplateView):
             context["not_agreed_terms"] = active_terms.filter(
                 Q(userterms=None)
                 | (
-                        Q(userterms__date_accepted__isnull=True)
-                        & Q(userterms__user=self.request.user)
+                    Q(userterms__date_accepted__isnull=True)
+                    & Q(userterms__user=self.request.user)
                 )
             ).order_by("date_created")
 
@@ -974,19 +958,21 @@ class TermsAcceptView(TabbedTermsMixin, AcceptTermsView):
 class TabbedEmailView(EmailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['extra_tabs'] = [
+        context["extra_tabs"] = [
             {
-                'title': "User profile",
-                'icon': "user",
-                'href': reverse('users:detail', kwargs=dict(username=self.request.user.username)),
-                'active': False
+                "title": "User profile",
+                "icon": "user",
+                "href": reverse(
+                    "users:detail", kwargs=dict(username=self.request.user.username)
+                ),
+                "active": False,
             },
             {
-                'title': "Edit e-mail addresses",
-                'icon': "edit",
-                'href': self.request.path,
-                'active': True
-            }
+                "title": "Edit e-mail addresses",
+                "icon": "edit",
+                "href": self.request.path,
+                "active": True,
+            },
         ]
         return context
 
