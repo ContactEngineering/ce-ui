@@ -302,22 +302,22 @@ const allSelected = computed({
             <drop-zone v-if="isEditable && !anySelected"
                        @files-dropped="filesDropped">
             </drop-zone>
-            <topography-properties-card v-if="anySelected" :batch-edit="true" :saving="_saving"
-                                        v-model:topography="_batchEditTopography" @save:edit="saveBatchEdit"
+            <topography-properties-card v-if="anySelected" v-model:topography="_batchEditTopography" :batch-edit="true"
+                                        :saving="_saving" @save:edit="saveBatchEdit"
                                         @discard:edit="discardBatchEdit">
             </topography-properties-card>
             <div v-if="isEditable && _topographies.length > 0" class="d-flex mb-1">
               <BCard>
-                <BFormCheckbox size="sm" :indeterminate="someSelected" v-model="allSelected">
+                <BFormCheckbox v-model="allSelected" :indeterminate="someSelected" size="sm">
                   Select all
                 </BFormCheckbox>
               </BCard>
             </div>
             <div v-for="(topography, index) in _topographies">
-              <TopographyCard v-if="topography != null" :selectable="isEditable"
-                              :topography-url="topography.url" :disabled="!isEditable"
-                              @delete:topography="() => deleteTopography(index)"
-                              v-model:topography="_topographies[index]" v-model:selected="_selected[index]">
+              <TopographyCard v-if="topography != null" v-model:selected="_selected[index]"
+                              v-model:topography="_topographies[index]" :disabled="!isEditable"
+                              :selectable="isEditable"
+                              :topography-url="topography.url" @delete:topography="() => deleteTopography(index)">
               </TopographyCard>
             </div>
           </BTab>
@@ -347,18 +347,18 @@ const allSelected = computed({
           </BTab>
           <BTab title="Description">
             <SurfaceDescription v-if="_surface != null"
-                                :surface-url="_surface.url"
-                                :name="_surface.name"
                                 :description="_surface.description"
-                                :tags="_surface.tags"
-                                :permission="_permissions.current_user.permission">
+                                :name="_surface.name"
+                                :permission="_permissions.current_user.permission"
+                                :surface-url="_surface.url"
+                                :tags="_surface.tags">
             </SurfaceDescription>
           </BTab>
           <BTab title="Properties">
             <SurfaceProperties v-if="_surface != null"
                                v-model:properties="_surface.properties"
-                               :surface-url="_surface.url"
-                               :permission="_permissions.current_user.permission">
+                               :permission="_permissions.current_user.permission"
+                               :surface-url="_surface.url">
             </SurfaceProperties>
           </BTab>
           <BTab title="Attachments">
@@ -370,8 +370,8 @@ const allSelected = computed({
           <BTab v-if="_surface != null"
                 title="Permissions">
             <SurfacePermissions v-if="_surface.publication == null"
-                                :set-permissions-url="_surface.api.set_permissions"
-                                v-model:permissions="_permissions">
+                                v-model:permissions="_permissions"
+                                :set-permissions-url="_surface.api.set_permissions">
             </SurfacePermissions>
             <BCard v-if="_surface.publication != null" class="w-100">
               <template #header>
@@ -416,16 +416,12 @@ const allSelected = computed({
                   </b-accordion-item>
                   <b-accordion-item title="BibTeX">
                     <code>
-                                            <pre>{{
-                                                _publication.citation.bibtex
-                                              }}</pre>
+                      <pre>{{ _publication.citation.bibtex }}</pre>
                     </code>
                   </b-accordion-item>
                   <b-accordion-item title="BibLaTeX">
                     <code>
-                                            <pre>{{
-                                                _publication.citation.biblatex
-                                              }}</pre>
+                      <pre>{{ _publication.citation.biblatex }}</pre>
                     </code>
                   </b-accordion-item>
                 </b-accordion>
@@ -447,8 +443,8 @@ const allSelected = computed({
               Publish
             </a>
 
-            <a v-if="_versions == null || _versions.length === 0" href="#"
-               class="btn btn-outline-secondary mb-2" @click="_showDeleteModal = true">
+            <a v-if="_versions == null || _versions.length === 0" class="btn btn-outline-secondary mb-2"
+               href="#" @click="_showDeleteModal = true">
               Delete
             </a>
             <div
@@ -457,32 +453,32 @@ const allSelected = computed({
               <hr/>
               <div class="card-body">
                 <div v-if="_publication != null">
-                                    <span class="badge bg-info">
-                                        Published by {{ _publication.publisher.name }}
-                                    </span>
+                  <span class="badge bg-info">
+                      Published by {{ _publication.publisher.name }}
+                  </span>
                 </div>
                 <div>
-                                    <span v-for="tag in _surface.tags" class="badge bg-success">
-                                        {{ tag.name }}
-                                    </span>
+                  <span v-for="tag in _surface.tags" class="badge bg-success">
+                      {{ tag.name }}
+                  </span>
                 </div>
                 <b-dropdown
                     v-if="_versions == null || _versions.length > 0"
+                    :text="versionString"
                     class="mt-2"
-                    variant="info"
-                    :text="versionString">
+                    variant="info">
                   <b-dropdown-item
                       v-if="_publication == null || _publication.has_access_to_original_surface"
-                      :href="hrefOriginalSurface" :disabled="_publication == null">
+                      :disabled="_publication == null" :href="hrefOriginalSurface">
                     Work in progress
                   </b-dropdown-item>
                   <b-dropdown-item v-if="_versions == null">
                     <b-spinner small/>
                     Loading versions...
                   </b-dropdown-item>
-                  <b-dropdown-item v-if="_versions != null" v-for="version in _versions"
-                                   :href="surfaceHrefForVersion(version)"
-                                   :disabled="_publication != null && _publication.version === version.version">
+                  <b-dropdown-item v-for="version in _versions" v-if="_versions != null"
+                                   :disabled="_publication != null && _publication.version === version.version"
+                                   :href="surfaceHrefForVersion(version)">
                     Version {{ version.version }}
                   </b-dropdown-item>
                 </b-dropdown>
@@ -495,8 +491,8 @@ const allSelected = computed({
   </div>
   <b-modal v-if="_surface != null"
            v-model="_showDeleteModal"
-           @ok="deleteSurface"
-           title="Delete digital surface twin">
+           title="Delete digital surface twin"
+           @ok="deleteSurface">
     You are about to delete the digital surface twin with name <b>{{
       _surface.name
     }}</b> and all contained

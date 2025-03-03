@@ -495,11 +495,9 @@ function createSurface() {
     </table>
   </div>
   <div>
-        <span v-if="!_isLoading">
-            Showing {{ _numItemsOnCurrentPage }} {{ _treeModeInfos[_treeMode].element_kind }} out of {{
-            _numItems
-          }}.
-            {{ _treeModeInfos[_treeMode].hint }}
-        </span>
+    <span v-if="!_isLoading">
+        Showing {{ _numItemsOnCurrentPage }} {{ _treeModeInfos[_treeMode].element_kind }} out of {{ _numItems }}.
+        {{ _treeModeInfos[_treeMode].hint }}
+    </span>
   </div>
 </template>
