@@ -32,6 +32,8 @@ from topobank.usage_stats.utils import (current_statistics,
 from topobank.users.models import User
 from trackstats.models import Metric, Period
 
+from ce_ui import breadcrumb
+
 from .serializers import SurfaceSearchSerializer, TagSearchSerizalizer
 from .utils import (current_selection_as_basket_items,
                     filter_queryset_by_search_term, filtered_topographies,
@@ -235,28 +237,10 @@ class TopographyDetailView(TemplateView):
             raise PermissionDenied()
 
         #
-        # Add context needed for tabs
+        # Breadcrumb navigation
         #
-        context["extra_tabs"] = [
-            {
-                "title": f"{topography.surface.label}",
-                "icon": "gem",
-                "icon_style_prefix": "far",
-                "href": f"{reverse('ce_ui:surface-detail')}?surface={topography.surface.pk}",
-                "active": False,
-                "login_required": False,
-                "tooltip": f"Properties of surface '{topography.surface.label}'",
-            },
-            {
-                "title": f"{topography.name}",
-                "icon": "file",
-                "icon_style_prefix": "far",
-                "href": self.request.path,
-                "active": True,
-                "login_required": False,
-                "tooltip": f"Properties of topography '{topography.name}'",
-            },
-        ]
+        breadcrumb.add_surface(context, topography.surface)
+        breadcrumb.add_topography(context, topography)
 
         return context
 
@@ -336,17 +320,7 @@ class SurfaceDetailView(TemplateView):
         except (ValueError, Surface.DoesNotExist):
             raise PermissionDenied()
 
-        context["extra_tabs"] = [
-            {
-                "title": f"{surface.label}",
-                "icon": "gem",
-                "icon_style_prefix": "far",
-                "href": f"{reverse('ce_ui:surface-detail')}?surface={surface.pk}",
-                "active": True,
-                "login_required": False,
-                "tooltip": f"Properties of surface '{surface.label}'",
-            }
-        ]
+        breadcrumb.add_surface(context, surface)
 
         return context
 
