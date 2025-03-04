@@ -1,6 +1,11 @@
 # Changelog for plugin *ce-ui*
 
-## 1.11.1 (2025-03-03)
+## 1.11.2 (2025-03-04)
+
+- BUG: Select data channel if parsing file fails for a specific channel
+- BUG: Show properties to the right of, not below, the thumbnail
+
+## 1.11.1 (2025-03-04)
 
 - MAINT: Show messages as toasts
 - MAINT: Show errors as toasts
