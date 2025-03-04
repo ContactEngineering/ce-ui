@@ -138,7 +138,7 @@ watch(() => analysis.value, () => {
             <div v-if="analysis.task_state === 'su'">
                 <span><b>Created on:</b> {{ new Date(analysis.creation_time).toLocaleString() }}
                     &#8212; <b>Started at:</b> {{ new Date(analysis.start_time).toLocaleString() }}
-                    &#8212; <b>Duration:</b> {{ Math.round(analysis.duration) }} seconds</span>
+                    &#8212; <b>Duration:</b> {{ analysis.duration }}</span>
                 <span v-if="analysis.task_memory != null">
                     &#8212; <b>Peak memory usage:</b> {{ taskMemoryPretty }}
                 </span>
