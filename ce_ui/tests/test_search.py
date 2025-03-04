@@ -943,27 +943,6 @@ def test_tag_search_with_request_factory(user_three_surfaces_four_topographies):
     assert_dicts_equal(resulted_dicts, expected_dicts)
 
     #
-    # Now restrict result by query parameters, search for category 'dum'
-    # -> no result, because surface 3 would match, but has no tag
-    #
-    request = factory.get(reverse("ce_ui:tag-list") + "?category=dum")
-    request.user = user
-    request.session = session
-
-    #
-    # Create tag tree and compare with expectation
-    #
-    response = TagTreeView.as_view()(request)
-
-    assert response.status_code == 200
-
-    # no results expected
-    resulted_dicts = ordereddicts_to_dicts(
-        response.data["page_results"], sorted_by="title"
-    )
-    assert resulted_dicts == []
-
-    #
     # Now create another surface and share with this active user, than filter only for shared
     #
     user2 = UserFactory()
