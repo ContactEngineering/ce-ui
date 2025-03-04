@@ -6,12 +6,12 @@ import {computed, onMounted, ref} from "vue";
 
 import {
     BButton,
-    BButtonGroup,
     BButtonToolbar,
     BFormGroup,
+    BFormInput,
     BFormSelect,
     BInputGroup,
-    BListGroup,
+    BListGroup, BModal,
     BOverlay,
     BPagination,
     BToastOrchestrator,
@@ -61,6 +61,7 @@ const _orderBy = ref(orderByFilterChoices[0].value);
 const _pageSize = ref(props.pageSize);
 const _searchTerm = ref(props.searchTerm);
 const _selection = ref(props.initialSelection);
+const _searchInfoModalVisible = ref(false);
 const _sharingStatus = ref(sharingStatusFilterChoices[0].value);
 
 const _datasets = ref([]);
@@ -128,21 +129,17 @@ const pageSize = computed({
     }
 });
 
-const searchUrl = computed(() => {
-    // Returns URL object
-
-    // replace page_size parameter
-    // ref: https://usefulangle.com/post/81/javascript-change-url-parameters
-    let queryParams = url.searchParams;
-
-    queryParams.set("search", _searchTerm.value);  // empty string -> no search
-    queryParams.set("order_by", _orderBy.value);
-    queryParams.set("sharing_status", _sharingStatus.value);
-    queryParams.set('page_size', _pageSize.value);
-    queryParams.set('page', currentPage.value);
-    url.search = queryParams.toString();
-
-    return url;
+const searchTerm = computed({
+    get() {
+        if (_searchTerm.value.length == 0) {
+            return null;
+        }
+        return _searchTerm.value;
+    },
+    set(value) {
+        _searchTerm.value = value;
+        getDatasets();
+    }
 });
 
 function clearSearchTerm() {
@@ -171,25 +168,21 @@ function unselect() {
     <Basket :basket-items="_selection" @unselect-successful="unselect">
     </Basket>
     <BOverlay :show="_isLoading">
-        <div class="row row-cols-lg-auto">
-            <BButtonToolbar class="mb-2">
-                <BButtonGroup class="me-2"
-                              v-if="_searchTerm">
-                    <BButton variant="warning"
-                             @click="clearSearchTerm"
-                             :disabled="_isLoading">
-                        Clear filter for <b>{{ _searchTerm }}</b>
+        <div class="row">
+            <BFormGroup class="mb-2"
+                        description="Search for digital surface twins by name or tags">
+                <BInputGroup>
+                    <BFormInput v-model="searchTerm"
+                                placeholder="Type to start search..."/>
+                    <BButton variant="outline-secondary"
+                             title="Tips for searching"
+                             @click="_searchInfoModalVisible = true">
+                        <i class="fa fa-info-circle" aria-hidden="true"></i>
                     </BButton>
-                </BButtonGroup>
-                <BButtonGroup class="me-2">
-                    <BButton variant="outline-info"
-                             disabled>
-                        Not filtered for search term
-                    </BButton>
-                </BButtonGroup>
-            </BButtonToolbar>
+                </BInputGroup>
+            </BFormGroup>
         </div>
-        <div class="row row-cols-lg-auto">
+        <div class="row">
             <BButtonToolbar class="mb-2">
                 <BPagination class="me-2 mb-0"
                              v-model="currentPage" :disabled="_isLoading" :limit="9"
@@ -213,20 +206,17 @@ function unselect() {
                                  :options="sharingStatusFilterChoices">
                     </BFormSelect>
                 </BFormGroup>
-                <BButtonGroup v-if="isAnonymous">
-                    <BButton variant="primary"
-                             title="Please sign-in to use this feature"
-                             disabled>
-                        Create new digital surface twin
-                    </BButton>
-                </BButtonGroup>
-                <BButtonGroup v-if="!isAnonymous">
-                    <BButton variant="primary"
-                             @click="createSurface"
-                             :disabled="_isLoading">
-                        Create new digital surface twin
-                    </BButton>
-                </BButtonGroup>
+                <BButton v-if="isAnonymous" variant="primary"
+                         title="Please sign-in to use this feature"
+                         disabled>
+                    Create new digital surface twin
+                </BButton>
+                <BButton v-if="!isAnonymous"
+                         variant="primary"
+                         @click="createSurface"
+                         :disabled="_isLoading">
+                    Create new digital surface twin
+                </BButton>
             </BButtonToolbar>
         </div>
 
@@ -243,4 +233,92 @@ function unselect() {
             {{ _nbDatasets }}.
         </div>
     </BOverlay>
+    <!-- Search Help Modal-->
+    <BModal title="Tips for searching"
+            v-model="_searchInfoModalVisible"
+            size="xl"
+            :ok-only="true">
+        <p>Searching is performed over these fields:</p>
+        <ul>
+            <li>Names of surface and measurements</li>
+            <li>Names of tags</li>
+            <li>Descriptions of digital surface twins and measurements</li>
+        </ul>
+
+        <p>All texts in the search field is split into a list of tokens.
+            Searching finds matches
+            of the search expression among these tokens. You can build
+            search
+            expression from search terms
+            as follows:</p>
+
+        <table class="table table-bordered table-condensed">
+            <thead class="thead-light">
+            <tr>
+                <th>Search result should list items with</th>
+                <th>Search expression</th>
+                <th>Comment</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>both <em>AFM</em> and <em>surface</em></td>
+                <td><input type="text" value="AFM surface" size="40"
+                           readonly>
+                </td>
+                <td>text not inside quote marks will be interpreted as AND
+                </td>
+            </tr>
+            <tr>
+                <td>either <em>AFM</em> or <em>surface</em> or both</td>
+                <td><input type="text" value="AFM OR surface" size="40"
+                           readonly></td>
+                <td>logical OR, least precedence</td>
+            </tr>
+            <tr>
+                <td><em>AFM</em> but not <em>surface</em></td>
+                <td><input type="text" value="AFM -surface" size="40"
+                           readonly>
+                </td>
+                <td>the logical not operator is written by using -, has
+                    highest
+                    precedence
+                </td>
+            </tr>
+            <tr>
+                <td>the phrase <em>AFM Surface</em></td>
+                <td><input type="text" value='"AFM surface"' size="40"
+                           readonly>
+                </td>
+                <td><em>AFM</em> and <em>surface</em> are found if next to
+                    each
+                    other
+                </td>
+            </tr>
+            <tr>
+                <td><em>AFM Surface</em> as a phrase and <em>imported</em>
+                    somewhere else
+                </td>
+                <td><input type="text" value='"AFM surface" imported'
+                           size="40"
+                           readonly></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><em>AFM Surface</em> as a phrase and <em>imported</em>
+                    but
+                    not <em>material</em></td>
+                <td><input type="text"
+                           value='"AFM surface" imported -material'
+                           size="40" readonly></td>
+                <td>The above can also be combined. Parentheses are not
+                    allowed,
+                    all entries
+                    are valid search expressions.
+                </td>
+            </tr>
+            </tbody>
+
+        </table>
+    </BModal>
 </template>
