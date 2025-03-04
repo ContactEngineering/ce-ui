@@ -350,7 +350,7 @@ const hasThumbnail = computed(() => props.topography.thumbnail != null && props.
                 </a>
             </div>
             <div
-                :class="{ 'col-10': hasThumbnail, 'col-12': hasThumbnail }">
+                :class="{ 'col-10': hasThumbnail, 'col-12': !hasThumbnail }">
                 <div class="container">
                     <div class="row">
                         <div class="col-6">
