@@ -6,6 +6,8 @@ import {computed, onMounted, ref} from "vue";
 
 import {
     BButton,
+    BButtonGroup,
+    BButtonToolbar,
     BFormGroup,
     BFormSelect,
     BInputGroup,
@@ -33,13 +35,21 @@ const props = defineProps({
     },
     isAnonymous: Boolean,
     isLoading: Boolean,
-    orderBy: String,
-    orderByFilterChoices: Object,
     pageSize: Number,
-    sharingStatus: String,
-    sharingStatusFilterChoices: Object,
     searchTerm: String
 });
+
+// Constants
+const orderByFilterChoices = [
+    {text: 'Date', value: 'date'},
+    {text: 'Name', value: 'name'},
+];
+const sharingStatusFilterChoices = [
+    {text: 'All accessible datasets', value: 'all'},
+    {text: 'Unpublished datasets created by me', value: 'own'},
+    {text: 'Unpublished datasets created by others', value: 'others'},
+    {text: 'Published datasets', value: 'published'}
+];
 
 
 // UI logic
@@ -47,11 +57,11 @@ const _currentPage = ref(props.currentPage);
 const _isLoading = ref(props.isLoading);
 const _nbDatasets = ref(null);
 const _nbDatasetsOnCurrentPage = ref(null);
-const _orderBy = ref(props.orderBy);
+const _orderBy = ref(orderByFilterChoices[0].value);
 const _pageSize = ref(props.pageSize);
 const _searchTerm = ref(props.searchTerm);
 const _selection = ref(props.initialSelection);
-const _sharingStatus = ref(props.sharingStatus);
+const _sharingStatus = ref(sharingStatusFilterChoices[0].value);
 
 const _datasets = ref([]);
 const _nextUrl = ref(null);
@@ -59,8 +69,11 @@ const _previousUrl = ref(null);
 
 function getDatasets(offset = 0) {
     _isLoading.value = true;
-    _currentPage.value = offset / _pageSize.value;
-    axios.get(`${props.apiUrl}?offset=${offset}&limit=${_pageSize.value}`).then(response => {
+    _currentPage.value = offset / _pageSize.value + 1;
+    let queryUrl = `${props.apiUrl}?offset=${offset}&limit=${_pageSize.value}`;
+    queryUrl += `&order_by=${_orderBy.value}`;
+    queryUrl += `&sharing_status=${_sharingStatus.value}`;
+    axios.get(queryUrl).then(response => {
         _nbDatasets.value = response.data.count;
         _nbDatasetsOnCurrentPage.value = Math.min(response.data.results.length, _pageSize.value);
         _nextUrl.value = response.data.next;
@@ -155,68 +168,64 @@ function unselect() {
     <Basket :basket-items="_selection" @unselect-successful="unselect">
     </Basket>
     <BOverlay :show="_isLoading">
-        <div class="row row-cols-lg-auto mb-2">
-            <div v-if="_searchTerm" class="form-group">
-                <button class="btn btn-warning form-control" type="button"
-                        id="clear-search-term-btn"
-                        @click="clearSearchTerm" :disabled="_isLoading">
-                    Clear filter for <b>{{ _searchTerm }}</b>
-                </button>
-            </div>
-            <div v-else class="form-group">
-                <button class="btn btn-outline-info form-control disabled"
-                        type="button">
-                    Not filtered for search term
-                </button>
-            </div>
+        <div class="row row-cols-lg-auto">
+            <BButtonToolbar class="mb-2">
+                <BButtonGroup class="me-2"
+                              v-if="_searchTerm">
+                    <BButton variant="warning"
+                             @click="clearSearchTerm"
+                             :disabled="_isLoading">
+                        Clear filter for <b>{{ _searchTerm }}</b>
+                    </BButton>
+                </BButtonGroup>
+                <BButtonGroup class="me-2">
+                    <BButton variant="outline-info"
+                             disabled>
+                        Not filtered for search term
+                    </BButton>
+                </BButtonGroup>
+                <BFormGroup class="me-2">
+                    <BFormSelect name="sharing_status" class="form-control"
+                                 v-model="_sharingStatus" @change="getDatasets"
+                                 :disabled="_isLoading"
+                                 :options="sharingStatusFilterChoices">
+                    </BFormSelect>
+                </BFormGroup>
 
-            <BFormGroup>
-                <BFormSelect name="sharing_status" class="form-control"
-                             v-model="_sharingStatus" @change="getDatasets"
-                             :disabled="_isLoading"
-                             :options="sharingStatusFilterChoices">
-                </BFormSelect>
-            </BFormGroup>
-
-            <div class="col-md-4">
-                <div v-if="isAnonymous" class="form-group">
+                <BButtonGroup v-if="isAnonymous">
                     <BButton variant="primary"
                              title="Please sign-in to use this feature"
                              disabled>
                         Create new digital surface twin
                     </BButton>
-                </div>
-                <div v-if="!isAnonymous" class="form-group"
-                     title="Create a new digital surface twin">
-                    <BButton variant="primary" class="form-control"
+                </BButtonGroup>
+                <BButtonGroup v-if="!isAnonymous">
+                    <BButton variant="primary"
                              @click="createSurface"
                              :disabled="_isLoading">
                         Create new digital surface twin
                     </BButton>
-                </div>
-            </div>
+                </BButtonGroup>
+            </BButtonToolbar>
         </div>
         <div class="row row-cols-lg-auto">
-            <div class="col-md-4">
-                <BPagination v-model="currentPage" :disabled="_isLoading" :limit="9"
+            <BButtonToolbar class="mb-2">
+                <BPagination class="me-2 mb-0"
+                             v-model="currentPage" :disabled="_isLoading" :limit="9"
                              :total-rows="_nbDatasets"
                              :per-page="_pageSize">
                 </BPagination>
-            </div>
-            <div class="col-md-4">
-                <BInputGroup prepend="Page size">
+                <BInputGroup class="me-2" prepend="Page size">
                     <BFormSelect v-model="pageSize" :disabled="_isLoading"
                                  :options="[10, 25, 50, 100]">
                     </BFormSelect>
                 </BInputGroup>
-            </div>
-            <div class="col-md-4">
                 <BInputGroup prepend="Sort by">
                     <BFormSelect v-model="orderBy" :disabled="_isLoading"
                                  :options="orderByFilterChoices">
                     </BFormSelect>
                 </BInputGroup>
-            </div>
+            </BButtonToolbar>
         </div>
 
         <BListGroup>

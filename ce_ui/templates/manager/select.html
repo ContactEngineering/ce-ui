@@ -74,12 +74,8 @@
                 currentPage: initial_select_tab_state.current_page,
                 isAnonymous: {{ request.user.is_anonymous|yesno:'true,false' }},
                 initialSelection: {{ basket_items_json | safe }},
-                orderBy: initial_select_tab_state.order_by,
-                orderByFilterChoices: Object.entries(order_by_filter_choices).map(([x, y]) => { return {value: x, text: y}; }),
                 pageSize: initial_select_tab_state.page_size,
-                searchTerm: initial_select_tab_state.search_term,
-                sharingStatus: initial_select_tab_state.sharing_status,
-                sharingStatusFilterChoices: Object.entries(sharing_status_filter_choices).map(([x, y]) => { return {value: x, text: y}; })
+                searchTerm: initial_select_tab_state.search_term
             }
         );
     </script>
