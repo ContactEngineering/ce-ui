@@ -9,9 +9,14 @@ def prepare_context(context):
         tab["active"] = False
 
 
-def add_surface(context, surface):
+def add_generic(context, d):
     prepare_context(context)
-    context["extra_tabs"] += [
+    context["extra_tabs"] += [d]
+
+
+def add_surface(context, surface):
+    add_generic(
+        context,
         {
             "title": f"{surface.label}",
             "icon": "layer-group",
@@ -20,12 +25,11 @@ def add_surface(context, surface):
             "active": True,
             "login_required": False,
             "tooltip": f"Properties of digital surface twin '{surface.label}'",
-        }
-    ]
+        },
+    )
 
 
 def add_topography(context, topography):
-    prepare_context(context)
     next = (
         Topography.objects.filter(surface=topography.surface, pk__gt=topography.pk)
         .order_by("pk")
@@ -50,4 +54,4 @@ def add_topography(context, topography):
         topography_tab["href_next"] = f"{url}?topography={next.pk}"
     if previous is not None:
         topography_tab["href_previous"] = f"{url}?topography={previous.pk}"
-    context["extra_tabs"] += [topography_tab]
+    add_generic(context, topography_tab)

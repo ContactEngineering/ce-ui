@@ -30,9 +30,9 @@ import {ccLicenseInfo} from "../utils/data";
 import Attachments from './Attachments.vue';
 import BandwidthPlot from './BandwidthPlot.vue';
 import DropZone from '../components/DropZone.vue';
-import SurfaceDescription from './SurfaceDescription.vue';
-import SurfacePermissions from './SurfacePermissions.vue';
-import SurfaceProperties from './SurfaceProperties.vue';
+import DatasetDescription from './DatasetDescription.vue';
+import DatasetPermissions from './DatasetPermissions.vue';
+import DatasetProperties from './DatasetProperties.vue';
 import TopographyCard from "./TopographyCard.vue";
 import TopographyPropertiesCard from "./TopographyPropertiesCard.vue";
 
@@ -389,20 +389,20 @@ const allSelected = computed({
                         </BCard>
                     </BTab>
                     <BTab title="Description">
-                        <SurfaceDescription v-if="_surface != null"
+                        <DatasetDescription v-if="_surface != null"
                                             :description="_surface.description"
                                             :name="_surface.name"
                                             :permission="_permissions.current_user.permission"
                                             :surface-url="_surface.url"
                                             :tags="_surface.tags">
-                        </SurfaceDescription>
+                        </DatasetDescription>
                     </BTab>
                     <BTab title="Properties">
-                        <SurfaceProperties v-if="_surface != null"
+                        <DatasetProperties v-if="_surface != null"
                                            v-model:properties="_surface.properties"
                                            :permission="_permissions.current_user.permission"
                                            :surface-url="_surface.url">
-                        </SurfaceProperties>
+                        </DatasetProperties>
                     </BTab>
                     <BTab title="Attachments">
                         <Attachments v-if="_surface != null"
@@ -412,10 +412,10 @@ const allSelected = computed({
                     </BTab>
                     <BTab v-if="_surface != null"
                           title="Permissions">
-                        <SurfacePermissions v-if="_surface.publication == null"
+                        <DatasetPermissions v-if="_surface.publication == null"
                                             v-model:permissions="_permissions"
                                             :set-permissions-url="_surface.api.set_permissions">
-                        </SurfacePermissions>
+                        </DatasetPermissions>
                         <BCard v-if="_surface.publication != null" class="w-100">
                             <template #header>
                                 <h5 class="float-start">Permissions</h5>

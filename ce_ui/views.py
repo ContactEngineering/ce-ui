@@ -689,7 +689,7 @@ def unselect_all(request):
     return Response([])
 
 
-def extra_tabs_if_single_item_selected(topographies, surfaces):
+def extra_tabs_if_single_item_selected(context, topographies, surfaces):
     """Return contribution to context for opening extra tabs if a single topography/surface is selected.
 
     Parameters
@@ -705,48 +705,15 @@ def extra_tabs_if_single_item_selected(topographies, surfaces):
     Sequence of dicts, each dict corresponds to an extra tab.
 
     """
-    tabs = []
-
     if len(topographies) == 1 and len(surfaces) == 0:
         # exactly one topography was selected -> show also tabs of topography
         topo = topographies[0]
-        tabs.extend(
-            [
-                {
-                    "title": f"{topo.surface.label}",
-                    "icon": "gem",
-                    "icon_style_prefix": "far",
-                    "href": f"{reverse('ce_ui:surface-detail')}?surface={topo.surface.pk}",
-                    "active": False,
-                    "login_required": False,
-                    "tooltip": f"Properties of surface '{topo.surface.label}'",
-                },
-                {
-                    "title": f"{topo.name}",
-                    "icon": "file",
-                    "icon_style_prefix": "far",
-                    "href": f"{reverse('ce_ui:topography-detail')}?topography={topo.pk}",
-                    "active": False,
-                    "login_required": False,
-                    "tooltip": f"Properties of measurement '{topo.name}'",
-                },
-            ]
-        )
+        breadcrumb.add_surface(context, topo.surface)
+        breadcrumb.add_topography(context, topo)
     elif len(surfaces) == 1 and all(t.surface == surfaces[0] for t in topographies):
         # exactly one surface was selected -> show also tab of surface
         surface = surfaces[0]
-        tabs.append(
-            {
-                "title": f"{surface.label}",
-                "icon": "gem",
-                "icon_style_prefix": "far",
-                "href": f"{reverse('ce_ui:surface-detail')}?surface={surface.pk}",
-                "active": False,
-                "login_required": False,
-                "tooltip": f"Properties of surface '{surface.label}'",
-            }
-        )
-    return tabs
+        breadcrumb.add_surface(context, surface)
 
 
 class AnalysisResultDetailView(DetailView):
@@ -839,8 +806,9 @@ class AnalysesResultListView(TemplateView):
             pass
 
         # Decide whether to open extra tabs for surface/topography details
-        tabs = extra_tabs_if_single_item_selected(topographies, surfaces)
-        tabs.append(
+        extra_tabs_if_single_item_selected(context, topographies, surfaces)
+        breadcrumb.add_generic(
+            context,
             {
                 "title": "Analyze",
                 "icon": "chart-area",
@@ -850,9 +818,8 @@ class AnalysesResultListView(TemplateView):
                 "login_required": False,
                 "tooltip": "Results for selected analysis functions",
                 "show_basket": True,
-            }
+            },
         )
-        context["extra_tabs"] = tabs
 
         return context
 
@@ -982,7 +949,8 @@ class TabbedEmailView(EmailView):
                 "title": "User profile",
                 "icon": "user",
                 "href": reverse(
-                    "ce_ui:user-detail", kwargs=dict(username=self.request.user.username)
+                    "ce_ui:user-detail",
+                    kwargs=dict(username=self.request.user.username),
                 ),
                 "active": False,
             },
@@ -1024,7 +992,9 @@ class UserRedirectView(LoginRequiredMixin, RedirectView):
     permanent = False
 
     def get_redirect_url(self):
-        return reverse("ce_ui:user-detail", kwargs={"username": self.request.user.username})
+        return reverse(
+            "ce_ui:user-detail", kwargs={"username": self.request.user.username}
+        )
 
 
 class UserUpdateView(LoginRequiredMixin, UpdateView):
@@ -1036,7 +1006,9 @@ class UserUpdateView(LoginRequiredMixin, UpdateView):
     # send the user back to their own page after a successful update
 
     def get_success_url(self):
-        return reverse("ce_ui:user-detail", kwargs={"username": self.request.user.username})
+        return reverse(
+            "ce_ui:user-detail", kwargs={"username": self.request.user.username}
+        )
 
     def get_object(self, queryset=None):
         # Only get the User record for the user making the request
@@ -1049,7 +1021,8 @@ class UserUpdateView(LoginRequiredMixin, UpdateView):
                 "title": "User Profile",
                 "icon": "user",
                 "href": reverse(
-                    "ce_ui:user-detail", kwargs=dict(username=self.request.user.username)
+                    "ce_ui:user-detail",
+                    kwargs=dict(username=self.request.user.username),
                 ),
                 "active": False,
             },

@@ -67,12 +67,10 @@
         // Pass some data from Django context to Javascript
         const order_by_filter_choices = JSON.parse(document.getElementById('order-by-filter-choices').textContent);
         const sharing_status_filter_choices = JSON.parse(document.getElementById('sharing-status-filter-choices').textContent);
-        const base_urls = JSON.parse(document.getElementById('base-urls').textContent);
         const initial_select_tab_state = JSON.parse(document.getElementById('initial-select-tab-state').textContent);
 
-        topobank.base.createSearchResultsApp(
+        topobank.base.createDatasetListApp(
             '#search-results', '{{ csrf_token }}', {
-                baseUrls: base_urls,
                 currentPage: initial_select_tab_state.current_page,
                 isAnonymous: {{ request.user.is_anonymous|yesno:'true,false' }},
                 initialSelection: {{ basket_items_json | safe }},
@@ -81,8 +79,7 @@
                 pageSize: initial_select_tab_state.page_size,
                 searchTerm: initial_select_tab_state.search_term,
                 sharingStatus: initial_select_tab_state.sharing_status,
-                sharingStatusFilterChoices: Object.entries(sharing_status_filter_choices).map(([x, y]) => { return {value: x, text: y}; }),
-                treeMode: initial_select_tab_state.tree_mode
+                sharingStatusFilterChoices: Object.entries(sharing_status_filter_choices).map(([x, y]) => { return {value: x, text: y}; })
             }
         );
     </script>

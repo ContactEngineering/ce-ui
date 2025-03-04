@@ -32,7 +32,7 @@ export default {
     },
     methods: {
         // the following method is called when the "x" symbol is clicked in a basket item
-        handle_close(event) {
+        handle_close() {
             this.$emit('unselect', this.elem.key);  // See basket's "created" where event handlers are defined
         }
     }
