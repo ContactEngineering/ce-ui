@@ -2,6 +2,10 @@
 
 ## 1.11.0 (2025-03-03)
 
+- MAINT: Prettified surface details card
+
+## 1.11.0 (2025-03-03)
+
 - ENH: Quickly switching to next measurement/topography (#94)
 - BUG: Fixed measurement/topography download (#89)
 - BUG: Don't leak DST name in 403 error (#75)
