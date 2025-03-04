@@ -30,7 +30,7 @@ export default {
             });
         },
         dataSourceChanged(value) {
-            axios.patch(this.topography.url, {'data_source': value}).then(response => {
+            axios.patch(this.topography.url, {'data_source': this.topography.data_source}).then(response => {
                 this.$emit('update:topography', response.data);
             });
         }
@@ -71,10 +71,10 @@ export default {
             </div>
             <div v-if="topography !== null && topography.data_source !== null && topography.channel_names.length > 0"
                  class="input-group-sm float-start me-2">
-                <b-form-select :options="channelOptions"
+                <BFormSelect :options="channelOptions"
                                v-model="topography.data_source"
                                @change="dataSourceChanged">
-                </b-form-select>
+                </BFormSelect>
             </div>
             <div>
                 <h5 class="d-inline">{{ topography.name }}</h5>
