@@ -72,12 +72,12 @@ ui_urlpatterns = [
     # User management
     #
     # path("", view=views.UserListView.as_view(), name="list"),
-    path("html/user-redirect/", view=views.UserRedirectView.as_view(), name="redirect"),
-    path("html/user-update/", view=views.UserUpdateView.as_view(), name="update"),
+    path("html/user-redirect/", view=views.UserRedirectView.as_view(), name="user-redirect"),
+    path("html/user-update/", view=views.UserUpdateView.as_view(), name="user-update"),
     path(
         "html/user/<str:username>/",
         view=views.UserDetailView.as_view(),
-        name="detail",
+        name="user-detail",
     ),
     path(
         "html/user-email/", views.TabbedEmailView.as_view(), name="account_email"
