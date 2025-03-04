@@ -2,6 +2,8 @@
 
 ## 1.11.2 (2025-03-04)
 
+- BUG: Don't show publish button if user has no rights to publish (#84)
+- BUG: Show bare task duration (#85)
 - BUG: Select data channel if parsing file fails for a specific channel
 - BUG: Show properties to the right of, not below, the thumbnail
 

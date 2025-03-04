@@ -289,7 +289,7 @@ const isEditable = computed(() => {
     return _surface.value != null && _surface.value.permissions.current_user.permission !== 'view';
 });
 
-const isDeletable = computed(() => {
+const hasFullAccess = computed(() => {
     return _surface.value != null && _surface.value.permissions.current_user.permission === 'full';
 });
 
@@ -447,26 +447,26 @@ const allSelected = computed({
                                 When reusing this dataset, please cite the original
                                 source.
                             </p>
-                            <b-accordion>
-                                <b-accordion-item title="Citation" visible>
+                            <BAccordion>
+                                <BAccordionItem title="Citation" visible>
                                     <div v-html="_publication.citation.html"/>
-                                </b-accordion-item>
-                                <b-accordion-item title="RIS">
+                                </BAccordionItem>
+                                <BAccordionItem title="RIS">
                                     <code>
                                         <pre>{{ _publication.citation.ris }}</pre>
                                     </code>
-                                </b-accordion-item>
-                                <b-accordion-item title="BibTeX">
+                                </BAccordionItem>
+                                <BAccordionItem title="BibTeX">
                                     <code>
                                         <pre>{{ _publication.citation.bibtex }}</pre>
                                     </code>
-                                </b-accordion-item>
-                                <b-accordion-item title="BibLaTeX">
+                                </BAccordionItem>
+                                <BAccordionItem title="BibLaTeX">
                                     <code>
                                         <pre>{{ _publication.citation.biblatex }}</pre>
                                     </code>
-                                </b-accordion-item>
-                            </b-accordion>
+                                </BAccordionItem>
+                            </BAccordion>
                         </BCard>
                     </BTab>
                     <template #tabs-end>
@@ -481,12 +481,12 @@ const allSelected = computed({
                             Download
                         </a>
 
-                        <a v-if="!isPublication" :href="publishUrl"
+                        <a v-if="!isPublication && hasFullAccess" :href="publishUrl"
                            class="btn btn-outline-secondary mb-2">
                             Publish
                         </a>
 
-                        <a v-if="_versions == null || _versions.length === 0 && isDeletable"
+                        <a v-if="_versions == null || _versions.length === 0 && hasFullAccess"
                            class="btn btn-outline-secondary mb-2"
                            href="#" @click="_showDeleteModal = true">
                             Delete
