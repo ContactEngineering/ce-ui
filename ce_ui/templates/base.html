@@ -97,8 +97,18 @@
 <!--sidebar js -->
 <script src="{% static 'js/topnav_app.bundle.js' %}"></script>
 <script>
+    const messages = [];
+    {% if messages %}
+        {% for message in messages %}
+            messages.push({
+                message: '{{ message }}',
+                level: '{{ message.level_tag }}',
+                extra_tags: '{{ message.extra_tags }}'
+            });
+        {% endfor %}
+    {% endif %}
+
     topobank.topnav_app.createTopnavApp('#topnav', '{{ csrf_token }}', {
-        isAnonymous: {{ request.user.is_anonymous|yesno:'true,false' }},
         apiUrl: '{{ request.user.get_absolute_url }}',
         loginUrl: '{% provider_login_url 'orcid' method=" oauth2" %}',
         selectUrl: '{% url 'ce_ui:select' %}',
@@ -106,7 +116,9 @@
         userName: '{{ request.user.username }}',
         name: '{{ request.user.name }}',
         orcid: '{{ request.user.orcid_id }}',
-        isStaff: {{ request.user.is_staff|yesno:'true,false' }}
+        isAnonymous: {{ request.user.is_anonymous|yesno:'true,false' }},
+        isStaff: {{ request.user.is_staff|yesno:'true,false' }},
+        messages: messages
     });
 </script>
 </body>

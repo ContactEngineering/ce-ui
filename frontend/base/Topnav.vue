@@ -1,20 +1,22 @@
 <script setup>
 
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import {
     BButton,
-    BFormGroup,
     BFormInput,
     BModal,
     BNavbar,
     BNavbarBrand,
     BNavbarNav,
-    BNavForm,
-    BNavItem
+    BNavItem,
+    BToastOrchestrator,
+    useToastController
 } from "bootstrap-vue-next";
 
 import NotificationButton from "topobank/base/NotificationButton.vue";
 import UserMenuButton from "topobank/base/UserMenuButton.vue";
+
+const {show} = useToastController();
 
 const props = defineProps({
     isAnonymous: Boolean,
@@ -25,14 +27,45 @@ const props = defineProps({
     userName: String,
     name: String,
     orcid: String,
-    isStaff: Boolean
+    isStaff: Boolean,
+    messages: {
+        type: Array,
+        default: []
+    }
 });
 
 const searchInfoModal = ref(false);
 
+const levelToVariant = {
+    'error': 'danger',
+    'warning': 'warning',
+    'info': 'info',
+    'success': 'success'
+};
+
+const levelToTitle = {
+    'error': 'Error',
+    'warning': 'Warning',
+    'info': 'Information',
+    'success': 'Success'
+}
+
+onMounted(() => {
+    for (const message of props.messages) {
+        show?.({
+            props: {
+                title: levelToTitle[message.level],
+                body: message.message,
+                variant: levelToVariant[message.level]
+            }
+        });
+    }
+});
+
 </script>
 
 <template>
+    <BToastOrchestrator/>
     <BNavbar variant="dark" class="navbar-dark">
         <BNavbarBrand href="/" class="d-flex flex-grow-1">
             <img src="/static/images/ce_logo.svg" height="25px">
@@ -40,7 +73,8 @@ const searchInfoModal = ref(false);
         </BNavbarBrand>
         <BNavbarNav>
             <form :action="selectUrl" method="get" class="d-flex">
-                <label class="col-form-label visually-hidden" for="inline-form-input-name">Search term</label>
+                <label class="col-form-label visually-hidden"
+                       for="inline-form-input-name">Search term</label>
                 <BFormInput type="search"
                             name="search"
                             placeholder="Enter search expression">

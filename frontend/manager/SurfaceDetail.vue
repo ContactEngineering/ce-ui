@@ -16,7 +16,8 @@ import {
     BSpinner,
     BTab,
     BTabs,
-    BToastOrchestrator
+    BToastOrchestrator,
+    useToastController
 } from 'bootstrap-vue-next';
 
 import {
@@ -34,6 +35,8 @@ import SurfacePermissions from './SurfacePermissions.vue';
 import SurfaceProperties from './SurfaceProperties.vue';
 import TopographyCard from "./TopographyCard.vue";
 import TopographyPropertiesCard from "./TopographyPropertiesCard.vue";
+
+const {show} = useToastController();
 
 const props = defineProps({
     surfaceUrl: String,
@@ -63,7 +66,6 @@ const _topographies = ref([]);  // Topographies contained in this surface
 const _versions = ref(null);  // Published versions of this surface
 
 // GUI logic
-const _error = ref(null);   // Errors from saving batch edits
 const _saving = ref(false);  // Saving batch edits
 const _showDeleteModal = ref(false);  // Triggers delete modal
 const _selected = ref([]);  // Selected topographies (for batch editing)
@@ -123,7 +125,13 @@ function updateCard() {
         _selected.value = new Array(_topographies.value.length).fill(false);  // Nothing is selected
         updatePublication();
     }).catch(error => {
-        _error.value = error;
+        show?.({
+            props: {
+                title: "Failed to fetch digital surface twin",
+                body: error,
+                variant: 'danger'
+            }
+        });
     });
 }
 
@@ -136,7 +144,13 @@ function updatePublication() {
             _publication.value = response.data;
             updateVersions();
         }).catch(error => {
-            _error.value = error;
+            show?.({
+                props: {
+                    title: "Failed to fetch publication information",
+                    body: error,
+                    variant: 'danger'
+                }
+            });
         });
     }
 }
@@ -145,7 +159,13 @@ function updateVersions() {
     axios.get(`/go/api/publication/?original_surface=${getOriginalSurfaceId()}`).then(response => {
         _versions.value = response.data;
     }).catch(error => {
-        _error.value = error;
+        show?.({
+            props: {
+                title: "Failed to fetch published versions",
+                body: error,
+                variant: 'danger'
+            }
+        });
     });
 }
 
@@ -165,7 +185,13 @@ function uploadNewTopography(file) {
         _topographies.value.push(upload);  // this will trigger showing a topography-upload-card
         _selected.value.push(false);  // initially unselected
     }).catch(error => {
-        _error.value = error;
+        show?.({
+            props: {
+                title: "Failed to create a new measurement",
+                body: error,
+                variant: 'danger'
+            }
+        });
     });
 }
 
@@ -180,9 +206,6 @@ function saveBatchEdit(topography) {
     // Clear all null fields
     const cleanedBatchEditTopography = filterTopographyForPatchRequest(topography);
 
-    // Clear possible errors
-    _error.value = null;
-
     // Update all topographies and issue patch request
     for (const i in _topographies.value) {
         if (_selected.value[i]) {
@@ -194,7 +217,13 @@ function saveBatchEdit(topography) {
             axios.patch(t.url, filterTopographyForPatchRequest(t)).then(response => {
                 _topographies.value[i] = response.data;
             }).catch(error => {
-                _error.value = error;
+                show?.({
+                    props: {
+                        title: "Failed to update measurement",
+                        body: error,
+                        variant: 'danger'
+                    }
+                });
             });
         }
     }
@@ -226,7 +255,13 @@ function deleteSurface() {
         emit('delete:surface', _surface.value.url);
         window.location.href = `/ui/html/dataset-list/`;
     }).catch(error => {
-        _error.value = error;
+        show?.({
+            props: {
+                title: "Failed to delete digital surface twin",
+                body: error,
+                variant: 'danger'
+            }
+        });
     });
 }
 
@@ -252,6 +287,10 @@ const publishUrl = computed(() => {
 
 const isEditable = computed(() => {
     return _surface.value != null && _surface.value.permissions.current_user.permission !== 'view';
+});
+
+const isDeletable = computed(() => {
+    return _surface.value != null && _surface.value.permissions.current_user.permission === 'full';
 });
 
 const isPublication = computed(() => {
@@ -280,7 +319,7 @@ const allSelected = computed({
 </script>
 
 <template>
-    <BToastOrchestrator/>
+    <BToastOrchestrator></BToastOrchestrator>
     <div class="container">
         <div v-if="_surface == null" class="d-flex justify-content-center mt-5">
             <div class="flex-column text-center">
@@ -288,9 +327,6 @@ const allSelected = computed({
                 <p>Loading...</p>
             </div>
         </div>
-        <b-alert :model-value="_error != null" variant="danger">
-            {{ _error.message }}: {{ _error.response.statusText }}
-        </b-alert>
         <div v-if="_surface != null" class="row">
             <div class="col-12">
                 <BTabs class="nav-pills-custom"
@@ -450,7 +486,7 @@ const allSelected = computed({
                             Publish
                         </a>
 
-                        <a v-if="_versions == null || _versions.length === 0"
+                        <a v-if="_versions == null || _versions.length === 0 && isDeletable"
                            class="btn btn-outline-secondary mb-2"
                            href="#" @click="_showDeleteModal = true">
                             Delete
@@ -459,10 +495,13 @@ const allSelected = computed({
                         <BCard
                             v-if="_surface != null && (_publication != null || _surface.tags.length > 0 || _versions == null || _versions.length > 0)">
                             <div v-if="_publication != null">
-<span class="badge bg-info">Published by {{ _publication.publisher.name }}</span>
+                                <span class="badge bg-info">Published by {{
+                                        _publication.publisher.name
+                                    }}</span>
                             </div>
                             <div v-if="_surface.tags.length > 0">
-<span v-for="tag in _surface.tags" class="badge bg-success">{{ tag.name }}</span>
+                                <span v-for="tag in _surface.tags"
+                                      class="badge bg-success">{{ tag.name }}</span>
                             </div>
                             <BDropdown
                                 v-if="_versions == null || _versions.length > 0"
