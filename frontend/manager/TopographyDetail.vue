@@ -4,12 +4,12 @@ import axios from "axios";
 
 import {computed, onMounted, ref} from "vue";
 import {
-    BAlert,
     BModal,
     BSpinner,
     BTab,
     BTabs,
-    BToastOrchestrator
+    BToastOrchestrator,
+    useToastController
 } from "bootstrap-vue-next";
 
 import {getIdFromUrl, subjectsToBase64} from "topobank/utils/api.js";
@@ -22,13 +22,13 @@ import LineScanPlot from "../components/LineScanPlot.vue";
 import TopographyBadges from "./TopographyBadges.vue";
 import TopographyCard from "./TopographyCard.vue";
 
+const {show} = useToastController();
 
 const props = defineProps({
     topographyUrl: String
 });
 
 const _disabled = ref(false);
-const _error = ref(null);
 const _showDeleteModal = ref(false);
 const _topography = ref(null);
 
@@ -42,7 +42,13 @@ function updateCard() {
         _topography.value = response.data;
         _disabled.value = _topography.value === null || _topography.value.permissions.current_user.permission === 'view';
     }).catch(error => {
-        _error.value = error;
+        show?.({
+            props: {
+                title: "Failed to fetch measurement",
+                body: error,
+                variant: 'danger'
+            }
+        });
     });
 }
 
@@ -52,7 +58,13 @@ function deleteTopography() {
         const id = getIdFromUrl(_topography.value.surface);
         window.location.href = `/ui/html/surface/?surface=${id}`;
     }).catch(error => {
-        _error.value = error;
+        show?.({
+            props: {
+                title: "Failed to delete measurement",
+                body: error,
+                variant: 'danger'
+            }
+        });
     });
 }
 
@@ -74,10 +86,6 @@ const base64Subjects = computed(() => {
                 <p>Loading...</p>
             </div>
         </div>
-        <BAlert :model-value="_error != null"
-                variant="danger">
-            {{ _error.message }}: {{ _error.response.statusText }}
-        </BAlert>
         <div v-if="_topography !== null"
              class="row">
             <div class="col-12">

@@ -1,7 +1,9 @@
 # Changelog for plugin *ce-ui*
 
-## 1.11.0 (2025-03-03)
+## 1.11.1 (2025-03-03)
 
+- MAINT: Show messages as toasts
+- MAINT: Show errors as toasts
 - MAINT: Prettified surface details card
 
 ## 1.11.0 (2025-03-03)

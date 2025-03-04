@@ -370,10 +370,10 @@ const allSelected = computed({
                             <template #header>
                                 <h5 class="float-start">Bandwidths</h5>
                             </template>
-                            <b-alert :model-value="_topographies.length == 0" info>
-                                This surface has no measurements yet.
-                            </b-alert>
-                            <b-alert :model-value="_topographies.length > 0"
+                            <BAlert :model-value="_topographies.length == 0" info>
+                                This surface has no measurements.
+                            </BAlert>
+                            <BAlert :model-value="_topographies.length > 0"
                                      secondary>
                                 This bandwidth plot shows the range of length scales
                                 that have been measured for
@@ -382,7 +382,7 @@ const allSelected = computed({
                                 Part of the bandwidth shown may be unreliable due to
                                 the configured instrument's
                                 measurement capacities.
-                            </b-alert>
+                            </BAlert>
                             <bandwidth-plot v-if="_topographies.length > 0"
                                             :topographies="_topographies">
                             </bandwidth-plot>
