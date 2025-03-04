@@ -73,6 +73,9 @@ function getDatasets(offset = 0) {
     let queryUrl = `${props.apiUrl}?offset=${offset}&limit=${_pageSize.value}`;
     queryUrl += `&order_by=${_orderBy.value}`;
     queryUrl += `&sharing_status=${_sharingStatus.value}`;
+    if (_searchTerm != null) {
+        queryUrl += `&search=${_searchTerm.value}`;
+    }
     axios.get(queryUrl).then(response => {
         _nbDatasets.value = response.data.count;
         _nbDatasetsOnCurrentPage.value = Math.min(response.data.results.length, _pageSize.value);
@@ -184,28 +187,6 @@ function unselect() {
                         Not filtered for search term
                     </BButton>
                 </BButtonGroup>
-                <BFormGroup class="me-2">
-                    <BFormSelect name="sharing_status" class="form-control"
-                                 v-model="_sharingStatus" @change="getDatasets"
-                                 :disabled="_isLoading"
-                                 :options="sharingStatusFilterChoices">
-                    </BFormSelect>
-                </BFormGroup>
-
-                <BButtonGroup v-if="isAnonymous">
-                    <BButton variant="primary"
-                             title="Please sign-in to use this feature"
-                             disabled>
-                        Create new digital surface twin
-                    </BButton>
-                </BButtonGroup>
-                <BButtonGroup v-if="!isAnonymous">
-                    <BButton variant="primary"
-                             @click="createSurface"
-                             :disabled="_isLoading">
-                        Create new digital surface twin
-                    </BButton>
-                </BButtonGroup>
             </BButtonToolbar>
         </div>
         <div class="row row-cols-lg-auto">
@@ -220,11 +201,32 @@ function unselect() {
                                  :options="[10, 25, 50, 100]">
                     </BFormSelect>
                 </BInputGroup>
-                <BInputGroup prepend="Sort by">
+                <BInputGroup class="me-2" prepend="Sort by">
                     <BFormSelect v-model="orderBy" :disabled="_isLoading"
                                  :options="orderByFilterChoices">
                     </BFormSelect>
                 </BInputGroup>
+                <BFormGroup class="me-2">
+                    <BFormSelect name="sharing_status" class="form-control"
+                                 v-model="_sharingStatus" @change="getDatasets"
+                                 :disabled="_isLoading"
+                                 :options="sharingStatusFilterChoices">
+                    </BFormSelect>
+                </BFormGroup>
+                <BButtonGroup v-if="isAnonymous">
+                    <BButton variant="primary"
+                             title="Please sign-in to use this feature"
+                             disabled>
+                        Create new digital surface twin
+                    </BButton>
+                </BButtonGroup>
+                <BButtonGroup v-if="!isAnonymous">
+                    <BButton variant="primary"
+                             @click="createSurface"
+                             :disabled="_isLoading">
+                        Create new digital surface twin
+                    </BButton>
+                </BButtonGroup>
             </BButtonToolbar>
         </div>
 
