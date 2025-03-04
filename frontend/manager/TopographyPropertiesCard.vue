@@ -529,10 +529,10 @@ const hasThumbnail = computed(() => props.topography.thumbnail != null && props.
                 </div>
             </div>
         </div>
-        <div v-if="_attachmentsVisible" class="container">
-            <attachments :attachments-url="topography.attachments"
+        <div v-if="!enlarged && _attachmentsVisible" class="container">
+            <Attachments :attachments-url="topography.attachments"
                          :permission="topography.permissions.current_user.permission">
-            </attachments>
+            </Attachments>
         </div>
         <template #footer>
             <TopographyBadges v-if="!batchEdit && !enlarged"

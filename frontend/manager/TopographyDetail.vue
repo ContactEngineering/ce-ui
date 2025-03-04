@@ -111,9 +111,9 @@ const base64Subjects = computed(() => {
                         </TopographyCard>
                     </BTab>
                     <BTab title="Attachments">
-                        <attachments :attachments-url="_topography.attachments"
+                        <Attachments :attachments-url="_topography.attachments"
                                      :permission="_topography.permissions.current_user.permission">
-                        </attachments>
+                        </Attachments>
                     </BTab>
                     <template #tabs-end>
                         <hr/>
