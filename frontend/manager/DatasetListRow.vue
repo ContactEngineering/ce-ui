@@ -2,6 +2,9 @@
 
 import {computed, onMounted, ref} from "vue";
 
+import axios from "axios";
+import {subjectsToBase64} from "topobank/utils/api";
+
 import {
     BButton,
     BButtonGroup,
@@ -10,8 +13,11 @@ import {
 } from "bootstrap-vue-next";
 
 import ThumbnailRow from "./ThumbnailRow.vue";
-import axios from "axios";
-import {subjectsToBase64} from "topobank/utils/api";
+
+const selected = defineModel("selected", {
+    type: Boolean,
+    default: false
+});
 
 const props = defineProps({
     dataset: Object
@@ -40,7 +46,7 @@ const creationDatePretty = computed(() => {
     <BListGroupItem>
         <div class="d-flex">
             <div>
-                <BFormCheckbox></BFormCheckbox>
+                <BFormCheckbox v-model="selected"></BFormCheckbox>
             </div>
             <div class="flex-grow-1 ms-2 me-2">
                 <a v-if="dataset.publication_doi != null"

@@ -12,7 +12,7 @@ window.Bokeh = Bokeh;
 
 import DeepZoomImage from '../components/DeepZoomImage.vue';
 
-import Basket from './Basket.vue'
+import Basket from '../base/Basket.vue'
 import DatasetList from './DatasetList.vue';
 
 import 'topobank/scss/custom.scss';

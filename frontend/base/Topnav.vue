@@ -1,10 +1,8 @@
 <script setup>
 
-import {onMounted, ref} from "vue";
+import {onMounted} from "vue";
 import {
     BButton,
-    BFormInput,
-    BModal,
     BNavbar,
     BNavbarBrand,
     BNavbarNav,
@@ -13,8 +11,9 @@ import {
     useToastController
 } from "bootstrap-vue-next";
 
-import NotificationButton from "topobank/base/NotificationButton.vue";
-import UserMenuButton from "topobank/base/UserMenuButton.vue";
+import BasketButton from "./BasketButton.vue";
+import NotificationButton from "./NotificationButton.vue";
+import UserMenuButton from "./UserMenuButton.vue";
 
 const {show} = useToastController();
 
@@ -76,6 +75,7 @@ onMounted(() => {
                 </BButton>
             </BNavItem>
         </BNavbarNav>
+        <BasketButton></BasketButton>
         <NotificationButton v-if="!isAnonymous"></NotificationButton>
         <UserMenuButton
             v-if="!isAnonymous"

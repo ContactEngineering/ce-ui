@@ -34,7 +34,7 @@ import DatasetDescription from './DatasetDescription.vue';
 import DatasetPermissions from './DatasetPermissions.vue';
 import DatasetProperties from './DatasetProperties.vue';
 import TopographyCard from "./TopographyCard.vue";
-import TopographyPropertiesCard from "./TopographyPropertiesCard.vue";
+import TopographyUpdateCard from "./TopographyUpdateCard.vue";
 
 const {show} = useToastController();
 
@@ -338,13 +338,13 @@ const allSelected = computed({
                         <drop-zone v-if="isEditable && !anySelected"
                                    @files-dropped="filesDropped">
                         </drop-zone>
-                        <topography-properties-card v-if="anySelected"
+                        <topography-update-card v-if="anySelected"
                                                     v-model:topography="_batchEditTopography"
                                                     :batch-edit="true"
                                                     :saving="_saving"
                                                     @save:edit="saveBatchEdit"
                                                     @discard:edit="discardBatchEdit">
-                        </topography-properties-card>
+                        </topography-update-card>
                         <div v-if="isEditable && _topographies.length > 0"
                              class="d-flex mb-1">
                             <BCard>
