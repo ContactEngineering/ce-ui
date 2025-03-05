@@ -48,7 +48,6 @@ const _colormap = ref(null);
 const _errorMessage = ref(null);
 
 onMounted(() => {
-    //this.eventHub.on('download-dzi', this.download);
     requestDzi();
 });
 

@@ -1,5 +1,10 @@
 # Changelog for plugin *ce-ui*
 
+## 1.12.0 (not yet released)
+
+- ENH: New dataset list
+- ENH: Search while typing
+
 ## 1.11.2 (2025-03-04)
 
 - BUG: Don't show publish button if user has no rights to publish (#84)

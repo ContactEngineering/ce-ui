@@ -413,63 +413,6 @@ section[title="Terms and Conditions"] div.toc-container, #tc-terms-html {
 .card-footer {
     background-color: unset;
 }
-
-/**
- * Settings for the Find & select results tree
- */
-
-.select-tree-title {
-    font-size: medium;
-    font-weight: bold;
-}
-
-.select-tree-authors {
-    font-size: medium;
-    color: var(--secondary);
-}
-
-/* The following cuts the description text after 3 display lines */
-.select-tree-description {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.fancytree-active .select-tree-authors {
-    font-size: medium;
-    /* color: white; */
-}
-
-.fancytree-active .select-tree-authors a {
-    font-size: medium;
-    /* color: white; */
-}
-
-.select-tree-item p {
-    margin-bottom: 0.3rem;
-}
-
-.select-tree-info {
-    color: var(--secondary);
-}
-
-.fancytree-active .select-tree-info {
-    /* color: white; */
-}
-
-.surface-tree thead {
-    display: none;
-}
-
-.create-twin-button {
-    width: 100em;
-}
-
-.surface-tree {
-    table-layout: fixed;
-}
-
 .dot {
     width: 1em;
     height: 1em;
