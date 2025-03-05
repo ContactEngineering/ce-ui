@@ -10,9 +10,6 @@ import RoughnessParametersCard from 'topobank_statistics/RoughnessParametersCard
 import SeriesCard from 'topobank/analysis/SeriesCard.vue';
 
 import axios from "axios";
-import mitt from 'mitt';
-
-const eventHub = mitt();
 
 export function registerAnalysisCardComponents(app) {
     app.component('ContactMechanicsCard', ContactMechanicsCard);
@@ -26,7 +23,6 @@ export function createAnalysisResultsListApp(el, csrfToken, props) {
     app.use(VueCookies);
     axios.defaults.headers.common['X-CSRFToken'] = csrfToken;
     app.provide('csrfToken', csrfToken);
-    app.provide('eventHub', eventHub);
     registerAnalysisCardComponents(app);
     app.mount(el);
     return app;
@@ -38,7 +34,6 @@ export function createAnalysisResultsDetailApp(el, csrfToken, props) {
     app.use(VueCookies);
     axios.defaults.headers.common['X-CSRFToken'] = csrfToken;
     app.provide('csrfToken', csrfToken);
-    app.provide('eventHub', eventHub);
     registerAnalysisCardComponents(app);
     app.mount(el);
     return app;

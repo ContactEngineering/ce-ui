@@ -26,9 +26,10 @@
           href="{% static 'images/favicons/favicon.png' %}"/>
 
     <script src="{% static 'js/base.bundle.js' %}"></script>
-
-    <link href="{% static 'tagulous/lib/select2-4/css/select2.min.css' %}"
-          rel="stylesheet">
+    <script src="https://unpkg.com/mitt/dist/mitt.umd.js"></script>
+    <script>
+        window.eventHub = mitt();
+    </script>
 
     {% block extra_css %}{% endblock extra_css %}
 </head>

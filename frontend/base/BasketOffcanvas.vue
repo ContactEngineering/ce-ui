@@ -1,9 +1,6 @@
 <script setup>
 
-import axios from "axios";
-import mitt from "mitt";
-import {onMounted, ref} from "vue";
-
+import {onMounted} from "vue";
 
 import {
     BAlert,
@@ -14,26 +11,29 @@ import {
     BOffcanvas
 } from "bootstrap-vue-next";
 
-const visible = defineModel("visible");
-const items = defineModel("items", {type: Array, default: () => []});
+const visible = defineModel("visible", {type: Boolean, required: true});
+const items = defineModel("items", {type: Object, default: {}});
 
-const eventHub = mitt();
+const eventHub = window.eventHub;
+
+onMounted(() => {
+    eventHub.on("basket:add", addItem);
+    eventHub.on("basket:remove", removeItem);
+});
 
 function clearSelection() {
-  items.value = [];
+    items.value = {};
 }
 
 function addItem(item) {
-  items.value.push(item);
+    console.log("add", item);
+    items.value[item.id] = item;
 }
 
 function removeItem(item) {
-  const index = _items.value.indexOf(item);
-  items.value.splice(index, 1);
+    console.log("remove", item);
+    delete items.value[item.id];
 }
-
-eventHub.on("basket-add", addItem);
-eventHub.on("basket-remove", removeItem);
 
 </script>
 
@@ -46,7 +46,7 @@ eventHub.on("basket-remove", removeItem);
         <template #footer>
             <BNavbarNav class="justify-content-end flex-grow-1">
                 <BNavItem class="btn btn-secondary" @click="clearSelection"
-                          :disabled="itemCount === 0">
+                          :disabled="items.length === 0">
                     Clear selection
                 </BNavItem>
             </BNavbarNav>

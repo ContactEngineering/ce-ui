@@ -14,16 +14,14 @@ import {
 
 import ThumbnailRow from "./ThumbnailRow.vue";
 
-const selected = defineModel("selected", {
-    type: Boolean,
-    default: false
-});
+const emit = defineEmits(["select", "unselect"]);
 
 const props = defineProps({
     dataset: Object
 });
 
 const _creator = ref(null);
+const _selected = ref(false);
 
 onMounted(() => {
     axios.get(props.dataset.creator)
@@ -38,6 +36,20 @@ const publicationDatePretty = computed(() => {
 
 const creationDatePretty = computed(() => {
     return new Date(props.dataset.creation_datetime).toISOString().substring(0, 10);
+});
+
+const selected = computed({
+    get() {
+        return _selected.value;
+    },
+    set(value) {
+        _selected.value = value;
+        if (value) {
+            emit("select", props.dataset);
+        } else {
+            emit("unselect", props.dataset);
+        }
+    }
 });
 
 </script>
