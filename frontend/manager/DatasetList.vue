@@ -36,7 +36,11 @@ const props = defineProps({
     isAnonymous: Boolean,
     isLoading: Boolean,
     pageSize: Number,
-    searchTerm: String
+    searchTerm: String,
+    searchDelay: {
+        type: Number,
+        default: 500
+    }
 });
 
 // Constants
@@ -68,7 +72,10 @@ const _datasets = ref([]);
 const _nextUrl = ref(null);
 const _previousUrl = ref(null);
 
+let searchDelayTimer = null;
+
 function getDatasets(offset = 0) {
+    searchDelayTimer = null;
     _isLoading.value = true;
     _currentPage.value = offset / _pageSize.value + 1;
     let queryUrl = `${props.apiUrl}?offset=${offset}&limit=${_pageSize.value}`;
@@ -138,7 +145,8 @@ const searchTerm = computed({
     },
     set(value) {
         _searchTerm.value = value;
-        getDatasets();
+        clearTimeout(searchDelayTimer);
+        searchDelayTimer = setTimeout(getDatasets, props.searchDelay);
     }
 });
 
@@ -169,18 +177,29 @@ function unselect() {
     </Basket>
     <BOverlay :show="_isLoading">
         <div class="row">
-            <BFormGroup class="mb-2"
-                        description="Search for digital surface twins by name or tags">
-                <BInputGroup>
-                    <BFormInput v-model="searchTerm"
-                                placeholder="Type to start search..."/>
-                    <BButton variant="outline-secondary"
-                             title="Tips for searching"
-                             @click="_searchInfoModalVisible = true">
-                        <i class="fa fa-info-circle" aria-hidden="true"></i>
-                    </BButton>
-                </BInputGroup>
-            </BFormGroup>
+            <div class="col-8">
+                <BFormGroup class="mb-2"
+                            description="Search for digital surface twins by name or tags">
+                    <BInputGroup>
+                        <BFormInput v-model="searchTerm"
+                                    placeholder="Type to start searching..."/>
+                        <BButton variant="outline-secondary"
+                                 title="Tips for searching"
+                                 @click="_searchInfoModalVisible = true">
+                            <i class="fa fa-info-circle" aria-hidden="true"></i>
+                        </BButton>
+                    </BInputGroup>
+                </BFormGroup>
+            </div>
+            <div class="col-4">
+                <BFormGroup description="Filter results by sharing status">
+                    <BFormSelect name="sharing_status" class="form-control"
+                                 v-model="_sharingStatus" @change="getDatasets"
+                                 :disabled="_isLoading"
+                                 :options="sharingStatusFilterChoices">
+                    </BFormSelect>
+                </BFormGroup>
+            </div>
         </div>
         <div class="row">
             <BButtonToolbar class="mb-2">
@@ -199,13 +218,6 @@ function unselect() {
                                  :options="orderByFilterChoices">
                     </BFormSelect>
                 </BInputGroup>
-                <BFormGroup class="me-2">
-                    <BFormSelect name="sharing_status" class="form-control"
-                                 v-model="_sharingStatus" @change="getDatasets"
-                                 :disabled="_isLoading"
-                                 :options="sharingStatusFilterChoices">
-                    </BFormSelect>
-                </BFormGroup>
                 <BButton v-if="isAnonymous" variant="primary"
                          title="Please sign-in to use this feature"
                          disabled>
