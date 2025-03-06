@@ -2,7 +2,7 @@
 
 import axios from "axios";
 
-import {computed, onMounted, ref} from "vue";
+import {computed, inject, onMounted, ref} from "vue";
 import {
     BModal,
     BSpinner,
@@ -25,12 +25,26 @@ import TopographyCard from "../manager/TopographyCard.vue";
 const {show} = useToastController();
 
 const props = defineProps({
-    topographyUrl: String
+    topographyUrl: String,
+    topographyUrlPrefix: {
+        type: String,
+        default: "/manager/api/topography/"
+    }
 });
+
+const appProps = inject("appProps");
 
 const _disabled = ref(false);
 const _showDeleteModal = ref(false);
 const _topography = ref(null);
+
+function getTopographyUrl() {
+    if (props.topographyUrl != null) {
+        return props.topographyUrl;
+    }
+    const topographyId = appProps.searchParams.get("topography");
+    return `${props.topographyUrlPrefix}${topographyId}`;
+}
 
 onMounted(() => {
     updateCard();
@@ -38,7 +52,7 @@ onMounted(() => {
 
 function updateCard() {
     /* Fetch JSON describing the card */
-    axios.get(`${props.topographyUrl}?permissions=yes&attachments=yes`).then(response => {
+    axios.get(`${getTopographyUrl()}?permissions=yes&attachments=yes`).then(response => {
         _topography.value = response.data;
         _disabled.value = _topography.value === null || _topography.value.permissions.current_user.permission === 'view';
     }).catch(error => {

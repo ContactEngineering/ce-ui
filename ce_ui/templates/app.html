@@ -30,8 +30,12 @@
                 icon: '{{ breadcrumb.icon }}',
                 icon_style_prefix: '{{ breadcrumb.icon_style }}',
                 href: '{{ breadcrumb.href }}',
-                href_next: {{ breadcrumb.href_next|default:'null' }},
-                href_previous: {{ breadcrumb.href_previous|default:'null' }},
+                {%  if breadcrumb.href_next %}
+                    href_next: '{{ breadcrumb.href_next }}',
+                {% endif %}
+                {%  if breadcrumb.href_previous %}
+                    href_previous: '{{ breadcrumb.href_previous }}',
+                {% endif %}
                 active: {{ breadcrumb.active|yesno:'true,false' }},
                 login_required: {{ breadcrumb.login_required|yesno:'true,false' }},
                 tooltip: '{{ breadcrumb.tooltip }}'
@@ -43,8 +47,12 @@
                 icon: '{{ breadcrumb.icon }}',
                 icon_style_prefix: '{{ breadcrumb.icon_style }}',
                 href: '{{ breadcrumb.href }}',
-                href_next: {{ breadcrumb.href_next|default:'null' }},
-                href_previous: {{ breadcrumb.href_previous|default:'null' }},
+                {%  if breadcrumb.href_next %}
+                    href_next: '{{ breadcrumb.href_next }}',
+                {% endif %}
+                {%  if breadcrumb.href_previous %}
+                    href_previous: '{{ breadcrumb.href_previous }}',
+                {% endif %}
                 active: {{ breadcrumb.active|yesno:'true,false' }},
                 login_required: {{ breadcrumb.login_required|yesno:'true,false' }},
                 tooltip: '{{ breadcrumb.tooltip }}'

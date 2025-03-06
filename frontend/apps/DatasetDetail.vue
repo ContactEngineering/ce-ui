@@ -1,7 +1,7 @@
 <script setup>
 
 import axios from "axios";
-import {computed, onMounted, ref} from "vue";
+import {computed, inject, onMounted, ref} from "vue";
 
 import {
     BAccordion,
@@ -39,7 +39,14 @@ import TopographyUpdateCard from "../manager/TopographyUpdateCard.vue";
 const {show} = useToastController();
 
 const props = defineProps({
-    surfaceUrl: String,
+    surfaceUrl: {
+        type: String,
+        default: null
+    },
+    surfaceUrlPrefix: {
+        type: String,
+        default: '/manager/api/surface/'
+    },
     newTopographyUrl: {
         type: String,
         default: '/manager/api/topography/'
@@ -53,6 +60,8 @@ const props = defineProps({
         }
     }
 });
+
+const appProps = inject("appProps");
 
 const emit = defineEmits([
     'delete:surface'
@@ -72,6 +81,18 @@ const _selected = ref([]);  // Selected topographies (for batch editing)
 
 // Batch edit data
 const _batchEditTopography = ref(emptyTopography());
+
+function getSurfaceUrl() {
+    if (props.surfaceUrl != null) {
+        return props.surfaceUrl;
+    }
+    const surfaceId = appProps.searchParams.get("surface");
+    return `${props.surfaceUrlPrefix}${surfaceId}`;
+}
+
+const computedSurfaceUrl = computed(() => {
+    return getSurfaceUrl();
+});
 
 function emptyTopography() {
     return {
@@ -118,7 +139,7 @@ function getOriginalSurfaceId() {
 
 function updateCard() {
     /* Fetch JSON describing the card */
-    axios.get(`${props.surfaceUrl}?children=yes&permissions=yes&attachments=yes`).then(response => {
+    axios.get(`${getSurfaceUrl()}?children=yes&permissions=yes&attachments=yes`).then(response => {
         _surface.value = response.data;
         _permissions.value = response.data.permissions;
         _topographies.value = response.data.topography_set;
@@ -177,7 +198,7 @@ function filesDropped(files) {
 
 function uploadNewTopography(file) {
     axios.post(props.newTopographyUrl, {
-        surface: props.surfaceUrl,
+        surface: computedSurfaceUrl,
         name: file.name
     }).then(response => {
         let upload = response.data;
@@ -476,7 +497,7 @@ const allSelected = computed({
                             Analyze
                         </a>
 
-                        <a :href="`${surfaceUrl}download/`"
+                        <a :href="`${computedSurfaceUrl}download/`"
                            class="btn btn-outline-secondary mb-2">
                             Download
                         </a>
