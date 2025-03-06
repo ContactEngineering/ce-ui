@@ -247,7 +247,7 @@ function discardBatchEdit() {
 }
 
 function surfaceHrefForVersion(version) {
-    return `/ui/html/surface/?surface=${getIdFromUrl(version.surface)}`;
+    return `/ui/html/dataset-detail/?surface=${getIdFromUrl(version.surface)}`;
 }
 
 function deleteSurface() {
@@ -278,7 +278,7 @@ const versionString = computed(() => {
 });
 
 const hrefOriginalSurface = computed(() => {
-    return `/ui/html/surface/?surface=${getOriginalSurfaceId()}`;
+    return `/ui/html/dataset-detail/?surface=${getOriginalSurfaceId()}`;
 });
 
 const publishUrl = computed(() => {

@@ -11,19 +11,13 @@ from django.http import HttpResponse
 from django.urls import reverse
 from django.views.generic import (DetailView, ListView, RedirectView,
                                   TemplateView, UpdateView)
-from rest_framework import generics
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.response import Response
-from rest_framework.utils.urls import remove_query_param, replace_query_param
 from termsandconditions.models import TermsAndConditions
 from termsandconditions.views import AcceptTermsView
 from termsandconditions.views import TermsView as OrigTermsView
-from topobank.analysis.models import AnalysisFunction
 from topobank.analysis.registry import (get_analysis_function_names,
                                         get_visualization_type)
 from topobank.manager.containers import write_surface_container
-from topobank.manager.models import Surface, Tag, Topography
+from topobank.manager.models import Surface, Topography
 from topobank.manager.utils import subjects_from_base64
 from topobank.usage_stats.utils import (increase_statistics_by_date,
                                         increase_statistics_by_date_and_object)
@@ -32,12 +26,9 @@ from trackstats.models import Metric, Period
 
 from ce_ui import breadcrumb
 
-from .serializers import SurfaceSearchSerializer, TagSearchSerizalizer
-from .utils import (current_selection_as_basket_items,
-                    filter_queryset_by_search_term, filtered_topographies,
-                    get_order_by, get_search_term, get_sharing_status,
-                    get_tree_mode, instances_to_selection, selected_instances,
-                    selection_to_subjects_dict, tags_for_user)
+from .utils import (filter_queryset_by_search_term, get_order_by,
+                    get_search_term, get_sharing_status,
+                    instances_to_selection, selection_to_subjects_dict)
 
 ORDER_BY_CHOICES = {"name": "name", "-creation_datetime": "date"}
 SHARING_STATUS_FILTER_CHOICES = {
@@ -231,8 +222,39 @@ class DataSetListView(AppView):
         return super().dispatch(request, *args, **kwargs)
 
 
-class TopographyDetailView(TemplateView):
-    template_name = "manager/topography_detail.html"
+class DatasetDetailView(AppView):
+    vue_component = "dataset-detail"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        #
+        # Get surface instance
+        #
+        surface_id = self.request.GET.get("surface")
+        if surface_id is None:
+            return context
+        try:
+            surface = Surface.objects.get(id=int(surface_id))
+        except (ValueError, Surface.DoesNotExist):
+            raise PermissionDenied()
+
+        #
+        # Check permissions
+        #
+        if not surface.has_permission(self.request.user, "view"):
+            raise PermissionDenied()
+
+        #
+        # Breadcrumb navigation
+        #
+        breadcrumb.add_surface(context, surface)
+
+        return context
+
+
+class TopographyDetailView(AppView):
+    vue_component = "topography-detail"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -263,426 +285,8 @@ class TopographyDetailView(TemplateView):
         return context
 
 
-class SurfaceDetailView(TemplateView):
-    template_name = "manager/surface_detail.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        #
-        # Get surface instance
-        #
-        surface_id = self.request.GET.get("surface")
-        if surface_id is None:
-            return context
-        try:
-            surface = Surface.objects.get(id=int(surface_id))
-        except (ValueError, Surface.DoesNotExist):
-            raise PermissionDenied()
-
-        #
-        # Check permissions
-        #
-        if not surface.has_permission(self.request.user, "view"):
-            raise PermissionDenied()
-
-        #
-        # Breadcrumb navigation
-        #
-        breadcrumb.add_surface(context, surface)
-
-        return context
-
-
-#######################################################################################
-# Views for REST interface
-#######################################################################################
-class SurfaceSearchPaginator(PageNumberPagination):
-    page_size = DEFAULT_PAGE_SIZE
-    page_query_param = "page"
-    page_size_query_param = "page_size"
-    max_page_size = MAX_PAGE_SIZE
-
-    def get_paginated_response(self, data):
-
-        #
-        # Save information about requested data in session
-        #
-        session = self.request.session
-
-        select_tab_state = session.get(
-            "select_tab_state", DEFAULT_SELECT_TAB_STATE.copy()
-        )
-        # not using the keyword argument "default" here, because in some tests,
-        # the session is a simple dict and no real session dict. A simple
-        # dict's .get() has no keyword argument 'default', although it can be given
-        # as second parameter.
-
-        select_tab_state["search_term"] = get_search_term(self.request)
-        select_tab_state["order_by"] = get_order_by(self.request)
-        select_tab_state["sharing_status"] = get_sharing_status(self.request)
-        select_tab_state["tree_mode"] = get_tree_mode(self.request)
-        page_size = self.get_page_size(self.request)
-        select_tab_state[self.page_size_query_param] = page_size
-        select_tab_state["current_page"] = self.page.number
-        _log.debug("Setting select tab state set in paginator: %s", select_tab_state)
-        session["select_tab_state"] = select_tab_state
-
-        return Response(
-            {
-                "num_items": self.page.paginator.count,
-                "num_pages": self.page.paginator.num_pages,
-                "page_range": list(self.page.paginator.page_range),
-                "page_urls": list(self.get_page_urls()),
-                "current_page": self.page.number,
-                "num_items_on_current_page": len(self.page.object_list),
-                "page_size": page_size,
-                "search_term": select_tab_state["search_term"],
-                "order_by": select_tab_state["order_by"],
-                "sharing_status": select_tab_state["sharing_status"],
-                "tree_mode": select_tab_state["tree_mode"],
-                "page_results": data,
-            }
-        )
-
-    def get_page_urls(self):
-        base_url = self.request.build_absolute_uri()
-        urls = []
-        for page_no in self.page.paginator.page_range:
-            if page_no == 1:
-                url = remove_query_param(base_url, self.page_query_param)
-            else:
-                url = replace_query_param(base_url, self.page_query_param, page_no)
-            # always add page size, so requests for other apps have it
-            url = replace_query_param(
-                url, self.page_size_query_param, self.get_page_size(self.request)
-            )
-            urls.append(url)
-        return urls
-
-
-class TagTreeView(generics.ListAPIView):
-    """
-    Generate tree of tags with surfaces and topographies underneath.
-    """
-
-    serializer_class = TagSearchSerizalizer
-    pagination_class = SurfaceSearchPaginator
-
-    def get_queryset(self):
-        surfaces = filtered_surfaces(self.request)
-        topographies = filtered_topographies(self.request, surfaces)
-        return tags_for_user(self.request.user, surfaces, topographies).filter(
-            parent=None
-        )
-        # Only top level are collected, the children are added in the serializer.
-        #
-        # TODO The filtered surfaces and topographies are calculated twice here, not sure how to circumvent this.
-        # Maybe by caching with request argument?
-
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context["selected_instances"] = selected_instances(self.request)
-        context["request"] = self.request
-
-        surfaces = filtered_surfaces(self.request)
-        topographies = filtered_topographies(self.request, surfaces)
-        tags = tags_for_user(self.request.user, surfaces, topographies)
-        context["tags_for_user"] = tags
-
-        #
-        # also pass filtered surfaces and topographies the user has access to
-        #
-        context["surfaces"] = surfaces
-        context["topographies"] = topographies
-
-        return context
-
-
-# FIXME!!! This should be folded into the `SurfaceViewSet`, but handling
-#  selections should be moved to the client first.
-class SurfaceListView(generics.ListAPIView):
-    """
-    List all surfaces with topographies underneath.
-    """
-
-    serializer_class = SurfaceSearchSerializer
-    pagination_class = SurfaceSearchPaginator
-
-    def get_queryset(self):
-        return filtered_surfaces(self.request)
-
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context["selected_instances"] = selected_instances(self.request)
-        context["request"] = self.request
-        return context
-
-
-def _selection_set(request):
-    return set(request.session.get("selection", []))
-
-
-def _surface_key(
-    pk,
-):  # TODO use such a function everywhere: instance_key_for_selection()
-    return "surface-{}".format(pk)
-
-
-def _topography_key(pk):
-    return "topography-{}".format(pk)
-
-
-def _tag_key(pk):
-    return "tag-{}".format(pk)
-
-
-def set_surface_select_status(request, pk, select_status):
-    """Marks the given surface as 'selected' in session or checks this.
-
-    :param request: request
-    :param pk: primary key of the surface
-    :param select_status: True if surface should be selected, False if it should be unselected
-    :return: JSON Response
-
-    The response returns the current selection as suitable for the basket.
-    """
-    try:
-        pk = int(pk)
-        surface = Surface.objects.get(pk=pk)
-        assert surface.has_permission(request.user, "view")
-    except (ValueError, Surface.DoesNotExist, AssertionError):
-        raise PermissionDenied()  # This should be shown independent of whether the surface exists
-
-    surface_key = _surface_key(pk)
-    selection = _selection_set(request)
-    is_selected = surface_key in selection
-
-    if request.method == "POST":
-        if select_status:
-            # surface should be selected
-            selection.add(surface_key)
-        elif is_selected:
-            selection.remove(surface_key)
-
-        request.session["selection"] = list(selection)
-
-    data = current_selection_as_basket_items(request)
-    return Response(data)
-
-
-@api_view(["POST"])
-@permission_classes(
-    []
-)  # We need to override permissions because the anonymous user has read-only access
-def select_surface(request, pk):
-    """Marks the given surface as 'selected' in session.
-
-    :param request: request
-    :param pk: primary key of the surface
-    :return: JSON Response
-
-    The response returns the current selection as suitable for the basket.
-    """
-    return set_surface_select_status(request, pk, True)
-
-
-@api_view(["POST"])
-@permission_classes(
-    []
-)  # We need to override permissions because the anonymous user has read-only access
-def unselect_surface(request, pk):
-    """Marks the given surface as 'unselected' in session.
-
-    :param request: request
-    :param pk: primary key of the surface
-    :return: JSON Response
-
-    The response returns the current selection as suitable for the basket.
-    """
-    return set_surface_select_status(request, pk, False)
-
-
-def set_topography_select_status(request, pk, select_status):
-    """Marks the given topography as 'selected' or 'unselected' in session.
-
-    :param request: request
-    :param pk: primary key of the surface
-    :param select_status: True or False, True means "mark as selected", False means "mark as unselected"
-    :return: JSON Response
-
-    The response returns the current selection as suitable for the basket.
-    """
-    try:
-        pk = int(pk)
-        topo = Topography.objects.get(pk=pk)
-        assert topo.surface.has_permission(request.user, "view")
-    except (ValueError, Topography.DoesNotExist, AssertionError):
-        raise PermissionDenied()  # This should be shown independent of whether the surface exists
-
-    topography_key = _topography_key(pk)
-    selection = _selection_set(request)
-    is_selected = topography_key in selection
-
-    if request.method == "POST":
-        if select_status:
-            # topography should be selected
-            selection.add(topography_key)
-        elif is_selected:
-            selection.remove(topography_key)
-
-        request.session["selection"] = list(selection)
-
-    data = current_selection_as_basket_items(request)
-    return Response(data)
-
-
-@api_view(["POST"])
-@permission_classes(
-    []
-)  # We need to override permissions because the anonymous user has read-only access
-def select_topography(request, pk):
-    """Marks the given topography as 'selected' in session.
-
-    :param request: request
-    :param pk: primary key of the surface
-    :return: JSON Response
-
-    The response returns the current selection as suitable for the basket.
-    """
-    return set_topography_select_status(request, pk, True)
-
-
-@api_view(["POST"])
-@permission_classes(
-    []
-)  # We need to override permissions because the anonymous user has read-only access
-def unselect_topography(request, pk):
-    """Marks the given topography as 'selected' in session.
-
-    :param request: request
-    :param pk: primary key of the surface
-    :return: JSON Response
-
-    The response returns the current selection as suitable for the basket.
-    """
-    return set_topography_select_status(request, pk, False)
-
-
-def set_tag_select_status(request, pk, select_status):
-    """Marks the given tag as 'selected' in session or checks this.
-
-    :param request: request
-    :param pk: primary key of the tag
-    :param select_status: True if tag should be selected, False if it should be unselected
-    :return: JSON Response
-
-    The response returns the current selection as suitable for the basket.
-    """
-    try:
-        pk = int(pk)
-        tag = Tag.objects.get(pk=pk)
-    except (ValueError, Tag.DoesNotExist):
-        raise PermissionDenied()
-
-    if tag not in tags_for_user(request.user):
-        raise PermissionDenied()
-
-    tag_key = _tag_key(pk)
-    selection = _selection_set(request)
-    is_selected = tag_key in selection
-
-    if request.method == "POST":
-        if select_status:
-            # tag should be selected
-            selection.add(tag_key)
-        elif is_selected:
-            selection.remove(tag_key)
-
-        request.session["selection"] = list(selection)
-
-    data = current_selection_as_basket_items(request)
-    return Response(data)
-
-
-@api_view(["POST"])
-@permission_classes(
-    []
-)  # We need to override permissions because the anonymous user has read-only access
-def select_tag(request, pk):
-    """Marks the given tag as 'selected' in session.
-
-    :param request: request
-    :param pk: primary key of the tag
-    :return: JSON Response
-
-    The response returns the current selection as suitable for the basket.
-    """
-    return set_tag_select_status(request, pk, True)
-
-
-@api_view(["POST"])
-@permission_classes(
-    []
-)  # We need to override permissions because the anonymous user has read-only access
-def unselect_tag(request, pk):
-    """Marks the given tag as 'unselected' in session.
-
-    :param request: request
-    :param pk: primary key of the tag
-    :return: JSON Response
-
-    The response returns the current selection as suitable for the basket.
-    """
-    return set_tag_select_status(request, pk, False)
-
-
-@api_view(["POST"])
-@permission_classes(
-    []
-)  # We need to override permissions because the anonymous user has read-only access
-def unselect_all(request):
-    """Removes all selections from session.
-
-    :param request: request
-    :return: empty list as JSON Response
-    """
-    request.session["selection"] = []
-    return Response([])
-
-
-def extra_tabs_if_single_item_selected(context, topographies, surfaces):
-    """Return contribution to context for opening extra tabs if a single topography/surface is selected.
-
-    Parameters
-    ----------
-    topographies: list of topographies
-        Use here the result of function `utils.selected_instances`.
-
-    surfaces: list of surfaces
-        Use here the result of function `utils.selected_instances`.
-
-    Returns
-    -------
-    Sequence of dicts, each dict corresponds to an extra tab.
-
-    """
-    if len(topographies) == 1 and len(surfaces) == 0:
-        # exactly one topography was selected -> show also tabs of topography
-        topo = topographies[0]
-        breadcrumb.add_surface(context, topo.surface)
-        breadcrumb.add_topography(context, topo)
-    elif len(surfaces) == 1 and all(t.surface == surfaces[0] for t in topographies):
-        # exactly one surface was selected -> show also tab of surface
-        surface = surfaces[0]
-        breadcrumb.add_surface(context, surface)
-
-
-class AnalysisResultDetailView(DetailView):
-    """Show analyses for a given analysis function."""
-
-    model = AnalysisFunction
-    template_name = "analysis/analyses_detail.html"
+class AnalysisDetailView(AppView):
+    vue_component = "analysis-detail"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -704,39 +308,35 @@ class AnalysisResultDetailView(DetailView):
         context["visualization_type"] = visualization_type
 
         # Decide whether to open extra tabs for surface/topography details
-        tabs = extra_tabs_if_single_item_selected(
-            effective_topographies, effective_surfaces
+        breadcrumb.add_generic(
+            context,
+            {
+                "title": "Analyze",
+                "icon": "chart-area",
+                "href": f"{reverse('ce_ui:results-list')}?subjects={self.request.GET.get('subjects')}",
+                "active": False,
+                "login_required": False,
+                "tooltip": "Results for selected analysis functions",
+            },
         )
-        tabs.extend(
-            [
-                {
-                    "title": "Analyze",
-                    "icon": "chart-area",
-                    "href": f"{reverse('ce_ui:results-list')}?subjects={self.request.GET.get('subjects')}",
-                    "active": False,
-                    "login_required": False,
-                    "tooltip": "Results for selected analysis functions",
-                },
-                {
-                    "title": f"{function.display_name}",
-                    "icon": "chart-area",
-                    "href": f"{self.request.path}?subjects={self.request.GET.get('subjects')}",
-                    "active": True,
-                    "login_required": False,
-                    "tooltip": f"Results for analysis '{function.display_name}'",
-                    "show_basket": True,
-                },
-            ]
+        breadcrumb.add_generic(
+            context,
+            {
+                "title": f"{function.display_name}",
+                "icon": "chart-area",
+                "href": f"{self.request.path}?subjects={self.request.GET.get('subjects')}",
+                "active": True,
+                "login_required": False,
+                "tooltip": f"Results for analysis '{function.display_name}'",
+                "show_basket": True,
+            },
         )
-        context["extra_tabs"] = tabs
 
         return context
 
 
-class AnalysesResultListView(TemplateView):
-    """View showing analyses from multiple functions."""
-
-    template_name = "analysis/analyses_list.html"
+class AnalysisListView(AppView):
+    vue_component = "analysis-list"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -768,7 +368,7 @@ class AnalysesResultListView(TemplateView):
             pass
 
         # Decide whether to open extra tabs for surface/topography details
-        extra_tabs_if_single_item_selected(context, topographies, surfaces)
+        # extra_tabs_if_single_item_selected(context, topographies, surfaces)
         breadcrumb.add_generic(
             context,
             {

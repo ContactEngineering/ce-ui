@@ -208,7 +208,7 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
             "urls": {
                 "analyze": surface1_analyze,
                 "download": f"/manager/api/surface/{surface1.id}/download/",
-                "detail": f"/ui/html/surface/?surface={surface1.id}",
+                "detail": f"/ui/html/dataset-detail/?surface={surface1.id}",
                 "select": f"/ui/api/selection/surface/{surface1.id}/select/",
                 "unselect": f"/ui/api/selection/surface/{surface1.id}/unselect/",
             },
@@ -328,7 +328,7 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
             "urls": {
                 "analyze": surface2_analyze,
                 "download": f"/manager/api/surface/{surface2.id}/download/",
-                "detail": f"/ui/html/surface/?surface={surface2.id}",
+                "detail": f"/ui/html/dataset-detail/?surface={surface2.id}",
                 "select": f"/ui/api/selection/surface/{surface2.id}/select/",
                 "unselect": f"/ui/api/selection/surface/{surface2.id}/unselect/",
             },
@@ -360,7 +360,7 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
             "modification_datetime": surface3.modification_datetime.astimezone().isoformat(),
             "urls": {
                 "download": f"/manager/api/surface/{surface3.id}/download/",
-                "detail": f"/ui/html/surface/?surface={surface3.id}",
+                "detail": f"/ui/html/dataset-detail/?surface={surface3.id}",
                 "select": f"/ui/api/selection/surface/{surface3.id}/select/",
                 "unselect": f"/ui/api/selection/surface/{surface3.id}/unselect/",
             },
@@ -458,7 +458,7 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
             "urls": {
                 "analyze": surface2_analyze,
                 "download": f"/manager/api/surface/{surface2.id}/download/",
-                "detail": f"/ui/html/surface/?surface={surface2.id}",
+                "detail": f"/ui/html/dataset-detail/?surface={surface2.id}",
                 "select": f"/ui/api/selection/surface/{surface2.id}/select/",
                 "unselect": f"/ui/api/selection/surface/{surface2.id}/unselect/",
             },
@@ -724,7 +724,7 @@ def test_tag_search_with_request_factory(user_three_surfaces_four_topographies):
         "urls": {
             "analyze": surface1_analyze,
             "download": f"/manager/api/surface/{surface1.id}/download/",
-            "detail": f"/ui/html/surface/?surface={surface1.id}",
+            "detail": f"/ui/html/dataset-detail/?surface={surface1.id}",
             "select": f"/ui/api/selection/surface/{surface1.id}/select/",
             "unselect": f"/ui/api/selection/surface/{surface1.id}/unselect/",
         },
@@ -953,7 +953,7 @@ def test_tag_search_with_request_factory(user_three_surfaces_four_topographies):
 
     shared_pk = Tag.objects.get(name="shared").pk
     shared_prefix = f"/ui/html/tag/{shared_pk}/"
-    surface4_prefix = f"/ui/html/surface/{surface4.pk}/"
+    surface4_prefix = f"/ui/html/dataset-detail/{surface4.pk}/"
 
     request = factory.get(reverse("ce_ui:tag-list") + "?sharing_status=others")
     request.user = user

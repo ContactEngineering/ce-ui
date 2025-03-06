@@ -2,8 +2,7 @@ from django.conf import settings
 from django.shortcuts import reverse
 
 HOME_URL = reverse("home")
-SELECT_URL = reverse("ce_ui:select")
-UNSELECT_ALL_URL = reverse("ce_ui:unselect-all")
+SEARCH_URL = reverse("ce_ui:select")
 
 
 def fixed_tabs_processor(request):
@@ -50,8 +49,8 @@ def fixed_tabs_processor(request):
             "title": "My datasets",
             "icon": "table-list",
             "icon_style_prefix": "fa",
-            "href": SELECT_URL,
-            "active": request.path == SELECT_URL,
+            "href": SEARCH_URL,
+            "active": request.path == SEARCH_URL,
             "tooltip": "Select surfaces and topographies for analysis or create new surfaces",
             "show_basket": True,
         }

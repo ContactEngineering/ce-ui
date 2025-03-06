@@ -66,6 +66,7 @@
                 userOrcid: '{{ request.user.orcid_id }}',
                 userIsAnonymous: {{ request.user.is_anonymous|yesno:'true,false' }},
                 userIsStaff: {{ request.user.is_staff|yesno:'true,false' }},
+                searchParams: new URLSearchParams(window.location.search)
             },
             {
                 // The main component to mount
