@@ -250,7 +250,7 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                 <BButton v-if="!selected"
                          class="float-end ms-2"
                          variant="outline-secondary"
-                         :href="`/ui/html/topography/?topography=${topography.id}`">
+                         :href="`/ui/html/topography/${topography.id}/`">
                     <i class="fa fa-expand"></i>
                 </BButton>
                 <BButton v-if="selected"

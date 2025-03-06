@@ -19,7 +19,7 @@ function iconClass(tab) {
 <template>
     <ul role="tablist"
         class="nav nav-tabs lined-tabs align-items-center bg-light w-100 shadow">
-        <li v-for="tab in tabs"
+        <li v-for="(tab, index) in tabs"
             class="nav-item d-flex"
             :title="tab.tooltip">
             <div :class="{ 'nav-link': true, 'active': tab.active }">
@@ -39,6 +39,15 @@ function iconClass(tab) {
                     <i class="fa fa-caret-right"></i>
                 </a>
             </div>
+            <div v-if="index !== tabs.length - 1" class="nav-pad-y">
+                /
+            </div>
         </li>
     </ul>
 </template>
+
+<style scoped>
+.nav-pad-y {
+    padding: var(--bs-nav-link-padding-y) 0;
+}
+</style>

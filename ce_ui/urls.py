@@ -96,12 +96,12 @@ ui_urlpatterns = [
     #
     path("html/dataset-list/", view=views.DataSetListView.as_view(), name="select"),
     path(
-        r"html/topography/",
+        r"html/topography/<int:pk>/",
         view=views.TopographyDetailView.as_view(),
         name="topography-detail",
     ),
     path(
-        r"html/dataset-detail/",
+        r"html/dataset-detail/<int:pk>/",
         view=views.DatasetDetailView.as_view(),
         name="surface-detail",
     ),

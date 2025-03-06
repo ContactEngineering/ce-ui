@@ -62,7 +62,7 @@ function setPlotData(topographies) {
         right: filtered_topographies.map(t => t.bandwidth_upper),
         name: filtered_topographies.map(t => t.name),
         thumbnail: filtered_topographies.map(t => t.thumbnail == null ? null : t.thumbnail.file),
-        link: filtered_topographies.map(t => `/ui/html/topography/?topography=${t.id}`),
+        link: filtered_topographies.map(t => `/ui/html/topography/${t.id}/`),
     };
 }
 

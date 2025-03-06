@@ -163,7 +163,7 @@ function clearSearchTerm() {
 
 function createSurface() {
     axios.post('/manager/api/surface/').then(response => {
-        window.location.href = `/ui/html/dataset-detail/?surface=${response.data.id}`;
+        window.location.href = `/ui/html/dataset-detail/${response.data.id}/`;
     });
 }
 

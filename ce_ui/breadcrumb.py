@@ -21,7 +21,7 @@ def add_surface(context, surface):
             "title": f"{surface.label}",
             "icon": "layer-group",
             "icon_style_prefix": "fa",
-            "href": f"{reverse('ce_ui:surface-detail')}?surface={surface.pk}",
+            "href": f"{reverse('ce_ui:surface-detail', kwargs=dict(pk=surface.pk))}",
             "active": True,
             "login_required": False,
             "tooltip": f"Properties of digital surface twin '{surface.label}'",
@@ -40,18 +40,21 @@ def add_topography(context, topography):
         .order_by("pk")
         .last()
     )
-    url = reverse("ce_ui:topography-detail")
     topography_tab = {
         "title": f"{topography.name}",
         "icon": "microscope",
         "icon_style_prefix": "fa",
-        "href": f"{url}?topography={topography.pk}",
+        "href": reverse("ce_ui:topography-detail", kwargs=dict(pk=topography.pk)),
         "active": True,
         "login_required": False,
         "tooltip": f"Properties of measurement '{topography.name}'",
     }
     if next is not None:
-        topography_tab["href_next"] = f"{url}?topography={next.pk}"
+        topography_tab["href_next"] = reverse(
+            "ce_ui:topography-detail", kwargs=dict(pk=next.pk)
+        )
     if previous is not None:
-        topography_tab["href_previous"] = f"{url}?topography={previous.pk}"
+        topography_tab["href_previous"] = reverse(
+            "ce_ui:topography-detail", kwargs=dict(pk=previous.pk)
+        )
     add_generic(context, topography_tab)

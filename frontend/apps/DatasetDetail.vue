@@ -1,7 +1,7 @@
 <script setup>
 
 import axios from "axios";
-import {computed, inject, onMounted, ref} from "vue";
+import {computed, inject, onMounted, ref, shallowRef} from "vue";
 
 import {
     BAccordion,
@@ -68,7 +68,7 @@ const emit = defineEmits([
 ])
 
 // Data that is displayed or can be edited
-const _surface = ref(null);  // Surface data
+const _surface = shallowRef(null);  // Surface data
 const _publication = ref(null);  // Publication data
 const _permissions = ref(null);  // Permissions
 const _topographies = ref([]);  // Topographies contained in this surface
@@ -139,6 +139,7 @@ function getOriginalSurfaceId() {
 
 function updateCard() {
     /* Fetch JSON describing the card */
+    /*
     axios.get(`${getSurfaceUrl()}?children=yes&permissions=yes&attachments=yes`).then(response => {
         _surface.value = response.data;
         _permissions.value = response.data.permissions;
@@ -154,6 +155,12 @@ function updateCard() {
             }
         });
     });
+     */
+    _surface.value = appProps.object;
+    _permissions.value = appProps.object.permissions;
+    _topographies.value = appProps.object.topography_set;
+    _selected.value = new Array(_topographies.value.length).fill(false);  // Nothing is selected
+    updatePublication();
 }
 
 function updatePublication() {
@@ -268,7 +275,7 @@ function discardBatchEdit() {
 }
 
 function surfaceHrefForVersion(version) {
-    return `/ui/html/dataset-detail/?surface=${getIdFromUrl(version.surface)}`;
+    return `/ui/html/dataset-detail/${getIdFromUrl(version.surface)}/`;
 }
 
 function deleteSurface() {
@@ -299,7 +306,7 @@ const versionString = computed(() => {
 });
 
 const hrefOriginalSurface = computed(() => {
-    return `/ui/html/dataset-detail/?surface=${getOriginalSurfaceId()}`;
+    return `/ui/html/dataset-detail/${getOriginalSurfaceId()}/`;
 });
 
 const publishUrl = computed(() => {
@@ -360,11 +367,11 @@ const allSelected = computed({
                                    @files-dropped="filesDropped">
                         </drop-zone>
                         <topography-update-card v-if="anySelected"
-                                                    v-model:topography="_batchEditTopography"
-                                                    :batch-edit="true"
-                                                    :saving="_saving"
-                                                    @save:edit="saveBatchEdit"
-                                                    @discard:edit="discardBatchEdit">
+                                                v-model:topography="_batchEditTopography"
+                                                :batch-edit="true"
+                                                :saving="_saving"
+                                                @save:edit="saveBatchEdit"
+                                                @discard:edit="discardBatchEdit">
                         </topography-update-card>
                         <div v-if="isEditable && _topographies.length > 0"
                              class="d-flex mb-1">
@@ -395,7 +402,7 @@ const allSelected = computed({
                                 This surface has no measurements.
                             </BAlert>
                             <BAlert :model-value="_topographies.length > 0"
-                                     secondary>
+                                    secondary>
                                 This bandwidth plot shows the range of length scales
                                 that have been measured for
                                 this digital surface twin. Each of the blocks below

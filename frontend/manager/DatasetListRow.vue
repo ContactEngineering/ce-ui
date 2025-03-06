@@ -123,7 +123,7 @@ const selected = computed({
             <div class="d-block">
                 <BButtonGroup vertical size="sm">
                     <BButton variant="outline-secondary"
-                             :href="`/ui/html/dataset-detail/?surface=${ dataset.id }`">
+                             :href="`/ui/html/dataset-detail/${ dataset.id }/`">
                         View
                     </BButton>
                     <BButton variant="outline-secondary"

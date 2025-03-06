@@ -52,6 +52,7 @@ onMounted(() => {
 
 function updateCard() {
     /* Fetch JSON describing the card */
+    /*
     axios.get(`${getTopographyUrl()}?permissions=yes&attachments=yes`).then(response => {
         _topography.value = response.data;
         _disabled.value = _topography.value === null || _topography.value.permissions.current_user.permission === 'view';
@@ -64,13 +65,16 @@ function updateCard() {
             }
         });
     });
+     */
+    _topography.value = appProps.object;
+    _disabled.value = _topography.value === null || _topography.value.permissions.current_user.permission === 'view';
 }
 
 function deleteTopography() {
     axios.delete(_topography.url).then(response => {
         this.$emit('topography-deleted', _topography.value.url);
         const id = getIdFromUrl(_topography.value.surface);
-        window.location.href = `/ui/html/dataset-detail/?surface=${id}`;
+        window.location.href = `/ui/html/dataset-detail/${id}/`;
     }).catch(error => {
         show?.({
             props: {

@@ -22,7 +22,7 @@ const hasThumbnail = computed(() => {
 
 <template>
     <BOverlay :show="hasThumbnail && _isLoading">
-        <a :href="`/ui/html/topography/?topography=${dataSource.id}`">
+        <a :href="`/ui/html/topography/${dataSource.id}/`">
             <img v-if="hasThumbnail"
                  :class="imgClass"
                  :src="dataSource.thumbnail.file"

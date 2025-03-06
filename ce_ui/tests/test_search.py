@@ -208,7 +208,7 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
             "urls": {
                 "analyze": surface1_analyze,
                 "download": f"/manager/api/surface/{surface1.id}/download/",
-                "detail": f"/ui/html/dataset-detail/?surface={surface1.id}",
+                "detail": f"/ui/html/dataset-detail/{surface1.id}/",
                 "select": f"/ui/api/selection/surface/{surface1.id}/select/",
                 "unselect": f"/ui/api/selection/surface/{surface1.id}/unselect/",
             },
@@ -328,7 +328,7 @@ def test_surface_search_with_request_factory(user_three_surfaces_four_topographi
             "urls": {
                 "analyze": surface2_analyze,
                 "download": f"/manager/api/surface/{surface2.id}/download/",
-                "detail": f"/ui/html/dataset-detail/?surface={surface2.id}",
+                "detail": f"/ui/html/dataset-detail/{surface2.id}/",
                 "select": f"/ui/api/selection/surface/{surface2.id}/select/",
                 "unselect": f"/ui/api/selection/surface/{surface2.id}/unselect/",
             },

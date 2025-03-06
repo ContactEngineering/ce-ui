@@ -6,8 +6,7 @@ from io import BytesIO
 from allauth.account.views import EmailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
-from django.db.models import Q, Subquery, TextField, Value
-from django.db.models.functions import Replace
+from django.db.models import Q
 from django.http import HttpResponse
 from django.urls import reverse
 from django.views.generic import (DetailView, ListView, RedirectView,
@@ -20,18 +19,15 @@ from topobank.analysis.registry import get_analysis_function_names
 from topobank.analysis.serializers import WorkflowSerializer
 from topobank.manager.containers import write_surface_container
 from topobank.manager.models import Surface, Topography
-from topobank.manager.serializers import SurfaceSerializer
-from topobank.manager.utils import subjects_from_base64
+from topobank.manager.serializers import (SurfaceSerializer,
+                                          TopographySerializer)
+from topobank.manager.utils import subjects_from_base64, subjects_to_base64
 from topobank.usage_stats.utils import (increase_statistics_by_date,
                                         increase_statistics_by_date_and_object)
 from topobank.users.models import User
 from trackstats.models import Metric, Period
 
 from ce_ui import breadcrumb
-
-from .utils import (filter_queryset_by_search_term, get_order_by,
-                    get_search_term, get_sharing_status,
-                    instances_to_selection)
 
 ORDER_BY_CHOICES = {"name": "name", "-creation_datetime": "date"}
 SHARING_STATUS_FILTER_CHOICES = {
@@ -59,114 +55,6 @@ DEFAULT_SELECT_TAB_STATE = {
 DEFAULT_CONTAINER_FILENAME = "digital_surface_twin.zip"
 
 _log = logging.getLogger(__name__)
-
-
-def filtered_surfaces(request):
-    """Return queryset with surfaces matching all filter criteria.
-
-    Surfaces should be
-    - readable by the current user
-    - filtered by sharing status
-    - filtered by search expression, if given
-
-    Parameters
-    ----------
-    request
-        Request instance
-
-    Returns
-    -------
-        Filtered queryset of surfaces
-    """
-
-    user = request.user
-    # start with all surfaces which are visible for the user
-    qs = Surface.objects.for_user(user)
-
-    #
-    # Filter by sharing status
-    #
-    sharing_status = get_sharing_status(request)
-    if sharing_status == "own":
-        qs = qs.filter(creator=user)
-        if hasattr(Surface, "publication"):
-            qs = qs.exclude(
-                publication__isnull=False
-            )  # exclude published and own surfaces
-    elif sharing_status == "others":
-        qs = qs.exclude(creator=user)
-        if hasattr(Surface, "publication"):
-            qs = qs.exclude(
-                publication__isnull=False
-            )  # exclude published and own surfaces
-    elif sharing_status == "published":
-        if hasattr(Surface, "publication"):
-            qs = qs.filter(publication__isnull=False)
-        else:
-            qs = Surface.objects.none()
-    elif sharing_status == "all":
-        pass
-    else:
-        raise ValueError(f"Unknown sharing status '{sharing_status}'.")
-
-    #
-    # Filter by search term
-    #
-    search_term = get_search_term(request)
-    if search_term:
-        #
-        # search specific fields of all surfaces in a 'websearch' manner:
-        # combine phrases by "AND", allow expressions and quotes
-        #
-        # See https://docs.djangoproject.com/en/3.2/ref/contrib/postgres/search/#full-text-search
-        # for details.
-        #
-        # We introduce an extra field for search in tag names where the tag names
-        # are changed so that the tokenizer splits the names into multiple words
-        qs = (
-            qs.annotate(
-                tag_names_for_search=Replace(
-                    Replace(
-                        "tags__name", Value("."), Value(" ")
-                    ),  # replace . with space
-                    Value("/"),
-                    Value(" "),
-                ),  # replace / with space
-                topography_tag_names_for_search=Replace(  # same for the topographies
-                    Replace("topography__tags__name", Value("."), Value(" ")),
-                    Value("/"),
-                    Value(" "),
-                ),
-                topography_name_for_search=Replace(
-                    "topography__name", Value("."), Value(" "), output_field=TextField()
-                ),
-                # often there are filenames
-            )
-            .distinct("id")
-            .order_by("id")
-        )
-        qs = filter_queryset_by_search_term(
-            qs,
-            search_term,
-            [
-                "description",
-                "name",
-                "creator__name",
-                "tag_names_for_search",
-                "topography_name_for_search",
-                "topography__description",
-                "topography_tag_names_for_search",
-                "topography__creator__name",
-            ],
-        )
-
-    #
-    # Sort results
-    #
-    order_by = get_order_by(request)
-    qs = Surface.objects.filter(pk__in=Subquery(qs.values("pk"))).order_by(order_by)
-
-    return qs
 
 
 def download_selection_as_surfaces(request):
@@ -228,9 +116,11 @@ class AppDetailView(DetailView):
 
         context["vue_component"] = self.vue_component
         context["extra_tabs"] = []
-        context["object_json"] = json.dumps(self.get_serializer_class()(
-            self.object, context={"request": self.request}
-        ).data)
+        context["object_json"] = json.dumps(
+            self.get_serializer_class()(
+                self.object, context={"request": self.request}
+            ).data
+        )
 
         return context
 
@@ -254,60 +144,102 @@ class DatasetDetailView(AppDetailView):
         context = super().get_context_data(**kwargs)
 
         #
-        # Get surface instance
-        #
-        surface_id = self.request.GET.get("surface")
-        if surface_id is None:
-            return context
-        try:
-            surface = Surface.objects.get(id=int(surface_id))
-        except (ValueError, Surface.DoesNotExist):
-            raise PermissionDenied()
-
-        #
         # Check permissions
         #
-        if not surface.has_permission(self.request.user, "view"):
+        if not self.object.has_permission(self.request.user, "view"):
             raise PermissionDenied()
 
         #
         # Breadcrumb navigation
         #
-        breadcrumb.add_surface(context, surface)
+        breadcrumb.add_surface(context, self.object)
 
         return context
 
 
-class TopographyDetailView(AppView):
+class TopographyDetailView(AppDetailView):
+    model = Topography
     vue_component = "topography-detail"
+    serializer_class = TopographySerializer
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         #
-        # Get surface instance
-        #
-        topography_id = self.request.GET.get("topography")
-        if topography_id is None:
-            return context
-        try:
-            topography = Topography.objects.get(id=int(topography_id))
-        except (ValueError, Topography.DoesNotExist):
-            raise PermissionDenied()
-
-        #
         # Check permissions
         #
-        if not topography.has_permission(self.request.user, "view"):
+        if not self.object.has_permission(self.request.user, "view"):
             raise PermissionDenied()
 
         #
         # Breadcrumb navigation
         #
-        breadcrumb.add_surface(context, topography.surface)
-        breadcrumb.add_topography(context, topography)
+        breadcrumb.add_surface(context, self.object.surface)
+        breadcrumb.add_topography(context, self.object)
 
         return context
+
+
+def extra_tabs_if_single_item_selected(context, subjects):
+    """Return contribution to context for opening extra tabs if a single topography/surface is selected.
+
+    Parameters
+    ----------
+    topographies: list of topographies
+        Use here the result of function `utils.selected_instances`.
+
+    surfaces: list of surfaces
+        Use here the result of function `utils.selected_instances`.
+
+    Returns
+    -------
+    Sequence of dicts, each dict corresponds to an extra tab.
+
+    """
+    surfaces = [x for x in subjects if isinstance(x, Surface)]
+    topographies = [x for x in subjects if isinstance(x, Topography)]
+    if len(topographies) == 1 and len(surfaces) == 0:
+        # exactly one topography was selected -> show also tabs of topography
+        topo = topographies[0]
+        breadcrumb.add_generic(
+            context,
+            {
+                "title": f"{topo.surface.label}",
+                "icon": "gem",
+                "icon_style_prefix": "far",
+                "href": f"{reverse('ce_ui:surface-detail', kwargs=dict(pk=topo.surface.pk))}",
+                "active": False,
+                "login_required": False,
+                "tooltip": f"Properties of surface '{topo.surface.label}'",
+            },
+        )
+        breadcrumb.add_generic(
+            context,
+            {
+                "title": f"{topo.name}",
+                "icon": "file",
+                "icon_style_prefix": "far",
+                "href": f"{reverse('ce_ui:topography-detail', kwargs=dict(pk=topo.pk))}",
+                "active": False,
+                "login_required": False,
+                "tooltip": f"Properties of measurement '{topo.name}'",
+            },
+        )
+    elif len(surfaces) == 1 and all(t.surface == surfaces[0] for t in topographies):
+        # exactly one surface was selected -> show also tab of surface
+        surface = surfaces[0]
+        breadcrumb.add_generic(
+            context,
+            {
+                "title": f"{surface.label}",
+                "icon": "gem",
+                "icon_style_prefix": "far",
+                "href": f"{reverse('ce_ui:surface-detail', kwargs=dict(pk=surface.pk))}",
+                "active": False,
+                "login_required": False,
+                "tooltip": f"Properties of surface '{surface.label}'",
+            },
+        )
 
 
 class AnalysisDetailView(AppDetailView):
@@ -324,12 +256,17 @@ class AnalysisDetailView(AppDetailView):
             raise PermissionDenied()
 
         # Decide whether to open extra tabs for surface/topography details
+        subjects = subjects_from_base64(
+            self.request.GET.get("subjects"), user=self.request.user
+        )
+        extra_tabs_if_single_item_selected(context, subjects)
+        subjects = subjects_to_base64(subjects)
         breadcrumb.add_generic(
             context,
             {
                 "title": "Analyze",
                 "icon": "chart-area",
-                "href": f"{reverse('ce_ui:results-list')}?subjects={self.request.GET.get('subjects')}",
+                "href": f"{reverse('ce_ui:results-list')}?subjects={subjects}",
                 "active": False,
                 "login_required": False,
                 "tooltip": "Results for selected workflow",
@@ -340,7 +277,7 @@ class AnalysisDetailView(AppDetailView):
             {
                 "title": f"{workflow.display_name}",
                 "icon": "chart-area",
-                "href": f"{self.request.path}?subjects={self.request.GET.get('subjects')}",
+                "href": f"{self.request.path}?subjects={subjects}",
                 "active": True,
                 "login_required": False,
                 "tooltip": f"Results for workflow '{workflow.display_name}'",
@@ -357,31 +294,10 @@ class AnalysisListView(AppView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        topographies = []
-        surfaces = []
-
-        # Find out what the subjects are. The usual query is a base64 encoded
-        # subjects dictionary passed as the 'subjects' argument.
-        subjects = self.request.GET.get("subjects")
-        topography = self.request.GET.get("topography")
-        surface = self.request.GET.get("surface")
-        if subjects is not None:
-            try:
-                subjects = subjects_from_base64(subjects)
-            except:  # noqa: E722
-                subjects = None
-
-            if subjects is not None:
-                # Update session to reflect selection
-                topographies = [t for t in subjects if isinstance(t, Topography)]
-                surfaces = [t for t in subjects if isinstance(t, Surface)]
-                self.request.session["selection"] = instances_to_selection(
-                    topographies=topographies, surfaces=surfaces
-                )
-        elif topography is not None:
-            pass
-        elif surface is not None:
-            pass
+        subjects = subjects_from_base64(
+            self.request.GET.get("subjects"), user=self.request.user
+        )
+        extra_tabs_if_single_item_selected(context, subjects)
 
         # Decide whether to open extra tabs for surface/topography details
         # extra_tabs_if_single_item_selected(context, topographies, surfaces)
