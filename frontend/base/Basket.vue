@@ -10,7 +10,7 @@ export default {
     props: {
         analysisListUrl: {
             type: String,
-            default: '/ui/html/analysis-list/'
+            default: '/ui/analysis-list/'
         },
         apiUnselectAllUrl: {
             type: String,

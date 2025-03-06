@@ -250,7 +250,7 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                 <BButton v-if="!selected"
                          class="float-end ms-2"
                          variant="outline-secondary"
-                         :href="`/ui/html/topography/${topography.id}/`">
+                         :href="`/ui/topography/${topography.id}/`">
                     <i class="fa fa-expand"></i>
                 </BButton>
                 <BButton v-if="selected"
@@ -307,7 +307,7 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
             </BButtonGroup>
             <BButtonGroup v-if="!batchEdit" size="sm" class="float-end me-2">
                 <BButton variant="outline-secondary"
-                         :href="`/ui/html/analysis-list/?subjects=${subjectsToBase64({topography: [topography.id]})}`">
+                         :href="`/ui/analysis-list/?subjects=${subjectsToBase64({topography: [topography.id]})}`">
                     Analyze
                 </BButton>
             </BButtonGroup>

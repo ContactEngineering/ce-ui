@@ -19,7 +19,7 @@ const props = defineProps({
     },
     detailUrl: {
         type: String,
-        default: "/ui/html/analysis-detail/"
+        default: "/ui/analysis-detail/"
     },
     enlarged: {
         type: Boolean,

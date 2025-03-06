@@ -55,13 +55,13 @@ onMounted(() => {
                      class="row">
                     <div class="col-6">
                         <div class="opacity-container">
-                            <a href="/ui/html/analysis-detail/14/?subjects=eyJzdXJmYWNlIjogWzE1MDVdfQ==">
+                            <a href="/ui/analysis-detail/14/?subjects=eyJzdXJmYWNlIjogWzE1MDVdfQ==">
                                 <img class="image"
                                      src="/static/images/screenshot_psd.jpg"
                                      width="100%"/>
                             </a>
                             <div class="middle">
-                                <a href="/ui/html/analysis-detail/14/?subjects=eyJzdXJmYWNlIjogWzE1MDVdfQ=="
+                                <a href="/ui/analysis-detail/14/?subjects=eyJzdXJmYWNlIjogWzE1MDVdfQ=="
                                    class="btn btn-secondary">
                                     Combine analyses on multiple measurements into a
                                     complete
@@ -73,13 +73,13 @@ onMounted(() => {
                     </div>
                     <div class="col-6">
                         <div class="opacity-container">
-                            <a href="/ui/html/analysis-detail/18/?subjects=eyJ0b3BvZ3JhcGh5IjpbMTk1OV19">
+                            <a href="/ui/analysis-detail/18/?subjects=eyJ0b3BvZ3JhcGh5IjpbMTk1OV19">
                                 <img class="image"
                                      src="/static/images/screenshot_contact_mechanics.jpg"
                                      width="100%"/>
                             </a>
                             <div class="middle">
-                                <a href="/ui/html/analysis-detail/18/?subjects=eyJ0b3BvZ3JhcGh5IjpbMTk1OV19"
+                                <a href="/ui/analysis-detail/18/?subjects=eyJ0b3BvZ3JhcGh5IjpbMTk1OV19"
                                    class="btn btn-secondary">
                                     Carry out contact mechanical calculations with the
                                     boundary element method.

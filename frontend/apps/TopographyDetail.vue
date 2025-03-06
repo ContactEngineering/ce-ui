@@ -74,7 +74,7 @@ function deleteTopography() {
     axios.delete(_topography.url).then(response => {
         this.$emit('topography-deleted', _topography.value.url);
         const id = getIdFromUrl(_topography.value.surface);
-        window.location.href = `/ui/html/dataset-detail/${id}/`;
+        window.location.href = `/ui/dataset-detail/${id}/`;
     }).catch(error => {
         show?.({
             props: {
@@ -135,7 +135,7 @@ const base64Subjects = computed(() => {
                     </BTab>
                     <template #tabs-end>
                         <hr/>
-                        <a :href="`/ui/html/analysis-list/?subjects=${base64Subjects}`"
+                        <a :href="`/ui/analysis-list/?subjects=${base64Subjects}`"
                            class="btn btn-outline-danger mb-2 mt-2">
                             Analyze
                         </a>

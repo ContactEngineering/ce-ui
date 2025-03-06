@@ -78,40 +78,40 @@ ui_urlpatterns = [
     #
     # path("", view=views.UserListView.as_view(), name="list"),
     path(
-        "html/user-redirect/",
+        "user-redirect/",
         view=views.UserRedirectView.as_view(),
         name="user-redirect",
     ),
-    path("html/user-update/", view=views.UserUpdateView.as_view(), name="user-update"),
+    path("user-update/", view=views.UserUpdateView.as_view(), name="user-update"),
     path(
-        "html/user/<str:username>/",
+        "user/<str:username>/",
         view=views.UserDetailView.as_view(),
         name="user-detail",
     ),
     path(
-        "html/user-email/", views.TabbedEmailView.as_view(), name="account_email"
+        "user-email/", views.TabbedEmailView.as_view(), name="account_email"
     ),  # same as allauth.accounts.email.EmailView, but with tab data
     #
     # HTML routes
     #
-    path("html/dataset-list/", view=views.DataSetListView.as_view(), name="select"),
+    path("dataset-list/", view=views.DataSetListView.as_view(), name="select"),
     path(
-        r"html/topography/<int:pk>/",
+        r"topography/<int:pk>/",
         view=views.TopographyDetailView.as_view(),
         name="topography-detail",
     ),
     path(
-        r"html/dataset-detail/<int:pk>/",
+        r"dataset-detail/<int:pk>/",
         view=views.DatasetDetailView.as_view(),
         name="surface-detail",
     ),
     path(
-        "html/analysis-list/",
+        "analysis-list/",
         view=views.AnalysisListView.as_view(),
         name="results-list",
     ),
     path(
-        r"html/analysis-detail/<int:pk>/",
+        r"analysis-detail/<int:pk>/",
         view=views.AnalysisDetailView.as_view(),
         name="results-detail",
     ),

@@ -275,13 +275,13 @@ function discardBatchEdit() {
 }
 
 function surfaceHrefForVersion(version) {
-    return `/ui/html/dataset-detail/${getIdFromUrl(version.surface)}/`;
+    return `/ui/dataset-detail/${getIdFromUrl(version.surface)}/`;
 }
 
 function deleteSurface() {
     axios.delete(_surface.value.url).then(response => {
         emit('delete:surface', _surface.value.url);
-        window.location.href = `/ui/html/dataset-list/`;
+        window.location.href = `/ui/dataset-list/`;
     }).catch(error => {
         show?.({
             props: {
@@ -306,7 +306,7 @@ const versionString = computed(() => {
 });
 
 const hrefOriginalSurface = computed(() => {
-    return `/ui/html/dataset-detail/${getOriginalSurfaceId()}/`;
+    return `/ui/dataset-detail/${getOriginalSurfaceId()}/`;
 });
 
 const publishUrl = computed(() => {
@@ -499,7 +499,7 @@ const allSelected = computed({
                     </BTab>
                     <template #tabs-end>
                         <hr/>
-                        <a :href="`/ui/html/analysis-list/?subjects=${base64Subjects}`"
+                        <a :href="`/ui/analysis-list/?subjects=${base64Subjects}`"
                            class="btn btn-outline-danger mb-2 mt-2">
                             Analyze
                         </a>
