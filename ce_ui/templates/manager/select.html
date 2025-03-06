@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'topnav_breadcrumbs_and_footer.html' %}
 {% load static i18n %}
 
 {% block content %}
@@ -15,7 +15,7 @@
 
 {% block javascript %}
     <script>
-        topobank.base.createDatasetListApp(
+        topobank.app.createDatasetListApp(
             '#search-results', '{{ csrf_token }}', {
                 isAnonymous: {{ request.user.is_anonymous|yesno:'true,false' }}
             }

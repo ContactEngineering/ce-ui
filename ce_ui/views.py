@@ -224,7 +224,7 @@ class AppView(TemplateView):
 
 
 class DataSetListView(AppView):
-    vue_component = "DatasetList"
+    vue_component = "dataset-list"
 
     def dispatch(self, request, *args, **kwargs):
         # count this view event for statistics

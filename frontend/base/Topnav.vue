@@ -1,6 +1,6 @@
 <script setup>
 
-import {onMounted} from "vue";
+import {inject, onMounted} from "vue";
 import {
     BButton,
     BNavbar,
@@ -18,20 +18,12 @@ import UserMenuButton from "./UserMenuButton.vue";
 const {show} = useToastController();
 
 const props = defineProps({
-    isAnonymous: Boolean,
-    apiUrl: String,
-    loginUrl: String,
-    adminUrl: String,
-    selectUrl: String,
-    userName: String,
-    name: String,
-    orcid: String,
-    isStaff: Boolean,
     messages: {
         type: Array,
         default: []
     }
 });
+const appProps = inject("appProps");
 
 const levelToVariant = {
     'error': 'danger',
@@ -68,7 +60,7 @@ onMounted(() => {
             <img src="/static/images/ce_logo.svg" height="25px">
             &nbsp contact.engineering
         </BNavbarBrand>
-        <BNavbarNav v-if="isAnonymous">
+        <BNavbarNav v-if="appProps.userIsAnonymous">
             <BNavItem>
                 <BButton :href="loginUrl" variant="outline-secondary">
                     Sign in
@@ -76,14 +68,14 @@ onMounted(() => {
             </BNavItem>
         </BNavbarNav>
         <BasketButton></BasketButton>
-        <NotificationButton v-if="!isAnonymous"></NotificationButton>
+        <NotificationButton v-if="!appProps.userIsAnonymous"></NotificationButton>
         <UserMenuButton
-            v-if="!isAnonymous"
-            :api-url="apiUrl"
-            :admin-url="adminUrl"
-            :name="name"
-            :orcid="orcid"
-            :is-staff="isStaff"
+            v-if="!appProps.userIsAnonymous"
+            :api-url="appProps.userApiUrl"
+            :admin-url="appProps.adminUrl"
+            :name="appProps.userFullName"
+            :orcid="appProps.userOrcid"
+            :is-staff="appProps.userIsStaff"
         ></UserMenuButton>
     </BNavbar>
 </template>

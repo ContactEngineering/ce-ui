@@ -26,7 +26,7 @@ const props = defineProps({
 <template>
     <div class="fixed-top">
         <Topnav></Topnav>
-        <Breadcrumbs></Breadcrumbs>
+        <Breadcrumbs :tabs="breadcrumbs"></Breadcrumbs>
     </div>
 
     <div id="wrapper">
@@ -34,9 +34,8 @@ const props = defineProps({
             <div class="container-fluid mt-1">
                 <div class="tab-content mt-2">
                     <div class="tab-pane active">
-                        <div id="search-results">
-                            Div here
-                        </div>
+                        <component :is="vueComponent">
+                        </component>
                     </div>
                 </div>
             </div>

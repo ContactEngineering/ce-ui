@@ -7,7 +7,7 @@
 {% endblock body %}
 
 {% block javascript_at_end %}
-    <script src="{% static 'js/base.bundle.js' %}"></script>
+    <script src="{% static 'js/app.bundle.js' %}"></script>
     <script>
         /**
          * Get messages from Django context and pass them into an array.
@@ -30,8 +30,8 @@
                 icon: '{{ breadcrumb.icon }}',
                 icon_style_prefix: '{{ breadcrumb.icon_style }}',
                 href: '{{ breadcrumb.href }}',
-                href_next: '{{ breadcrumb.href_next }}',
-                href_previous: '{{ breadcrumb.href_previous }}',
+                href_next: {{ breadcrumb.href_next|default:'null' }},
+                href_previous: {{ breadcrumb.href_previous|default:'null' }},
                 active: {{ breadcrumb.active|yesno:'true,false' }},
                 login_required: {{ breadcrumb.login_required|yesno:'true,false' }},
                 tooltip: '{{ breadcrumb.tooltip }}'
@@ -43,20 +43,18 @@
                 icon: '{{ breadcrumb.icon }}',
                 icon_style_prefix: '{{ breadcrumb.icon_style }}',
                 href: '{{ breadcrumb.href }}',
+                href_next: {{ breadcrumb.href_next|default:'null' }},
+                href_previous: {{ breadcrumb.href_previous|default:'null' }},
                 active: {{ breadcrumb.active|yesno:'true,false' }},
                 login_required: {{ breadcrumb.login_required|yesno:'true,false' }},
                 tooltip: '{{ breadcrumb.tooltip }}'
             });
         {% endfor %}
 
-        topobank.base.createAppFrame(
+        topobank.app.createAppFrame(
             '#app',
             '{{ csrf_token }}',
             {
-                // The main component to mount
-                vueComponent: '{{ vue_component }}',
-                // Breadcrumb navigation
-                breadcrumbs: breadcrumbs,
                 // Admin and login URLs
                 adminUrl: '{% url 'admin:index' %}',
                 loginUrl: '{% provider_login_url 'orcid' method=" oauth2" %}',
@@ -67,6 +65,12 @@
                 userOrcid: '{{ request.user.orcid_id }}',
                 userIsAnonymous: {{ request.user.is_anonymous|yesno:'true,false' }},
                 userIsStaff: {{ request.user.is_staff|yesno:'true,false' }},
+            },
+            {
+                // The main component to mount
+                vueComponent: '{{ vue_component }}',
+                // Breadcrumb navigation
+                breadcrumbs: breadcrumbs,
                 // Django messages
                 messages: messages
             }

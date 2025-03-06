@@ -1,7 +1,5 @@
 <script setup>
 
-import {computed} from "vue";
-
 const props = defineProps({
     tabs: {
         type: Array,
@@ -9,11 +7,12 @@ const props = defineProps({
     }
 });
 
-const iconClass = computed(() => {
+function iconClass(tab) {
     const c = {};
     c['fa'] = true;
     c[`fa-${tab.icon}`] = true;
-});
+    return c;
+}
 
 </script>
 
@@ -31,7 +30,7 @@ const iconClass = computed(() => {
                 </a>
                 <a class="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-75-hover"
                    :href="tab.href">
-                    <i :class="iconClass"></i>
+                    <i :class="iconClass(tab)"></i>
                     {{ tab.title }}
                 </a>
                 <a v-if="tab.href_next != null"

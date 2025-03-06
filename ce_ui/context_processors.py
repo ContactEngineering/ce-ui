@@ -84,7 +84,7 @@ def basket_processor(request):
     -------
     Dict with extra context, a key 'basket_items_json'
     which encodes all selected topographies and surfaces such they can be
-    displayed on top of each page. See also base.html.
+    displayed on top of each page. See also topnav_breadcrumbs_and_footer.html.
     """
     basket_items = current_selection_as_basket_items(request)
 
