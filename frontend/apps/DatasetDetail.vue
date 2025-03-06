@@ -500,22 +500,22 @@ const allSelected = computed({
                     <template #tabs-end>
                         <hr/>
                         <a :href="`/ui/analysis-list/?subjects=${base64Subjects}`"
-                           class="btn btn-outline-danger mb-2 mt-2">
+                           class="btn btn-success mb-2 mt-2">
                             Analyze
                         </a>
 
                         <a :href="`${computedSurfaceUrl}download/`"
-                           class="btn btn-outline-secondary mb-2">
+                           class="btn btn-light mb-2">
                             Download
                         </a>
 
                         <a v-if="!isPublication && hasFullAccess" :href="publishUrl"
-                           class="btn btn-outline-secondary mb-2">
+                           class="btn btn-light mb-2">
                             Publish
                         </a>
 
                         <a v-if="_versions == null || _versions.length === 0 && hasFullAccess"
-                           class="btn btn-outline-secondary mb-2"
+                           class="btn btn-danger mb-2"
                            href="#" @click="_showDeleteModal = true">
                             Delete
                         </a>

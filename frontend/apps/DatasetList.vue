@@ -188,7 +188,7 @@ function unselect(dataset) {
                                 placeholder="Type to start searching..."
                                 type="search"/>
                     <BButton title="Tips for searching"
-                             variant="outline-secondary"
+                             variant="light"
                              @click="_searchInfoModalVisible = true">
                         <i aria-hidden="true" class="fa fa-info-circle"></i>
                     </BButton>

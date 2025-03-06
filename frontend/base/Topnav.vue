@@ -62,7 +62,7 @@ onMounted(() => {
         </BNavbarBrand>
         <BNavbarNav v-if="appProps.userIsAnonymous">
             <BNavItem>
-                <BButton :href="loginUrl" variant="outline-secondary">
+                <BButton :href="loginUrl" variant="secondary">
                     Sign in
                 </BButton>
             </BNavItem>

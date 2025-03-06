@@ -136,17 +136,17 @@ const base64Subjects = computed(() => {
                     <template #tabs-end>
                         <hr/>
                         <a :href="`/ui/analysis-list/?subjects=${base64Subjects}`"
-                           class="btn btn-outline-danger mb-2 mt-2">
+                           class="btn btn-success mb-2 mt-2">
                             Analyze
                         </a>
 
                         <a :href="_topography.datafile?.file"
-                           class="btn btn-outline-secondary mb-2">
+                           class="btn btn-light mb-2">
                             Download
                         </a>
 
                         <a href="#"
-                           class="btn btn-outline-secondary mb-2"
+                           class="btn btn-danger mb-2"
                            @click="_showDeleteModal = true">
                             Delete
                         </a>
