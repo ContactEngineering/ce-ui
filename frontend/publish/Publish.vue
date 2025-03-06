@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import axios from "axios";
 import PublishStage1 from './components/Publish_stage_1.vue';
 import PublishStage2 from './components/Publish_stage_2.vue';
@@ -18,11 +18,28 @@ let authors;
 let license;
 
 function publish() {
+  // NOTE: The django view expects the author data in a structure thats not convenient
+  // NOTE: for vue. Thats why we transform the structure here.
+  const authorsTransformed = authors.map((author) => {
+    return {
+      first_name: author.person.firstName,
+      last_name: author.person.lastName,
+      orcid_id: author.person.orcidId,
+      affiliations: author.affiliations.map((affiliation) => {
+        return {
+          name: affiliation.name,
+          ror_id: affiliation.rorId
+        }
+      })
+    }
+  });
   axios.post('/publication/publish/', {
     'surface': props.surfaceId,
-    'authors': authors,
+    'authors': authorsTransformed,
     'license': license
-  })
+  }).catch((response) => {
+    console.error(response);
+  });
 }
 
 </script>
