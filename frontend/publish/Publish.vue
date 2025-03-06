@@ -42,6 +42,8 @@ function publish() {
     'surface': props.surfaceId,
     'authors': authorsTransformed,
     'license': license
+  }).then((response) => {
+    window.open(`/ui/html/surface/?surface=${response.data}`, "_self");
   }).catch((error) => {
     if (error.response.status == 429) { // Too Many Requests
       show?.({
