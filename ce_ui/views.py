@@ -321,6 +321,27 @@ class PublishView(TemplateView):
                 "orcidId": self.request.user.orcid_id,
             }
         )
+        surface = Surface.objects.get(id=kwargs["pk"])
+        context["extra_tabs"] = [
+            {
+                "title": f"{surface.label}",
+                "icon": "gem",
+                "icon_style_prefix": "far",
+                "href": f"{reverse('ce_ui:surface-detail')}?surface={surface.pk}",
+                "active": False,
+                "login_required": False,
+                "tooltip": f"Properties of surface '{surface.label}'",
+            },
+            {
+                "title": "publish",
+                "icon": "paper-plane",
+                "icon_style_prefix": "far",
+                "href": f"{reverse('ce_ui:publish', kwargs=kwargs)}",
+                "active": True,
+                "login_required": False,
+                "tooltip": f"Publish '{surface.label}'",
+            },
+        ]
 
         return context
 

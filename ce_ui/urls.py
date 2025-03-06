@@ -117,7 +117,7 @@ ui_urlpatterns = [
     path(
         r"html/publish/<int:pk>/",
         view=views.PublishView.as_view(),
-        name="results-detail",
+        name="publish",
     ),
     #
     # Data routes

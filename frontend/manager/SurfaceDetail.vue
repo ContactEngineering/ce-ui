@@ -156,7 +156,7 @@ function updatePublication() {
 }
 
 function updateVersions() {
-    axios.get(`/go/api/publication/?original_surface=${getOriginalSurfaceId()}`).then(response => {
+    axios.get(`/publication/api/publication/?original_surface=${getOriginalSurfaceId()}`).then(response => {
         _versions.value = response.data;
     }).catch(error => {
         show?.({
@@ -535,7 +535,7 @@ const allSelected = computed({
              @ok="deleteSurface">
         You are about to delete the digital surface twin with name <b>{{
             _surface.name
-            }}</b> and all contained
+        }}</b> and all contained
         measurements. Are you sure you want to proceed?
     </b-modal>
 </template>
