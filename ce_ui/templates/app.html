@@ -59,31 +59,43 @@
             });
         {% endfor %}
 
-        topobank.app.createAppFrame(
-            '#app',
-            '{{ csrf_token }}',
-            {
-                // Admin and login URLs
-                adminUrl: '{% url 'admin:index' %}',
-                loginUrl: '{% provider_login_url 'orcid' method=" oauth2" %}',
-                datasetListUrl: '{% url 'ce_ui:select' %}',
-                // User information
-                userApiUrl: '{{ request.user.get_absolute_url }}',
-                userName: '{{ request.user.username }}',
-                userFullName: '{{ request.user.name }}',
-                userOrcid: '{{ request.user.orcid_id }}',
-                userIsAnonymous: {{ request.user.is_anonymous|yesno:'true,false' }},
-                userIsStaff: {{ request.user.is_staff|yesno:'true,false' }},
-                searchParams: new URLSearchParams(window.location.search)
-            },
-            {
-                // The main component to mount
-                vueComponent: '{{ vue_component }}',
-                // Breadcrumb navigation
-                breadcrumbs: breadcrumbs,
-                // Django messages
-                messages: messages
-            }
-        );
+        /*
+         * Properties that are globally injected into the Vue app
+         */
+        let appProps = {
+            // Admin and login URLs
+            adminUrl: '{% url 'admin:index' %}',
+            loginUrl: '{% provider_login_url 'orcid' method=" oauth2" %}',
+            datasetListUrl: '{% url 'ce_ui:select' %}',
+            // User information
+            userApiUrl: '{{ request.user.get_absolute_url }}',
+            userName: '{{ request.user.username }}',
+            userFullName: '{{ request.user.name }}',
+            userOrcid: '{{ request.user.orcid_id }}',
+            userIsAnonymous: {{ request.user.is_anonymous|yesno:'true,false' }},
+            userIsStaff: {{ request.user.is_staff|yesno:'true,false' }},
+            searchParams: new URLSearchParams(window.location.search)
+        };
+
+        /*
+         * "Detail" views yield a current serialized object
+         */
+        {% if object_json %}
+            appProps["object"] = JSON.parse('{{ object_json|safe }}');
+        {% endif %}
+
+        /*
+         * Properties that are only visible to the app frame component
+         */
+        const props = {
+            // The main component to mount
+            vueComponent: '{{ vue_component }}',
+            // Breadcrumb navigation
+            breadcrumbs: breadcrumbs,
+            // Django messages
+            messages: messages
+        };
+
+        topobank.app.createAppFrame('#app', '{{ csrf_token }}', appProps, props);
     </script>
 {% endblock javascript %}

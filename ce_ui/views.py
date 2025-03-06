@@ -1,3 +1,4 @@
+import json
 import logging
 from html import unescape
 from io import BytesIO
@@ -227,7 +228,9 @@ class AppDetailView(DetailView):
 
         context["vue_component"] = self.vue_component
         context["extra_tabs"] = []
-        context["object_json"] = self.get_serializer_class()(self.object).data
+        context["object_json"] = json.dumps(self.get_serializer_class()(
+            self.object, context={"request": self.request}
+        ).data)
 
         return context
 
@@ -315,9 +318,9 @@ class AnalysisDetailView(AppDetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        function = self.object
+        workflow = self.object
         # Check if user is allowed to use this function
-        if function.name not in get_analysis_function_names(self.request.user):
+        if workflow.name not in get_analysis_function_names(self.request.user):
             raise PermissionDenied()
 
         # Decide whether to open extra tabs for surface/topography details
@@ -329,18 +332,18 @@ class AnalysisDetailView(AppDetailView):
                 "href": f"{reverse('ce_ui:results-list')}?subjects={self.request.GET.get('subjects')}",
                 "active": False,
                 "login_required": False,
-                "tooltip": "Results for selected analysis functions",
+                "tooltip": "Results for selected workflow",
             },
         )
         breadcrumb.add_generic(
             context,
             {
-                "title": f"{function.display_name}",
+                "title": f"{workflow.display_name}",
                 "icon": "chart-area",
                 "href": f"{self.request.path}?subjects={self.request.GET.get('subjects')}",
                 "active": True,
                 "login_required": False,
-                "tooltip": f"Results for analysis '{function.display_name}'",
+                "tooltip": f"Results for workflow '{workflow.display_name}'",
                 "show_basket": True,
             },
         )
