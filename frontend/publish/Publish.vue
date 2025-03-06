@@ -8,7 +8,8 @@ import PublishStage4 from './components/Publish_stage_4.vue';
 import ProgessBar from './components/Publish_progess.vue';
 
 const props = defineProps({
-  user: Object
+  user: Object,
+  surfaceId: Number
 });
 
 const stage = ref(0);
@@ -17,8 +18,8 @@ let authors;
 let license;
 
 function publish() {
-  console.log(license);
   axios.post('/publication/publish/', {
+    'surface': props.surfaceId,
     'authors': authors,
     'license': license
   })
@@ -29,7 +30,7 @@ function publish() {
   <div class="container">
     <ProgessBar :stage="stage" />
     <div class="p-5">
-      <PublishStage1 :stage="stage" @continue="stage = 1"></PublishStage1>
+      <PublishStage1 :stage="stage" :surfaceId="surfaceId" @continue="stage = 1"></PublishStage1>
       <PublishStage2 :stage="stage" :user="props.user" @continue="(emitedAuthors) => {
         authors = emitedAuthors;
         stage = 2;

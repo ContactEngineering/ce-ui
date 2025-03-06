@@ -10,7 +10,8 @@
   <script src="{% static 'js/publish_app.bundle.js' %}"></script>
   <script>
     topobank.publish_app.createPublishApp('#publish', '{{ csrf_token }}', {
-      user: {{user | safe}}
+      user: {{user | safe}},
+      surfaceId: {{pk}}
     });
   </script>
 {% endblock javascript %}
