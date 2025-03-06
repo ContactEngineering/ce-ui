@@ -232,11 +232,6 @@ class DataSetListView(AppView):
         increase_statistics_by_date(metric, period=Period.DAY)
         return super().dispatch(request, *args, **kwargs)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        return context
-
 
 class TopographyDetailView(TemplateView):
     template_name = "manager/topography_detail.html"

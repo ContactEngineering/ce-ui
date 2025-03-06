@@ -7,16 +7,6 @@ const props = defineProps({
     vueComponent: String,
     // Breadcrumb navigation
     breadcrumbs: Object,
-    // Admin and login URLs
-    adminUrl: String,
-    loginUrl: String,
-    // User information
-    userApiUrl: String,
-    userName: String,
-    userFullName: String,
-    userOrcid: String,
-    userIsAnonymous: Boolean,
-    userIsStaff: Boolean,
     // Django messages
     messages: Array
 })
