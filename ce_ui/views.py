@@ -210,6 +210,34 @@ def download_selection_as_surfaces(request):
     return response
 
 
+class AppView(TemplateView):
+    template_name = "app.html"
+    vue_component = None
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context["vue_component"] = self.vue_component
+        context["extra_tabs"] = []
+
+        return context
+
+
+class DataSetListView(AppView):
+    vue_component = "DatasetList"
+
+    def dispatch(self, request, *args, **kwargs):
+        # count this view event for statistics
+        metric = Metric.objects.SEARCH_VIEW_COUNT
+        increase_statistics_by_date(metric, period=Period.DAY)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        return context
+
+
 class TopographyDetailView(TemplateView):
     template_name = "manager/topography_detail.html"
 
@@ -238,65 +266,6 @@ class TopographyDetailView(TemplateView):
         #
         breadcrumb.add_surface(context, topography.surface)
         breadcrumb.add_topography(context, topography)
-
-        return context
-
-
-class DataSetListView(TemplateView):
-    template_name = "manager/select.html"
-
-    def dispatch(self, request, *args, **kwargs):
-        # count this view event for statistics
-        metric = Metric.objects.SEARCH_VIEW_COUNT
-        increase_statistics_by_date(metric, period=Period.DAY)
-        return super().dispatch(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        session = self.request.session
-
-        search_term = get_search_term(self.request)
-        if search_term:
-            # When searching, we want the default select tab state except for
-            # the search term, which is taken from thr request parameters.
-            # If not using the default select tab state, this can result
-            # in "Load Error!" on the page (#543) because e.g. page 2
-            # is not available in the result.
-            select_tab_state = DEFAULT_SELECT_TAB_STATE.copy()
-            select_tab_state["search_term"] = search_term
-        else:
-            # .. otherwise keep search term from session variable 'select_tab_state'
-            #    and all other state settings
-            select_tab_state = session.get(
-                "select_tab_state", default=DEFAULT_SELECT_TAB_STATE.copy()
-            )
-
-        # key: tree mode
-        context["base_urls"] = {
-            "surface list": self.request.build_absolute_uri(reverse("ce_ui:search")),
-            "tag tree": self.request.build_absolute_uri(reverse("ce_ui:tag-list")),
-        }
-
-        context["order_by_filter_choices"] = ORDER_BY_CHOICES.copy()
-
-        if self.request.user.is_anonymous:
-            # Anonymous user have only one choice
-            context["sharing_status_filter_choices"] = {
-                "published": SHARING_STATUS_FILTER_CHOICES["published"]
-            }
-            select_tab_state["sharing_status"] = (
-                "published"  # this only choice should be selected
-            )
-        else:
-            context["sharing_status_filter_choices"] = (
-                SHARING_STATUS_FILTER_CHOICES.copy()
-            )
-
-        context["select_tab_state"] = select_tab_state.copy()
-
-        # The session needs a default for the state of the select tab
-        session["select_tab_state"] = select_tab_state
 
         return context
 

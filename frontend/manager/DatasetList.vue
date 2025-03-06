@@ -21,22 +21,29 @@ import {
 import DatasetListRow from './DatasetListRow.vue';
 
 const {show} = useToastController();
-const eventHub = window.eventHub;
 
 const props = defineProps({
     apiUrl: {
         type: String,
         default: "/manager/api/surface/"
     },
-    currentPage: Number,
+    currentPage: {
+        Number,
+        default: 0
+    },
     initialSelection: {
         type: Array,
         default: []
     },
     isAnonymous: Boolean,
-    isLoading: Boolean,
-    pageSize: Number,
-    searchTerm: String,
+    pageSize: {
+        type: Number,
+        default: 10
+    },
+    searchTerm: {
+        type: String,
+        default: ""
+    },
     searchDelay: {
         type: Number,
         default: 500
@@ -58,7 +65,7 @@ const sharingStatusFilterChoices = [
 
 // UI logic
 const _currentPage = ref(props.currentPage);
-const _isLoading = ref(props.isLoading);
+const _isLoading = ref(false);
 const _nbDatasets = ref(null);
 const _nbDatasetsOnCurrentPage = ref(null);
 const _orderBy = ref(orderByFilterChoices[0].value);
@@ -161,13 +168,11 @@ function createSurface() {
 }
 
 function select(dataset) {
-    console.log("Emitting add");
-    eventHub.emit("basket:add", dataset);
+    //eventHub.emit("basket:add", dataset);
 }
 
 function unselect(dataset) {
-    console.log("Emitting remove");
-    eventHub.emit("basket:remove", dataset);
+    //eventHub.emit("basket:remove", dataset);
 }
 
 </script>

@@ -1,128 +1,54 @@
-<!DOCTYPE html>
-{% load static i18n %}
-{% load icon_tags %}
-{% load socialaccount %}
-{% load terms_tags %}
+{% extends 'footer_only.html' %}
+{% load static %}
 {% load tabnav_tags %}
+{% load socialaccount %}
 
-<html lang="en">
+{% block body %}
 
-<head>
+    <div class="fixed-top">
+        <div id="topnav"></div>
+        {% tab_navigation %}
+    </div>
 
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description"
-          content="Cloud service for storing and analysis surface topography measurements">
-    <meta name="author" content="Michael Röttger, Lars Pastewka">
-    <meta name="keywords"
-          content="roughness, surface finish, contact calculator, contact mechanics">
+    <div id="wrapper">
+        <div id="content-wrapper">
+            <div class="container-fluid mt-1">
+                {# Insert actual content, see other templates #}
+                {% block content %}
+                {% endblock content %}
+            </div>
+        </div>
+    </div>
 
-    <title>contact.engineering - Store and analyze surface topography
-        measurements</title>
+{% endblock body %}
 
-    <link rel="icon" type="image/x-icon"
-          href="{% static 'images/favicons/favicon.png' %}"/>
-
-    <script src="{% static 'js/base.bundle.js' %}"></script>
-    <script src="https://unpkg.com/mitt/dist/mitt.umd.js"></script>
+{% block javascript_at_end %}
+    <!--sidebar js -->
+    <script src="{% static 'js/topnav_app.bundle.js' %}"></script>
     <script>
-        window.eventHub = mitt();
+        const messages = [];
+        {% if messages %}
+            {% for message in messages %}
+                messages.push({
+                    message: '{{ message }}',
+                    level: '{{ message.level_tag }}',
+                    extra_tags: '{{ message.extra_tags }}'
+                });
+            {% endfor %}
+        {% endif %}
+
+        topobank.topnav_app.createTopnavApp('#topnav', '{{ csrf_token }}', {
+            apiUrl: '{{ request.user.get_absolute_url }}',
+            loginUrl: '{% provider_login_url 'orcid' method=" oauth2" %}',
+            selectUrl: '{% url 'ce_ui:select' %}',
+            adminUrl: '{% url 'admin:index' %}',
+            userName: '{{ request.user.username }}',
+            name: '{{ request.user.name }}',
+            orcid: '{{ request.user.orcid_id }}',
+            isAnonymous: {{ request.user.is_anonymous|yesno:'true,false' }},
+            isStaff: {{ request.user.is_staff|yesno:'true,false' }},
+            messages: messages
+        });
     </script>
-
-    {% block extra_css %}{% endblock extra_css %}
-</head>
-
-<body id="page-top" lang="en-US">
-
-<div class="fixed-top">
-    <div id="topnav"></div>
-    {% tab_navigation %}
-</div>
-
-<div id="wrapper">
-    <div id="content-wrapper">
-        <div class="container-fluid mt-1">
-            {# Insert actual content, see other templates #}
-            {% block content %}
-            {% endblock content %}
-        </div>
-    </div>
-</div>
-
-<footer class="sticky-footer">
-    <div class="container my-auto">
-        <div class="copyright text-center my-auto">
-            <a href="https://pastewka.org/" target="_blank"
-               class="text-decoration-none">
-                <img src="{% static 'images/uni_freiburg_logo.png' %}"
-                     height="64px"></img>
-            </a>
-            <a href="http://www.engineering.pitt.edu/TevisJacobs/" target="_blank"
-               class="text-decoration-none">
-                <img src="{% static 'images/pitt_logo.png' %}" height="64px"></img>
-            </a>
-            &nbsp&nbsp&nbsp&#8213;&nbsp&nbsp&nbsp
-            Funding by
-            &nbsp&nbsp&nbsp
-            <a href="https://erc.europa.eu/" target="_blank"
-               class="text-decoration-none">
-                <img src="{% static 'images/erc_logo.png' %}" height="64px"></img>
-            </a>
-            <a href="https://www.livmats.uni-freiburg.de/" target="_blank"
-               class="text-decoration-none">
-                <img src="{% static 'images/logo_livmats_small.jpg' %}"
-                     height="64px"></img>
-            </a>
-            <a href="https://www.nsf.gov/" target="_blank" class="text-decoration-none">
-                <img src="{% static 'images/nsf_logo.png' %}" height="64px"></img>
-            </a>
-        </div>
-    </div>
-</footer>
-
-<!-- /#page-wrapper -->
-<!-- Scroll to Top Button-->
-<a class="scroll-to-top rounded" href="#page-top" style="display: inline;">
-    <i class="fa fa-angle-up"></i>
-</a>
-
-<!-- OpenSeadragon -->
-<!-- This cannot be installed via NPM because scalebar and FileSaver is not available as a package -->
-<script src={% static "vendor/openseadragon/openseadragon.min.js" %}></script>
-<script src={% static "vendor/openseadragon/openseadragon-scalebar.js" %}></script>
-<script src={% static "vendor/openseadragon/FileSaver.min.js" %}></script>
-
-{% block javascript %}{% endblock javascript %}
-<!--sidebar js -->
-<script src="{% static 'js/topnav_app.bundle.js' %}"></script>
-<script>
-    const messages = [];
-    {% if messages %}
-        {% for message in messages %}
-            messages.push({
-                message: '{{ message }}',
-                level: '{{ message.level_tag }}',
-                extra_tags: '{{ message.extra_tags }}'
-            });
-        {% endfor %}
-    {% endif %}
-
-    topobank.topnav_app.createTopnavApp('#topnav', '{{ csrf_token }}', {
-        apiUrl: '{{ request.user.get_absolute_url }}',
-        loginUrl: '{% provider_login_url 'orcid' method=" oauth2" %}',
-        selectUrl: '{% url 'ce_ui:select' %}',
-        adminUrl: '{% url 'admin:index' %}',
-        userName: '{{ request.user.username }}',
-        name: '{{ request.user.name }}',
-        orcid: '{{ request.user.orcid_id }}',
-        isAnonymous: {{ request.user.is_anonymous|yesno:'true,false' }},
-        isStaff: {{ request.user.is_staff|yesno:'true,false' }},
-        messages: messages
-    });
-</script>
-</body>
-
-</html>
-
+    {% block javascript %}{% endblock javascript %}
+{% endblock javascript_at_end %}

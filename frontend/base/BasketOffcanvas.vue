@@ -14,11 +14,9 @@ import {
 const visible = defineModel("visible", {type: Boolean, required: true});
 const items = defineModel("items", {type: Object, default: {}});
 
-const eventHub = window.eventHub;
-
 onMounted(() => {
-    eventHub.on("basket:add", addItem);
-    eventHub.on("basket:remove", removeItem);
+    //eventHub.on("basket:add", addItem);
+    //eventHub.on("basket:remove", removeItem);
 });
 
 function clearSelection() {
@@ -26,12 +24,10 @@ function clearSelection() {
 }
 
 function addItem(item) {
-    console.log("add", item);
     items.value[item.id] = item;
 }
 
 function removeItem(item) {
-    console.log("remove", item);
     delete items.value[item.id];
 }
 
@@ -57,7 +53,7 @@ function removeItem(item) {
         </BAlert>
         <BListGroup>
             <BListGroupItem v-for="item in items">
-                {{ item }}
+                <i class="fa fa-layer-group"></i> {{ item.name }}
             </BListGroupItem>
         </BListGroup>
     </BOffcanvas>
