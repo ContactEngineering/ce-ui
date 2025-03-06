@@ -3,8 +3,7 @@ import { ref, computed } from 'vue';
 import { BFormCheckbox, BButton } from 'bootstrap-vue-next';
 
 const props = defineProps({
-  stage: Number,
-  configured_for_doi_generation: Boolean,
+  stage: Number
 });
 const emit = defineEmits(['back', 'publish']);
 
@@ -35,7 +34,7 @@ function checkAndPublish() {
         <li>If you have assigned tags to the digital twin or its measurements, these tags are also
           part of the publication.</li>
         <li>Your ORCID iD will saved along with your publication.</li>
-        <li v-if="configured_for_doi_generation">A <a href="https://www.doi.org/">DOI (Digital Object
+        <li>A <a href="https://www.doi.org/">DOI (Digital Object
             Identifier)</a> will be generated
           with the given data. Your data will be accessible under the corresponding URL.</li>
       </ul>
@@ -52,7 +51,7 @@ function checkAndPublish() {
     <div class="d-flex flex-row justify-content-center">
       <div class="d-flex flex-column">
         <BFormCheckbox v-model="check1" :state="valid1">
-          I understand the implications of publishing this surface and I agree.*<br>
+          I understand the implications of publishing this digital surface twin and I agree.*<br>
           <span class="text-muted"> Please read the implications of publishing listed above and check.</span>
         </BFormCheckbox>
         <BFormCheckbox v-model="check2" :state="valid2">

@@ -17,7 +17,7 @@ const stages = [
     icon: 'fa-scale-balanced'
   },
   {
-    name: "Sublit",
+    name: "Submit",
     icon: 'fa-paper-plane'
   }
 ];
