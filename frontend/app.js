@@ -6,7 +6,8 @@ import {createBootstrap} from 'bootstrap-vue-next'
 import axios from "axios";
 
 // Import the app components
-import {componentIndex} from './apps/index.js';
+import {registerAppComponents} from './apps/index';
+import {registerAnalysisCardComponents} from "./analysis/index";
 
 // Import the AppFrame component
 import AppFrame from './apps/AppFrame.vue';
@@ -21,9 +22,9 @@ export function createAppFrame(element, csrfToken, appProps, componentProps) {
     app.provide('csrfToken', csrfToken);
     app.provide('appProps', appProps);
     // Register all single-page components from the index
-    for (const component of componentIndex) {
-        app.component(component.name, component.implementation);
-    }
+    registerAppComponents(app);
+    // Register all analysis card components from the index
+    registerAnalysisCardComponents(app);
     app.mount(element);
     return app;
 }

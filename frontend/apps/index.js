@@ -8,11 +8,17 @@ import DatasetDetail from './DatasetDetail.vue';
 import DatasetList from './DatasetList.vue';
 import TopographyDetail from './TopographyDetail.vue';
 
-export const componentIndex = [
-    {name: "analysis-detail", implementation: AnalysisResultsDetail},
-    {name: "analysis-list", implementation: AnalysisResultsList},
-    {name: "dataset-list", implementation: DatasetList},
-    {name: "dataset-detail", implementation: DatasetDetail},
-    {name: "home", implementation: Home},
-    {name: "topography-detail", implementation: TopographyDetail}
+const componentIndex = [
+    {name: "AnalysisDetail", implementation: AnalysisResultsDetail},
+    {name: "AnalysisList", implementation: AnalysisResultsList},
+    {name: "DatasetList", implementation: DatasetList},
+    {name: "DatasetDetail", implementation: DatasetDetail},
+    {name: "Home", implementation: Home},
+    {name: "TopographyDetail", implementation: TopographyDetail}
 ];
+
+export function registerAppComponents(app) {
+    for (const component of componentIndex) {
+        app.component(component.name, component.implementation);
+    }
+}
