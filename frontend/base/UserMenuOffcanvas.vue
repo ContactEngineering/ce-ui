@@ -1,9 +1,10 @@
 <script setup>
 
+import {ref} from "vue";
+
 import {BModal, BNavbarNav, BNavItem, BOffcanvas} from "bootstrap-vue-next";
 
-import VersionInformation from "topobank/base/VersionInformation.vue";
-import {ref} from "vue";
+import VersionInformation from "./VersionInformation.vue";
 
 const visible = defineModel("visible");
 

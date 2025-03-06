@@ -3,7 +3,6 @@ from html import unescape
 from io import BytesIO
 
 from allauth.account.views import EmailView
-from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q, Subquery, TextField, Value
@@ -26,8 +25,7 @@ from topobank.analysis.registry import (get_analysis_function_names,
 from topobank.manager.containers import write_surface_container
 from topobank.manager.models import Surface, Tag, Topography
 from topobank.manager.utils import subjects_from_base64
-from topobank.usage_stats.utils import (current_statistics,
-                                        increase_statistics_by_date,
+from topobank.usage_stats.utils import (increase_statistics_by_date,
                                         increase_statistics_by_date_and_object)
 from topobank.users.models import User
 from trackstats.models import Metric, Period
@@ -355,7 +353,7 @@ class SurfaceSearchPaginator(PageNumberPagination):
                 url = remove_query_param(base_url, self.page_query_param)
             else:
                 url = replace_query_param(base_url, self.page_query_param, page_no)
-            # always add page size, so requests for other pages have it
+            # always add page size, so requests for other apps have it
             url = replace_query_param(
                 url, self.page_size_query_param, self.get_page_size(self.request)
             )
@@ -788,38 +786,12 @@ class AnalysesResultListView(TemplateView):
         return context
 
 
-class HomeView(TemplateView):
-    template_name = "pages/home.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data()
-        user = self.request.user
-        if user.is_anonymous:
-            anon = get_user_model().get_anonymous()
-            context["num_users"] = User.objects.filter(
-                Q(is_active=True) & ~Q(pk=anon.pk)
-            ).count()
-
-            current_stats = current_statistics()
-        else:
-            current_stats = current_statistics(user)
-
-            # count surfaces you can view, but you are not creator
-            context["num_shared_surfaces"] = (
-                Surface.objects.for_user(user, "view").exclude(creator=user).count()
-            )
-
-        context["num_surfaces"] = current_stats["num_surfaces_excluding_publications"]
-        context["num_topographies"] = current_stats[
-            "num_topographies_excluding_publications"
-        ]
-        context["num_analyses"] = current_stats["num_analyses_excluding_publications"]
-
-        return context
+class HomeView(AppView):
+    vue_component = "home"
 
 
 class TermsView(TemplateView):
-    template_name = "pages/termsconditions.html"
+    template_name = "apps/termsconditions.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

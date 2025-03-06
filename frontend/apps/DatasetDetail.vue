@@ -27,14 +27,14 @@ import {
 } from "../utils/api";
 import {ccLicenseInfo} from "../utils/data";
 
-import Attachments from './Attachments.vue';
-import BandwidthPlot from './BandwidthPlot.vue';
+import Attachments from '../manager/Attachments.vue';
+import BandwidthPlot from '../manager/BandwidthPlot.vue';
 import DropZone from '../components/DropZone.vue';
-import DatasetDescription from './DatasetDescription.vue';
-import DatasetPermissions from './DatasetPermissions.vue';
-import DatasetProperties from './DatasetProperties.vue';
-import TopographyCard from "./TopographyCard.vue";
-import TopographyUpdateCard from "./TopographyUpdateCard.vue";
+import DatasetDescription from '../manager/DatasetDescription.vue';
+import DatasetPermissions from '../manager/DatasetPermissions.vue';
+import DatasetProperties from '../manager/DatasetProperties.vue';
+import TopographyCard from "../manager/TopographyCard.vue";
+import TopographyUpdateCard from "../manager/TopographyUpdateCard.vue";
 
 const {show} = useToastController();
 

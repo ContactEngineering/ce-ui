@@ -1,7 +1,7 @@
 <script setup>
 
-import Breadcrumbs from "./Breadcrumbs.vue";
-import Topnav from "./Topnav.vue";
+import Breadcrumbs from "../base/Breadcrumbs.vue";
+import Topnav from "../base/Topnav.vue";
 
 const props = defineProps({
     vueComponent: String,

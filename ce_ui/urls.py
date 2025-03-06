@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.urls import include, path, re_path
-from django.views.generic import RedirectView, TemplateView
+from django.views.generic import RedirectView
 
 from . import views
 
@@ -13,14 +13,9 @@ urlprefix = None  # No url prefix, this plugin wants to register top-level route
 #
 urlpatterns = [
     #
-    # Main entry points and static pages
+    # Main entry points and static apps
     #
     path("", views.HomeView.as_view(), name="home"),
-    path(
-        "about/",
-        TemplateView.as_view(template_name="pages/about.html"),
-        name="about",
-    ),
     path(
         "termsandconditions/",
         views.TermsView.as_view(),

@@ -1,4 +1,4 @@
-{% extends 'footer_only.html' %}
+{% extends 'base.html' %}
 {% load static i18n %}
 {% load socialaccount %}
 
@@ -6,7 +6,7 @@
     <div id="app"></div>
 {% endblock body %}
 
-{% block javascript_at_end %}
+{% block javascript %}
     <script src="{% static 'js/app.bundle.js' %}"></script>
     <script>
         /**
@@ -58,6 +58,7 @@
                 // Admin and login URLs
                 adminUrl: '{% url 'admin:index' %}',
                 loginUrl: '{% provider_login_url 'orcid' method=" oauth2" %}',
+                datasetListUrl: '{% url 'ce_ui:select' %}',
                 // User information
                 userApiUrl: '{{ request.user.get_absolute_url }}',
                 userName: '{{ request.user.username }}',
@@ -76,4 +77,4 @@
             }
         );
     </script>
-{% endblock javascript_at_end %}
+{% endblock javascript %}

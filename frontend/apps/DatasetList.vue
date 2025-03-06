@@ -18,7 +18,7 @@ import {
     useToastController
 } from "bootstrap-vue-next";
 
-import DatasetListRow from './DatasetListRow.vue';
+import DatasetListRow from '../manager/DatasetListRow.vue';
 
 const {show} = useToastController();
 

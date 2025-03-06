@@ -14,13 +14,13 @@ import {
 
 import {getIdFromUrl, subjectsToBase64} from "topobank/utils/api.js";
 
-import Attachments from './Attachments.vue';
+import Attachments from '../manager/Attachments.vue';
 
 import DeepZoomImage from "../components/DeepZoomImage.vue";
 import LineScanPlot from "../components/LineScanPlot.vue";
 
-import TopographyBadges from "./TopographyBadges.vue";
-import TopographyCard from "./TopographyCard.vue";
+import TopographyBadges from "../manager/TopographyBadges.vue";
+import TopographyCard from "../manager/TopographyCard.vue";
 
 const {show} = useToastController();
 

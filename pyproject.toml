@@ -54,5 +54,3 @@ termsandconditions = 'termsandconditions.middleware.TermsAndConditionsRedirectMi
 
 [project.entry-points.'topobank.context_processors']
 fixed_tabs = 'ce_ui.context_processors.fixed_tabs_processor'
-versions = 'ce_ui.context_processors.versions_processor'
-basket = 'ce_ui.context_processors.basket_processor'

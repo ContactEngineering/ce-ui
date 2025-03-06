@@ -6,10 +6,10 @@ import {createBootstrap} from 'bootstrap-vue-next'
 import axios from "axios";
 
 // Import the app components
-import {componentIndex} from './index.js';
+import {componentIndex} from './apps/index.js';
 
 // Import the AppFrame component
-import AppFrame from './base/AppFrame.vue';
+import AppFrame from './apps/AppFrame.vue';
 
 /**
  * Create Vue.js app for a component and hook it up to DOM element
