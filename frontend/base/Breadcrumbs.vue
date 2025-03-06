@@ -39,7 +39,7 @@ function iconClass(tab) {
                     <i class="fa fa-caret-right"></i>
                 </a>
             </div>
-            <div v-if="index !== tabs.length - 1" class="nav-pad-y">
+            <div v-if="index !== 0 && index !== tabs.length - 1" class="nav-pad-y">
                 /
             </div>
         </li>
