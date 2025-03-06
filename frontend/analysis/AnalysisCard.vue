@@ -31,13 +31,22 @@ const props = defineProps({
         type: Array,
         default: []
     },
-    functionId: Number,
+    functionId: {
+      type: Number,
+      required: true
+    },
     showLoadingSpinner: {
         type: Boolean,
         default: false
     },
-    subjects: String,
-    title: String
+    subjects: {
+      type: Object,
+      required: true
+    },
+    title: {
+      type: String,
+      required: true
+    }
 });
 
 // GUI logic

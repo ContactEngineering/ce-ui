@@ -1,29 +1,42 @@
 <script setup>
 
 import axios from "axios";
-import {computed, onMounted, ref} from "vue";
+import { computed, onMounted, ref } from "vue";
 
-import {BDropdownDivider, BDropdownItem} from 'bootstrap-vue-next';
+import { BDropdownDivider, BDropdownItem, useToastController } from "bootstrap-vue-next";
+
+import { subjectsToBase64 } from "../utils/api";
 
 import AnalysisCard from "./AnalysisCard.vue";
-import BokehPlot from '../components/BokehPlot.vue';
+import BokehPlot from "../components/BokehPlot.vue";
+
+const { show } = useToastController();
 
 const props = defineProps({
     apiUrl: {
         type: String,
-        default: '/analysis/api/card/series'
+        default: "/analysis/api/card/series"
     },
     detailUrl: {
         type: String,
-        default: '/ui/html/analysis-detail/'
+        default: "/ui/html/analysis-detail/"
     },
     enlarged: {
         type: Boolean,
         default: true
     },
-    functionId: Number,
-    functionName: String,
-    subjects: String
+    functionId: {
+        type: Number,
+        required: true
+    },
+    functionName: {
+        type: String,
+        required: true
+    },
+    subjects: {
+        type: Object,
+        required: true
+    }
 });
 
 // Information about analyses that this card display
@@ -60,7 +73,7 @@ const analysisIds = computed(() => {
 function updateCard() {
     /* Fetch JSON describing the card */
     _nbPendingAjaxRequests.value++;
-    axios.get(`${props.apiUrl}/${props.functionId}?subjects=${props.subjects}`)
+    axios.get(`${props.apiUrl}/${props.functionId}?subjects=${subjectsToBase64(props.subjects)}`)
         .then(response => {
             _analyses.value = response.data.analyses;
             _title.value = response.data.plotConfiguration.title;
@@ -77,6 +90,17 @@ function updateCard() {
             _showSymbols.value = response.data.plotConfiguration.showSymbols;
             _dois.value = response.data.dois;
             _messages.value = response.data.messages;
+        })
+        .catch(error => {
+            show?.({
+                props: {
+                    title: "Error fetching analysis result",
+                    body: error.message,
+                    variant: "danger"
+                }
+            });
+        })
+        .finally(() => {
             _nbPendingAjaxRequests.value--;
         });
 }
@@ -88,14 +112,14 @@ function updateCard() {
                   :detailUrl="detailUrl"
                   :dois="_dois"
                   :enlarged="enlarged"
-                  :messages="_messages"
                   :functionId="functionId"
-                  :subjects="subjects"
+                  :messages="_messages"
                   :showLoadingSpinner="_nbPendingAjaxRequests > 0"
+                  :subjects="subjects"
                   :title="_title"
                   @allTasksFinished="updateCard"
-                  @someTasksFinished="updateCard"
-                  @refreshButtonClicked="updateCard">
+                  @refreshButtonClicked="updateCard"
+                  @someTasksFinished="updateCard">
         <template #dropdowns>
             <BDropdownDivider></BDropdownDivider>
             <BDropdownItem :href="`/analysis/download/${analysisIds}/txt`">
@@ -112,12 +136,12 @@ function updateCard() {
             </BDropdownItem>
         </template>
         <BokehPlot v-model:nbPendingAjaxRequests="_nbPendingAjaxRequests"
-                   :plots="_plots"
                    :categories="_categories"
                    :dataSources="_dataSources"
+                   :functionTitle="_title"
                    :outputBackend="_outputBackend"
-                   :showSymbols="_showSymbols"
-                   :functionTitle="_title">
+                   :plots="_plots"
+                   :showSymbols="_showSymbols">
         </BokehPlot>
     </AnalysisCard>
 </template>

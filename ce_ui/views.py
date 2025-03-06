@@ -14,10 +14,12 @@ from django.views.generic import (DetailView, ListView, RedirectView,
 from termsandconditions.models import TermsAndConditions
 from termsandconditions.views import AcceptTermsView
 from termsandconditions.views import TermsView as OrigTermsView
-from topobank.analysis.registry import (get_analysis_function_names,
-                                        get_visualization_type)
+from topobank.analysis.models import AnalysisFunction
+from topobank.analysis.registry import get_analysis_function_names
+from topobank.analysis.serializers import WorkflowSerializer
 from topobank.manager.containers import write_surface_container
 from topobank.manager.models import Surface, Topography
+from topobank.manager.serializers import SurfaceSerializer
 from topobank.manager.utils import subjects_from_base64
 from topobank.usage_stats.utils import (increase_statistics_by_date,
                                         increase_statistics_by_date_and_object)
@@ -28,7 +30,7 @@ from ce_ui import breadcrumb
 
 from .utils import (filter_queryset_by_search_term, get_order_by,
                     get_search_term, get_sharing_status,
-                    instances_to_selection, selection_to_subjects_dict)
+                    instances_to_selection)
 
 ORDER_BY_CHOICES = {"name": "name", "-creation_datetime": "date"}
 SHARING_STATUS_FILTER_CHOICES = {
@@ -212,6 +214,24 @@ class AppView(TemplateView):
         return context
 
 
+class AppDetailView(DetailView):
+    template_name = "app.html"
+    vue_component = None
+    serializer_class = None
+
+    def get_serializer_class(self):
+        return self.serializer_class
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context["vue_component"] = self.vue_component
+        context["extra_tabs"] = []
+        context["object_json"] = self.get_serializer_class()(self.object).data
+
+        return context
+
+
 class DataSetListView(AppView):
     vue_component = "dataset-list"
 
@@ -222,8 +242,10 @@ class DataSetListView(AppView):
         return super().dispatch(request, *args, **kwargs)
 
 
-class DatasetDetailView(AppView):
+class DatasetDetailView(AppDetailView):
+    model = Surface
     vue_component = "dataset-detail"
+    serializer_class = SurfaceSerializer
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -285,8 +307,10 @@ class TopographyDetailView(AppView):
         return context
 
 
-class AnalysisDetailView(AppView):
-    vue_component = "analysis-detail"
+class AnalysisDetailView(AppDetailView):
+    model = AnalysisFunction
+    vue_component = "AnalysisDetail"
+    serializer_class = WorkflowSerializer
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -295,17 +319,6 @@ class AnalysisDetailView(AppView):
         # Check if user is allowed to use this function
         if function.name not in get_analysis_function_names(self.request.user):
             raise PermissionDenied()
-
-        # filter subjects to those this user is allowed to see
-        effective_topographies, effective_surfaces, subjects = (
-            selection_to_subjects_dict(self.request)
-        )
-
-        # get analysis result type
-        visualization_type = get_visualization_type(name=function.name)
-
-        context["function"] = function
-        context["visualization_type"] = visualization_type
 
         # Decide whether to open extra tabs for surface/topography details
         breadcrumb.add_generic(

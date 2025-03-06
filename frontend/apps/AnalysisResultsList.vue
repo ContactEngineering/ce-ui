@@ -11,6 +11,8 @@ import {
   BToastOrchestrator
 } from "bootstrap-vue-next";
 
+import {subjectsFromBase64} from "../utils/api";
+
 const props = defineProps({
   apiRegistryUrl: {
     type: String,
@@ -31,7 +33,7 @@ function getSubjectsDict() {
     subjects = props.subjects;
   }
   if (subjects != null) {
-    return JSON.parse(atob(subjects));
+    return subjectsFromBase64(subjects);
   }
   return null;
 }
