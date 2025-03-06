@@ -1,5 +1,8 @@
 <script setup>
 import { ref } from 'vue';
+
+import { BToastOrchestrator, useToastController } from 'bootstrap-vue-next';
+
 import axios from "axios";
 import PublishStage1 from './components/Publish_stage_1.vue';
 import PublishStage2 from './components/Publish_stage_2.vue';
@@ -11,6 +14,8 @@ const props = defineProps({
   user: Object,
   surfaceId: Number
 });
+
+const { show } = useToastController();
 
 const stage = ref(0);
 
@@ -37,13 +42,22 @@ function publish() {
     'surface': props.surfaceId,
     'authors': authorsTransformed,
     'license': license
-  }).catch((response) => {
-    console.error(response);
+  }).catch((error) => {
+    if (error.response.status == 429) { // Too Many Requests
+      show?.({
+        props: {
+          title: "Too Many Requests",
+          body: `Please wait ${error.response.data} seconds before publishing this digital surface twin again.`,
+          variant: "danger"
+        }
+      });
+    }
   });
 }
 
 </script>
 <template>
+  <BToastOrchestrator />
   <div class="container">
     <ProgessBar :stage="stage" />
     <div class="p-5">
