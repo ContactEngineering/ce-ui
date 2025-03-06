@@ -102,7 +102,6 @@ function check_validity() {
       valid.value[index].affiliations[affIndex].name = affiliation.name != "";
       valid.value[index].affiliations[affIndex].rorId = affiliation.rorId === "" || rorIdRegex.test(affiliation.rorId);
     });
-    console.log(valid.value[index].affiliations)
     is_valid = is_valid && Object.values(valid.value[index].person).every((x) => x) && valid.value[index].affiliations.every((affiliation) => Object.values(affiliation).every((x) => x))
   })
   return is_valid;
@@ -112,7 +111,7 @@ function nextStage() {
   if (!check_validity()) {
     return;
   }
-  emit('continue');
+  emit('continue', authors.value);
 }
 
 const authors_string = computed(() => {

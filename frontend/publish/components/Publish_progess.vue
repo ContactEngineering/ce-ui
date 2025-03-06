@@ -24,7 +24,6 @@ const stages = [
 
 </script>
 <template>
-  <h3>Publish</h3>
   <div id="progress" class="d-flex flex-row justify-content-center">
     <div v-for="stage in [0, 1, 2, 3]" class="d-flex flex-row align-items-center">
       <div class="position-relative" style="transition-property: color; transition-delay: 1s;"
