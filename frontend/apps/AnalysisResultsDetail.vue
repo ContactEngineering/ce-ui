@@ -2,7 +2,6 @@
 
 import {computed, inject} from "vue";
 
-import {BToastOrchestrator} from "bootstrap-vue-next";
 import {subjectsFromBase64} from "topobank/utils/api";
 
 const appProps = inject("appProps");
@@ -26,7 +25,6 @@ const subjects = computed(() => {
 </script>
 
 <template>
-    <BToastOrchestrator />
     <div class="row">
         <div class="col-lg-12 mb-4">
             <component :is="`${visualizationType}-card`"

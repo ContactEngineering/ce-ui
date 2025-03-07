@@ -8,7 +8,6 @@ import {
     BSpinner,
     BTab,
     BTabs,
-    BToastOrchestrator,
     useToastController
 } from "bootstrap-vue-next";
 
@@ -95,7 +94,6 @@ const base64Subjects = computed(() => {
 </script>
 
 <template>
-    <BToastOrchestrator/>
     <div class="container">
         <div v-if="_topography == null"
              class="d-flex justify-content-center mt-5">

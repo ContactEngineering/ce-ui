@@ -8,7 +8,6 @@ import {
   BFormCheckbox,
   BFormCheckboxGroup,
   BFormGroup,
-  BToastOrchestrator
 } from "bootstrap-vue-next";
 
 import {subjectsFromBase64} from "../utils/api";
@@ -69,7 +68,6 @@ function updateSelection() {
 </script>
 
 <template>
-  <BToastOrchestrator/>
   <div class="row mb-2">
     <b-form class="col-12">
       <b-form-group>

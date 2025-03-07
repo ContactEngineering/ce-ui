@@ -1,5 +1,7 @@
 <script setup>
 
+import{BToastOrchestrator} from "bootstrap-vue-next";
+
 import Breadcrumbs from "../base/Breadcrumbs.vue";
 import Topnav from "../base/Topnav.vue";
 
@@ -14,6 +16,7 @@ const props = defineProps({
 </script>
 
 <template>
+    <BToastOrchestrator></BToastOrchestrator>
     <div class="fixed-top">
         <Topnav></Topnav>
         <Breadcrumbs :tabs="breadcrumbs"></Breadcrumbs>

@@ -7,7 +7,6 @@ import {
     BNavbarBrand,
     BNavbarNav,
     BNavItem,
-    BToastOrchestrator,
     useToastController
 } from "bootstrap-vue-next";
 
@@ -54,7 +53,6 @@ onMounted(() => {
 </script>
 
 <template>
-    <BToastOrchestrator/>
     <BNavbar variant="dark" class="navbar-dark">
         <BNavbarBrand href="/" class="d-flex flex-grow-1">
             <img src="/static/images/ce_logo.svg" height="25px">

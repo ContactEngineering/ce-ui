@@ -14,7 +14,6 @@ import {
     BListGroup, BModal,
     BOverlay,
     BPagination,
-    BToastOrchestrator,
     useToastController
 } from "bootstrap-vue-next";
 
@@ -46,7 +45,7 @@ const props = defineProps({
     },
     searchDelay: {
         type: Number,
-        default: 500
+        default: 300
     }
 });
 
@@ -178,7 +177,6 @@ function unselect(dataset) {
 </script>
 
 <template>
-    <BToastOrchestrator></BToastOrchestrator>
     <div class="row">
         <div class="col-8">
             <BFormGroup class="mb-2"

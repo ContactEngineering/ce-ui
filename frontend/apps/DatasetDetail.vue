@@ -16,7 +16,6 @@ import {
     BSpinner,
     BTab,
     BTabs,
-    BToastOrchestrator,
     useToastController
 } from 'bootstrap-vue-next';
 
@@ -347,7 +346,6 @@ const allSelected = computed({
 </script>
 
 <template>
-    <BToastOrchestrator></BToastOrchestrator>
     <div class="container">
         <div v-if="_surface == null" class="d-flex justify-content-center mt-5">
             <div class="flex-column text-center">
