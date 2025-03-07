@@ -1,14 +1,8 @@
-import json
-
 from django.conf import settings
 from django.shortcuts import reverse
-from topobank.supplib.versions import get_versions
 
-from .utils import current_selection_as_basket_items
-
-HOME_URL = reverse('home')
-SELECT_URL = reverse('ce_ui:select')
-UNSELECT_ALL_URL = reverse('ce_ui:unselect-all')
+HOME_URL = reverse("home")
+SEARCH_URL = reverse("ce_ui:select")
 
 
 def fixed_tabs_processor(request):
@@ -36,54 +30,34 @@ def fixed_tabs_processor(request):
 
     tabs = []
     if settings.TABNAV_DISPLAY_HOME_TAB:
-        tabs += [{
-            'login_required': False,
-            'title': '',  # no text
-            'icon': 'home',
-            'href': HOME_URL,
-            'active': request.path == HOME_URL,
-            'tooltip': "Welcome to contact.engineering",
-            'show_basket': False,
-        }]
+        tabs += [
+            {
+                "login_required": False,
+                "title": "",  # no text
+                "icon": "home",
+                "href": HOME_URL,
+                "active": request.path == HOME_URL,
+                "tooltip": "Welcome to contact.engineering",
+                "show_basket": False,
+            }
+        ]
 
     # This is the datasets tab
-    tabs += [{
-        'login_required': False,
-        'title': 'Datasets',
-        'icon': 'table-list',
-        'icon_style_prefix': 'fa',
-        'href': SELECT_URL,
-        'active': request.path == SELECT_URL,
-        'tooltip': "Select surfaces and topographies for analysis or create new surfaces",
-        'show_basket': True,
-    }]
+    tabs += [
+        {
+            "login_required": False,
+            "title": "My datasets",
+            "icon": "table-list",
+            "icon_style_prefix": "fa",
+            "href": SEARCH_URL,
+            "active": request.path == SEARCH_URL,
+            "tooltip": "Select surfaces and topographies for analysis or create new surfaces",
+            "show_basket": True,
+        }
+    ]
 
     # Add default value for icon_style_prefix if missing
     for tab in tabs:
-        tab.setdefault('icon_style_prefix', 'fa')
+        tab.setdefault("icon_style_prefix", "fa")
 
     return dict(fixed_tabs=tabs)
-
-
-def versions_processor(request):
-    return dict(versions=get_versions())
-
-
-def basket_processor(request):
-    """Return JSON with select surfaces and topographies.
-
-    Parameters
-    ----------
-    request
-
-    Returns
-    -------
-    Dict with extra context, a key 'basket_items_json'
-    which encodes all selected topographies and surfaces such they can be
-    displayed on top of each page. See also base.html.
-    """
-    basket_items = current_selection_as_basket_items(request)
-
-    return dict(basket_items_json=json.dumps(basket_items),
-                num_basket_items=len(basket_items),
-                unselect_all_url=UNSELECT_ALL_URL)

@@ -22,6 +22,7 @@ import {filterTopographyForPatchRequest, subjectsToBase64} from "../utils/api";
 
 import TopographyBadges from "./TopographyBadges.vue";
 import Attachments from './Attachments.vue';
+import Thumbnail from "./Thumbnail.vue";
 
 const props = defineProps({
     batchEdit: {type: Boolean, default: false},
@@ -221,8 +222,6 @@ const instrumentParametersResolutionUnit = instrumentParameterModel('resolution'
 const instrumentParametersTipRadiusValue = instrumentParameterModel('tip_radius', 'value');
 const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius', 'unit');
 
-const hasThumbnail = computed(() => props.topography.thumbnail != null && props.topography.thumbnail.file != null);
-
 </script>
 
 <template>
@@ -250,8 +249,8 @@ const hasThumbnail = computed(() => props.topography.thumbnail != null && props.
                 size="sm" class="float-end">
                 <BButton v-if="!selected"
                          class="float-end ms-2"
-                         variant="outline-secondary"
-                         :href="`/ui/html/topography/?topography=${topography.id}`">
+                         variant="light"
+                         :href="`/ui/topography/${topography.id}/`">
                     <i class="fa fa-expand"></i>
                 </BButton>
                 <BButton v-if="selected"
@@ -265,30 +264,30 @@ const hasThumbnail = computed(() => props.topography.thumbnail != null && props.
                 v-if="!batchEdit && topography != null && !_editing && !_saving && !saving"
                 size="sm" class="float-end">
                 <BButton v-if="!disabled"
-                         variant="outline-secondary"
+                         variant="light"
                          :disabled="selected"
                          @click="_savedTopography = cloneDeep(topography); _editing = true">
                     <i class="fa fa-pen"></i>
                 </BButton>
                 <BButton v-if="!enlarged && !selected"
-                         variant="outline-secondary"
-                         :href="topography.datafile.file">
+                         variant="light"
+                         :href="topography.datafile?.file">
                     <i class="fa fa-download"></i>
                 </BButton>
                 <BButton v-if="!disabled && selected"
-                         variant="outline-secondary"
+                         variant="light"
                          disabled>
                     <i class="fa fa-download"></i>
                 </BButton>
                 <BButton v-if="!disabled"
-                         variant="outline-secondary"
+                         variant="light"
                          :disabled="selected">
                     <i class="fa fa-refresh"
                        @click="forceInspect"></i>
                 </BButton>
                 <BButton v-if="!disabled && !enlarged"
                          :disabled="selected"
-                         variant="outline-secondary"
+                         variant="light"
                          @click="_showDeleteModal = true">
                     <i class="fa fa-trash"></i>
                 </BButton>
@@ -307,8 +306,8 @@ const hasThumbnail = computed(() => props.topography.thumbnail != null && props.
                 </BButton>
             </BButtonGroup>
             <BButtonGroup v-if="!batchEdit" size="sm" class="float-end me-2">
-                <BButton variant="outline-secondary"
-                         :href="`/ui/html/analysis-list/?subjects=${subjectsToBase64({topography: [topography.id]})}`">
+                <BButton variant="light"
+                         :href="`/ui/analysis-list/?subjects=${subjectsToBase64({topography: [topography.id]})}`">
                     Analyze
                 </BButton>
             </BButtonGroup>
@@ -343,14 +342,12 @@ const hasThumbnail = computed(() => props.topography.thumbnail != null && props.
             Please wait...
         </div>
         <div v-if="topography != null" class="row">
-            <div v-if="hasThumbnail" class="col-2">
-                <a :href="`/ui/html/topography/?topography=${topography.id}`">
-                    <img class="img-thumbnail mw-100"
-                         :src="topography.thumbnail.file">
-                </a>
+            <div class="col-2">
+                <Thumbnail img-class="img-thumbnail"
+                           :data-source="topography">
+                </Thumbnail>
             </div>
-            <div
-                :class="{ 'col-10': hasThumbnail, 'col-12': !hasThumbnail }">
+            <div class="col-10">
                 <div class="container">
                     <div class="row">
                         <div class="col-6">

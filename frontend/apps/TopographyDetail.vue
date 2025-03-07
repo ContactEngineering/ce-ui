@@ -2,35 +2,48 @@
 
 import axios from "axios";
 
-import {computed, onMounted, ref} from "vue";
+import {computed, inject, onMounted, ref} from "vue";
 import {
     BModal,
     BSpinner,
     BTab,
     BTabs,
-    BToastOrchestrator,
     useToastController
 } from "bootstrap-vue-next";
 
 import {getIdFromUrl, subjectsToBase64} from "topobank/utils/api.js";
 
-import Attachments from './Attachments.vue';
+import Attachments from '../manager/Attachments.vue';
 
 import DeepZoomImage from "../components/DeepZoomImage.vue";
 import LineScanPlot from "../components/LineScanPlot.vue";
 
-import TopographyBadges from "./TopographyBadges.vue";
-import TopographyCard from "./TopographyCard.vue";
+import TopographyBadges from "../manager/TopographyBadges.vue";
+import TopographyCard from "../manager/TopographyCard.vue";
 
 const {show} = useToastController();
 
 const props = defineProps({
-    topographyUrl: String
+    topographyUrl: String,
+    topographyUrlPrefix: {
+        type: String,
+        default: "/manager/api/topography/"
+    }
 });
+
+const appProps = inject("appProps");
 
 const _disabled = ref(false);
 const _showDeleteModal = ref(false);
 const _topography = ref(null);
+
+function getTopographyUrl() {
+    if (props.topographyUrl != null) {
+        return props.topographyUrl;
+    }
+    const topographyId = appProps.searchParams.get("topography");
+    return `${props.topographyUrlPrefix}${topographyId}`;
+}
 
 onMounted(() => {
     updateCard();
@@ -38,7 +51,8 @@ onMounted(() => {
 
 function updateCard() {
     /* Fetch JSON describing the card */
-    axios.get(`${props.topographyUrl}?permissions=yes&attachments=yes`).then(response => {
+    /*
+    axios.get(`${getTopographyUrl()}?permissions=yes&attachments=yes`).then(response => {
         _topography.value = response.data;
         _disabled.value = _topography.value === null || _topography.value.permissions.current_user.permission === 'view';
     }).catch(error => {
@@ -50,13 +64,16 @@ function updateCard() {
             }
         });
     });
+     */
+    _topography.value = appProps.object;
+    _disabled.value = _topography.value === null || _topography.value.permissions.current_user.permission === 'view';
 }
 
 function deleteTopography() {
     axios.delete(_topography.url).then(response => {
         this.$emit('topography-deleted', _topography.value.url);
         const id = getIdFromUrl(_topography.value.surface);
-        window.location.href = `/ui/html/surface/?surface=${id}`;
+        window.location.href = `/ui/dataset-detail/${id}/`;
     }).catch(error => {
         show?.({
             props: {
@@ -77,7 +94,6 @@ const base64Subjects = computed(() => {
 </script>
 
 <template>
-    <BToastOrchestrator/>
     <div class="container">
         <div v-if="_topography == null"
              class="d-flex justify-content-center mt-5">
@@ -117,18 +133,18 @@ const base64Subjects = computed(() => {
                     </BTab>
                     <template #tabs-end>
                         <hr/>
-                        <a :href="`/ui/html/analysis-list/?subjects=${base64Subjects}`"
-                           class="btn btn-outline-danger mb-2 mt-2">
+                        <a :href="`/ui/analysis-list/?subjects=${base64Subjects}`"
+                           class="btn btn-success mb-2 mt-2">
                             Analyze
                         </a>
 
-                        <a :href="_topography.datafile.file"
-                           class="btn btn-outline-secondary mb-2">
+                        <a :href="_topography.datafile?.file"
+                           class="btn btn-light mb-2">
                             Download
                         </a>
 
                         <a href="#"
-                           class="btn btn-outline-secondary mb-2"
+                           class="btn btn-danger mb-2"
                            @click="_showDeleteModal = true">
                             Delete
                         </a>

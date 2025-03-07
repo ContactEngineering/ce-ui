@@ -1,7 +1,7 @@
 <script setup>
 
 import axios from "axios";
-import {computed, onMounted, ref} from "vue";
+import {computed, inject, onMounted, ref, shallowRef} from "vue";
 
 import {
     BAccordion,
@@ -16,7 +16,6 @@ import {
     BSpinner,
     BTab,
     BTabs,
-    BToastOrchestrator,
     useToastController
 } from 'bootstrap-vue-next';
 
@@ -27,19 +26,26 @@ import {
 } from "../utils/api";
 import {ccLicenseInfo} from "../utils/data";
 
-import Attachments from './Attachments.vue';
-import BandwidthPlot from './BandwidthPlot.vue';
+import Attachments from '../manager/Attachments.vue';
+import BandwidthPlot from '../manager/BandwidthPlot.vue';
 import DropZone from '../components/DropZone.vue';
-import SurfaceDescription from './SurfaceDescription.vue';
-import SurfacePermissions from './SurfacePermissions.vue';
-import SurfaceProperties from './SurfaceProperties.vue';
-import TopographyCard from "./TopographyCard.vue";
-import TopographyPropertiesCard from "./TopographyPropertiesCard.vue";
+import DatasetDescription from '../manager/DatasetDescription.vue';
+import DatasetPermissions from '../manager/DatasetPermissions.vue';
+import DatasetProperties from '../manager/DatasetProperties.vue';
+import TopographyCard from "../manager/TopographyCard.vue";
+import TopographyUpdateCard from "../manager/TopographyUpdateCard.vue";
 
 const {show} = useToastController();
 
 const props = defineProps({
-    surfaceUrl: String,
+    surfaceUrl: {
+        type: String,
+        default: null
+    },
+    surfaceUrlPrefix: {
+        type: String,
+        default: '/manager/api/surface/'
+    },
     newTopographyUrl: {
         type: String,
         default: '/manager/api/topography/'
@@ -54,12 +60,14 @@ const props = defineProps({
     }
 });
 
+const appProps = inject("appProps");
+
 const emit = defineEmits([
     'delete:surface'
 ])
 
 // Data that is displayed or can be edited
-const _surface = ref(null);  // Surface data
+const _surface = shallowRef(null);  // Surface data
 const _publication = ref(null);  // Publication data
 const _permissions = ref(null);  // Permissions
 const _topographies = ref([]);  // Topographies contained in this surface
@@ -72,6 +80,18 @@ const _selected = ref([]);  // Selected topographies (for batch editing)
 
 // Batch edit data
 const _batchEditTopography = ref(emptyTopography());
+
+function getSurfaceUrl() {
+    if (props.surfaceUrl != null) {
+        return props.surfaceUrl;
+    }
+    const surfaceId = appProps.searchParams.get("surface");
+    return `${props.surfaceUrlPrefix}${surfaceId}`;
+}
+
+const computedSurfaceUrl = computed(() => {
+    return getSurfaceUrl();
+});
 
 function emptyTopography() {
     return {
@@ -118,7 +138,8 @@ function getOriginalSurfaceId() {
 
 function updateCard() {
     /* Fetch JSON describing the card */
-    axios.get(`${props.surfaceUrl}?children=yes&permissions=yes&attachments=yes`).then(response => {
+    /*
+    axios.get(`${getSurfaceUrl()}?children=yes&permissions=yes&attachments=yes`).then(response => {
         _surface.value = response.data;
         _permissions.value = response.data.permissions;
         _topographies.value = response.data.topography_set;
@@ -133,6 +154,12 @@ function updateCard() {
             }
         });
     });
+     */
+    _surface.value = appProps.object;
+    _permissions.value = appProps.object.permissions;
+    _topographies.value = appProps.object.topography_set;
+    _selected.value = new Array(_topographies.value.length).fill(false);  // Nothing is selected
+    updatePublication();
 }
 
 function updatePublication() {
@@ -177,7 +204,7 @@ function filesDropped(files) {
 
 function uploadNewTopography(file) {
     axios.post(props.newTopographyUrl, {
-        surface: props.surfaceUrl,
+        surface: computedSurfaceUrl,
         name: file.name
     }).then(response => {
         let upload = response.data;
@@ -247,13 +274,13 @@ function discardBatchEdit() {
 }
 
 function surfaceHrefForVersion(version) {
-    return `/ui/html/surface/?surface=${getIdFromUrl(version.surface)}`;
+    return `/ui/dataset-detail/${getIdFromUrl(version.surface)}/`;
 }
 
 function deleteSurface() {
     axios.delete(_surface.value.url).then(response => {
         emit('delete:surface', _surface.value.url);
-        window.location.href = `/ui/html/dataset-list/`;
+        window.location.href = `/ui/dataset-list/`;
     }).catch(error => {
         show?.({
             props: {
@@ -278,7 +305,7 @@ const versionString = computed(() => {
 });
 
 const hrefOriginalSurface = computed(() => {
-    return `/ui/html/surface/?surface=${getOriginalSurfaceId()}`;
+    return `/ui/dataset-detail/${getOriginalSurfaceId()}/`;
 });
 
 const publishUrl = computed(() => {
@@ -319,7 +346,6 @@ const allSelected = computed({
 </script>
 
 <template>
-    <BToastOrchestrator></BToastOrchestrator>
     <div class="container">
         <div v-if="_surface == null" class="d-flex justify-content-center mt-5">
             <div class="flex-column text-center">
@@ -338,13 +364,13 @@ const allSelected = computed({
                         <drop-zone v-if="isEditable && !anySelected"
                                    @files-dropped="filesDropped">
                         </drop-zone>
-                        <topography-properties-card v-if="anySelected"
-                                                    v-model:topography="_batchEditTopography"
-                                                    :batch-edit="true"
-                                                    :saving="_saving"
-                                                    @save:edit="saveBatchEdit"
-                                                    @discard:edit="discardBatchEdit">
-                        </topography-properties-card>
+                        <topography-update-card v-if="anySelected"
+                                                v-model:topography="_batchEditTopography"
+                                                :batch-edit="true"
+                                                :saving="_saving"
+                                                @save:edit="saveBatchEdit"
+                                                @discard:edit="discardBatchEdit">
+                        </topography-update-card>
                         <div v-if="isEditable && _topographies.length > 0"
                              class="d-flex mb-1">
                             <BCard>
@@ -374,7 +400,7 @@ const allSelected = computed({
                                 This surface has no measurements.
                             </BAlert>
                             <BAlert :model-value="_topographies.length > 0"
-                                     secondary>
+                                    secondary>
                                 This bandwidth plot shows the range of length scales
                                 that have been measured for
                                 this digital surface twin. Each of the blocks below
@@ -389,20 +415,20 @@ const allSelected = computed({
                         </BCard>
                     </BTab>
                     <BTab title="Description">
-                        <SurfaceDescription v-if="_surface != null"
+                        <DatasetDescription v-if="_surface != null"
                                             :description="_surface.description"
                                             :name="_surface.name"
                                             :permission="_permissions.current_user.permission"
                                             :surface-url="_surface.url"
                                             :tags="_surface.tags">
-                        </SurfaceDescription>
+                        </DatasetDescription>
                     </BTab>
                     <BTab title="Properties">
-                        <SurfaceProperties v-if="_surface != null"
+                        <DatasetProperties v-if="_surface != null"
                                            v-model:properties="_surface.properties"
                                            :permission="_permissions.current_user.permission"
                                            :surface-url="_surface.url">
-                        </SurfaceProperties>
+                        </DatasetProperties>
                     </BTab>
                     <BTab title="Attachments">
                         <Attachments v-if="_surface != null"
@@ -412,10 +438,10 @@ const allSelected = computed({
                     </BTab>
                     <BTab v-if="_surface != null"
                           title="Permissions">
-                        <SurfacePermissions v-if="_surface.publication == null"
+                        <DatasetPermissions v-if="_surface.publication == null"
                                             v-model:permissions="_permissions"
                                             :set-permissions-url="_surface.api.set_permissions">
-                        </SurfacePermissions>
+                        </DatasetPermissions>
                         <BCard v-if="_surface.publication != null" class="w-100">
                             <template #header>
                                 <h5 class="float-start">Permissions</h5>
@@ -471,23 +497,23 @@ const allSelected = computed({
                     </BTab>
                     <template #tabs-end>
                         <hr/>
-                        <a :href="`/ui/html/analysis-list/?subjects=${base64Subjects}`"
-                           class="btn btn-outline-danger mb-2 mt-2">
+                        <a :href="`/ui/analysis-list/?subjects=${base64Subjects}`"
+                           class="btn btn-success mb-2 mt-2">
                             Analyze
                         </a>
 
-                        <a :href="`${surfaceUrl}download/`"
-                           class="btn btn-outline-secondary mb-2">
+                        <a :href="`${computedSurfaceUrl}download/`"
+                           class="btn btn-light mb-2">
                             Download
                         </a>
 
                         <a v-if="!isPublication && hasFullAccess" :href="publishUrl"
-                           class="btn btn-outline-secondary mb-2">
+                           class="btn btn-light mb-2">
                             Publish
                         </a>
 
                         <a v-if="_versions == null || _versions.length === 0 && hasFullAccess"
-                           class="btn btn-outline-secondary mb-2"
+                           class="btn btn-danger mb-2"
                            href="#" @click="_showDeleteModal = true">
                             Delete
                         </a>
