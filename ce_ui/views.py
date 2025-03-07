@@ -33,7 +33,7 @@ from topobank.analysis.registry import (
 )
 from topobank.manager.containers import write_surface_container
 from topobank.manager.models import Surface, Tag, Topography
-from topobank.manager.utils import get_reader_infos, subjects_from_base64
+from topobank.manager.utils import subjects_from_base64
 from topobank.usage_stats.utils import (
     current_statistics,
     increase_statistics_by_date,
