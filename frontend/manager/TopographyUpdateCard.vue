@@ -249,7 +249,7 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                 size="sm" class="float-end">
                 <BButton v-if="!selected"
                          class="float-end ms-2"
-                         variant="outline-secondary"
+                         variant="light"
                          :href="`/ui/topography/${topography.id}/`">
                     <i class="fa fa-expand"></i>
                 </BButton>
@@ -264,30 +264,30 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                 v-if="!batchEdit && topography != null && !_editing && !_saving && !saving"
                 size="sm" class="float-end">
                 <BButton v-if="!disabled"
-                         variant="outline-secondary"
+                         variant="light"
                          :disabled="selected"
                          @click="_savedTopography = cloneDeep(topography); _editing = true">
                     <i class="fa fa-pen"></i>
                 </BButton>
                 <BButton v-if="!enlarged && !selected"
-                         variant="outline-secondary"
+                         variant="light"
                          :href="topography.datafile?.file">
                     <i class="fa fa-download"></i>
                 </BButton>
                 <BButton v-if="!disabled && selected"
-                         variant="outline-secondary"
+                         variant="light"
                          disabled>
                     <i class="fa fa-download"></i>
                 </BButton>
                 <BButton v-if="!disabled"
-                         variant="outline-secondary"
+                         variant="light"
                          :disabled="selected">
                     <i class="fa fa-refresh"
                        @click="forceInspect"></i>
                 </BButton>
                 <BButton v-if="!disabled && !enlarged"
                          :disabled="selected"
-                         variant="outline-secondary"
+                         variant="light"
                          @click="_showDeleteModal = true">
                     <i class="fa fa-trash"></i>
                 </BButton>
@@ -306,7 +306,7 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                 </BButton>
             </BButtonGroup>
             <BButtonGroup v-if="!batchEdit" size="sm" class="float-end me-2">
-                <BButton variant="outline-secondary"
+                <BButton variant="light"
                          :href="`/ui/analysis-list/?subjects=${subjectsToBase64({topography: [topography.id]})}`">
                     Analyze
                 </BButton>

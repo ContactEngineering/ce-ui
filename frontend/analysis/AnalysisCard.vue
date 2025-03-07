@@ -69,7 +69,7 @@ const nbSuccess = computed(() => {
                              @someTasksFinished="(nbRunningOrPending) => emit('someTasksFinished', nbRunningOrPending)">
                 </TasksButton>
                 <BButton v-if="analyses !== null"
-                         variant="outline-secondary"
+                         variant="light"
                          size="sm"
                          @click="emit('refreshButtonClicked')"
                          class="float-end ms-1">
@@ -82,7 +82,7 @@ const nbSuccess = computed(() => {
                                   class="float-end">
                 </CardExpandButton>
             </div>
-            <BDropdown variant="outline-secondary" size="sm" class="float-start me-2">
+            <BDropdown variant="light" size="sm" class="float-start me-2">
                 <template #button-content>
                     <i class="fa fa-bars"></i>
                 </template>
