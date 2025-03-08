@@ -25,7 +25,7 @@ import {
     getIdFromUrl,
     subjectsToBase64
 } from "../utils/api";
-import {ccLicenseInfo} from "../utils/data";
+import { ccLicenseInfo } from "../utils/data";
 
 import Attachments from './Attachments.vue';
 import BandwidthPlot from './BandwidthPlot.vue';
@@ -156,7 +156,7 @@ function updatePublication() {
 }
 
 function updateVersions() {
-    axios.get(`/go/api/publication/?original_surface=${getOriginalSurfaceId()}`).then(response => {
+    axios.get(`/publication/api/publication/?original_surface=${getOriginalSurfaceId()}`).then(response => {
         _versions.value = response.data;
     }).catch(error => {
         show?.({
@@ -282,7 +282,7 @@ const hrefOriginalSurface = computed(() => {
 });
 
 const publishUrl = computed(() => {
-    return `/go/html/publish/${getSurfaceId()}/`;
+    return `/ui/html/publish/${getSurfaceId()}/`;
 });
 
 const isEditable = computed(() => {
@@ -335,8 +335,7 @@ const allSelected = computed({
                        pills
                        vertical>
                     <BTab title="Measurements">
-                        <drop-zone v-if="isEditable && !anySelected"
-                                   @files-dropped="filesDropped">
+                        <drop-zone v-if="isEditable && !anySelected" @files-dropped="filesDropped">
                         </drop-zone>
                         <topography-properties-card v-if="anySelected"
                                                     v-model:topography="_batchEditTopography"
@@ -405,9 +404,8 @@ const allSelected = computed({
                         </SurfaceProperties>
                     </BTab>
                     <BTab title="Attachments">
-                        <Attachments v-if="_surface != null"
-                                     :attachments-url="_surface.attachments"
-                                     :permission="_permissions.current_user.permission">
+                        <Attachments v-if="_surface != null" :attachments-url="_surface.attachments"
+                            :permission="_permissions.current_user.permission">
                         </Attachments>
                     </BTab>
                     <BTab v-if="_surface != null"

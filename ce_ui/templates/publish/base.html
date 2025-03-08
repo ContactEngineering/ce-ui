@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load icon_tags %}
+{% load guardian_tags %}
+{% load static i18n %}
+{% block content %}
+  <div id="publish"></div>
+{% endblock content %}
+
+{% block javascript %}
+  <script src="{% static 'js/publish_app.bundle.js' %}"></script>
+  <script>
+    topobank.publish_app.createPublishApp('#publish', '{{ csrf_token }}', {
+      user: {{user | safe}},
+      surfaceId: {{pk}}
+    });
+  </script>
+{% endblock javascript %}

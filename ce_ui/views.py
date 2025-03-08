@@ -1,4 +1,5 @@
 import logging
+import json
 from html import unescape
 from io import BytesIO
 
@@ -10,8 +11,13 @@ from django.db.models import Q, Subquery, TextField, Value
 from django.db.models.functions import Replace
 from django.http import HttpResponse
 from django.urls import reverse
-from django.views.generic import (DetailView, ListView, RedirectView,
-                                  TemplateView, UpdateView)
+from django.views.generic import (
+    DetailView,
+    ListView,
+    RedirectView,
+    TemplateView,
+    UpdateView,
+)
 from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.pagination import PageNumberPagination
@@ -21,25 +27,37 @@ from termsandconditions.models import TermsAndConditions
 from termsandconditions.views import AcceptTermsView
 from termsandconditions.views import TermsView as OrigTermsView
 from topobank.analysis.models import AnalysisFunction
-from topobank.analysis.registry import (get_analysis_function_names,
-                                        get_visualization_type)
+from topobank.analysis.registry import (
+    get_analysis_function_names,
+    get_visualization_type,
+)
 from topobank.manager.containers import write_surface_container
 from topobank.manager.models import Surface, Tag, Topography
 from topobank.manager.utils import subjects_from_base64
-from topobank.usage_stats.utils import (current_statistics,
-                                        increase_statistics_by_date,
-                                        increase_statistics_by_date_and_object)
+from topobank.usage_stats.utils import (
+    current_statistics,
+    increase_statistics_by_date,
+    increase_statistics_by_date_and_object,
+)
 from topobank.users.models import User
 from trackstats.models import Metric, Period
 
 from ce_ui import breadcrumb
 
 from .serializers import SurfaceSearchSerializer, TagSearchSerizalizer
-from .utils import (current_selection_as_basket_items,
-                    filter_queryset_by_search_term, filtered_topographies,
-                    get_order_by, get_search_term, get_sharing_status,
-                    get_tree_mode, instances_to_selection, selected_instances,
-                    selection_to_subjects_dict, tags_for_user)
+from .utils import (
+    current_selection_as_basket_items,
+    filter_queryset_by_search_term,
+    filtered_topographies,
+    get_order_by,
+    get_search_term,
+    get_sharing_status,
+    get_tree_mode,
+    instances_to_selection,
+    selected_instances,
+    selection_to_subjects_dict,
+    tags_for_user,
+)
 
 ORDER_BY_CHOICES = {"name": "name", "-creation_datetime": "date"}
 SHARING_STATUS_FILTER_CHOICES = {
@@ -301,6 +319,43 @@ class DataSetListView(TemplateView):
         return context
 
 
+class PublishView(TemplateView):
+    template_name = "publish/base.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["user"] = json.dumps(
+            {
+                "firstName": self.request.user.first_name,
+                "lastName": self.request.user.last_name,
+                "orcidId": self.request.user.orcid_id,
+            }
+        )
+        surface = Surface.objects.get(id=kwargs["pk"])
+        context["extra_tabs"] = [
+            {
+                "title": f"{surface.label}",
+                "icon": "gem",
+                "icon_style_prefix": "far",
+                "href": f"{reverse('ce_ui:surface-detail')}?surface={surface.pk}",
+                "active": False,
+                "login_required": False,
+                "tooltip": f"Properties of surface '{surface.label}'",
+            },
+            {
+                "title": "publish",
+                "icon": "paper-plane",
+                "icon_style_prefix": "far",
+                "href": f"{reverse('ce_ui:publish', kwargs=kwargs)}",
+                "active": True,
+                "login_required": False,
+                "tooltip": f"Publish '{surface.label}'",
+            },
+        ]
+
+        return context
+
+
 class SurfaceDetailView(TemplateView):
     template_name = "manager/surface_detail.html"
 
@@ -342,7 +397,6 @@ class SurfaceSearchPaginator(PageNumberPagination):
     max_page_size = MAX_PAGE_SIZE
 
     def get_paginated_response(self, data):
-
         #
         # Save information about requested data in session
         #
@@ -982,7 +1036,8 @@ class TabbedEmailView(EmailView):
                 "title": "User profile",
                 "icon": "user",
                 "href": reverse(
-                    "ce_ui:user-detail", kwargs=dict(username=self.request.user.username)
+                    "ce_ui:user-detail",
+                    kwargs=dict(username=self.request.user.username),
                 ),
                 "active": False,
             },
@@ -1024,7 +1079,9 @@ class UserRedirectView(LoginRequiredMixin, RedirectView):
     permanent = False
 
     def get_redirect_url(self):
-        return reverse("ce_ui:user-detail", kwargs={"username": self.request.user.username})
+        return reverse(
+            "ce_ui:user-detail", kwargs={"username": self.request.user.username}
+        )
 
 
 class UserUpdateView(LoginRequiredMixin, UpdateView):
@@ -1036,7 +1093,9 @@ class UserUpdateView(LoginRequiredMixin, UpdateView):
     # send the user back to their own page after a successful update
 
     def get_success_url(self):
-        return reverse("ce_ui:user-detail", kwargs={"username": self.request.user.username})
+        return reverse(
+            "ce_ui:user-detail", kwargs={"username": self.request.user.username}
+        )
 
     def get_object(self, queryset=None):
         # Only get the User record for the user making the request
@@ -1049,7 +1108,8 @@ class UserUpdateView(LoginRequiredMixin, UpdateView):
                 "title": "User Profile",
                 "icon": "user",
                 "href": reverse(
-                    "ce_ui:user-detail", kwargs=dict(username=self.request.user.username)
+                    "ce_ui:user-detail",
+                    kwargs=dict(username=self.request.user.username),
                 ),
                 "active": False,
             },
