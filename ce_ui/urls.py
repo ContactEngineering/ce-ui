@@ -114,15 +114,7 @@ ui_urlpatterns = [
         r"analysis-detail/<int:pk>/",
         view=views.AnalysisDetailView.as_view(),
         name="results-detail",
-    ),
-    #
-    # Data routes
-    #
-    path(
-        "select/download/",
-        view=views.download_selection_as_surfaces,
-        name="download-selection",
-    ),
+    )
 ]
 urlpatterns += [path("ui/", include((ui_urlpatterns, app_name)))]
 

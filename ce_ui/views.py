@@ -1,13 +1,11 @@
 import json
 import logging
 from html import unescape
-from io import BytesIO
 
 from allauth.account.views import EmailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
-from django.http import HttpResponse
 from django.urls import reverse
 from django.views.generic import (DetailView, ListView, RedirectView,
                                   TemplateView, UpdateView)
@@ -17,13 +15,11 @@ from termsandconditions.views import TermsView as OrigTermsView
 from topobank.analysis.models import AnalysisFunction
 from topobank.analysis.registry import get_analysis_function_names
 from topobank.analysis.serializers import WorkflowSerializer
-from topobank.manager.containers import write_surface_container
 from topobank.manager.models import Surface, Topography
 from topobank.manager.serializers import (SurfaceSerializer,
                                           TopographySerializer)
 from topobank.manager.utils import subjects_from_base64, subjects_to_base64
-from topobank.usage_stats.utils import (increase_statistics_by_date,
-                                        increase_statistics_by_date_and_object)
+from topobank.usage_stats.utils import increase_statistics_by_date
 from topobank.users.models import User
 from trackstats.models import Metric, Period
 
@@ -55,39 +51,6 @@ DEFAULT_SELECT_TAB_STATE = {
 DEFAULT_CONTAINER_FILENAME = "digital_surface_twin.zip"
 
 _log = logging.getLogger(__name__)
-
-
-def download_selection_as_surfaces(request):
-    """Returns a file comprised from surfaces related to the selection.
-
-    :param request: current request
-    :return:
-    """
-
-    from .utils import current_selection_as_surface_list
-
-    surfaces = current_selection_as_surface_list(request)
-
-    container_bytes = BytesIO()
-    write_surface_container(container_bytes, surfaces)
-
-    # Prepare response object.
-    response = HttpResponse(
-        container_bytes.getvalue(), content_type="application/x-zip-compressed"
-    )
-    response["Content-Disposition"] = 'attachment; filename="{}"'.format(
-        DEFAULT_CONTAINER_FILENAME
-    )
-    # Since the selection contains multiple surfaces in general, we should think about
-    # another file name in this case.
-
-    # increase download count for each surface
-    for surf in surfaces:
-        increase_statistics_by_date_and_object(
-            Metric.objects.SURFACE_DOWNLOAD_COUNT, period=Period.DAY, obj=surf
-        )
-
-    return response
 
 
 class AppView(TemplateView):
@@ -323,7 +286,7 @@ class HomeView(AppView):
 
 
 class TermsView(TemplateView):
-    template_name = "apps/termsconditions.html"
+    template_name = "pages/termsconditions.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
