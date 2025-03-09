@@ -17,9 +17,12 @@ import {
     useToastController
 } from "bootstrap-vue-next";
 
+import {useSelectionStore} from "../stores/selection";
+
 import DatasetListRow from '../manager/DatasetListRow.vue';
 
 const {show} = useToastController();
+const selection = useSelectionStore();
 
 const props = defineProps({
     apiUrl: {
@@ -29,10 +32,6 @@ const props = defineProps({
     currentPage: {
         Number,
         default: 0
-    },
-    initialSelection: {
-        type: Array,
-        default: []
     },
     isAnonymous: Boolean,
     pageSize: {
@@ -167,11 +166,11 @@ function createSurface() {
 }
 
 function select(dataset) {
-    //eventHub.emit("basket:add", dataset);
+    selection.select(dataset.id);
 }
 
 function unselect(dataset) {
-    //eventHub.emit("basket:remove", dataset);
+    selection.unselect(dataset.id);
 }
 
 </script>
@@ -204,41 +203,49 @@ function unselect(dataset) {
         </div>
     </div>
     <BOverlay :show="_isLoading">
-        <div class="row">
-            <BButtonToolbar class="mb-2">
-                <BPagination v-model="currentPage"
-                             :disabled="_isLoading" :limit="9" :per-page="_pageSize"
-                             :total-rows="_nbDatasets"
-                             class="me-2 mb-0">
-                </BPagination>
-                <BInputGroup class="me-2" prepend="Page size">
-                    <BFormSelect v-model="pageSize" :disabled="_isLoading"
-                                 :options="[10, 25, 50, 100]">
-                    </BFormSelect>
-                </BInputGroup>
-                <BInputGroup class="me-2" prepend="Sort by">
-                    <BFormSelect v-model="orderBy" :disabled="_isLoading"
-                                 :options="orderByFilterChoices">
-                    </BFormSelect>
-                </BInputGroup>
-                <BButton v-if="isAnonymous" disabled
-                         title="Please sign-in to use this feature"
-                         variant="primary">
-                    Create new digital surface twin
-                </BButton>
-                <BButton v-if="!isAnonymous"
-                         :disabled="_isLoading"
-                         variant="primary"
-                         @click="createSurface">
-                    Create new digital surface twin
-                </BButton>
-            </BButtonToolbar>
-        </div>
+        <BButtonToolbar class="mb-2">
+            <BPagination v-model="currentPage"
+                         :disabled="_isLoading" :limit="9" :per-page="_pageSize"
+                         :total-rows="_nbDatasets"
+                         class="me-2 mb-0">
+            </BPagination>
+            <BInputGroup class="me-2" prepend="Page size">
+                <BFormSelect v-model="pageSize" :disabled="_isLoading"
+                             :options="[10, 25, 50, 100]">
+                </BFormSelect>
+            </BInputGroup>
+            <BInputGroup class="me-2" prepend="Sort by">
+                <BFormSelect v-model="orderBy" :disabled="_isLoading"
+                             :options="orderByFilterChoices">
+                </BFormSelect>
+            </BInputGroup>
+            <BButton v-if="selection.nbSelected === 0" class="me-2" variant="light"
+                     disabled>
+                No selected datasets
+            </BButton>
+            <BButton v-if="selection.nbSelected > 0" class="me-2" variant="warning"
+                     :disabled="_isLoading">
+                {{ selection.nbSelected }} datasets selected
+            </BButton>
+            <BButton v-if="isAnonymous" disabled
+                     title="Please sign-in to use this feature"
+                     variant="primary">
+                Create new digital surface twin
+            </BButton>
+            <BButton v-if="!isAnonymous"
+                     class="float-end"
+                     :disabled="_isLoading"
+                     variant="primary"
+                     @click="createSurface">
+                Create new digital surface twin
+            </BButton>
+        </BButtonToolbar>
         <BListGroup>
             <div v-for="dataset in _datasets" :key="dataset.id">{{ dataset.selected }}
             </div>
             <DatasetListRow v-for="dataset in _datasets" :key="dataset.id"
                             :dataset="dataset"
+                            :selected="selection.surfaceIds.includes(dataset.id)"
                             @select="select" @unselect="unselect">
             </DatasetListRow>
         </BListGroup>
@@ -333,7 +340,6 @@ function unselect(dataset) {
                 </td>
             </tr>
             </tbody>
-
         </table>
     </BModal>
 </template>

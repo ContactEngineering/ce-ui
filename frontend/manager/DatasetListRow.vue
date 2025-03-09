@@ -17,11 +17,15 @@ import ThumbnailRow from "./ThumbnailRow.vue";
 const emit = defineEmits(["select", "unselect"]);
 
 const props = defineProps({
-    dataset: Object
+    dataset: Object,
+    selected: {
+        type: Boolean,
+        default: false
+    }
 });
 
 const _creator = ref(null);
-const _selected = ref(false);
+const _selected = ref(props.selected);
 
 onMounted(() => {
     axios.get(props.dataset.creator)

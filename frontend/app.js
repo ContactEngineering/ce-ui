@@ -1,6 +1,9 @@
-// Vue & Bokeh
+// Vue, Pinia and Boostrap
 import {createApp} from 'vue';
 import {createBootstrap} from 'bootstrap-vue-next'
+import {createPinia} from "pinia";
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
+
 
 // Axios
 import axios from "axios";
@@ -17,6 +20,9 @@ import AppFrame from './apps/AppFrame.vue';
  */
 export function createAppFrame(element, csrfToken, appProps, componentProps) {
     let app = createApp(AppFrame, componentProps);
+    const pinia = createPinia();
+    pinia.use(piniaPluginPersistedstate);
+    app.use(pinia);
     app.use(createBootstrap());
     axios.defaults.headers.common['X-CSRFToken'] = csrfToken;
     app.provide('csrfToken', csrfToken);
