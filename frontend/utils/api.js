@@ -2,6 +2,10 @@ export function subjectsToBase64(subjects) {
     return btoa(JSON.stringify(subjects));
 }
 
+export function subjectsFromBase64(subjects) {
+    return JSON.parse(atob(subjects));
+}
+
 export function getIdFromUrl(url) {
     const s = url.split('/');
     return Number(s[s.length - 2]);

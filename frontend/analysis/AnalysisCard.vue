@@ -17,7 +17,7 @@ const emit = defineEmits(['allTasksFinished', 'someTasksFinished', 'refreshButto
 const props = defineProps({
     detailUrl: {
         type: String,
-        default: '/ui/html/analysis-detail/'
+        default: '/ui/analysis-detail/'
     },
     dois: {
         type: Array,
@@ -31,13 +31,22 @@ const props = defineProps({
         type: Array,
         default: []
     },
-    functionId: Number,
+    functionId: {
+      type: Number,
+      required: true
+    },
     showLoadingSpinner: {
         type: Boolean,
         default: false
     },
-    subjects: String,
-    title: String
+    subjects: {
+      type: Object,
+      required: true
+    },
+    title: {
+      type: String,
+      required: true
+    }
 });
 
 // GUI logic
@@ -60,7 +69,7 @@ const nbSuccess = computed(() => {
                              @someTasksFinished="(nbRunningOrPending) => emit('someTasksFinished', nbRunningOrPending)">
                 </TasksButton>
                 <BButton v-if="analyses !== null"
-                         variant="outline-secondary"
+                         variant="light"
                          size="sm"
                          @click="emit('refreshButtonClicked')"
                          class="float-end ms-1">
@@ -73,7 +82,7 @@ const nbSuccess = computed(() => {
                                   class="float-end">
                 </CardExpandButton>
             </div>
-            <BDropdown variant="outline-secondary" size="sm" class="float-start me-2">
+            <BDropdown variant="light" size="sm" class="float-start me-2">
                 <template #button-content>
                     <i class="fa fa-bars"></i>
                 </template>
