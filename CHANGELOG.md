@@ -6,6 +6,7 @@
 - ENH: Search while typing
 - ENH: New topnav basket for selections
 - ENH: Pinia store for selections
+- BUG: Fixing UI for property deletion
 - MAINT: Each page is now a single page application
 
 ## 1.11.2 (2025-03-04)

@@ -1,7 +1,7 @@
 <script setup>
 
 import axios from "axios";
-import {computed, ref} from 'vue';
+import { computed, ref } from 'vue';
 
 import {
     BButton,
@@ -19,7 +19,7 @@ import {
     useToastController
 } from 'bootstrap-vue-next';
 
-const {show} = useToastController();
+const { show } = useToastController();
 
 const properties = defineModel('properties', {
     default: {}
@@ -38,7 +38,7 @@ function isNumeric(s) {
 // is stored as the "name" of the property)
 function propertiesObjectToArray(propertiesObject) {
     return Object.entries(propertiesObject).map(([name, property]) => {
-        return {name: name, ...property};
+        return { name: name, ...property };
     });
 }
 
@@ -97,7 +97,7 @@ function addProperty() {
     // Add new empty property if there is no empty last property
     const len = _properties.value.length;
     if (len === 0 || (_properties.value[len - 1].name !== "" && _properties.value[len - 1].value !== "")) {
-        _properties.value.push({name: "", value: "", unit: null});
+        _properties.value.push({ name: "", value: "", unit: null });
     }
 }
 
@@ -132,7 +132,7 @@ function save() {
     // Update properties
     _isEditing.value = false;
     _isSaving.value = true;
-    axios.patch(props.surfaceUrl, {properties: propertiesArrayToObject(_properties.value)}).then(response => {
+    axios.patch(props.surfaceUrl, { properties: propertiesArrayToObject(_properties.value) }).then(response => {
         properties.value = response.data["properties"];
         _properties.value = propertiesObjectToArray(response.data["properties"]);
         _isSaving.value = false;
@@ -146,18 +146,15 @@ function save() {
         <template #header>
             <div class="d-flex">
                 <h5 class="flex-grow-1">Properties</h5>
-                <BButton size="sm" v-if="!_isEditing && isEditable"
-                         @click="enterEditMode"
-                         variant="outline-secondary">
+                <BButton size="sm" v-if="!_isEditing && isEditable" @click="enterEditMode" variant="outline-secondary">
                     <i class="fa fa-pen"></i>
                 </BButton>
                 <BButtonGroup v-else-if="isEditable" size="sm">
-                    <BButton v-if="_isEditing && !_isSaving"
-                             @click="discardChanges" variant="danger">
+                    <BButton v-if="_isEditing && !_isSaving" @click="discardChanges" variant="danger">
                         Discard
                     </BButton>
                     <BButton :disabled="!formIsValid" @click="save" variant="success">
-                        <BSpinner v-if="_isSaving" small/>
+                        <BSpinner v-if="_isSaving" small />
                         SAVE
                     </BButton>
                 </BButtonGroup>
@@ -169,10 +166,10 @@ function save() {
             </div>
             <BTableSimple>
                 <colgroup>
-                    <col/>
-                    <col/>
-                    <col/>
-                    <col/>
+                    <col />
+                    <col />
+                    <col />
+                    <col />
                 </colgroup>
                 <BThead head-variant="dark">
                     <BTr>
@@ -183,21 +180,16 @@ function save() {
                     </BTr>
                 </BThead>
                 <BTbody>
-                    <BTr v-for="property in _properties">
+                    <BTr v-for="(property, index) in _properties">
                         <BTd>
-                            <BButton v-if="_isEditing"
-                                     @click="deleteProperty(index)"
-                                     size="sm"
-                                     variant="danger"
-                                     title="remove property">
+                            <BButton v-if="_isEditing" @click="deleteProperty(index)" size="sm" variant="danger"
+                                title="remove property">
                                 <i class="fa fa-minus"></i>
                             </BButton>
                             <i v-else class="fa fa-bars"></i>
                         </BTd>
                         <BTd>
-                            <BFormInput v-if="_isEditing"
-                                        placeholder="Property name"
-                                        v-model="property.name">
+                            <BFormInput v-if="_isEditing" placeholder="Property name" v-model="property.name">
                             </BFormInput>
                             <div v-else>
                                 <span v-if="property.name === ''" class="fw-lighter">
@@ -207,9 +199,7 @@ function save() {
                             </div>
                         </BTd>
                         <BTd>
-                            <BFormInput v-if="_isEditing"
-                                        placeholder="Property value"
-                                        v-model="property.value">
+                            <BFormInput v-if="_isEditing" placeholder="Property value" v-model="property.value">
                             </BFormInput>
                             <div v-else>
                                 <span v-if="property.value === ''" class="fw-lighter">Property value</span>
@@ -217,13 +207,11 @@ function save() {
                             </div>
                         </BTd>
                         <BTd v-if="isNumeric(property.value)">
-                            <BFormInput v-if="_isEditing"
-                                        placeholder="dimensionless"
-                                        v-model="property.unit">
+                            <BFormInput v-if="_isEditing" placeholder="dimensionless" v-model="property.unit">
                             </BFormInput>
                             <div v-else>
                                 <span v-if="property.unit === '' || property.unit == null"
-                                      class="text-muted">(dimensionless)</span>
+                                    class="text-muted">(dimensionless)</span>
                                 <span v-else>{{ property.unit }}</span>
                             </div>
                         </BTd>
@@ -233,8 +221,7 @@ function save() {
                     </BTr>
                 </BTBody>
             </BTableSimple>
-            <div v-if="isEditable" @click="addProperty"
-                 class="d-flex highlight-on-hover rounded-3">
+            <div v-if="isEditable" @click="addProperty" class="d-flex highlight-on-hover rounded-3">
                 <div class="p-2 flex-shrink-1">
                     <i class="fa fa-plus"></i>
                 </div>
