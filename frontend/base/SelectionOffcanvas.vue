@@ -23,7 +23,7 @@ onMounted(() => {
 });
 
 function clearSelection() {
-    selction.clear();
+    selection.clear();
 }
 
 </script>
