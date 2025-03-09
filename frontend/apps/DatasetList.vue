@@ -11,7 +11,8 @@ import {
     BFormInput,
     BFormSelect,
     BInputGroup,
-    BListGroup, BModal,
+    BListGroup,
+    BModal,
     BOverlay,
     BPagination,
     useToastController
@@ -20,6 +21,7 @@ import {
 import {useSelectionStore} from "../stores/selection";
 
 import DatasetListRow from '../manager/DatasetListRow.vue';
+import SelectionOffcanvas from "../base/SelectionOffcanvas.vue";
 
 const {show} = useToastController();
 const selection = useSelectionStore();
@@ -70,6 +72,7 @@ const _orderBy = ref(orderByFilterChoices[0].value);
 const _pageSize = ref(props.pageSize);
 const _searchTerm = ref(props.searchTerm);
 const _searchInfoModalVisible = ref(false);
+const _selectionOffcanvasVisible = ref(false);
 const _sharingStatus = ref(sharingStatusFilterChoices[0].value);
 
 const _datasets = ref([]);
@@ -154,11 +157,6 @@ const searchTerm = computed({
     }
 });
 
-function clearSearchTerm() {
-    _searchTerm.value = '';
-    getDatasets();
-}
-
 function createSurface() {
     axios.post('/manager/api/surface/').then(response => {
         window.location.href = `/ui/dataset-detail/${response.data.id}/`;
@@ -224,7 +222,8 @@ function unselect(dataset) {
                 No selected datasets
             </BButton>
             <BButton v-if="selection.nbSelected > 0" class="me-2" variant="warning"
-                     :disabled="_isLoading">
+                     :disabled="_isLoading"
+                     @click="_selectionOffcanvasVisible = true">
                 {{ selection.nbSelected }} datasets selected
             </BButton>
             <BButton v-if="isAnonymous" disabled
@@ -245,7 +244,7 @@ function unselect(dataset) {
             </div>
             <DatasetListRow v-for="dataset in _datasets" :key="dataset.id"
                             :dataset="dataset"
-                            :selected="selection.surfaceIds.includes(dataset.id)"
+                            :selected="selection.isSelected(dataset.id)"
                             @select="select" @unselect="unselect">
             </DatasetListRow>
         </BListGroup>
@@ -342,4 +341,7 @@ function unselect(dataset) {
             </tbody>
         </table>
     </BModal>
+    <SelectionOffcanvas
+        v-model:visible="_selectionOffcanvasVisible"
+    ></SelectionOffcanvas>
 </template>

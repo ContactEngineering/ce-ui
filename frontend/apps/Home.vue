@@ -96,7 +96,7 @@ onMounted(() => {
                             <div class="card text-white bg-primary o-hidden h-100">
                                 <div class="card-body">
                                     <div class="card-body-icon">
-                                        <i class="fa fa-fw fa-gem"></i>
+                                        <i class="fa fa-layer-group"></i>
                                     </div>
                                     <div class="me-2">
                                         You have
@@ -115,7 +115,7 @@ onMounted(() => {
                             <div class="card text-white bg-danger o-hidden h-100">
                                 <div class="card-body">
                                     <div class="card-body-icon">
-                                        <i class="fa fa-fw fa-edit"></i>
+                                        <i class="fa fa-microscope"></i>
                                     </div>
                                     <div class="me-2">
                                         You have

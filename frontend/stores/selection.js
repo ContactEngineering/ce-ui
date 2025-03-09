@@ -1,21 +1,23 @@
-import {ref} from "vue";
 import {defineStore} from "pinia";
 
 export const useSelectionStore = defineStore('selection', {
     state: () => ({
-        surfaceIds: []
+        datasetIds: []
     }),
     getters: {
         nbSelected() {
-            return this.surfaceIds.length;
+            return this.datasetIds.length;
         }
     },
     actions: {
-        select(surfaceId) {
-            this.surfaceIds.push(surfaceId);
+        isSelected(datasetId) {
+            return this.datasetIds.includes(datasetId);
         },
-        unselect(surfaceId) {
-            this.surfaceIds = this.surfaceIds.filter(id => id !== surfaceId);
+        select(datasetId) {
+            this.datasetIds.push(datasetId);
+        },
+        unselect(datasetId) {
+            this.datasetIds = this.datasetIds.filter(id => id !== datasetId);
         }
     },
     persist: true

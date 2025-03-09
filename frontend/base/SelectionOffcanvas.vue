@@ -11,8 +11,11 @@ import {
     BOffcanvas
 } from "bootstrap-vue-next";
 
+import {useSelectionStore} from "topobank/stores/selection";
+
+const selection = useSelectionStore();
+
 const visible = defineModel("visible", {type: Boolean, required: true});
-const items = defineModel("items", {type: Object, default: {}});
 
 onMounted(() => {
     //eventHub.on("basket:add", addItem);
@@ -20,15 +23,7 @@ onMounted(() => {
 });
 
 function clearSelection() {
-    items.value = {};
-}
-
-function addItem(item) {
-    items.value[item.id] = item;
-}
-
-function removeItem(item) {
-    delete items.value[item.id];
+    selction.clear();
 }
 
 </script>
@@ -42,18 +37,18 @@ function removeItem(item) {
         <template #footer>
             <BNavbarNav class="justify-content-end flex-grow-1">
                 <BNavItem class="btn btn-secondary" @click="clearSelection"
-                          :disabled="items.length === 0">
+                          :disabled="selection.nbSelected === 0">
                     Clear selection
                 </BNavItem>
             </BNavbarNav>
         </template>
 
-        <BAlert :model-value="items.length === 0" variant="light">
+        <BAlert :model-value="selection.nbSelected === 0" variant="light">
             You have not selected any datasets.
         </BAlert>
         <BListGroup>
-            <BListGroupItem v-for="item in items">
-                <i class="fa fa-layer-group"></i> {{ item.name }}
+            <BListGroupItem v-for="dataset in selection.datasetIds">
+                <i class="fa fa-layer-group"></i> {{ dataset }}
             </BListGroupItem>
         </BListGroup>
     </BOffcanvas>
