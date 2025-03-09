@@ -10,7 +10,6 @@ import {
     useToastController
 } from "bootstrap-vue-next";
 
-import BasketButton from "./BasketButton.vue";
 import NotificationButton from "./NotificationButton.vue";
 import UserMenuButton from "./UserMenuButton.vue";
 
@@ -22,6 +21,7 @@ const props = defineProps({
         default: []
     }
 });
+
 const appProps = inject("appProps");
 
 const levelToVariant = {
@@ -60,12 +60,11 @@ onMounted(() => {
         </BNavbarBrand>
         <BNavbarNav v-if="appProps.userIsAnonymous">
             <BNavItem>
-                <BButton :href="loginUrl" variant="secondary">
+                <BButton :href="appProps.loginUrl" variant="secondary">
                     Sign in
                 </BButton>
             </BNavItem>
         </BNavbarNav>
-        <BasketButton></BasketButton>
         <NotificationButton v-if="!appProps.userIsAnonymous"></NotificationButton>
         <UserMenuButton
             v-if="!appProps.userIsAnonymous"
