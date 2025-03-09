@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "noapp.html" %}
 {% load static %}
 {% load terms_tags %}
 {% load socialaccount %}
@@ -44,7 +44,6 @@
       </div>
       {% endif %}
     {% else %}
-
       {# This is shown to anonymous users #}
       {% for terms in active_terms %}
         <div class="card">
