@@ -18,6 +18,9 @@ export const useSelectionStore = defineStore('selection', {
         },
         unselect(datasetId) {
             this.datasetIds = this.datasetIds.filter(id => id !== datasetId);
+        },
+        clear() {
+            this.datasetIds = [];
         }
     },
     persist: true
