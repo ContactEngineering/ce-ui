@@ -73,7 +73,7 @@ const analysisIds = computed(() => {
 function updateCard() {
     /* Fetch JSON describing the card */
     _nbPendingAjaxRequests.value++;
-    axios.get(`${props.apiUrl}/${props.functionId}?subjects=${subjectsToBase64(props.subjects)}`)
+    axios.get(`${props.apiUrl}/${props.functionName}?subjects=${subjectsToBase64(props.subjects)}`)
         .then(response => {
             _analyses.value = response.data.analyses;
             _title.value = response.data.plotConfiguration.title;
