@@ -164,7 +164,7 @@ function createSurface() {
 }
 
 function select(dataset) {
-    selection.select(dataset.id);
+    selection.select(dataset);
 }
 
 function unselect(dataset) {

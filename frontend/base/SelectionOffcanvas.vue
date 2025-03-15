@@ -36,6 +36,14 @@ function clearSelection() {
         </template>
         <template #footer>
             <BNavbarNav class="justify-content-end flex-grow-1">
+                <BNavItem class="btn btn-success mb-2"
+                          :disabled="selection.nbSelected === 0">
+                    Analyze
+                </BNavItem>
+                <BNavItem class="btn btn-light mb-2"
+                          :disabled="selection.nbSelected === 0">
+                    Download
+                </BNavItem>
                 <BNavItem class="btn btn-secondary" @click="clearSelection"
                           :disabled="selection.nbSelected === 0">
                     Clear selection
@@ -47,8 +55,8 @@ function clearSelection() {
             You have not selected any datasets.
         </BAlert>
         <BListGroup>
-            <BListGroupItem v-for="dataset in selection.datasetIds">
-                <i class="fa fa-layer-group"></i> {{ dataset }}
+            <BListGroupItem v-for="datasetId in selection.datasetIds">
+                <i class="fa fa-layer-group"></i> {{ selection.getDataset(datasetId)?.name }}
             </BListGroupItem>
         </BListGroup>
     </BOffcanvas>
