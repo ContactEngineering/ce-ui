@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue';
 
 import { BToastOrchestrator, useToastController } from 'bootstrap-vue-next';
