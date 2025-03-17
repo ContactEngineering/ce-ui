@@ -183,7 +183,7 @@ function updatePublication() {
 }
 
 function updateVersions() {
-    axios.get(`/publication/api/publication/?original_surface=${getOriginalSurfaceId()}`).then(response => {
+    axios.get(`/go/publication/?original_surface=${getOriginalSurfaceId()}`).then(response => {
         _versions.value = response.data;
     }).catch(error => {
         show?.({
