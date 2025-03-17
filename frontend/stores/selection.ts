@@ -6,25 +6,28 @@ export const useSelectionStore = defineStore('selection', {
         datasetCache: {}
     }),
     getters: {
-        nbSelected() {
+        nbSelected(): bigint {
             return this.datasetIds.length;
+        },
+        base64Selected(): string {
+            return btoa(JSON.stringify({surface: this.datasetIds}));
         }
     },
     actions: {
-        isSelected(datasetId) {
+        isSelected(datasetId: bigint): boolean {
             return this.datasetIds.includes(datasetId);
         },
         select(dataset) {
             this.datasetCache[dataset.id] = dataset;
             this.datasetIds.push(dataset.id);
         },
-        unselect(datasetId) {
+        unselect(datasetId: bigint) {
             this.datasetIds = this.datasetIds.filter(id => id !== datasetId);
         },
         clear() {
             this.datasetIds = [];
         },
-        getDataset(datasetId) {
+        getDataset(datasetId: bigint) {
             return this.datasetCache[datasetId];
         }
     },

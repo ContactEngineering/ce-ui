@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 
 import {onMounted} from "vue";
 
@@ -16,6 +16,13 @@ import {useSelectionStore} from "topobank/stores/selection";
 const selection = useSelectionStore();
 
 const visible = defineModel("visible", {type: Boolean, required: true});
+
+const props = defineProps({
+    analysisListUrl: {
+        type: String,
+        default: "/ui/analysis-list/"
+    }
+});
 
 onMounted(() => {
     //eventHub.on("basket:add", addItem);
@@ -37,6 +44,7 @@ function clearSelection() {
         <template #footer>
             <BNavbarNav class="justify-content-end flex-grow-1">
                 <BNavItem class="btn btn-success mb-2"
+                          :href="`${analysisListUrl}?subjects=${selection.base64Selected}`"
                           :disabled="selection.nbSelected === 0">
                     Analyze
                 </BNavItem>
@@ -56,7 +64,8 @@ function clearSelection() {
         </BAlert>
         <BListGroup>
             <BListGroupItem v-for="datasetId in selection.datasetIds">
-                <i class="fa fa-layer-group"></i> {{ selection.getDataset(datasetId)?.name }}
+                <i class="fa fa-layer-group"></i>
+                {{ selection.getDataset(datasetId)?.name }}
             </BListGroupItem>
         </BListGroup>
     </BOffcanvas>

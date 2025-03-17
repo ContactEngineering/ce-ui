@@ -1,6 +1,6 @@
-<script setup>
+<script setup lang="ts">
 
-import{BToastOrchestrator} from "bootstrap-vue-next";
+import {BToastOrchestrator} from "bootstrap-vue-next";
 
 import Breadcrumbs from "../base/Breadcrumbs.vue";
 import Topnav from "../base/Topnav.vue";

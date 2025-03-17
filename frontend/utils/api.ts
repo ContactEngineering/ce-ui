@@ -1,20 +1,20 @@
-export function subjectsToBase64(subjects) {
+export function subjectsToBase64(subjects: any): string {
     return btoa(JSON.stringify(subjects));
 }
 
-export function subjectsFromBase64(subjects) {
+export function subjectsFromBase64(subjects: string): any {
     return JSON.parse(atob(subjects));
 }
 
-export function getIdFromUrl(url) {
+export function getIdFromUrl(url: string): number {
     const s = url.split('/');
     return Number(s[s.length - 2]);
 }
 
 
-export function filterTopographyForPatchRequest(topography) {
+export function filterTopographyForPatchRequest(topography: any): any {
     // Copy writable entries
-    let writeableEntries = [
+    let writeableEntries: string[] = [
         'description', 'instrument_name', 'instrument_parameters', 'instrument_type', 'measurement_date', 'name',
         'tags', 'detrend_mode', 'fill_undefined_data_mode', 'data_source'
     ];
@@ -31,7 +31,7 @@ export function filterTopographyForPatchRequest(topography) {
         writeableEntries.push('is_periodic');
     }
 
-    let returnDict = {};
+    let returnDict: {} = {};
     for (const e of writeableEntries) {
         if (topography[e] != null) {
             returnDict[e] = topography[e];
