@@ -111,7 +111,7 @@ ui_urlpatterns = [
         name="results-list",
     ),
     path(
-        r"analysis-detail/<int:pk>/",
+        r"analysis-detail/<str:slug>/",
         view=views.AnalysisDetailView.as_view(),
         name="results-detail",
     )

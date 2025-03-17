@@ -31,8 +31,8 @@ const props = defineProps({
         type: Array,
         default: []
     },
-    functionId: {
-      type: Number,
+    functionName: {
+      type: String,
       required: true
     },
     showLoadingSpinner: {
@@ -77,7 +77,7 @@ const nbSuccess = computed(() => {
                 </BButton>
                 <CardExpandButton v-if="!enlarged"
                                   :detail-url="detailUrl"
-                                  :function-id="functionId"
+                                  :function-name="functionName"
                                   :subjects="subjects"
                                   class="float-end">
                 </CardExpandButton>

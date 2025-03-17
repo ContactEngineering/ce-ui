@@ -72,7 +72,6 @@ onMounted(() => {
             <component :is="`${card.visualization_type}-card`"
                        v-if="analysis.isSelected(card.name)"
                        :enlarged="false"
-                       :function-id="card.id"
                        :function-name="card.name"
                        :subjects="subjectsDict">
             </component>

@@ -10,10 +10,6 @@ const visualizationType = computed(() => {
     return appProps.object.visualization_type;
 });
 
-const functionId = computed(() => {
-    return appProps.object.id;
-});
-
 const functionName = computed(() => {
     return appProps.object.name;
 });
@@ -29,8 +25,7 @@ const subjects = computed(() => {
         <div class="col-lg-12 mb-4">
             <component :is="`${visualizationType}-card`"
                        :enlarged="true"
-                       :function-id="functionId"
-                       :function-name="functionName"
+                       :functionName="functionName"
                        :subjects="subjects">
             </component>
         </div>

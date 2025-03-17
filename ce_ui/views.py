@@ -207,6 +207,7 @@ def extra_tabs_if_single_item_selected(context, subjects):
 
 class AnalysisDetailView(AppDetailView):
     model = AnalysisFunction
+    slug_field = "name"
     vue_component = "AnalysisDetail"
     serializer_class = WorkflowSerializer
 

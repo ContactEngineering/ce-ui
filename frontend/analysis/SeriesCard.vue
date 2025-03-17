@@ -25,10 +25,6 @@ const props = defineProps({
         type: Boolean,
         default: true
     },
-    functionId: {
-        type: Number,
-        required: true
-    },
     functionName: {
         type: String,
         required: true
@@ -112,7 +108,7 @@ function updateCard() {
                   :detailUrl="detailUrl"
                   :dois="_dois"
                   :enlarged="enlarged"
-                  :functionId="functionId"
+                  :functionName="functionName"
                   :messages="_messages"
                   :showLoadingSpinner="_nbPendingAjaxRequests > 0"
                   :subjects="subjects"
