@@ -4,7 +4,7 @@ import {computed, ref} from "vue";
 
 import {BButton} from 'bootstrap-vue-next';
 
-import {countTaskStates} from 'topobank/utils/tasks.js';
+import {countTaskStates} from 'topobank/utils/tasks.ts';
 
 import TaskStatesModal from './TaskStatesModal.vue';
 
@@ -46,7 +46,7 @@ const nbFailed = computed(() => {
 </script>
 
 <template>
-    <BButton variant="outline-secondary"
+    <BButton variant="light"
              size="sm"
              @click="_modalVisible = !_modalVisible">
         <span v-if="nbRunningOrPending > 0" class="spinner"></span>

@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 
 import axios from "axios";
 import DropZone from '../components/DropZone.vue';
@@ -158,7 +158,8 @@ const attachmentToShowInfo = computed(() => {
                 Drop your attachments here or
             </DropZone>
             <div>
-                <div v-for="[key, value] in Object.entries(attachments)" :key="value.id">
+                <div v-for="[key, value] in Object.entries(attachments)"
+                     :key="value.id">
                     <div
                         class="d-flex align-items-center my-1 border rounded px-2 py-1">
                         <a :href="value.file"><i
@@ -167,13 +168,13 @@ const attachmentToShowInfo = computed(() => {
                             }}
                         </a>
                         <BButton size="sm" class="ms-auto" title="information"
-                                  variant="outline-info"
-                                  @click="infoAttachmentKey = key; infoModal = true;">
+                                 variant="outline-info"
+                                 @click="infoAttachmentKey = key; infoModal = true;">
                             <i class="fa-solid fa-circle-info"></i> Info
                         </BButton>
                         <BButton v-if="isEditable" size="sm" class="ms-2"
-                                  title="delete" variant="outline-danger"
-                                  @click="deleteAttachmentKey = key; deleteModal = true;">
+                                 title="delete" variant="outline-danger"
+                                 @click="deleteAttachmentKey = key; deleteModal = true;">
                             <i class="fa-solid fa-trash"></i> Delete
                         </BButton>
                     </div>
@@ -198,7 +199,7 @@ const attachmentToShowInfo = computed(() => {
     </BCard>
 
     <BModal v-model="deleteModal" v-if="attachmentToDelete" centered
-             title="Delete Attachment">
+            title="Delete Attachment">
         <div class="d-flex flex-column align-items-center">
             <span class="fw-bold"> This operation will permanently delete the attachment:</span>
             <span class="fst-italic"> "{{ attachmentToDelete.filename }}" </span>
@@ -206,18 +207,18 @@ const attachmentToShowInfo = computed(() => {
         </div>
         <template #footer>
             <BButton size="xl" variant="outline-secondary"
-                      @click="deleteModal = false">
+                     @click="deleteModal = false">
                 Cancel
             </BButton>
             <BButton size="xl" class="ms-2" variant="outline-danger"
-                      @click="deleteModal = false; deleteAttachment(deleteAttachmentKey)">
+                     @click="deleteModal = false; deleteAttachment(deleteAttachmentKey)">
                 Delete
             </BButton>
         </template>
     </BModal>
 
     <BModal v-model="infoModal" v-if="attachmentToShowInfo" centered ok-only
-             title="Attachment Info">
+            title="Attachment Info">
         <div>
             <div class="row">
                 <div class="col-3 fw-bold">

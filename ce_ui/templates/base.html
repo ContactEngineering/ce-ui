@@ -1,9 +1,5 @@
 <!DOCTYPE html>
-{% load static i18n %}
-{% load icon_tags %}
-{% load socialaccount %}
-{% load terms_tags %}
-{% load tabnav_tags %}
+{% load static %}
 
 <html lang="en">
 
@@ -15,40 +11,22 @@
           content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description"
           content="Cloud service for storing and analysis surface topography measurements">
-    <meta name="author" content="Michael Röttger, Lars Pastewka">
+    <meta name="author" content="Michael Röttger, Lars Pastewka, Tevis Jacobs">
     <meta name="keywords"
           content="roughness, surface finish, contact calculator, contact mechanics">
 
-    <title>contact.engineering - Store and analyze surface topography
-        measurements</title>
+    <title>contact.engineering - A surface topography cloud database</title>
 
     <link rel="icon" type="image/x-icon"
           href="{% static 'images/favicons/favicon.png' %}"/>
-
-    <script src="{% static 'js/base.bundle.js' %}"></script>
-
-    <link href="{% static 'tagulous/lib/select2-4/css/select2.min.css' %}"
-          rel="stylesheet">
 
     {% block extra_css %}{% endblock extra_css %}
 </head>
 
 <body id="page-top" lang="en-US">
 
-<div class="fixed-top">
-    <div id="topnav"></div>
-    {% tab_navigation %}
-</div>
-
-<div id="wrapper">
-    <div id="content-wrapper">
-        <div class="container-fluid mt-1">
-            {# Insert actual content, see other templates #}
-            {% block content %}
-            {% endblock content %}
-        </div>
-    </div>
-</div>
+{% block body %}
+{% endblock body %}
 
 <footer class="sticky-footer">
     <div class="container my-auto">
@@ -94,33 +72,7 @@
 <script src={% static "vendor/openseadragon/FileSaver.min.js" %}></script>
 
 {% block javascript %}{% endblock javascript %}
-<!--sidebar js -->
-<script src="{% static 'js/topnav_app.bundle.js' %}"></script>
-<script>
-    const messages = [];
-    {% if messages %}
-        {% for message in messages %}
-            messages.push({
-                message: '{{ message }}',
-                level: '{{ message.level_tag }}',
-                extra_tags: '{{ message.extra_tags }}'
-            });
-        {% endfor %}
-    {% endif %}
 
-    topobank.topnav_app.createTopnavApp('#topnav', '{{ csrf_token }}', {
-        apiUrl: '{{ request.user.get_absolute_url }}',
-        loginUrl: '{% provider_login_url 'orcid' method=" oauth2" %}',
-        selectUrl: '{% url 'ce_ui:select' %}',
-        adminUrl: '{% url 'admin:index' %}',
-        userName: '{{ request.user.username }}',
-        name: '{{ request.user.name }}',
-        orcid: '{{ request.user.orcid_id }}',
-        isAnonymous: {{ request.user.is_anonymous|yesno:'true,false' }},
-        isStaff: {{ request.user.is_staff|yesno:'true,false' }},
-        messages: messages
-    });
-</script>
 </body>
 
 </html>

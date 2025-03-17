@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 
 import axios from "axios";
 import {onMounted, ref} from "vue";
@@ -14,7 +14,7 @@ const props = defineProps({
 const _bokehPlotElement = ref(null);
 
 onMounted(() => {
-    axios.get(props.topography.squeezed_datafile.file, {responseType: 'arraybuffer'})
+    axios.get(props.topography.squeezed_datafile?.file, {responseType: 'arraybuffer'})
         .then(response => {
             const netcdfReader = new NetCDFReader(response.data);
             const x = netcdfReader.getDataVariable('x');

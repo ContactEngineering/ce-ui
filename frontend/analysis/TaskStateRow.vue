@@ -1,11 +1,11 @@
-<script setup>
+<script setup lang="ts">
 
 import axios from "axios";
 import {computed, onMounted, ref, watch} from "vue";
 
 import {BButton, useToastController} from "bootstrap-vue-next";
 
-import {prettyBytes} from "../utils/formatting.js";
+import {prettyBytes} from "../utils/formatting";
 
 import ProgressIndicator from "topobank/components/ProgressIndicator.vue";
 

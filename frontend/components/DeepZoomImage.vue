@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 
 /**
  * Vue component for visualizing 2D maps (topography, pressure, etc.) using
@@ -48,7 +48,6 @@ const _colormap = ref(null);
 const _errorMessage = ref(null);
 
 onMounted(() => {
-    //this.eventHub.on('download-dzi', this.download);
     requestDzi();
 });
 
@@ -97,7 +96,7 @@ function refreshDzi() {
     }).catch(error => {
         show?.({
             props: {
-                title: "Error rendering zoomable image",
+                title: "Error fetching zoomable image",
                 body: error.message,
                 variant: 'danger'
             }
