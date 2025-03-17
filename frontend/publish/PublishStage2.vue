@@ -126,7 +126,7 @@ function moveAffiliationDown(authorIndex, affiliationIndex) {
     }
 }
 
-const orcidIdRegex = new RegExp("^\\d{4}-\\d{4}-\\d{4}-\\d{4}$");
+const orcidIdRegex = new RegExp("^(\\d{4}-){3}\\d{3}(\\d|X)$");
 const rorIdRegex = new RegExp("^0[a-z|0-9]{6}[0-9]{2}$");
 
 function checkValidity() {
