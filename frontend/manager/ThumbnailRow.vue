@@ -11,7 +11,7 @@ const props = defineProps({
     dataSourceListUrl: String,
     nbThumbnailsIncrement: {
         type: Number,
-        default: 20
+        default: 5
     }
 });
 
@@ -26,11 +26,11 @@ onMounted(() => {
 
 function loadMoreThumbnails() {
     _isLoading.value = true;
-    _nbThumbnails.value += props.nbThumbnailsIncrement;
-    axios.get(`${props.dataSourceListUrl}&limit=${_nbThumbnails.value}`)
+    axios.get(`${props.dataSourceListUrl}&offset=${_nbThumbnails.value}&limit=${_nbThumbnails.value + props.nbThumbnailsIncrement}`)
         .then(response => {
-            _dataSources.value = response.data?.results;
-            _nbDataSources.value = response.data?.count;
+            _dataSources.value.push(...response.data.results);
+            _nbDataSources.value = response.data.count;
+            _nbThumbnails.value += props.nbThumbnailsIncrement;
         })
         .finally(() => {
             _isLoading.value = false;
