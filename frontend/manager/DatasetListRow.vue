@@ -21,16 +21,30 @@ const props = defineProps({
 });
 
 const _creator = ref(null);
+const _publication = ref(null);
 
 onMounted(() => {
     axios.get(props.dataset.creator)
         .then(response => {
             _creator.value = response.data.name;
         });
+    if (props.dataset?.publication) {
+        axios.get(props.dataset.publication).then(response => {
+            _publication.value = response.data;
+            console.log(_publication.value);
+        });
+    }
+});
+
+const publicationAuthorsPretty = computed(() => {
+    if (_publication.value == null) {
+        return null;
+    }
+    return _publication.value.authors_json.map(author => `${author.first_name} ${author.last_name}`).join(', ');
 });
 
 const publicationDatePretty = computed(() => {
-    return new Date(props.dataset.publication_date).toISOString().substring(0, 10);
+    return new Date(_publication.value?.datetime).toISOString().substring(0, 10);
 });
 
 const creationDatePretty = computed(() => {
@@ -70,14 +84,14 @@ const creationDatePretty = computed(() => {
                 <p class="dataset-title">
                     <i class="fa fa-layer-group"></i> {{ dataset.name }}
                 </p>
+                <p v-if="_publication != null" class="dataset-authors">
+                    {{ publicationAuthorsPretty }}
+                    (published {{ publicationDatePretty }})
+                </p>
                 <ThumbnailRow class="mb-3"
                               :data-source-list-url="dataset.topographies">
                 </ThumbnailRow>
-                <p v-if="dataset.publication_authors != null" class="dataset-authors">
-                    {{ dataset.publication_authors }}
-                    (published {{ publicationDatePretty }})
-                </p>
-                <p v-else class="dataset-authors">
+                <p v-if="_publication == null" class="dataset-authors">
                     This digital surface twin is unpublished.
                     It was created
                     <span v-if="_creator != null">
