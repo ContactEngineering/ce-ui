@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 
 import {computed, onMounted, ref} from "vue";
 
@@ -14,18 +14,13 @@ import {
 
 import ThumbnailRow from "./ThumbnailRow.vue";
 
-const emit = defineEmits(["select", "unselect"]);
+const selected = defineModel<boolean>("selected");
 
 const props = defineProps({
-    dataset: Object,
-    selected: {
-        type: Boolean,
-        default: false
-    }
+    dataset: Object
 });
 
 const _creator = ref(null);
-const _selected = ref(props.selected);
 
 onMounted(() => {
     axios.get(props.dataset.creator)
@@ -42,27 +37,13 @@ const creationDatePretty = computed(() => {
     return new Date(props.dataset.creation_datetime).toISOString().substring(0, 10);
 });
 
-const selected = computed({
-    get() {
-        return _selected.value;
-    },
-    set(value) {
-        _selected.value = value;
-        if (value) {
-            emit("select", props.dataset);
-        } else {
-            emit("unselect", props.dataset);
-        }
-    }
-});
-
 </script>
 
 <template>
     <BListGroupItem>
         <div class="d-flex">
             <div>
-                <BFormCheckbox v-model="selected"></BFormCheckbox>
+                <BFormCheckbox v-model="selected" :value="dataset.id"></BFormCheckbox>
             </div>
             <div class="flex-grow-1 ms-2 me-2">
                 <a v-if="dataset.publication_doi != null"
