@@ -1,9 +1,10 @@
 # Changelog for plugin *ce-ui*
 
-## 1.12.0 (not yet released)
+## 1.12.0 (2025-03-17)
 
 - ENH: New dataset list
 - ENH: Search while typing
+- ENH: New publication flow
 - ENH: New topnav basket for selections
 - ENH: Pinia store for selections
 - BUG: Fixing UI for property deletion

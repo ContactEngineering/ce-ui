@@ -1,6 +1,6 @@
-import ContactMechanicsCard from 'topobank_contact/ContactMechanicsCard.vue';
-import RoughnessParametersCard from 'topobank_statistics/RoughnessParametersCard.vue';
-import SeriesCard from 'topobank/analysis/SeriesCard.vue';
+import ContactMechanicsCard from '@/analysis/ContactMechanicsCard.vue';
+import RoughnessParametersCard from '@/analysis/RoughnessParametersCard.vue';
+import SeriesCard from '@/analysis/SeriesCard.vue';
 
 
 export function registerAnalysisCardComponents(app) {

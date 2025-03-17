@@ -64,15 +64,15 @@ const sharingStatusFilterChoices = [
 
 
 // UI logic
-const _currentPage = ref(props.currentPage);
-const _isLoading = ref(false);
-const _nbDatasets = ref(null);
-const _nbDatasetsOnCurrentPage = ref(null);
+const _currentPage = ref<number>(props.currentPage);
+const _isLoading = ref<boolean>(false);
+const _nbDatasets = ref<number>(null);
+const _nbDatasetsOnCurrentPage = ref<number>(null);
 const _orderBy = ref(orderByFilterChoices[0].value);
-const _pageSize = ref(props.pageSize);
-const _searchTerm = ref(props.searchTerm);
-const _searchInfoModalVisible = ref(false);
-const _selectionOffcanvasVisible = ref(false);
+const _pageSize = ref<number>(props.pageSize);
+const _searchTerm = ref<string>(props.searchTerm);
+const _searchInfoModalVisible = ref<boolean>(false);
+const _selectionOffcanvasVisible = ref<boolean>(false);
 const _sharingStatus = ref(sharingStatusFilterChoices[0].value);
 
 const _datasets = ref([]);
@@ -81,7 +81,7 @@ const _previousUrl = ref(null);
 
 let searchDelayTimer = null;
 
-function getDatasets(offset = 0) {
+function getDatasets(offset: number = 0) {
     searchDelayTimer = null;
     _isLoading.value = true;
     _currentPage.value = offset / _pageSize.value + 1;
@@ -171,6 +171,10 @@ function unselect(dataset) {
     selection.unselect(dataset.id);
 }
 
+function sharingStatusChanged() {
+    getDatasets();
+}
+
 </script>
 
 <template>
@@ -195,7 +199,7 @@ function unselect(dataset) {
                 <BFormSelect v-model="_sharingStatus" :disabled="_isLoading"
                              :options="sharingStatusFilterChoices" class="form-control"
                              name="sharing_status"
-                             @change="getDatasets">
+                             @change="sharingStatusChanged">
                 </BFormSelect>
             </BFormGroup>
         </div>

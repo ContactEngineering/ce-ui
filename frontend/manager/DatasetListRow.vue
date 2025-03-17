@@ -1,11 +1,12 @@
 <script setup lang="ts">
 
-import {computed, onMounted, ref} from "vue";
+import { computed, onMounted, ref } from "vue";
 
 import axios from "axios";
-import {subjectsToBase64} from "topobank/utils/api";
+import { subjectsToBase64 } from "topobank/utils/api";
 
 import {
+    BBadge,
     BButton,
     BButtonGroup,
     BFormCheckbox,
@@ -21,16 +22,29 @@ const props = defineProps({
 });
 
 const _creator = ref(null);
+const _publication = ref(null);
 
 onMounted(() => {
     axios.get(props.dataset.creator)
         .then(response => {
             _creator.value = response.data.name;
         });
+    if (props.dataset?.publication) {
+        axios.get(props.dataset.publication).then(response => {
+            _publication.value = response.data;
+        });
+    }
+});
+
+const publicationAuthorsPretty = computed(() => {
+    if (_publication.value == null) {
+        return null;
+    }
+    return _publication.value.authors_json.map(author => `${author.first_name} ${author.last_name}`).join(", ");
 });
 
 const publicationDatePretty = computed(() => {
-    return new Date(props.dataset.publication_date).toISOString().substring(0, 10);
+    return new Date(_publication.value?.datetime).toISOString().substring(0, 10);
 });
 
 const creationDatePretty = computed(() => {
@@ -46,6 +60,16 @@ const creationDatePretty = computed(() => {
                 <BFormCheckbox v-model="selected" :value="dataset.id"></BFormCheckbox>
             </div>
             <div class="flex-grow-1 ms-2 me-2">
+                <img v-if="_publication != null"
+                     class="float-end ms-2 me-2"
+                     variant="dark"
+                     :src="`/static/images/cc/${_publication.license}.svg`"
+                     title="Dataset can be reused under the terms of a Creative Commons license.">
+                <BBadge v-if="_publication != null"
+                        class="float-end me-2"
+                        :href="`https://doi.org/${_publication.doi_name}`">
+                    https://doi.org/{{ _publication.doi_name }}
+                </BBadge>
                 <a v-if="dataset.publication_doi != null"
                    class="badge bg-dark me-1 text-decoration-none"
                    :href="dataset.publication_doi">{{ dataset.publication_doi }}</a>
@@ -70,14 +94,14 @@ const creationDatePretty = computed(() => {
                 <p class="dataset-title">
                     <i class="fa fa-layer-group"></i> {{ dataset.name }}
                 </p>
+                <p v-if="_publication != null" class="dataset-authors">
+                    {{ publicationAuthorsPretty }}
+                    (published {{ publicationDatePretty }})
+                </p>
                 <ThumbnailRow class="mb-3"
                               :data-source-list-url="dataset.topographies">
                 </ThumbnailRow>
-                <p v-if="dataset.publication_authors != null" class="dataset-authors">
-                    {{ dataset.publication_authors }}
-                    (published {{ publicationDatePretty }})
-                </p>
-                <p v-else class="dataset-authors">
+                <p v-if="_publication == null" class="dataset-authors">
                     This digital surface twin is unpublished.
                     It was created
                     <span v-if="_creator != null">

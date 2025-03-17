@@ -106,6 +106,11 @@ ui_urlpatterns = [
         name="surface-detail",
     ),
     path(
+        r"dataset-publish/<int:pk>/",
+        view=views.DatasetPublishView.as_view(),
+        name="dataset-publish",
+    ),
+    path(
         "analysis-list/",
         view=views.AnalysisListView.as_view(),
         name="results-list",

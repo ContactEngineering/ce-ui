@@ -73,6 +73,8 @@
             // User information
             userApiUrl: '{{ request.user.get_absolute_url }}',
             userName: '{{ request.user.username }}',
+            userFirstName: '{{ request.user.first_name }}',
+            userLastName: '{{ request.user.last_name }}',
             userFullName: '{{ request.user.name }}',
             userOrcid: '{{ request.user.orcid_id }}',
             userIsAnonymous: {{ request.user.is_anonymous|yesno:'true,false' }},

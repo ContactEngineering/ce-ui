@@ -86,7 +86,7 @@ class AppDetailView(DetailView):
 
 
 class DataSetListView(AppView):
-    vue_component = "dataset-list"
+    vue_component = "DatasetList"
 
     def dispatch(self, request, *args, **kwargs):
         # count this view event for statistics
@@ -97,7 +97,7 @@ class DataSetListView(AppView):
 
 class DatasetDetailView(AppDetailView):
     model = Surface
-    vue_component = "dataset-detail"
+    vue_component = "DatasetDetail"
     serializer_class = SurfaceSerializer
 
     def get_context_data(self, **kwargs):
@@ -117,9 +117,43 @@ class DatasetDetailView(AppDetailView):
         return context
 
 
+class DatasetPublishView(AppDetailView):
+    model = Surface
+    vue_component = "DatasetPublish"
+    serializer_class = SurfaceSerializer
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        #
+        # Check permissions
+        #
+        if not self.object.has_permission(self.request.user, "full"):
+            raise PermissionDenied()
+
+        #
+        # Breadcrumb navigation
+        #
+        breadcrumb.add_surface(context, self.object)
+        breadcrumb.add_generic(
+            context,
+            {
+                "title": "Publish dataset",
+                "icon": "paper-plane",
+                "icon_style_prefix": "far",
+                "href": f"{reverse('ce_ui:dataset-publish', kwargs=dict(pk=self.object.id))}",
+                "active": True,
+                "login_required": False,
+                "tooltip": f"Publish '{self.object.label}'",
+            },
+        )
+
+        return context
+
+
 class TopographyDetailView(AppDetailView):
     model = Topography
-    vue_component = "topography-detail"
+    vue_component = "TopographyDetail"
     serializer_class = TopographySerializer
 
     def get_context_data(self, **kwargs):
@@ -250,7 +284,7 @@ class AnalysisDetailView(AppDetailView):
 
 
 class AnalysisListView(AppView):
-    vue_component = "analysis-list"
+    vue_component = "AnalysisList"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -280,7 +314,7 @@ class AnalysisListView(AppView):
 
 
 class HomeView(AppView):
-    vue_component = "home"
+    vue_component = "Home"
 
 
 class TermsView(TemplateView):
