@@ -1,4 +1,3 @@
-import json
 import logging
 from html import unescape
 
@@ -11,7 +10,6 @@ from django.views.generic import (DetailView, ListView, RedirectView,
                                   TemplateView, UpdateView)
 from termsandconditions.models import TermsAndConditions
 from termsandconditions.views import AcceptTermsView
-from termsandconditions.views import TermsView as OrigTermsView
 from topobank.analysis.models import AnalysisFunction
 from topobank.analysis.registry import get_analysis_function_names
 from topobank.analysis.serializers import WorkflowSerializer
@@ -79,11 +77,10 @@ class AppDetailView(DetailView):
 
         context["vue_component"] = self.vue_component
         context["extra_tabs"] = []
-        context["object_json"] = json.dumps(
-            self.get_serializer_class()(
-                self.object, context={"request": self.request}
-            ).data
-        )
+        context["serialized_object"] = self.get_serializer_class()(
+            self.object, context={"request": self.request}
+        ).data
+        print(context["serialized_object"])
 
         return context
 
@@ -365,7 +362,7 @@ class TabbedTermsMixin:
         return context
 
 
-class TermsDetailView(TabbedTermsMixin, OrigTermsView):
+class TermsDetailView(TabbedTermsMixin, TermsView):
     pass
 
 

@@ -7,6 +7,9 @@
 {% endblock body %}
 
 {% block javascript %}
+    {% if serialized_object %}
+        {{ serialized_object|json_script:"object" }}
+    {% endif %}
     <script src="{% static 'js/app.bundle.js' %}"></script>
     <script>
         /**
@@ -80,8 +83,8 @@
         /*
          * "Detail" views yield a current serialized object
          */
-        {% if object_json %}
-            appProps["object"] = JSON.parse('{{ object_json|safe }}');
+        {% if serialized_object %}
+            appProps["object"] = JSON.parse(document.getElementById("object").textContent);
         {% endif %}
 
         /*
