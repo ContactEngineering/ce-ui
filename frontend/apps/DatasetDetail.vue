@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 
 import axios from "axios";
 import {computed, inject, onMounted, ref, shallowRef} from "vue";

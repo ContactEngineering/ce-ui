@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const manifestUrl = "/files/manifest/";
+const manifestUrl: string = "/files/manifest/";
 
 export function createFileManifest({folderUrl, fileName}) {
     const body = {

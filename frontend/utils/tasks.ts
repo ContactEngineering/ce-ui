@@ -1,4 +1,4 @@
-export function countTaskStates(analyses, states) {
+export function countTaskStates(analyses: any[], states: string[]): number {
     if (analyses == null) {
         return 0;
     }

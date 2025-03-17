@@ -4,7 +4,7 @@ import {computed, ref} from "vue";
 
 import {BButton, BCard, BDropdown, BDropdownItem, BSpinner} from 'bootstrap-vue-next';
 
-import {countTaskStates} from 'topobank/utils/tasks.js';
+import {countTaskStates} from 'topobank/utils/tasks.ts';
 
 import BibliographyModal from './BibliographyModal.vue';
 import CardExpandButton from './CardExpandButton.vue';

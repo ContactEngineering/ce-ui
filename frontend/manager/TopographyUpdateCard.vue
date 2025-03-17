@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 
 import axios from "axios";
 import {cloneDeep} from "lodash";
@@ -9,13 +9,13 @@ import {
     BButton,
     BButtonGroup,
     BCard,
-    BCollapse,
     BFormCheckbox,
     BFormInput,
     BFormSelect,
     BFormTextarea,
     BModal,
-    BSpinner
+    BSpinner,
+    useToastController
 } from 'bootstrap-vue-next';
 
 import {filterTopographyForPatchRequest, subjectsToBase64} from "../utils/api";
@@ -23,6 +23,8 @@ import {filterTopographyForPatchRequest, subjectsToBase64} from "../utils/api";
 import TopographyBadges from "./TopographyBadges.vue";
 import Attachments from './Attachments.vue';
 import Thumbnail from "./Thumbnail.vue";
+
+const {show} = useToastController();
 
 const props = defineProps({
     batchEdit: {type: Boolean, default: false},
@@ -64,7 +66,6 @@ const _attachmentsVisible = ref(props.enlarged);
 
 // GUI logic
 const _editing = ref(props.batchEdit);
-const _error = ref(null);
 const _saving = ref(false);
 const _showDeleteModal = ref(false);
 
@@ -112,10 +113,13 @@ function saveEdits() {
         _editing.value = false;
         _saving.value = true;
         axios.patch(props.topographyUrl, filterTopographyForPatchRequest(props.topography)).then(response => {
-            _error.value = null;
             emit('update:topography', response.data);
         }).catch(error => {
-            _error.value = error;
+            show?.({
+                title: "Failed to save changes",
+                body: error,
+                variant: 'danger'
+            });
             emit('update:topography', _savedTopography);
         }).finally(() => {
             _saving.value = false;
@@ -138,7 +142,11 @@ function deleteTopography() {
     axios.delete(props.topographyUrl).then(response => {
         emit('delete:topography', props.topographyUrl);
     }).catch(error => {
-        _error.value = error;
+        show?.({
+            title: "Failed to delete measurement",
+            body: error,
+            variant: 'danger'
+        });
     });
 }
 
@@ -146,7 +154,11 @@ function forceInspect() {
     axios.post(`${props.topographyUrl}force-inspect/`).then(response => {
         emit('update:topography', response.data);
     }).catch(error => {
-        _error.value = error;
+        show?.({
+            title: "Failed to force file inspection",
+            body: error,
+            variant: 'danger'
+        });
     });
 }
 
@@ -334,9 +346,6 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                 </BButton>
             </BButtonGroup>
         </template>
-        <BAlert :model-value="_error != null" variant="danger">
-            {{ _error.message }}
-        </BAlert>
         <div v-if="topography == null" class="tab-content">
             <BSpinner small></BSpinner>
             Please wait...

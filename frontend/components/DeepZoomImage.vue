@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 
 /**
  * Vue component for visualizing 2D maps (topography, pressure, etc.) using
@@ -96,7 +96,7 @@ function refreshDzi() {
     }).catch(error => {
         show?.({
             props: {
-                title: "Error rendering zoomable image",
+                title: "Error fetching zoomable image",
                 body: error.message,
                 variant: 'danger'
             }
