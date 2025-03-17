@@ -40,7 +40,7 @@ function publish() {
             })
         }
     });
-    axios.post('/publication/publish/', {
+    axios.post('/go/publish/', {
         'surface': appProps.object.id,
         'authors': authorsTransformed,
         'license': license
