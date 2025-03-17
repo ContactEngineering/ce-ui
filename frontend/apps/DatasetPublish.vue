@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { ref } from 'vue';
+import {inject, ref} from 'vue';
 
 import { useToastController } from 'bootstrap-vue-next';
 
@@ -15,6 +15,8 @@ const props = defineProps({
   user: Object,
   surfaceId: Number
 });
+
+const appProps = inject("appProps");
 
 const { show } = useToastController();
 
@@ -63,7 +65,7 @@ function publish() {
   <div class="container">
     <ProgessBar :stage="stage" />
     <div class="p-5">
-      <PublishStage1 :stage="stage" :surfaceId="surfaceId" @continue="stage = 1"></PublishStage1>
+      <PublishStage1 :stage="stage" :surfaceId="appProps.object.id" @continue="stage = 1"></PublishStage1>
       <PublishStage2 :stage="stage" :user="props.user" @continue="(emitedAuthors) => {
         authors = emitedAuthors;
         stage = 2;

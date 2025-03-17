@@ -1,4 +1,5 @@
 <script setup>
+
 const props = defineProps({
   stage: Number,
 });
@@ -21,8 +22,8 @@ const stages = [
     icon: 'fa-paper-plane'
   }
 ];
-
 </script>
+
 <template>
   <div id="progress" class="d-flex flex-row justify-content-center">
     <div v-for="stage in [0, 1, 2, 3]" class="d-flex flex-row align-items-center">
