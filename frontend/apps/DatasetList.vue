@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 
 import axios from "axios";
 
@@ -145,7 +145,7 @@ const pageSize = computed({
 
 const searchTerm = computed({
     get() {
-        if (_searchTerm.value.length == 0) {
+        if (_searchTerm.value.length === 0) {
             return null;
         }
         return _searchTerm.value;
@@ -244,8 +244,7 @@ function unselect(dataset) {
             </div>
             <DatasetListRow v-for="dataset in _datasets" :key="dataset.id"
                             :dataset="dataset"
-                            :selected="selection.isSelected(dataset.id)"
-                            @select="select" @unselect="unselect">
+                            v-model:selected="selection.datasetIds">
             </DatasetListRow>
         </BListGroup>
 

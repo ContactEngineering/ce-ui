@@ -2,7 +2,7 @@
  * Convert numerals inside a string into the unicode superscript equivalent, e.g.
  *   µm3 => µm³
  */
-function unicodeSuperscript(s) {
+function unicodeSuperscript(s: string): string {
     var superscript_dict = {
         '0': '⁰',
         '1': '¹',
@@ -32,7 +32,7 @@ function unicodeSuperscript(s) {
  *
  * @returns {Formatter} A formatter for general values.
  */
-export function formatExponential(d, maxNumberOfDecimalPlaces) {
+export function formatExponential(d: number, maxNumberOfDecimalPlaces: bigint): string {
     if (maxNumberOfDecimalPlaces === undefined) {
         maxNumberOfDecimalPlaces = 3;
     }
@@ -74,7 +74,7 @@ export function formatExponential(d, maxNumberOfDecimalPlaces) {
  * @param {number} [size] Number of bytes. *
  * @returns {string} Formatted string.
  * */
-export function prettyBytes(size) {
+export function prettyBytes(size: bigint): string {
     var i = size == 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
     return (size / Math.pow(1024, i)).toFixed(2) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
 }
@@ -86,7 +86,7 @@ export function prettyBytes(size) {
  * @param {string} dateTimeString - The date-time string to be formatted.
  * @returns {string} The formatted local date-time string.
  */
-export function formatDateTime(dateTimeString) {
+export function formatDateTime(dateTimeString: string): string {
     var date = new Date(dateTimeString);
     return date.toLocaleString();
 }

@@ -1,4 +1,14 @@
-export const ccLicenseInfo = {
+interface LicenseInfo {
+    [Key: string]: {
+        descriptionUrl: string,
+        legalCodeUrl: string,
+        title: string,
+        optionName: string,
+        spdxIdentifier: string
+    }
+}
+
+export const ccLicenseInfo: LicenseInfo = {
     'cc0-1.0': {
         descriptionUrl: 'https://creativecommons.org/publicdomain/zero/1.0/',
         legalCodeUrl: 'https://creativecommons.org/publicdomain/zero/1.0/legalcode',

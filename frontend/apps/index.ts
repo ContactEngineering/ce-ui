@@ -8,7 +8,12 @@ import DatasetDetail from './DatasetDetail.vue';
 import DatasetList from './DatasetList.vue';
 import TopographyDetail from './TopographyDetail.vue';
 
-const componentIndex = [
+interface ComponentIndex {
+    name: string,
+    implementation: any
+}
+
+const componentIndex: ComponentIndex = [
     {name: "AnalysisDetail", implementation: AnalysisResultsDetail},
     {name: "AnalysisList", implementation: AnalysisResultsList},
     {name: "DatasetList", implementation: DatasetList},
