@@ -1,35 +1,41 @@
-<script setup>
+<script setup lang="ts">
 
 import axios from "axios";
 import {onMounted, ref} from "vue";
 
-import {BOverlay} from "bootstrap-vue-next";
+import {BButton, BOverlay} from "bootstrap-vue-next";
 
 import Thumbnail from "./Thumbnail.vue";
 
 const props = defineProps({
     dataSourceListUrl: String,
-    maxNbThumbnails: {
+    nbThumbnailsIncrement: {
         type: Number,
         default: 20
     }
 });
 
 const _dataSources = ref([]);
-const _nbDataSources = ref(0);
-const _isLoading = ref(true);
+const _nbDataSources = ref<number>(0);
+const _nbThumbnails = ref<number>(0);
+const _isLoading = ref<boolean>(true);
 
 onMounted(() => {
+    loadMoreThumbnails();
+});
+
+function loadMoreThumbnails() {
     _isLoading.value = true;
-    axios.get(`${props.dataSourceListUrl}&limit=${props.maxNbThumbnails}`)
+    _nbThumbnails.value += props.nbThumbnailsIncrement;
+    axios.get(`${props.dataSourceListUrl}&limit=${_nbThumbnails.value}`)
         .then(response => {
-            _dataSources.value = response.data.results;
-            _nbDataSources.value = response.data.count;
+            _dataSources.value = response.data?.results;
+            _nbDataSources.value = response.data?.count;
         })
         .finally(() => {
             _isLoading.value = false;
         });
-});
+}
 
 </script>
 
@@ -41,8 +47,11 @@ onMounted(() => {
                    img-class="mh-100"
                    :data-source="dataSource">
         </Thumbnail>
-        <i v-if="_nbDataSources > _dataSources.length"
-           class="fa fa-ellipsis align-self-center"></i>
+        <BButton v-if="_nbDataSources > _dataSources.length"
+                 variant="light" size="sm" class="me-1"
+                 @click="loadMoreThumbnails">
+            <i class="fa fa-ellipsis align-self-center"></i>
+        </BButton>
     </BOverlay>
 </template>
 

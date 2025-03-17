@@ -14,7 +14,7 @@ import {
 
 import ThumbnailRow from "./ThumbnailRow.vue";
 
-const selected = defineModel<boolean>("selected");
+const selected = defineModel<string[]>("selected");
 
 const props = defineProps({
     dataset: Object
