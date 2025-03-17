@@ -14,20 +14,22 @@ export const useSelectionStore = defineStore('selection', {
         }
     },
     actions: {
-        isSelected(datasetId: bigint): boolean {
+        isSelected(datasetId: number): boolean {
             return this.datasetIds.includes(datasetId);
         },
-        select(dataset) {
+        select(dataset: any) {
             this.datasetCache[dataset.id] = dataset;
             this.datasetIds.push(dataset.id);
         },
-        unselect(datasetId: bigint) {
-            this.datasetIds = this.datasetIds.filter(id => id !== datasetId);
+        unselect(datasetId: number) {
+            this.datasetIds = this.datasetIds.filter(
+                (id: number): boolean => id !== datasetId
+            );
         },
         clear() {
             this.datasetIds = [];
         },
-        getDataset(datasetId: bigint) {
+        getDataset(datasetId: number) {
             return this.datasetCache[datasetId];
         }
     },
