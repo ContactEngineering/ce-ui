@@ -1,6 +1,6 @@
 # Changelog for plugin *ce-ui*
 
-## 1.12.0 (2025-03-17)
+## 1.30.0 (2025-03-17)
 
 - ENH: New dataset list
 - ENH: Search while typing
