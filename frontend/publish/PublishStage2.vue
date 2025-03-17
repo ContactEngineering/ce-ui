@@ -1,156 +1,172 @@
 <script setup lang="ts">
 
-import {ref, computed, inject} from 'vue';
-import {BCard, BButton, BButtonGroup, BFormInput, BAlert} from 'bootstrap-vue-next';
+import { computed, inject, ref } from "vue";
+import { BCard, BButton, BButtonGroup, BFormInput, BAlert } from "bootstrap-vue-next";
 
 const props = defineProps({
-    stage: Number,
+    stage: Number
 });
 
 const appProps = inject("appProps");
 
-const emit = defineEmits(['back', 'continue'])
-
+const emit = defineEmits(["back", "continue"]);
 
 interface Person {
     firstName: string;
+    firstNameValid: boolean;
     lastName: string;
+    lastNameValid: boolean;
     orcidId: string;
+    orcidIdValid: boolean;
+}
+
+interface Affiliation {
+    name: string;
+    nameValid: boolean;
+    rorId: string;
+    rorIdValid: boolean;
 }
 
 interface Author {
     person: Person;
-    affiliations: string[];
+    affiliations: Affiliation[];
 }
 
 const authors = ref<Author[]>(
-    [
-        {
-            person:
-                {firstName: "", lastName: "", orcidId: ""},
-            affiliations: []
-        }
-    ]);
-
-const valid = ref<Author[]>([{
-    person: {firstName: null, lastName: null, orcidId: null},
-    affiliations: []
-}]);
+    [{
+        person: {
+            firstName: "",
+            firstNameValid: null,
+            lastName: "",
+            lastNameValid: null,
+            orcidId: "",
+            orcidIdValid: null
+        },
+        affiliations: []
+    }]);
 
 function fillAuthor(index) {
     authors.value[index].person = {
         firstName: appProps.userFirstName,
+        firstNameValid: null,
         lastName: appProps.userLastName,
-        orcidId: appProps.userOrcid
+        lastNameValid: null,
+        orcidId: appProps.userOrcid,
+        orcidIdValid: null
     };
 }
 
 function addAuthor() {
-    authors.value.push(
-        {
-            person:
-                {firstName: "", lastName: "", orcidId: ""},
-            affiliations: []
-        }
-    );
-    valid.value.push({
-        person: {firstName: null, lastName: null, orcidId: null},
+    authors.value.push({
+        person:
+            {
+                firstName: "",
+                firstNameValid: null,
+                lastName: "",
+                lastNameValid: null,
+                orcidId: "",
+                orcidIdValid: null
+            },
         affiliations: []
     });
-
 }
 
 function addAffiliation(index) {
     authors.value[index].affiliations.push(
         {
             name: "",
-            rorId: ""
+            nameValid: null,
+            rorId: "",
+            rorIdValid: null
         }
     );
-    valid.value[index].affiliations.push({name: null, rorId: null});
 }
 
 function removeAuthor(index) {
     authors.value.splice(index, 1);
-    valid.value.splice(index, 1);
 }
 
 function removeAffiliation(authorIndex, affiliationIndex) {
-    authors.value[authorIndex].affiliations.splice(affiliationIndex, 1);
-    valid.value[authorIndex].affiliations.splice(affiliationIndex, 1);
+    if (authorIndex >= 0 && authorIndex < authors.value.length) {
+        authors.value[authorIndex].affiliations.splice(affiliationIndex, 1);
+    }
 }
 
 function moveAuthorUp(index) {
-    if (index > 0) {
-        const tmp = authors.value[index];
-        authors.value[index] = authors.value[index - 1];
-        authors.value[index - 1] = tmp;
+    if (index > 0 && index < authors.value.length) {
+        [authors.value[index], authors.value[index - 1]] =
+            [authors.value[index - 1], authors.value[index]];
     }
 }
 
 function moveAffiliationUp(authorIndex, affiliationIndex) {
-    if (affiliationIndex > 0) {
-        const tmp = authors.value[authorIndex].affiliations[affiliationIndex];
-        authors.value[authorIndex].affiliations[affiliationIndex] = authors.value[authorIndex].affiliations[affiliationIndex - 1];
-        authors.value[authorIndex].affiliations[affiliationIndex - 1] = tmp;
+    if (authorIndex >= 0 && authorIndex < authors.value.length) {
+        const affiliations = authors.value[authorIndex].affiliations;
+        if (affiliationIndex > 0 && affiliationIndex < affiliations.length) {
+            [affiliations[affiliationIndex], affiliations[affiliationIndex - 1]] =
+                [affiliations[affiliationIndex - 1], affiliations[affiliationIndex]];
+        }
     }
 }
 
 function moveAuthorDown(index) {
-    if (index < authors.value.length - 1) {
-        const tmp = authors.value[index];
-        authors.value[index] = authors.value[index + 1];
-        authors.value[index + 1] = tmp;
-
+    if (index >= 0 && index < authors.value.length - 1) {
+        [authors.value[index], authors.value[index + 1]] =
+            [authors.value[index + 1], authors.value[index]];
     }
 }
 
 function moveAffiliationDown(authorIndex, affiliationIndex) {
-    if (affiliationIndex < authors.value[authorIndex].affiliations.length - 1) {
-        const tmp = authors.value[authorIndex].affiliations[affiliationIndex];
-        authors.value[authorIndex].affiliations[affiliationIndex] = authors.value[authorIndex].affiliations[affiliationIndex + 1];
-        authors.value[authorIndex].affiliations[affiliationIndex + 1] = tmp;
+    if (authorIndex >= 0 && authorIndex < authors.value.length) {
+        const affiliations = authors.value[authorIndex].affiliations;
+        if (affiliationIndex >= 0 && affiliationIndex < affiliations.length - 1) {
+            [affiliations[affiliationIndex], affiliations[affiliationIndex + 1]] =
+                [affiliations[affiliationIndex + 1], affiliations[affiliationIndex]];
+        }
     }
 }
-
 
 const orcidIdRegex = new RegExp("^\\d{4}-\\d{4}-\\d{4}-\\d{4}$");
 const rorIdRegex = new RegExp("^0[a-z|0-9]{6}[0-9]{2}$");
 
-function check_validity() {
-    let is_valid = true;
-    authors.value.forEach((author, index) => {
-        valid.value[index].person.firstName = author.person.firstName != "";
-        valid.value[index].person.lastName = author.person.lastName != "";
-        valid.value[index].person.orcidId = author.person.orcidId === "" || orcidIdRegex.test(author.person.orcidId);
-        author.affiliations.forEach((affiliation, affIndex) => {
-            valid.value[index].affiliations[affIndex].name = affiliation.name != "";
-            valid.value[index].affiliations[affIndex].rorId = affiliation.rorId === "" || rorIdRegex.test(affiliation.rorId);
+function checkValidity() {
+    authors.value.forEach(author => {
+        author.person.firstNameValid = author.person.firstName != "";
+        author.person.lastNameValid = author.person.lastName != "";
+        author.person.orcidIdValid =
+            author.person.orcidId === "" || orcidIdRegex.test(author.person.orcidId);
+        author.affiliations.forEach(affiliation => {
+            affiliation.nameValid = affiliation.name != "";
+            affiliation.rorIdValid =
+                affiliation.rorId === "" || rorIdRegex.test(affiliation.rorId);
         });
-        is_valid = is_valid && Object.values(valid.value[index].person).every((x) => x) && valid.value[index].affiliations.every((affiliation) => Object.values(affiliation).every((x) => x))
-    })
-    return is_valid;
+    });
+    return authors.value.every(x =>
+        x.person.firstNameValid &&
+        x.person.lastNameValid &&
+        x.person.orcidIdValid &&
+        x.affiliations.every(y => y.nameValid && y.rorIdValid));
 }
 
 function nextStage() {
-    if (!check_validity()) {
+    if (!checkValidity()) {
         return;
     }
-    emit('continue', authors.value);
+    emit("continue", authors.value);
 }
 
-const authors_string = computed(() => {
+const authorsString = computed(() => {
     return authors.value.map((author) => `${author.person.firstName} ${author.person.lastName}`).join(", ");
-})
+});
 
 </script>
 <template>
     <div v-if="props.stage == 1" class="mt-4">
         <h2 class="alert-heading">
-            Please enter the authors:
+            Please enter the authors
         </h2>
         <BAlert :model-value="true">
-            Authors will be listed like this: <strong> {{ authors_string }} </strong>
+            Authors will be listed like this: <strong> {{ authorsString }} </strong>
         </BAlert>
         <div class="p-2">
             <BCard v-for="(author, index) in authors" class="mb-2" header-tag="header"
@@ -189,7 +205,7 @@ const authors_string = computed(() => {
                     <div class="d-flex flex-column">
                         <span>First name*</span>
                         <BFormInput v-model="author.person.firstName"
-                                    :state="valid[index].person.firstName"
+                                    :state="author.person.firstNameValid"
                                     aria-describedby="input-live-help input-live-feedback"
                                     placeholder="First name">
                         </BFormInput>
@@ -197,57 +213,57 @@ const authors_string = computed(() => {
                     <div class="d-flex flex-column">
                         <span>Last name*</span>
                         <BFormInput v-model="author.person.lastName"
-                                    :state="valid[index].person.lastName"
+                                    :state="author.person.lastNameValid"
                                     placeholder="Last name">
                         </BFormInput>
                     </div>
                     <div class="d-flex flex-column">
                         <span>ORCID ID (optional)</span>
                         <BFormInput v-model="author.person.orcidId"
-                                    :state="valid[index].person.orcidId"
+                                    :state="author.person.orcidIdValid"
                                     placeholder="xxxx-xxxx-xxxx-xxxx">
                         </BFormInput>
                     </div>
                 </div>
                 <template #footer>
                     <h6 class="mb-0">{{ author.affiliations.length }} Affiliations</h6>
-                    <div v-for="(affiliation, affiliation_index) in author.affiliations"
+                    <div v-for="(affiliation, affiliationIndex) in author.affiliations"
                          class="d-flex flex-row justify-content-center align-items-end mt-2">
                         <BButtonGroup class="me-2">
                             <BButton
-                                @click="removeAffiliation(index, affiliation_index)"
+                                @click="removeAffiliation(index, affiliationIndex)"
                                 variant="danger"
                                 title="Delete this affiliation">
                                 <i class="fa-solid fa-trash-can"></i>
                             </BButton>
-                            <BButton v-if="affiliation_index == 0" disabled>
+                            <BButton v-if="affiliationIndex == 0" disabled>
                                 <i class="fa-solid fa-arrow-up"></i>
                             </BButton>
                             <BButton v-else
-                                     @click="moveAffiliationUp(index, affiliation_index)">
+                                     @click="moveAffiliationUp(index, affiliationIndex)">
                                 <i class="fa-solid fa-arrow-up"></i>
                             </BButton>
                             <BButton
-                                v-if="affiliation_index == author.affiliations.length - 1"
+                                v-if="affiliationIndex == author.affiliations.length - 1"
                                 disabled>
                                 <i class="fa-solid fa-arrow-down"></i>
                             </BButton>
                             <BButton v-else
-                                     @click="moveAffiliationDown(index, affiliation_index)">
+                                     @click="moveAffiliationDown(index, affiliationIndex)">
                                 <i class="fa-solid fa-arrow-down"></i>
                             </BButton>
                         </BButtonGroup>
                         <div class="d-flex flex-column me-2">
                             <span>Affiliation name*</span>
                             <BFormInput v-model="affiliation.name"
-                                        :state="valid[index].affiliations[affiliation_index].name"
+                                        :state="affiliation.nameValid"
                                         placeholder="Name">
                             </BFormInput>
                         </div>
                         <div class="d-flex flex-column">
                             <span>ROR ID (optional)</span>
                             <BFormInput v-model="affiliation.rorId"
-                                        :state="valid[index].affiliations[affiliation_index].rorId"
+                                        :state="affiliation.rorIdValid"
                                         placeholder="0xxxxxxxx">
                             </BFormInput>
                         </div>

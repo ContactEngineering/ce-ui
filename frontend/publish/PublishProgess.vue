@@ -6,7 +6,7 @@ const props = defineProps({
 
 const stages = [
   {
-    name: "Publish warning",
+    name: "Information",
     icon: 'fa-info'
   },
   {

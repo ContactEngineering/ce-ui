@@ -31,9 +31,9 @@ axios.get(`/manager/api/surface/${props.surfaceId}`).then((response) => {
 
             By publishing, you create an <strong>immutable copy</strong> of this digital
             twin as a snapshot with all its
-            data.<br>
+            data.
             This snapshot has a version number and a unique URL for citations and it is
-            visible and usable for everyone.
+            visible and usable to everyone.
         </div>
         <div v-if="error" class="alert mt-5"
              style="background-color: oklch(0.577 0.245 27.325 / 0.4);">
