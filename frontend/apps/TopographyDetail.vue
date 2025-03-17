@@ -11,7 +11,7 @@ import {
     useToastController
 } from "bootstrap-vue-next";
 
-import {getIdFromUrl, subjectsToBase64} from "topobank/utils/api.ts";
+import {getIdFromUrl, subjectsToBase64} from "topobank/utils/api";
 
 import Attachments from '../manager/Attachments.vue';
 

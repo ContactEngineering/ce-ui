@@ -24,15 +24,6 @@ const props = defineProps({
     }
 });
 
-onMounted(() => {
-    //eventHub.on("basket:add", addItem);
-    //eventHub.on("basket:remove", removeItem);
-});
-
-function clearSelection() {
-    selection.clear();
-}
-
 </script>
 
 <template>
@@ -44,15 +35,16 @@ function clearSelection() {
         <template #footer>
             <BNavbarNav class="justify-content-end flex-grow-1">
                 <BNavItem class="btn btn-success mb-2"
-                          :href="`${analysisListUrl}?subjects=${selection.base64Selected}`"
+                          :href="`${analysisListUrl}?subjects=${selection.selectedAsBase64}`"
                           :disabled="selection.nbSelected === 0">
                     Analyze
                 </BNavItem>
                 <BNavItem class="btn btn-light mb-2"
+                          :href="`/manager/api/surface/${selection.selectedAsString}/download/`"
                           :disabled="selection.nbSelected === 0">
                     Download
                 </BNavItem>
-                <BNavItem class="btn btn-secondary" @click="clearSelection"
+                <BNavItem class="btn btn-secondary" @click="selection.clear()"
                           :disabled="selection.nbSelected === 0">
                     Clear selection
                 </BNavItem>

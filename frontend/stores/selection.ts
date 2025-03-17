@@ -9,8 +9,11 @@ export const useSelectionStore = defineStore('selection', {
         nbSelected(): bigint {
             return this.datasetIds.length;
         },
-        base64Selected(): string {
+        selectedAsBase64(): string {
             return btoa(JSON.stringify({surface: this.datasetIds}));
+        },
+        selectedAsString(): any[] {
+            return this.datasetIds.join(',');
         }
     },
     actions: {
