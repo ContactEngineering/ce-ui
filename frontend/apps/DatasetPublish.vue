@@ -45,7 +45,7 @@ function publish() {
         'authors': authorsTransformed,
         'license': license
     }).then((response) => {
-        window.location.href = `/ui/dataset-detail/${response.data}/`;
+        window.location.href = `/ui/dataset-detail/${response.data.dataset_id}/`;
     }).catch((error) => {
         if (error.response.status == 429) { // Too Many Requests
             show?.({

@@ -32,7 +32,6 @@ onMounted(() => {
     if (props.dataset?.publication) {
         axios.get(props.dataset.publication).then(response => {
             _publication.value = response.data;
-            console.log(_publication.value);
         });
     }
 });
