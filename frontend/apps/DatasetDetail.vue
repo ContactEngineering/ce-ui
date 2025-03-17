@@ -309,7 +309,7 @@ const hrefOriginalSurface = computed(() => {
 });
 
 const publishUrl = computed(() => {
-    return `/ui/html/publish/${getSurfaceId()}/`;
+    return `/ui/dataset-publish/${getSurfaceId()}/`;
 });
 
 const isEditable = computed(() => {

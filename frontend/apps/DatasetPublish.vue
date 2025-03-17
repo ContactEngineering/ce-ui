@@ -1,14 +1,15 @@
 <script setup lang="ts">
+
 import { ref } from 'vue';
 
-import { BToastOrchestrator, useToastController } from 'bootstrap-vue-next';
+import { useToastController } from 'bootstrap-vue-next';
 
 import axios from "axios";
-import PublishStage1 from './components/Publish_stage_1.vue';
-import PublishStage2 from './components/Publish_stage_2.vue';
-import PublishStage3 from './components/Publish_stage_3.vue';
-import PublishStage4 from './components/Publish_stage_4.vue';
-import ProgessBar from './components/Publish_progess.vue';
+import PublishStage1 from '@/publish/PublishStage1.vue';
+import PublishStage2 from '@/publish/PublishStage2.vue';
+import PublishStage3 from '@/publish/PublishStage3.vue';
+import PublishStage4 from '@/publish/PublishStage4.vue';
+import ProgessBar from '@/publish/PublishProgess.vue';
 
 const props = defineProps({
   user: Object,
@@ -56,10 +57,9 @@ function publish() {
     }
   });
 }
-
 </script>
+
 <template>
-  <BToastOrchestrator />
   <div class="container">
     <ProgessBar :stage="stage" />
     <div class="p-5">
