@@ -1,5 +1,10 @@
 # Changelog for plugin *ce-ui*
 
+## 1.30.2 (2025-03-18)
+
+- MAINT: Show "Public datasets" when not logged in (#101)
+- MAINT: Fixed example links
+
 ## 1.30.1 (2025-03-18)
 
 - BUG: Fixed upload of measurements
