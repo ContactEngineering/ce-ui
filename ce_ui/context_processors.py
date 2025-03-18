@@ -46,7 +46,7 @@ def fixed_tabs_processor(request):
     tabs += [
         {
             "login_required": False,
-            "title": "My datasets",
+            "title": "Public datasets" if request.user.is_anonymous else "My datasets",
             "icon": "table-list",
             "icon_style_prefix": "fa",
             "href": SEARCH_URL,
