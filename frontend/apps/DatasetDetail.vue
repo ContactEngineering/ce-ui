@@ -38,14 +38,6 @@ import TopographyUpdateCard from "../manager/TopographyUpdateCard.vue";
 const {show} = useToastController();
 
 const props = defineProps({
-    surfaceUrl: {
-        type: String,
-        default: null
-    },
-    surfaceUrlPrefix: {
-        type: String,
-        default: '/manager/api/surface/'
-    },
     newTopographyUrl: {
         type: String,
         default: '/manager/api/topography/'
@@ -80,18 +72,6 @@ const _selected = ref([]);  // Selected topographies (for batch editing)
 
 // Batch edit data
 const _batchEditTopography = ref(emptyTopography());
-
-function getSurfaceUrl() {
-    if (props.surfaceUrl != null) {
-        return props.surfaceUrl;
-    }
-    const surfaceId = appProps.searchParams.get("surface");
-    return `${props.surfaceUrlPrefix}${surfaceId}`;
-}
-
-const computedSurfaceUrl = computed(() => {
-    return getSurfaceUrl();
-});
 
 function emptyTopography() {
     return {
@@ -138,23 +118,6 @@ function getOriginalSurfaceId() {
 
 function updateCard() {
     /* Fetch JSON describing the card */
-    /*
-    axios.get(`${getSurfaceUrl()}?children=yes&permissions=yes&attachments=yes`).then(response => {
-        _surface.value = response.data;
-        _permissions.value = response.data.permissions;
-        _topographies.value = response.data.topography_set;
-        _selected.value = new Array(_topographies.value.length).fill(false);  // Nothing is selected
-        updatePublication();
-    }).catch(error => {
-        show?.({
-            props: {
-                title: "Failed to fetch digital surface twin",
-                body: error,
-                variant: 'danger'
-            }
-        });
-    });
-     */
     _surface.value = appProps.object;
     _permissions.value = appProps.object.permissions;
     _topographies.value = appProps.object.topography_set;
@@ -204,14 +167,15 @@ function filesDropped(files) {
 
 function uploadNewTopography(file) {
     axios.post(props.newTopographyUrl, {
-        surface: computedSurfaceUrl,
+        surface: _surface.value.url,
         name: file.name
     }).then(response => {
+        console.log(response);
         let upload = response.data;
         upload.file = file;  // need to know which file to upload
         _topographies.value.push(upload);  // this will trigger showing a topography-upload-card
         _selected.value.push(false);  // initially unselected
-    }).catch(error => {
+    });/*.catch(error => {
         show?.({
             props: {
                 title: "Failed to create a new measurement",
@@ -219,7 +183,7 @@ function uploadNewTopography(file) {
                 variant: 'danger'
             }
         });
-    });
+    });*/
 }
 
 function deleteTopography(index) {
@@ -361,8 +325,8 @@ const allSelected = computed({
                        pills
                        vertical>
                     <BTab title="Measurements">
-                        <drop-zone v-if="isEditable && !anySelected" @files-dropped="filesDropped">
-                        </drop-zone>
+                        <DropZone v-if="isEditable && !anySelected" @files-dropped="filesDropped">
+                        </DropZone>
                         <topography-update-card v-if="anySelected"
                                                 v-model:topography="_batchEditTopography"
                                                 :batch-edit="true"
@@ -500,7 +464,7 @@ const allSelected = computed({
                             Analyze
                         </a>
 
-                        <a :href="`${computedSurfaceUrl}download/`"
+                        <a :href="`${_surface.url}download/`"
                            class="btn btn-light mb-2">
                             Download
                         </a>

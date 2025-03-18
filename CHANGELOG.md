@@ -1,5 +1,9 @@
 # Changelog for plugin *ce-ui*
 
+## 1.30.1 (2025-03-18)
+
+- BUG: Fixed upload of measurements
+
 ## 1.30.0 (2025-03-17)
 
 - ENH: New dataset list
