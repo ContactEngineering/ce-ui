@@ -119,7 +119,12 @@ ui_urlpatterns = [
         r"analysis-detail/<str:slug>/",
         view=views.AnalysisDetailView.as_view(),
         name="results-detail",
-    )
+    ),
+    path(
+        "tracing/",
+        view=views.TracingView.as_view(),
+        name="traceing",
+    ),
 ]
 urlpatterns += [path("ui/", include((ui_urlpatterns, app_name)))]
 

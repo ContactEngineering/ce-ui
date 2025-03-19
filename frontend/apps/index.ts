@@ -8,6 +8,7 @@ import DatasetDetail from './DatasetDetail.vue';
 import DatasetList from './DatasetList.vue';
 import DatasetPublish from './DatasetPublish.vue';
 import TopographyDetail from './TopographyDetail.vue';
+import Tracing from './Tracing.vue'
 
 interface ComponentIndex {
     name: string,
@@ -15,13 +16,14 @@ interface ComponentIndex {
 }
 
 const componentIndex: ComponentIndex = [
-    {name: "AnalysisDetail", implementation: AnalysisResultsDetail},
-    {name: "AnalysisList", implementation: AnalysisResultsList},
-    {name: "DatasetList", implementation: DatasetList},
-    {name: "DatasetDetail", implementation: DatasetDetail},
-    {name: "DatasetPublish", implementation: DatasetPublish},
-    {name: "Home", implementation: Home},
-    {name: "TopographyDetail", implementation: TopographyDetail}
+    { name: "AnalysisDetail", implementation: AnalysisResultsDetail },
+    { name: "AnalysisList", implementation: AnalysisResultsList },
+    { name: "DatasetList", implementation: DatasetList },
+    { name: "DatasetDetail", implementation: DatasetDetail },
+    { name: "DatasetPublish", implementation: DatasetPublish },
+    { name: "Home", implementation: Home },
+    { name: "TopographyDetail", implementation: TopographyDetail },
+    { name: "Tracing", implementation: Tracing }
 ];
 
 export function registerAppComponents(app) {
