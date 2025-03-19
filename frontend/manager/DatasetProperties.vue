@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 
 import axios from "axios";
 import { computed, ref } from 'vue';
@@ -136,6 +136,17 @@ function save() {
         properties.value = response.data["properties"];
         _properties.value = propertiesObjectToArray(response.data["properties"]);
         _isSaving.value = false;
+    }).catch((error) => {
+        _isSaving.value = false;
+        // Restore properties
+        _properties.value = propertiesObjectToArray(properties.value);
+        const msg = `Upload Failed: ${error.response.data.detail}. Please report this bug!`
+        show?.({
+            props: {
+                body: msg,
+                variant: "warning"
+            }
+        });
     });
 }
 
