@@ -101,7 +101,7 @@ onMounted(() => {
                                     <div class="me-2">
                                         You have
                                         <div class="welcome-page-statistics">
-                                            {{ managerStatistics?.nb_surfaces }}
+                                            {{ managerStatistics?.nb_surfaces_of_user }}
                                         </div>
                                         digital surface twins.
                                     </div>
@@ -120,7 +120,7 @@ onMounted(() => {
                                     <div class="me-2">
                                         You have
                                         <div class="welcome-page-statistics">
-                                            {{ managerStatistics?.nb_topographies }}
+                                            {{ managerStatistics?.nb_topographies_of_user }}
                                         </div>
                                         individual measurements.
                                     </div>
