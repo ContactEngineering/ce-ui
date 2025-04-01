@@ -1,5 +1,10 @@
 # Changelog for plugin *ce-ui*
 
+## 1.30.3 (2025-04-01)
+
+- BUG: Fixed upload of attachments
+- BUG: Fixed user statistics
+
 ## 1.30.2 (2025-03-18)
 
 - MAINT: Show "Public datasets" when not logged in (#101)
