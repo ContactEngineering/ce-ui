@@ -1,6 +1,6 @@
 import {defineStore} from "pinia";
 
-export const useSelectionStore = defineStore('selection', {
+export const useDatasetSelectionStore = defineStore('selection', {
     state: () => ({
         datasetIds: [],
         datasetCache: {}

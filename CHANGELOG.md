@@ -1,9 +1,10 @@
 # Changelog for plugin *ce-ui*
 
-## 1.30.3 (2025-04-01)
+## 1.30.3 (2025-04-02)
 
-- BUG: Fixed upload of attachments
+- BUG: Fixed upload of attachments (#107)
 - BUG: Fixed user statistics
+- BUG: Fixed missing names in selection view (#110)
 
 ## 1.30.2 (2025-03-18)
 

@@ -18,13 +18,13 @@ import {
     useToastController
 } from "bootstrap-vue-next";
 
-import {useSelectionStore} from "../stores/selection";
+import {useDatasetSelectionStore} from "../stores/datasetSelection";
 
 import DatasetListRow from '../manager/DatasetListRow.vue';
 import SelectionOffcanvas from "../base/SelectionOffcanvas.vue";
 
 const {show} = useToastController();
-const selection = useSelectionStore();
+const selection = useDatasetSelectionStore();
 
 const props = defineProps({
     apiUrl: {

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import {onMounted} from "vue";
+import axios from "axios";
 
 import {
     BAlert,
@@ -11,11 +11,12 @@ import {
     BOffcanvas
 } from "bootstrap-vue-next";
 
-import {useSelectionStore} from "topobank/stores/selection";
+import { useDatasetSelectionStore } from "@/stores/datasetSelection";
+import { onMounted, ref } from "vue";
 
-const selection = useSelectionStore();
+const selection = useDatasetSelectionStore();
 
-const visible = defineModel("visible", {type: Boolean, required: true});
+const visible = defineModel("visible", { type: Boolean, required: true });
 
 const props = defineProps({
     analysisListUrl: {
@@ -23,6 +24,25 @@ const props = defineProps({
         default: "/ui/analysis-list/"
     }
 });
+
+const datasets = ref([]);
+
+onMounted(async () => {
+    await refreshDatasets();
+    selection.$subscribe(async () => {
+        await refreshDatasets();
+    });
+});
+
+async function refreshDatasets() {
+    datasets.value = (await Promise.all(selection.datasetIds.map(async (id) => {
+        return axios.get("/manager/api/surface/" + id);
+    }))).map(response => {
+        return response.data;
+    });
+}
+
+
 
 </script>
 
@@ -55,9 +75,9 @@ const props = defineProps({
             You have not selected any datasets.
         </BAlert>
         <BListGroup>
-            <BListGroupItem v-for="datasetId in selection.datasetIds">
+            <BListGroupItem v-for="dataset in datasets">
                 <i class="fa fa-layer-group"></i>
-                {{ selection.getDataset(datasetId)?.name }}
+                {{ dataset.name }}
             </BListGroupItem>
         </BListGroup>
     </BOffcanvas>
