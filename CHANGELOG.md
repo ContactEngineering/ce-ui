@@ -1,5 +1,10 @@
 # Changelog for plugin *ce-ui*
 
+## 1.30.4 (2025-04-04)
+
+- BUG: Added missing template
+- MAINT: Moved allauth route registration to CE-UI
+
 ## 1.30.3 (2025-04-02)
 
 - BUG: Fixed upload of attachments (#107)
