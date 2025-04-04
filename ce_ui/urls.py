@@ -27,6 +27,10 @@ urlpatterns = [
         name="search",
     ),
     #
+    # Allauth
+    #
+    path("accounts/", include("allauth.urls")),
+    #
     # For asking for terms and conditions
     #
     # some url specs are overwritten here pointing to own views in order to plug in
