@@ -18,7 +18,7 @@ urlpatterns = [
     path("", views.HomeView.as_view(), name="home"),
     path(
         "termsandconditions/",
-        views.TermsView.as_view(),
+        views.TermsListView.as_view(),
         name="terms",
     ),
     path(

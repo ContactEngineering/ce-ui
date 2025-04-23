@@ -9,7 +9,8 @@ from django.urls import reverse
 from django.views.generic import (DetailView, ListView, RedirectView,
                                   TemplateView, UpdateView)
 from termsandconditions.models import TermsAndConditions
-from termsandconditions.views import AcceptTermsView
+from termsandconditions.views import (AcceptTermsView, GetTermsViewMixin,
+                                      TermsView)
 from topobank.analysis.models import AnalysisFunction
 from topobank.analysis.registry import get_analysis_function_names
 from topobank.analysis.serializers import WorkflowSerializer
@@ -317,7 +318,7 @@ class HomeView(AppView):
     vue_component = "Home"
 
 
-class TermsView(TemplateView):
+class TermsListView(TemplateView, GetTermsViewMixin):
     template_name = "pages/termsconditions.html"
 
     def get_context_data(self, **kwargs):
@@ -342,15 +343,16 @@ class TermsView(TemplateView):
         else:
             context["active_terms"] = active_terms.order_by("date_created")
 
-        context["extra_tabs"] = [
+        breadcrumb.add_generic(
+            context,
             {
                 "login_required": False,
                 "icon": "file-contract",
+                "href": reverse("terms"),
                 "title": "Terms and Conditions",
                 "active": True,
-            }
-        ]
-        context["connect_fixed_tabs_with_extra_tabs"] = False
+            },
+        )
 
         return context
 
@@ -360,7 +362,7 @@ class TermsView(TemplateView):
 # termsandconditions package in order to add context
 # for the tabbed interface
 #
-def tabs_for_terms(terms, request_path):
+def tabs_for_terms(context, terms, request_path):
     if len(terms) == 1:
         tab_title = unescape(
             f"{terms[0].name} {terms[0].version_number}"
@@ -368,14 +370,8 @@ def tabs_for_terms(terms, request_path):
     else:
         tab_title = "Terms"  # should not happen in Topobank, but just to be safe
 
-    return [
-        {
-            "icon": "file-contract",
-            "title": "Terms and Conditions",
-            "href": reverse("terms"),
-            "active": False,
-            "login_required": False,
-        },
+    breadcrumb.add_generic(
+        context,
         {
             "icon": "file-contract",
             "title": tab_title,
@@ -383,16 +379,13 @@ def tabs_for_terms(terms, request_path):
             "active": True,
             "login_required": False,
         },
-    ]
+    )
 
 
 class TabbedTermsMixin:
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["extra_tabs"] = tabs_for_terms(
-            self.get_terms(self.kwargs), self.request.path
-        )
-        context["connect_fixed_tabs_with_extra_tabs"] = False
+        tabs_for_terms(context, self.get_terms(self.kwargs), self.request.path)
         return context
 
 
@@ -407,7 +400,8 @@ class TermsAcceptView(TabbedTermsMixin, AcceptTermsView):
 class TabbedEmailView(EmailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["extra_tabs"] = [
+        breadcrumb.add_generic(
+            context,
             {
                 "title": "User profile",
                 "icon": "user",
@@ -417,13 +411,16 @@ class TabbedEmailView(EmailView):
                 ),
                 "active": False,
             },
+        )
+        breadcrumb.add_generic(
+            context,
             {
                 "title": "Edit e-mail addresses",
                 "icon": "edit",
                 "href": self.request.path,
                 "active": True,
             },
-        ]
+        )
         return context
 
 
@@ -439,15 +436,16 @@ class UserDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["extra_tabs"] = [
+        breadcrumb.add_generic(
+            context,
             {
                 "title": "User profile",
                 "icon": "user",
                 "href": self.request.path,
                 "active": True,
                 "login_required": False,
-            }
-        ]
+            },
+        )
         return context
 
 
@@ -479,7 +477,8 @@ class UserUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["extra_tabs"] = [
+        breadcrumb.add_generic(
+            context,
             {
                 "title": "User Profile",
                 "icon": "user",
@@ -489,13 +488,16 @@ class UserUpdateView(LoginRequiredMixin, UpdateView):
                 ),
                 "active": False,
             },
+        )
+        breadcrumb.add_generic(
+            context,
             {
                 "title": "Update user",
                 "icon": "edit",
                 "href": self.request.path,
                 "active": True,
             },
-        ]
+        )
         return context
 
 

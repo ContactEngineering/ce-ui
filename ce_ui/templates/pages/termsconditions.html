@@ -1,24 +1,17 @@
-{% extends "pages/termsframe.html" %}
-{% load static %}
+{% extends "app.html" %}
 {% load terms_tags %}
 {% load socialaccount %}
 
 
-{% block content %}
+{% block appcontent %}
     {% if not request.user.is_anonymous %}
         {% if agreed_terms|length > 0 %}
             <h2>You have accepted the following terms and conditions</h2>
             <ul>
                 {% for terms in agreed_terms %}
                     <li>
-                        <a class="terms-link" href="
-
-
-
-
-                                {% url 'tc_view_specific_version_page' terms.slug terms.version_number %}{% if returnTo %}?returnTo={{ returnTo }}{% endif %}">
-                            {% if terms.name %}{{ terms.name|safe }}
-                                , {% endif %}version {{ terms.version_number }}
+                        <a class="terms-link" href="{% url 'tc_view_specific_version_page' terms.slug terms.version_number %}{% if returnTo %}?returnTo={{ returnTo }}{% endif %}">
+                            {% if terms.name %}{{ terms.name|safe }}, {% endif %}version {{ terms.version_number }}
                         </a>
                     </li>
                 {% endfor %}
@@ -31,9 +24,7 @@
             <ul>
                 {% for terms in not_agreed_terms %}
                     <li>
-                        <a class="terms-link" href="
-
-                                {% url 'tc_accept_specific_page' terms.slug %}{% if returnTo %}?returnTo={{ returnTo }}{% endif %}">
+                        <a class="terms-link" href="{% url 'tc_accept_specific_page' terms.slug %}{% if returnTo %}?returnTo={{ returnTo }}{% endif %}">
                             {% if terms.name %}{{ terms.name|safe }}{% endif %}
                         </a>
                     </li>
@@ -47,10 +38,9 @@
             {{ terms.text|safe }}
         {% endfor %}
 
-        <p>If you want to use this site, <a
-                href="{% provider_login_url 'orcid' method="oauth2" %}">sign in via
-            ORCID</a>.
-            Afterwards you have the possibility to review and accept terms and
-            conditions.</p>
+        <p>If you want to use this site, <a href="{% provider_login_url 'orcid' method="oauth2" %}">
+            sign in via ORCID
+        </a>. Afterwards you have the possibility to review and accept terms and conditions.
+        </p>
     {% endif %}
-{% endblock content %}
+{% endblock appcontent %}
