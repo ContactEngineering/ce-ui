@@ -115,6 +115,11 @@ ui_urlpatterns = [
         name="dataset-publish",
     ),
     path(
+        r"dataset-collection-publish/",
+        view=views.DatasetCollectionPublishView.as_view(),
+        name="dataset-collection-publish",
+    ),
+    path(
         "analysis-list/",
         view=views.AnalysisListView.as_view(),
         name="results-list",
@@ -123,7 +128,7 @@ ui_urlpatterns = [
         r"analysis-detail/<str:slug>/",
         view=views.AnalysisDetailView.as_view(),
         name="results-detail",
-    )
+    ),
 ]
 urlpatterns += [path("ui/", include((ui_urlpatterns, app_name)))]
 

@@ -6,16 +6,20 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.urls import reverse
-from django.views.generic import (DetailView, ListView, RedirectView,
-                                  TemplateView, UpdateView)
+from django.views.generic import (
+    DetailView,
+    ListView,
+    RedirectView,
+    TemplateView,
+    UpdateView,
+)
 from termsandconditions.models import TermsAndConditions
 from termsandconditions.views import AcceptTermsView
 from topobank.analysis.models import AnalysisFunction
 from topobank.analysis.registry import get_analysis_function_names
 from topobank.analysis.serializers import WorkflowSerializer
 from topobank.manager.models import Surface, Topography
-from topobank.manager.serializers import (SurfaceSerializer,
-                                          TopographySerializer)
+from topobank.manager.serializers import SurfaceSerializer, TopographySerializer
 from topobank.manager.utils import subjects_from_base64, subjects_to_base64
 from topobank.usage_stats.utils import increase_statistics_by_date
 from topobank.users.models import User
@@ -114,6 +118,16 @@ class DatasetDetailView(AppDetailView):
         #
         breadcrumb.add_surface(context, self.object)
 
+        return context
+
+
+class DatasetCollectionPublishView(AppView):
+    vue_component = "DatasetCollectionPublish"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context["test"] = "dings"
         return context
 
 
