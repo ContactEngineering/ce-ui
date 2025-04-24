@@ -1,5 +1,6 @@
 <script setup lang="ts">
 
+import { BFormCheckbox, BButton, BSpinner } from 'bootstrap-vue-next';
 import { inject, ref } from 'vue';
 
 import { useToastController } from 'bootstrap-vue-next';
@@ -20,11 +21,13 @@ const appProps = inject("appProps");
 const { show } = useToastController();
 
 const stage = ref(0);
+const pending_request = ref(false);
 
 let authors;
 let license;
 
 function publish() {
+    pending_request.value = true;
     // NOTE: The django view expects the author data in a structure thats not convenient
     // NOTE: for vue. Thats why we transform the structure here.
     const authorsTransformed = authors.map((author) => {
@@ -56,6 +59,7 @@ function publish() {
                 }
             });
         }
+        pending_request.value = false;
     });
 }
 </script>
@@ -73,7 +77,8 @@ function publish() {
                 license = emitedLicense;
                 stage = 3;
             }" @back="stage = 1"></PublishStage3>
-            <PublishStage4 :stage="stage" @back="stage = 2" @publish="publish()"></PublishStage4>
+            <PublishStage4 :stage="stage" @back="stage = 2" @publish="publish()" :pending_request="pending_request">
+            </PublishStage4>
         </div>
     </div>
 </template>

@@ -1,10 +1,11 @@
 <script setup lang="ts">
 
 import { ref } from 'vue';
-import { BFormCheckbox, BButton } from 'bootstrap-vue-next';
+import { BFormCheckbox, BButton, BSpinner } from 'bootstrap-vue-next';
 
 const props = defineProps({
     stage: Number,
+    pending_request: Boolean
 });
 
 const emit = defineEmits(['back', 'publish']);
@@ -82,7 +83,11 @@ function checkAndPublish() {
             <BButton @click="$emit('back')" variant="primary">
                 Back
             </BButton>
-            <BButton @click="checkAndPublish()" variant="success" size="lg">
+            <BButton v-if="pending_request" disabled variant="success" size="lg">
+                Publish
+                <BSpinner variant="primary" style="width: 1.2rem; height: 1.2rem;" />
+            </BButton>
+            <BButton v-else @click="checkAndPublish()" variant="success" size="lg">
                 Publish 🚀
             </BButton>
         </div>
