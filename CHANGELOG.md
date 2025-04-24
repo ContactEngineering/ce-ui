@@ -1,5 +1,9 @@
 # Changelog for plugin *ce-ui*
 
+## 1.30.6 (2025-04-24)
+
+- BUG: Disable publication button while publication process is pending
+
 ## 1.30.5 (2025-04-23)
 
 - BUG: Reviewing accepted terms and conditions (#129)
