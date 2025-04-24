@@ -1,8 +1,9 @@
 <script setup lang="ts">
 
-import {inject, ref} from 'vue';
+import { BFormCheckbox, BButton, BSpinner } from 'bootstrap-vue-next';
+import { inject, ref } from 'vue';
 
-import {useToastController} from 'bootstrap-vue-next';
+import { useToastController } from 'bootstrap-vue-next';
 
 import axios from "axios";
 import PublishStage1 from '@/publish/PublishStage1.vue';
@@ -17,14 +18,16 @@ const props = defineProps({
 
 const appProps = inject("appProps");
 
-const {show} = useToastController();
+const { show } = useToastController();
 
 const stage = ref(0);
+const pending_request = ref(false);
 
 let authors;
 let license;
 
 function publish() {
+    pending_request.value = true;
     // NOTE: The django view expects the author data in a structure thats not convenient
     // NOTE: for vue. Thats why we transform the structure here.
     const authorsTransformed = authors.map((author) => {
@@ -56,26 +59,26 @@ function publish() {
                 }
             });
         }
+        pending_request.value = false;
     });
 }
 </script>
 
 <template>
     <div class="container">
-        <ProgessBar :stage="stage"/>
+        <ProgessBar :stage="stage" />
         <div class="p-5">
-            <PublishStage1 :stage="stage" :surfaceId="appProps.object.id"
-                           @continue="stage = 1"></PublishStage1>
+            <PublishStage1 :stage="stage" :surfaceId="appProps.object.id" @continue="stage = 1"></PublishStage1>
             <PublishStage2 :stage="stage" :user="props.user" @continue="(emitedAuthors) => {
-        authors = emitedAuthors;
-        stage = 2;
-      }" @back="stage = 0"></PublishStage2>
+                authors = emitedAuthors;
+                stage = 2;
+            }" @back="stage = 0"></PublishStage2>
             <PublishStage3 :stage="stage" @continue="(emitedLicense) => {
-        license = emitedLicense;
-        stage = 3;
-      }" @back="stage = 1"></PublishStage3>
-            <PublishStage4 :stage="stage" @back="stage = 2"
-                           @publish="publish()"></PublishStage4>
+                license = emitedLicense;
+                stage = 3;
+            }" @back="stage = 1"></PublishStage3>
+            <PublishStage4 :stage="stage" @back="stage = 2" @publish="publish()" :pending_request="pending_request">
+            </PublishStage4>
         </div>
     </div>
 </template>
