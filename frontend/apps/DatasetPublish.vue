@@ -1,19 +1,18 @@
 <script setup lang="ts">
 
-import { BFormCheckbox, BButton, BSpinner } from 'bootstrap-vue-next';
-import { inject, ref } from 'vue';
+import { inject, ref } from "vue";
 
-import { useToastController } from 'bootstrap-vue-next';
+import { useToastController } from "bootstrap-vue-next";
 
 import axios from "axios";
-import PublishStage1 from '@/publish/PublishStage1.vue';
-import PublishStage2 from '@/publish/PublishStage2.vue';
-import PublishStage3 from '@/publish/PublishStage3.vue';
-import PublishStage4 from '@/publish/PublishStage4.vue';
-import ProgessBar from '@/publish/PublishProgess.vue';
+import PublishStage1 from "@/publish/PublishStage1.vue";
+import PublishStage2 from "@/publish/PublishStage2.vue";
+import PublishStage3 from "@/publish/PublishStage3.vue";
+import PublishStage4 from "@/publish/PublishStage4.vue";
+import PublishProgress from "@/publish/PublishProgress.vue";
 
 const props = defineProps({
-    user: Object,
+    user: Object
 });
 
 const appProps = inject("appProps");
@@ -39,14 +38,14 @@ function publish() {
                 return {
                     name: affiliation.name,
                     ror_id: affiliation.rorId
-                }
+                };
             })
-        }
+        };
     });
-    axios.post('/go/publish/', {
-        'surface': appProps.object.id,
-        'authors': authorsTransformed,
-        'license': license
+    axios.post("/go/publish/", {
+        "surface": appProps.object.id,
+        "authors": authorsTransformed,
+        "license": license
     }).then((response) => {
         window.location.href = `/ui/dataset-detail/${response.data.dataset_id}/`;
     }).catch((error) => {
@@ -58,6 +57,15 @@ function publish() {
                     variant: "danger"
                 }
             });
+        } else {
+            show?.({
+                props: {
+                    title: "Error",
+                    body: "An error occurred while publishing the digital surface twin. Please try again later.",
+                    variant: "danger"
+                }
+            });
+            console.log(error.response);
         }
         pending_request.value = false;
     });
@@ -66,9 +74,10 @@ function publish() {
 
 <template>
     <div class="container">
-        <ProgessBar :stage="stage" />
+        <PublishProgress :stage="stage" />
         <div class="p-5">
-            <PublishStage1 :stage="stage" :surfaceId="appProps.object.id" @continue="stage = 1"></PublishStage1>
+            <PublishStage1 :stage="stage" :surfaceId="appProps.object.id"
+                           @continue="stage = 1"></PublishStage1>
             <PublishStage2 :stage="stage" :user="props.user" @continue="(emitedAuthors) => {
                 authors = emitedAuthors;
                 stage = 2;
@@ -77,7 +86,8 @@ function publish() {
                 license = emitedLicense;
                 stage = 3;
             }" @back="stage = 1"></PublishStage3>
-            <PublishStage4 :stage="stage" @back="stage = 2" @publish="publish()" :pending_request="pending_request">
+            <PublishStage4 :stage="stage" @back="stage = 2" @publish="publish()"
+                           :pending_request="pending_request">
             </PublishStage4>
         </div>
     </div>
