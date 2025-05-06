@@ -120,6 +120,11 @@ ui_urlpatterns = [
         name="dataset-collection-publish",
     ),
     path(
+        r"dataset-collection/<int:pk>/",
+        view=views.DatasetCollectionView.as_view(),
+        name="dataset-collection",
+    ),
+    path(
         "analysis-list/",
         view=views.AnalysisListView.as_view(),
         name="results-list",

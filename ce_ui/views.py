@@ -19,6 +19,8 @@ from topobank.analysis.models import AnalysisFunction
 from topobank.analysis.registry import get_analysis_function_names
 from topobank.analysis.serializers import WorkflowSerializer
 from topobank.manager.models import Surface, Topography
+from topobank_publication.models import PublicationCollection
+from topobank_publication.serializers import PublicationCollectionSerializer
 from topobank.manager.serializers import SurfaceSerializer, TopographySerializer
 from topobank.manager.utils import subjects_from_base64, subjects_to_base64
 from topobank.usage_stats.utils import increase_statistics_by_date
@@ -124,11 +126,11 @@ class DatasetDetailView(AppDetailView):
 class DatasetCollectionPublishView(AppView):
     vue_component = "DatasetCollectionPublish"
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
 
-        context["test"] = "dings"
-        return context
+class DatasetCollectionView(AppDetailView):
+    model = PublicationCollection
+    vue_component = "DatasetCollection"
+    serializer_class = PublicationCollectionSerializer
 
 
 class DatasetPublishView(AppDetailView):

@@ -3,11 +3,15 @@
 import axios from "axios";
 import { inject, ref } from "vue";
 
-import { BButton } from 'bootstrap-vue-next';
+import { BButton, BAlert, BFormInput, BFormTextarea, BSpinner } from 'bootstrap-vue-next';
 
 const appProps = inject("appProps");
 const datasets = ref([]);
 const publications = ref([]);
+const title = ref("");
+const validTitle = ref(null);
+const description = ref("");
+const pending_request = ref(false);
 
 appProps.searchParams.getAll("dataset").forEach(datasetId => {
     axios.get("/manager/api/surface/" + datasetId).then((datasetResponse) => {
@@ -28,19 +32,46 @@ function datetimeToDateString(timestamp) {
 }
 
 function publish() {
-    axios.post('/go/publish-collection/', {
-        publication: publications.value.map(publication => publication.id)
-    }).then((response) => {
-        console.log(response);
-    });
-
+    validTitle.value = title.value != "";
+    if (validTitle.value) {
+        pending_request.value = true;
+        axios.post('/go/publish-collection/', {
+            publication: publications.value.map(publication => publication.id),
+            title: title.value,
+            description: description.value
+        }).then((response) => {
+            window.location.href = `/ui/dataset-collection/${response.data.collection_id}/`;
+        }).catch((err) => {
+            console.error(err);
+            pending_request.value = false;
+        });
+    }
 }
 
 </script>
 <template>
     <div class="container">
         <h1>Publish a collection</h1>
-        <div class="d-flex flex-row">
+        <BAlert :model-value="true" variant="info">
+            <h4 class="alert-heading">You are about to create a publication collection</h4>
+            <p>
+                A publication collection is a object that bundles already published datasets. <br>
+                The Colection will be published under the <a href="https://creativecommons.org/publicdomain/zero/1.0/">
+                    CC0 1.0 Universal </a> license. <br>
+                You will be the author of the collection.
+            </p>
+            <hr />
+            <p class="mb-0">
+                Do you understand this and want to continue?
+            </p>
+        </BAlert>
+        <h3>Title*</h3>
+        <BFormInput id="collection-title" v-model="title" :state="validTitle"
+            placeholder="Enter the collection title" />
+        <h3>Description</h3>
+        <BFormTextarea v-model="description" placeholder="Enter a description..." rows="3" />
+        <h3>Publications:</h3>
+        <div class="d-flex flex-row mb-5">
             <div v-for="(dataset, index) in datasets" :key="dataset.id">
                 <a :href="`/ui/dataset-detail/${dataset.id}/`"
                     class="publication-card border rounded ms-2 p-2 d-flex flex-column">
@@ -52,9 +83,12 @@ function publish() {
                 </a>
             </div>
         </div>
-
         <div class="d-flex flex-row justify-content-end">
-            <BButton @click="publish()" variant="success" size="lg">
+            <BButton v-if="pending_request" disabled variant="success" size="lg">
+                Publish
+                <BSpinner variant="primary" style="width: 1.2rem; height: 1.2rem;" />
+            </BButton>
+            <BButton v-else @click="publish()" variant="success" size="lg">
                 Publish 🚀
             </BButton>
         </div>

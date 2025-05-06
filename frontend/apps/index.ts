@@ -9,6 +9,7 @@ import DatasetList from './DatasetList.vue';
 import DatasetPublish from './DatasetPublish.vue';
 import TopographyDetail from './TopographyDetail.vue';
 import DatasetCollectionPublish from './DatasetCollectionPublish.vue';
+import DatasetCollection from './DatasetCollection.vue';
 
 interface ComponentIndex {
     name: string,
@@ -24,6 +25,7 @@ const componentIndex: ComponentIndex = [
     { name: "Home", implementation: Home },
     { name: "TopographyDetail", implementation: TopographyDetail }
     { name: "DatasetCollectionPublish", implementation: DatasetCollectionPublish },
+    { name: "DatasetCollection", implementation: DatasetCollection },
 ];
 
 export function registerAppComponents(app) {
