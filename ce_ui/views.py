@@ -126,11 +126,49 @@ class DatasetDetailView(AppDetailView):
 class DatasetCollectionPublishView(AppView):
     vue_component = "DatasetCollectionPublish"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        #
+        # Breadcrumb navigation
+        #
+        breadcrumb.add_generic(
+            context,
+            {
+                "title": "Publish collection",
+                "icon": "paper-plane",
+                "icon_style_prefix": "far",
+                "active": True,
+                "login_required": False,
+            },
+        )
+
+        return context
+
 
 class DatasetCollectionView(AppDetailView):
     model = PublicationCollection
     vue_component = "DatasetCollection"
     serializer_class = PublicationCollectionSerializer
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        #
+        # Breadcrumb navigation
+        #
+        breadcrumb.add_generic(
+            context,
+            {
+                "title": "Dataset collection",
+                "icon": "cubes",
+                "icon_style_prefix": "far",
+                "active": True,
+                "login_required": False,
+            },
+        )
+
+        return context
 
 
 class DatasetPublishView(AppDetailView):
