@@ -71,8 +71,15 @@ function publish() {
         }).then((response) => {
             window.location.href = `/ui/dataset-collection/${response.data.collection_id}/`;
         }).catch((err) => {
-            console.error(err);
+            console.error(err.response.statusText);
             pending_request.value = false;
+            show?.({
+                props: {
+                    title: "Publishing failed",
+                    body: err.response.statusText,
+                    variant: 'danger'
+                }
+            });
         });
     }
 }

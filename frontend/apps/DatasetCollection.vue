@@ -3,6 +3,9 @@
 import axios from "axios";
 import { inject, ref } from "vue";
 
+import { useToastController } from 'bootstrap-vue-next';
+
+const { show } = useToastController();
 const appProps = inject("appProps");
 
 const collection = ref({});
@@ -21,12 +24,34 @@ axios.get(appProps.object.url).then((response) => {
             publications.value.push(response.data);
             axios.get(response.data.surface).then((response) => {
                 datasets.value.push(response.data);
+            }).catch(() => {
+                show?.({
+                    props: {
+                        title: "API error",
+                        body: `Dataset \"${response.data.surface}\" could not be found.`,
+                        variant: 'danger'
+                    }
+                });
             });
-        })
+        }).catch(() => {
+            show?.({
+                props: {
+                    title: "API error",
+                    body: `Publication \"${publication_url}\" could not be found.`,
+                    variant: 'danger'
+                }
+            });
+        });
     })
-
 }).catch((err) => {
     console.error(err);
+    show?.({
+        props: {
+            title: "API error",
+            body: `Publication Collection \"${appProps.object.url}\" could not be found.`,
+            variant: 'danger'
+        }
+    });
 });
 
 </script>
