@@ -1,10 +1,11 @@
 <script setup lang="ts">
 
-import {ref} from 'vue';
-import {BFormCheckbox, BButton} from 'bootstrap-vue-next';
+import { ref } from 'vue';
+import { BFormCheckbox, BButton, BSpinner } from 'bootstrap-vue-next';
 
 const props = defineProps({
-    stage: Number
+    stage: Number,
+    pending_request: Boolean
 });
 
 const emit = defineEmits(['back', 'publish']);
@@ -29,11 +30,11 @@ function checkAndPublish() {
         <div class="mt-4">
             <ul>
                 <li>The digital twin and all measurements will be <b>visible by
-                    everyone</b>,
+                        everyone</b>,
                     registered or anonymous users, now and in future.
                 </li>
                 <li>The related data (raw data, descriptions, ..) <b>will be
-                    downloadable by everyone</b>.
+                        downloadable by everyone</b>.
                 </li>
                 <li>Every user can perform analyses on your data.</li>
                 <li>You choose a license for your data - the choice of the license is
@@ -45,14 +46,14 @@ function checkAndPublish() {
                 </li>
                 <li>Your ORCID iD will saved along with your publication.</li>
                 <li>A <a href="https://www.doi.org/">DOI (Digital Object
-                    Identifier)</a> will be generated
+                        Identifier)</a> will be generated
                     with the given data. Your data will be accessible under the
                     corresponding URL.
                 </li>
             </ul>
             <p>
                 This is great if you want to <b>make your data public under a permanent
-                URL</b>, e.g. in order
+                    URL</b>, e.g. in order
                 to reference your data in a citation.
             </p>
             <p>
@@ -73,8 +74,8 @@ function checkAndPublish() {
                     I hold copyright of this data or have been authorized by the
                     copyright holders.*<br>
                     <span class="text-muted"> Please make sure you're not publishing data from others without their
-            authorization.
-          </span>
+                        authorization.
+                    </span>
                 </BFormCheckbox>
             </div>
         </div>
@@ -82,7 +83,11 @@ function checkAndPublish() {
             <BButton @click="$emit('back')" variant="primary">
                 Back
             </BButton>
-            <BButton @click="checkAndPublish()" variant="success" size="lg">
+            <BButton v-if="pending_request" disabled variant="success" size="lg">
+                Publish
+                <BSpinner variant="primary" style="width: 1.2rem; height: 1.2rem;" />
+            </BButton>
+            <BButton v-else @click="checkAndPublish()" variant="success" size="lg">
                 Publish 🚀
             </BButton>
         </div>

@@ -1,17 +1,17 @@
 <script setup lang="ts">
 
-import {BToastOrchestrator} from "bootstrap-vue-next";
+import { BToastOrchestrator } from "bootstrap-vue-next";
 
 import Breadcrumbs from "../base/Breadcrumbs.vue";
 import Topnav from "../base/Topnav.vue";
 
 const props = defineProps({
-    vueComponent: String,
+    vueComponent: { type: String, default: null },
     // Breadcrumb navigation
     breadcrumbs: Object,
     // Django messages
     messages: Array
-})
+});
 
 </script>
 
@@ -22,7 +22,7 @@ const props = defineProps({
         <Breadcrumbs :tabs="breadcrumbs"></Breadcrumbs>
     </div>
 
-    <div id="wrapper">
+    <div v-if="vueComponent != null && vueComponent.length > 0" id="wrapper">
         <div id="content-wrapper">
             <div class="container-fluid mt-1">
                 <div class="tab-content mt-2">

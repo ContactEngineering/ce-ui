@@ -4,6 +4,14 @@
 
 - ENH: Dataset Collection view and publish UI
 
+## 1.30.6 (2025-04-23)
+
+- ENH: Report publication errors
+
+## 1.30.5 (2025-04-23)
+
+- BUG: Reviewing accepted terms and conditions (#129)
+
 ## 1.30.4 (2025-04-04)
 
 - BUG: Added missing template
