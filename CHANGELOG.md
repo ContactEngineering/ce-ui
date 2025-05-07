@@ -1,5 +1,9 @@
 # Changelog for plugin *ce-ui*
 
+## Unreleased
+
+- ENH: Dataset Collection view and publish UI
+
 ## 1.30.4 (2025-04-04)
 
 - BUG: Added missing template
