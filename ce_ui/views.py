@@ -14,15 +14,14 @@ from django.views.generic import (
     UpdateView,
 )
 from termsandconditions.models import TermsAndConditions
-from termsandconditions.views import (AcceptTermsView, GetTermsViewMixin,
-                                      TermsView)
+from termsandconditions.views import AcceptTermsView, GetTermsViewMixin, TermsView
 from topobank.analysis.models import AnalysisFunction
 from topobank.analysis.registry import get_analysis_function_names
 from topobank.analysis.serializers import WorkflowSerializer
 from topobank.manager.models import Surface, Topography
 from topobank_publication.models import PublicationCollection
 from topobank_publication.serializers import PublicationCollectionSerializer
-from topobank.manager.serializers import SurfaceSerializer, TopographySerializer
+from topobank.manager.v1.serializers import SurfaceSerializer, TopographySerializer
 from topobank.manager.utils import subjects_from_base64, subjects_to_base64
 from topobank.usage_stats.utils import increase_statistics_by_date
 from topobank.users.models import User
