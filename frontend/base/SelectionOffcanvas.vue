@@ -8,11 +8,14 @@ import {
     BListGroupItem,
     BNavbarNav,
     BNavItem,
-    BOffcanvas
+    BOffcanvas,
+    useToastController
 } from "bootstrap-vue-next";
 
 import { useDatasetSelectionStore } from "@/stores/datasetSelection";
 import { onMounted, ref, computed } from "vue";
+
+const { show } = useToastController();
 
 const selection = useDatasetSelectionStore();
 
@@ -42,6 +45,23 @@ async function refreshDatasets() {
     });
 }
 
+function showCollectionInfo() {
+    const issue = "";
+    if (!selectionIsPublished.value) {
+        issue = "Your selection contains unpublished datasets."
+    }
+    else if (selection.nbSelected < 2) {
+        issue = "You selected less than 2 datasets."
+    }
+    show?.({
+        props: {
+            title: "Creating a collection",
+            body: "To create a collection you must select at least 2, published datasets." + issue,
+            variant: 'info'
+        }
+    });
+}
+
 const selectionIsPublished = computed(() => {
     return datasets.value.every((surface) => surface.publication != null);
 })
@@ -66,10 +86,11 @@ const selectionIsPublished = computed(() => {
                     :disabled="selection.nbSelected === 0">
                     Download
                 </BNavItem>
-                <BNavItem class="btn btn-light mb-2"
-                    :href="`/ui/dataset-collection-publish/?${datasets.map((surface) => `dataset=${surface.id}`).join('&')}`"
-                    :disabled="selection.nbSelected <= 1 || !selectionIsPublished">
-                    {{}}
+                <BNavItem v-if="selection.nbSelected > 1 && selectionIsPublished" class="btn btn-light mb-2"
+                    :href="`/ui/dataset-collection-publish/?${datasets.map((surface) => `dataset=${surface.id}`).join('&')}`">
+                    Create collection
+                </BNavItem>
+                <BNavItem v-else class="btn btn-light mb-2" @click="showCollectionInfo()">
                     Create collection
                 </BNavItem>
                 <BNavItem class="btn btn-secondary" @click="selection.clear()" :disabled="selection.nbSelected === 0">
