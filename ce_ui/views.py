@@ -139,7 +139,7 @@ class DatasetCollectionPublishView(AppView):
                 "icon": "paper-plane",
                 "icon_style_prefix": "far",
                 "active": True,
-                "login_required": False,
+                "login_required": True,
             },
         )
 
@@ -197,7 +197,7 @@ class DatasetPublishView(AppDetailView):
                 "icon_style_prefix": "far",
                 "href": f"{reverse('ce_ui:dataset-publish', kwargs=dict(pk=self.object.id))}",
                 "active": True,
-                "login_required": False,
+                "login_required": True,
                 "tooltip": f"Publish '{self.object.label}'",
             },
         )
