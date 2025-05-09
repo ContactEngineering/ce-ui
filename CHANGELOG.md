@@ -1,5 +1,9 @@
 # Changelog for plugin *ce-ui*
 
+## Unreleased
+
+- ENH: Dataset Collection view and publish UI
+
 ## 1.30.6 (2025-04-23)
 
 - ENH: Report publication errors

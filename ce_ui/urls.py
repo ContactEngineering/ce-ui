@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.auth.views import login_required
 from django.urls import include, path, re_path
 from django.views.generic import RedirectView
 
@@ -115,6 +116,16 @@ ui_urlpatterns = [
         name="dataset-publish",
     ),
     path(
+        r"dataset-collection-publish/",
+        view=login_required(views.DatasetCollectionPublishView.as_view()),
+        name="dataset-collection-publish",
+    ),
+    path(
+        r"dataset-collection/<int:pk>/",
+        view=views.DatasetCollectionView.as_view(),
+        name="dataset-collection",
+    ),
+    path(
         "analysis-list/",
         view=views.AnalysisListView.as_view(),
         name="results-list",
@@ -123,7 +134,7 @@ ui_urlpatterns = [
         r"analysis-detail/<str:slug>/",
         view=views.AnalysisDetailView.as_view(),
         name="results-detail",
-    )
+    ),
 ]
 urlpatterns += [path("ui/", include((ui_urlpatterns, app_name)))]
 
