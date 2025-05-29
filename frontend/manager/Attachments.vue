@@ -23,6 +23,9 @@ const props = defineProps({
     permission: String
 });
 
+const emit = defineEmits(['update:attachmentCount','update:isAttachmentsEditable']); // Emitting the number of attachments to parent component
+
+
 const {show} = useToastController();
 
 const attachments = ref({});
@@ -42,6 +45,7 @@ onMounted(() => {
 function refreshAttachments() {
     axios.get(props.attachmentsUrl).then(response => {
         attachments.value = response.data;
+        emit('update:attachmentCount', Object.keys(attachments.value).length);//emiting the number of attachments to parent
     }).catch(error => {
         show?.({
             props: {
@@ -129,6 +133,11 @@ function deleteAttachment(key) {
 
 const isEditable = computed(() => {
     return ['edit', 'full'].includes(props.permission);
+});
+
+// Emit the isEditable value when the component is mounted
+onMounted(() => {
+    emit('update:isAttachmentsEditable', isEditable);
 });
 
 const attachmentToDelete = computed(() => {
