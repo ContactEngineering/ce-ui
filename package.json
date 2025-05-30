@@ -25,7 +25,6 @@
     "bootstrap": "^5.3.3",
     "bootstrap-vue-next": "^0.28.0",
     "choices.js": "^11.1.0",
-    "d3": "^7.9.0",
     "datatables.net-bs5": "^2.2.2",
     "datatables.net-vue3": "^3.0.4",
     "flatbush": "^4.4.0",
