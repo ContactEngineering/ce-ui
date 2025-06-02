@@ -58,9 +58,10 @@ const emit = defineEmits([
     'delete:surface'
 ])
 
-const attachmentCount = ref(0); // Number of attachments
-const isAttachmentsEditable = ref(false); // checks whether the block has edit permissions
-
+const attachmentCount = defineModel({
+    type: Number,
+    default: 0
+});
 
 // Data that is displayed or can be edited
 const _surface = shallowRef(null);  // Surface data
@@ -390,18 +391,17 @@ const allSelected = computed({
                                             :tags="_surface.tags">
                         </DatasetDescription>
                     </BTab>
-                    <BTab title="Properties">
+                    <BTab title="Properties"> 
                         <DatasetProperties v-if="_surface != null"
                                            v-model:properties="_surface.properties"
                                            :permission="_permissions.current_user.permission"
                                            :surface-url="_surface.url">
                         </DatasetProperties>
                     </BTab>
-                    <BTab title="Attachments" :disabled="attachmentCount === 0&&!isAttachmentsEditable">  
+                    <BTab title="Attachments" v-if ="attachmentCount !== 0 || isEditable">   
                         <Attachments v-if="_surface != null" :attachments-url="_surface.attachments"
                             :permission="_permissions.current_user.permission"
-                            @update:attachmentCount="attachmentCount = $event"
-                            @update:isAttachmentsEditable="isAttachmentsEditable = $event"
+                            :v-model="attachmentCount"
                             >
                         </Attachments>
                     </BTab>

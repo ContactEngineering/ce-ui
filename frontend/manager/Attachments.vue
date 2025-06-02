@@ -23,7 +23,10 @@ const props = defineProps({
     permission: String
 });
 
-const emit = defineEmits(['update:attachmentCount','update:isAttachmentsEditable']); // Emitting the number of attachments to parent component
+const attachmentCount = defineModel({
+    type: Number,
+    default: 0
+});
 
 
 const {show} = useToastController();
@@ -45,7 +48,7 @@ onMounted(() => {
 function refreshAttachments() {
     axios.get(props.attachmentsUrl).then(response => {
         attachments.value = response.data;
-        emit('update:attachmentCount', Object.keys(attachments.value).length);//emiting the number of attachments to parent
+        attachmentCount.value = Object.keys(attachments.value).length; // Update the attachment count
     }).catch(error => {
         show?.({
             props: {
@@ -135,11 +138,6 @@ const isEditable = computed(() => {
     return ['edit', 'full'].includes(props.permission);
 });
 
-// Emit the isEditable value when the component is mounted
-onMounted(() => {
-    emit('update:isAttachmentsEditable', isEditable);
-});
-
 const attachmentToDelete = computed(() => {
     if (deleteAttachmentKey.value != null) {
         return attachments.value[deleteAttachmentKey.value];
@@ -198,7 +196,7 @@ const attachmentToShowInfo = computed(() => {
                                     :value="indicator.loaded"></b-progress>
                     </div>
                 </div>
-                <div v-if="attachments.length == 0">
+                <div v-if="attachmentCount == 0">
                     <BAlert :model-value="true" variant="primary">
                         This digital surface twin does not have file attachments yet.
                     </BAlert>

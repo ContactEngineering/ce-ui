@@ -367,3 +367,15 @@ compose/local/django/pip-packages/*
 data/
 .envs/.local/.pypi-authfile
 
+# static files
+static/js/1815e00441357e01619e.ttf
+static/js/2463b90d9a316e4e5294.woff2
+static/js/2582b0e4bcf85eceead0.ttf
+static/js/89999bdf5d835c012025.woff2
+static/js/914997e1bdfc990d0897.ttf
+.gitignore
+static/js/app.bundle.js
+static/js/c210719e60948b211a12.woff2
+static/js/da94ef451f4969af06e6.ttf
+.gitignore
+static/js/ea8f94e1d22e0d35ccd4.woff2
