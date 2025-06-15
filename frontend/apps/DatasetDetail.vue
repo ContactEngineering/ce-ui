@@ -60,6 +60,8 @@ const emit = defineEmits([
 
 const attachmentCount = ref(1);  // default count of the attachments 
 
+const propertyCount = ref(1);  // default count of the properties
+
 // Data that is displayed or can be edited
 const _surface = shallowRef(null);  // Surface data
 const _publication = ref(null);  // Publication data
@@ -388,11 +390,12 @@ const allSelected = computed({
                                             :tags="_surface.tags">
                         </DatasetDescription>
                     </BTab>
-                    <BTab title="Properties"> 
+                    <BTab title="Properties" v-if ="propertyCount !== 0 || isEditable"> 
                         <DatasetProperties v-if="_surface != null"
                                            v-model:properties="_surface.properties"
                                            :permission="_permissions.current_user.permission"
-                                           :surface-url="_surface.url">
+                                           :surface-url="_surface.url"
+                                           v-model:propertyCount="propertyCount">
                         </DatasetProperties>
                     </BTab>
                     <BTab title="Attachments" v-if ="attachmentCount !== 0 || isEditable"> <!--here the tab will not be displayed when attachment count is 0 and is editable is false -->
