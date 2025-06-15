@@ -367,7 +367,7 @@ compose/local/django/pip-packages/*
 data/
 .envs/.local/.pypi-authfile
 
-# static files
+# *.ttf and *.woff2 files
 static/js/1815e00441357e01619e.ttf
 static/js/2463b90d9a316e4e5294.woff2
 static/js/2582b0e4bcf85eceead0.ttf

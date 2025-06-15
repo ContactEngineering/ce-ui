@@ -58,10 +58,7 @@ const emit = defineEmits([
     'delete:surface'
 ])
 
-const attachmentCount = defineModel({
-    type: Number,
-    default: 0
-});
+const attachmentCount = ref(0);  // default count of the attachments 
 
 // Data that is displayed or can be edited
 const _surface = shallowRef(null);  // Surface data
@@ -398,7 +395,10 @@ const allSelected = computed({
                                            :surface-url="_surface.url">
                         </DatasetProperties>
                     </BTab>
-                    <BTab title="Attachments" v-if ="attachmentCount !== 0 || isEditable">   
+                    <BTab title="Attachments" v-if ="attachmentCount !== 0 || isEditable"> <!--here the tab will not be displayed when attachment count is 0 and is editable is false -->
+                        <template #title>
+                            Attachments <BBadge>{{ attachmentCount }}</BBadge>
+                        </template>
                         <Attachments v-if="_surface != null" :attachments-url="_surface.attachments"
                             :permission="_permissions.current_user.permission"
                             :v-model="attachmentCount"
