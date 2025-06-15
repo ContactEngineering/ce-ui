@@ -23,7 +23,7 @@ const props = defineProps({
     permission: String
 });
 
-const attachmentCount = defineModel({
+const attachmentCount = defineModel("attachmentCount",{
     type: Number,
     default: 0
 });

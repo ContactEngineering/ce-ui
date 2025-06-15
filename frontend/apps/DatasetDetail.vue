@@ -58,7 +58,7 @@ const emit = defineEmits([
     'delete:surface'
 ])
 
-const attachmentCount = ref(0);  // default count of the attachments 
+const attachmentCount = ref(1);  // default count of the attachments 
 
 // Data that is displayed or can be edited
 const _surface = shallowRef(null);  // Surface data
@@ -401,7 +401,7 @@ const allSelected = computed({
                         </template>
                         <Attachments v-if="_surface != null" :attachments-url="_surface.attachments"
                             :permission="_permissions.current_user.permission"
-                            :v-model="attachmentCount"
+                            v-model:attachmentCount="attachmentCount"
                             >
                         </Attachments>
                     </BTab>
