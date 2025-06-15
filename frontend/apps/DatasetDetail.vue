@@ -397,7 +397,7 @@ const allSelected = computed({
                     </BTab>
                     <BTab title="Attachments" v-if ="attachmentCount !== 0 || isEditable"> <!--here the tab will not be displayed when attachment count is 0 and is editable is false -->
                         <template #title>
-                            Attachments <BBadge>{{ attachmentCount }}</BBadge>
+                            Attachments : <BBadge>{{ attachmentCount }}</BBadge>
                         </template>
                         <Attachments v-if="_surface != null" :attachments-url="_surface.attachments"
                             :permission="_permissions.current_user.permission"
