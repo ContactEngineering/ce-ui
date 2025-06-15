@@ -388,7 +388,7 @@ const allSelected = computed({
                                             :tags="_surface.tags">
                         </DatasetDescription>
                     </BTab>
-                    <BTab title="Properties"> 
+                    <BTab title="Properties" v-if ="attachmentCount !== 0 || isEditable"> <!--here the properties tab will not be displayed when attachment count is 0 and is editable is false -->
                         <DatasetProperties v-if="_surface != null"
                                            v-model:properties="_surface.properties"
                                            :permission="_permissions.current_user.permission"
