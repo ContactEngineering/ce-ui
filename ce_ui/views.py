@@ -171,6 +171,10 @@ class DatasetCollectionView(AppDetailView):
         return context
 
 
+class DatasetCollectionListView(AppView):
+    vue_component = "DatasetCollectionList"
+
+
 class DatasetPublishView(AppDetailView):
     model = Surface
     vue_component = "DatasetPublish"
