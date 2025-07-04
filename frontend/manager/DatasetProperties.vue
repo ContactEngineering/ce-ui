@@ -25,6 +25,11 @@ const properties = defineModel('properties', {
     default: {}
 });
 
+const propertyCount = defineModel("propertyCount", {
+    type: Number,
+    default: 0
+});
+
 const props = defineProps({
     surfaceUrl: String,
     permission: String
@@ -149,6 +154,8 @@ function save() {
         });
     });
 }
+
+propertyCount.value = Object.keys(properties.value).length // Update the property count
 
 </script>
 
