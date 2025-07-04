@@ -7,6 +7,7 @@ import {
     BAccordion,
     BAccordionItem,
     BAlert,
+    BBadge,
     BCard,
     BCardText,
     BDropdown,
@@ -58,9 +59,9 @@ const emit = defineEmits([
     'delete:surface'
 ])
 
-const attachmentCount = ref(1);  // default count of the attachments 
+const attachmentCount = ref(null);  // default count of the attachments 
 
-const propertyCount = ref(1);  // default count of the properties
+const propertyCount = ref(null);  // default count of the properties
 
 // Data that is displayed or can be edited
 const _surface = shallowRef(null);  // Surface data
@@ -398,9 +399,9 @@ const allSelected = computed({
                                            v-model:propertyCount="propertyCount">
                         </DatasetProperties>
                     </BTab>
-                    <BTab title="Attachments" v-if ="attachmentCount !== 0 || isEditable"> <!--here the tab will not be displayed when attachment count is 0 and is editable is false -->
+                    <BTab title="Attachments" v-if ="attachmentCount === null || attachmentCount !== 0 || isEditable"> <!--here the tab will not be displayed when attachment count is 0 and is editable is false -->
                         <template #title>
-                            Attachments : <BBadge>{{ attachmentCount }}</BBadge>
+                            Attachments <BBadge>{{ attachmentCount }}</BBadge>
                         </template>
                         <Attachments v-if="_surface != null" :attachments-url="_surface.attachments"
                             :permission="_permissions.current_user.permission"

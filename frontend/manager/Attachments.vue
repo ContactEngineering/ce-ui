@@ -76,6 +76,7 @@ function handleFileDrop(files) {
                 onUploadProgress: e => uploadIndicator.value[manifest.id].loaded = e.loaded / e.total * 100
             }).then(response => {
                 attachments.value[manifest.filename] = manifest;
+                attachmentCount.value = Object.keys(attachments.value).length;
                 uploadIndicator.value = {};
                 // We need to fetch the manifest information again to have a link to
                 // the file
@@ -120,6 +121,7 @@ function deleteAttachment(key) {
     axios.delete(attachment.url)
         .then(() => {
             delete attachments.value[key];
+            attachmentCount.value = Object.keys(attachments.value).length;
             deleteAttachmentKey.value = null;
         })
         .catch((error) => {
