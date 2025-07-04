@@ -1,5 +1,5 @@
 from django.shortcuts import reverse
-from topobank.manager.views import SurfaceViewSet
+from topobank.manager.v1.views import SurfaceViewSet
 from topobank.testing.utils import ordereddicts_to_dicts
 
 
@@ -21,9 +21,11 @@ def search_surfaces(request_factory, user, expr):
     -------
     List of dicts with search results, sorted by 'title' key.
     """
-    request = request_factory.get(reverse('manager:surface-api-list') + f"?search={expr}")
+    request = request_factory.get(
+        reverse("manager:surface-api-list") + f"?search={expr}"
+    )
     request.user = user
     request.session = {}  # must be there
     response = SurfaceViewSet.as_view()(request)
     assert response.status_code == 200
-    return ordereddicts_to_dicts(response.data['results'], sorted_by='title')
+    return ordereddicts_to_dicts(response.data["results"], sorted_by="title")
