@@ -8,11 +8,14 @@ import {
     BListGroupItem,
     BNavbarNav,
     BNavItem,
-    BOffcanvas
+    BOffcanvas,
+    useToastController
 } from "bootstrap-vue-next";
 
 import { useDatasetSelectionStore } from "@/stores/datasetSelection";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
+
+const { show } = useToastController();
 
 const selection = useDatasetSelectionStore();
 
@@ -42,7 +45,26 @@ async function refreshDatasets() {
     });
 }
 
+function showCollectionInfo() {
+    const issue = "";
+    if (!selectionIsPublished.value) {
+        issue = "Your selection contains unpublished datasets."
+    }
+    else if (selection.nbSelected < 2) {
+        issue = "You selected less than 2 datasets."
+    }
+    show?.({
+        props: {
+            title: "Creating a collection",
+            body: "To create a collection you must select at least 2, published datasets." + issue,
+            variant: 'info'
+        }
+    });
+}
 
+const selectionIsPublished = computed(() => {
+    return datasets.value.every((surface) => surface.publication != null);
+})
 
 </script>
 
@@ -55,17 +77,23 @@ async function refreshDatasets() {
         <template #footer>
             <BNavbarNav class="justify-content-end flex-grow-1">
                 <BNavItem class="btn btn-success mb-2"
-                          :href="`${analysisListUrl}?subjects=${selection.selectedAsBase64}`"
-                          :disabled="selection.nbSelected === 0">
+                    :href="`${analysisListUrl}?subjects=${selection.selectedAsBase64}`"
+                    :disabled="selection.nbSelected === 0">
                     Analyze
                 </BNavItem>
                 <BNavItem class="btn btn-light mb-2"
-                          :href="`/manager/api/surface/${selection.selectedAsString}/download/`"
-                          :disabled="selection.nbSelected === 0">
+                    :href="`/manager/api/surface/${selection.selectedAsString}/download/`"
+                    :disabled="selection.nbSelected === 0">
                     Download
                 </BNavItem>
-                <BNavItem class="btn btn-secondary" @click="selection.clear()"
-                          :disabled="selection.nbSelected === 0">
+                <BNavItem v-if="selection.nbSelected > 1 && selectionIsPublished" class="btn btn-light mb-2"
+                    :href="`/ui/dataset-collection-publish/?${datasets.map((surface) => `dataset=${surface.id}`).join('&')}`">
+                    Create collection
+                </BNavItem>
+                <BNavItem v-else class="btn btn-light mb-2" @click="showCollectionInfo()">
+                    Create collection
+                </BNavItem>
+                <BNavItem class="btn btn-secondary" @click="selection.clear()" :disabled="selection.nbSelected === 0">
                     Clear selection
                 </BNavItem>
             </BNavbarNav>
