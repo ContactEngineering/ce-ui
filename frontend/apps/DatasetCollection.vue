@@ -3,7 +3,7 @@
 import axios from "axios";
 import { inject, ref } from "vue";
 
-import { useToastController } from 'bootstrap-vue-next';
+import { BBadge, useToastController } from "bootstrap-vue-next";
 
 const { show } = useToastController();
 const appProps = inject("appProps");
@@ -54,12 +54,38 @@ axios.get(appProps.object.url).then((response) => {
     });
 });
 
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        show?.({
+            props: {
+                title: "Copied",
+                body: "DOI url was copied to your system clippboard",
+                variant: 'success'
+            }
+        });
+    }).catch(err => {
+        console.error("Failed to copy:", err);
+    });
+}
+
+function doiUrl(doiName: string): string {
+    return `https://doi.org/${doiName}`
+}
+
 </script>
 <template>
     <div class="container">
+
+        <div class="d-flex align-items-center">
         <h1>
             {{ collection.title }}
         </h1>
+            <BBadge v-if="collection.doi_name"
+                class="ms-auto highlight-on-hover"
+                @click.stop="copyToClipboard(doiUrl(collection.doi_name))">
+                    {{ doiUrl(collection.doi_name) }}
+            </BBadge>
+        </div>
         <p style="white-space: pre-wrap;">
             {{ collection.description }}
         </p>
@@ -94,5 +120,16 @@ axios.get(appProps.object.url).then((response) => {
         color: #007BFF;
         cursor: pointer;
     }
+}
+
+.highlight-on-hover {
+    border: 1px solid rgba(0, 0, 0, 0);
+    transition: background-color 0.3s;
+}
+
+.highlight-on-hover:hover {
+    border: 1px solid #000000;
+    background: var(--bs-secondary-bg-subtle);
+    cursor: pointer;
 }
 </style>
