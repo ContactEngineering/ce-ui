@@ -1,24 +1,27 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watchEffect } from "vue";
 import axios from "axios";
-import { BBadge, useToastController } from "bootstrap-vue-next";
+    
+import { BBadge, BPagination ,useToastController } from "bootstrap-vue-next";
 
 const { show } = useToastController();
-
 const props = defineProps({
     apiUrl: {
         type: String,
         default: "/go/publication-collection"
     },
 })
-
 const collections = ref([])
+const itemsPerPage = 10;
+let page = ref(1)
+let collectionsCount = ref(0)
 
-axios.get(props.apiUrl)
-    .then((result) => {
-        collections.value = result.data;
-    })
-    .catch((err) => {
+watchEffect(() => {
+    axios.get(props.apiUrl + `/?limit=${itemsPerPage}&offset=${(page.value-1)*itemsPerPage}`)
+        .then((result) => {
+            collections.value = result.data.results;
+            collectionsCount.value = result.data.count;
+        }).catch((err) => {
         show?.({
             props: {
                 title: "Error fetching collections",
@@ -27,7 +30,8 @@ axios.get(props.apiUrl)
             }
         });
         console.error("Error while fetching publication collections:\n", err);
-    });
+        })
+});
 
 function openDetailView(id: number) {
     window.location.href = `/ui/dataset-collection/${id}/`
@@ -67,9 +71,17 @@ function copyToClipboard(text) {
             <p v-if="collection.description != ''">
                 {{ collection.description }}
             </p>
-            <span> published by: {{ collection.publisher.name }}</span><br>
-            <span> number of collected datasets: {{ collection.publications.length }}</span>
+            <span> This collection was published by {{ collection.publisher.name }}.</span><br>
+            <span> It contains {{ collection.publications.length }} datasets.</span>
         </div>
+    <div class="d-flex justify-content-center">
+    <BPagination v-model="page"
+                 :limit="9"
+                 :per-page="itemsPerPage"
+                 :total-rows="collectionsCount"
+                 class="me-2 mb-0">
+    </BPagination>
+    </div>
     </div>
 </template>
 
