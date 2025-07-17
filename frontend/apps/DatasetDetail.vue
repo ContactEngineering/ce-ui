@@ -193,7 +193,7 @@ function uploadNewTopography(file) {
 
 function deleteTopography(index) {
     _topographies.value[index] = null;
-}
+}    
 
 function saveBatchEdit(topography) {
     // Trigger saving spinner
@@ -312,6 +312,10 @@ const allSelected = computed({
     }
 });
 
+const measurementCount = computed(() => {
+  return _topographies.value.filter(t => t !== null).length;
+});
+
 </script>
 
 <template>
@@ -330,6 +334,9 @@ const allSelected = computed({
                        pills
                        vertical>
                     <BTab title="Measurements">
+                        <template #title>
+                            Measurements <BBadge>{{measurementCount}}</BBadge>
+                        </template>
                         <DropZone v-if="isEditable && !anySelected" @files-dropped="filesDropped">
                         </DropZone>
                         <topography-update-card v-if="anySelected"
@@ -392,6 +399,9 @@ const allSelected = computed({
                         </DatasetDescription>
                     </BTab>
                     <BTab title="Properties" v-if ="propertyCount !== 0 || isEditable"> 
+                        <template #title>
+                            Properties <BBadge>{{ propertyCount }}</BBadge>
+                        </template>
                         <DatasetProperties v-if="_surface != null"
                                            v-model:properties="_surface.properties"
                                            :permission="_permissions.current_user.permission"

@@ -153,6 +153,7 @@ function save() {
             }
         });
     });
+    propertyCount.value = Object.keys(propertiesArrayToObject(_properties.value)).length; // Update the property count
 }
 
 propertyCount.value = Object.keys(properties.value).length // Update the property count
