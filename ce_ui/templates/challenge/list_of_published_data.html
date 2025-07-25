@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}List of Published Data{% endblock %}
+
+{% block content %}
+<div class="centered-page">
+    <h1>List of published data from the challenge</h1>
+    <p>
+        All data required for recreation of the analysis presented in the paper can also be found on
+        <a href="https://doi.org/10.5281/zenodo.15341939" target="_blank" rel="noopener">Zenodo</a>.
+    </p>
+</div>
+<table>
+    <thead>
+        <tr>
+            <th>Sample ID</th>
+            <th>DOI link</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for sample_id, item in data_list.items %}
+        <tr>
+            <td>{{ sample_id }}</td>
+            <td><a href="{{ item.doi_link }}" target="_blank">{{ item.doi_link }}</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<p><a href="{% url 'homepage' %}">Back to homepage</a></p>
+
+{% endblock %}
