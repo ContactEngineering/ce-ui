@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.urls import include, path, re_path
 from django.views.generic import RedirectView
 
@@ -123,18 +122,27 @@ ui_urlpatterns = [
         r"analysis-detail/<str:slug>/",
         view=views.AnalysisDetailView.as_view(),
         name="results-detail",
-    )
+    ),
 ]
 urlpatterns += [path("ui/", include((ui_urlpatterns, app_name)))]
 
 #
-# Challenge redirect
+# Routes under the 'challenge/' prefix
 #
-if settings.CHALLENGE_REDIRECT_URL:
-    urlpatterns += [
-        path(
-            "challenge/",
-            RedirectView.as_view(url=settings.CHALLENGE_REDIRECT_URL, permanent=False),
-            name="challenge",
-        ),
-    ]
+challenge_urlpatterns = [
+    #
+    # User management
+    #
+    path(
+        "",
+        view=views.ChallengeHomepageView.as_view(),
+        name="challenge-homepage",
+    ),
+    path(
+        "list-of-published-data/",
+        view=views.ChallengeListOfPublishedDataView.as_view(),
+        name="challenge-list-of-published-data",
+    ),
+]
+
+urlpatterns += [path("challenge/", include((challenge_urlpatterns, app_name)))]
