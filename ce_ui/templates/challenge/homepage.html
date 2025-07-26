@@ -1,85 +1,128 @@
-{% extends "base.html" %}
+{% extends "noapp.html" %}
 {% load static %}
 {% block title %}Homepage{% endblock %}
 
 {% block content %}
-<div class="centered-page">
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-4">
+                <img src="{% static 'images/stc_logo.png' %}"
+                     alt="Surface-Topography Challenge"
+                     width="350px">
+            </div>
+            <div class="col-8">
+                <h3>The world’s most comprehensive statistical description of a surface
+                </h3>
+                <div class="accordion" id="accordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#collapse-one"
+                                    aria-expanded="true" aria-controls="collapse-one">
+                                Quick stats
+                            </button>
+                        </h2>
+                        <div id="collapse-one" class="accordion-collapse collapse show"
+                             data-bs-parent="#accordion">
+                            <div class="accordion-body">
+                                <ul>
+                                    <li><strong>2088</strong> measurements</li>
+                                    <li><strong>153</strong> participants</li>
+                                    <li><strong>63</strong> companies, national labs,
+                                        universities
+                                    </li>
+                                    <li><strong>20</strong> countries</li>
+                                    <li><strong>2</strong> different surfaces</li>
+                                    <li><strong>1</strong> international collaboration
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#collapse-two"
+                                    aria-expanded="false" aria-controls="collapse-two">
+                                The challenge has closed, but you can still explore the
+                                data
+                            </button>
+                        </h2>
+                        <div id="collapse-two" class="accordion-collapse collapse"
+                             data-bs-parent="#accordion">
+                            <div class="accordion-body">
+                                <ul>
+                                    <li>
+                                        <a href="https://doi.org/10.48550/arXiv.2206.13384"
+                                           target="_blank"
+                                           rel="noopener">
+                                            Read the original problem statement
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="https://doi.org/10.1007/s11249-025-02014-y"
+                                           target="_blank"
+                                           rel="noopener">
+                                            Read the resulting collaborative paper
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="https://docs.google.com/forms/d/e/1FAIpQLSevHWLJRuxZnAPqqV6YTKgqed-8s3AMtEv7yo-7g1gPPDNOLw/viewform?pli=1"
+                                           target="_blank" rel="noopener">
+                                            Request samples to measure and test
+                                        </a>
+                                        <div class="callout">
+                                            <p>
+                                                The challenge has closed, we are no
+                                                longer
+                                                accepting
+                                                submissions – but you can still request
+                                                samples for your own use, as long as
+                                                supplies
+                                                last.
+                                            </p>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <a href="https://contact.engineering/"
+                                           target="_blank"
+                                           rel="noopener">
+                                            Explore the open-source platform for data
+                                            sharing
+                                            and
+                                            analysis
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'challenge:list-of-published-data' %}">View
+                                            list
+                                            of
+                                            published data</a></p>
+                                    </li>
+                                    <li>
+                                        <a href="mailto:SurfaceTopographyChallenge@gmail.com?subject=[Surface-Topography%20Challenge]%20Getting%20in%20touch"
+                                           target="_blank" rel="noopener">
+                                            Get in touch!
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-    <img src="{% static 'images/stc_logo.png' %}" alt="Surface-Topography Challenge" class="small-image">
-    <h3>The Surface-Topography Challenge endeavored to create the world’s most comprehensive description of a surface
-    </h3>
-    <details class="collapsible" open>
-        <summary class="collapsible-summary">
-            <h2>Quick stats</h2>
-        </summary>
-        <div class="custom-line"></div>
-        <ul class="no-bullets">
-            <li><strong>2088</strong> measurements</li>
-            <li><strong>153</strong> participants</li>
-            <li><strong>63</strong> companies, national labs, universities</li>
-            <li><strong>20</strong> countries</li>
-            <li><strong>2</strong> different surfaces</li>
-            <li><strong>1</strong> international collaboration</li>
-        </ul>
-    </details>
-
-
-    <details class="collapsible" open>
-        <summary class="collapsible-summary">
-            <h2>The challenge has closed, but there are still things to do:</h2>
-        </summary>
-        <div class="custom-line"></div>
-        <ul class="no-bullets link-list">
-            <li>
-                <a href="https://doi.org/10.48550/arXiv.2206.13384" target="_blank" rel="noopener">
-                    Read the original Problem Statement
-                </a>
-            </li>
-            <li>
-                <a href="https://doi.org/10.1007/s11249-025-02014-y" target="_blank" rel="noopener">
-                    Read the resulting collaborative paper
-                </a>
-            </li>
-            <li>
-                <a href="https://docs.google.com/forms/d/e/1FAIpQLSevHWLJRuxZnAPqqV6YTKgqed-8s3AMtEv7yo-7g1gPPDNOLw/viewform?pli=1"
-                    target="_blank" rel="noopener">
-                    Request samples to measure and test
-                </a>
-                <div class="callout">
+                <div>
                     <p>
-                        The challenge has closed, we are no longer accepting submissions – but you can still request
-                        samples for your own use, as long as supplies last.
+                        The organizers of the challenge were: Arushi Pradhan, Nate
+                        Miller,
+                        Martin Müser, Lars Pastewka, Tevis Jacobs
                     </p>
                 </div>
-            </li>
-            <li>
-                <a href="https://contact.engineering/" target="_blank" rel="noopener">
-                    Explore the open-source platform for data sharing and analysis
-                </a>
-            </li>
-            <li>
-                <a href="{% url 'list_of_published_data' %}">View list of published data</a></p>
-            </li>
-            <li>
-                <a href="mailto:SurfaceTopographyChallenge@gmail.com?subject=[Surface-Topography%20Challenge]%20Getting%20in%20touch"
-                    target="_blank" rel="noopener">
-                    Get in touch!
-                </a>
-            </li>
-        </ul>
-    </details>
-
-
-    <hr class="blue-line">
-
-    <div class="organizers-section">
-        <p class="organizer-text">
-            The main organizers of the Challenge were:<br>
-            Arushi Pradhan, Nate Miller, Martin Müser, Lars Pastewka, Tevis Jacobs
-        </p>
-        <img src="{% static 'images/universities.png' %}" alt="universities" class="medium-image">
+            </div>
+        </div>
     </div>
-</div>
 
-</html>
+    </html>
 {% endblock %}

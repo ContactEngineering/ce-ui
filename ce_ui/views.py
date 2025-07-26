@@ -521,7 +521,7 @@ class ChallengeListOfPublishedDataView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         data_list = {}
-        csv_path = os.path.join(os.path.basename(__file__), "data", "challenge_data.csv")
+        csv_path = os.path.join(os.path.dirname(__file__), "data", "challenge_data.csv")
 
         with open(csv_path, mode="r") as file:
             reader = csv.DictReader(file)

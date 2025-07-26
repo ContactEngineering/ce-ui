@@ -134,15 +134,20 @@ challenge_urlpatterns = [
     # User management
     #
     path(
-        "",
+        r"",
         view=views.ChallengeHomepageView.as_view(),
-        name="challenge-homepage",
+        name="homepage",
     ),
     path(
-        "list-of-published-data/",
+        r"list-of-published-data/",
         view=views.ChallengeListOfPublishedDataView.as_view(),
-        name="challenge-list-of-published-data",
+        name="list-of-published-data",
     ),
 ]
 
-urlpatterns += [path("challenge/", include((challenge_urlpatterns, app_name)))]
+urlpatterns += [
+    path(
+        "challenge/",
+        include((challenge_urlpatterns, "challenge"), namespace="challenge"),
+    )
+]
