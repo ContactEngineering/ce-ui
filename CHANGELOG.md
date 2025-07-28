@@ -1,5 +1,9 @@
 # Changelog for plugin *ce-ui*
 
+## 1.31.1 (2025-07-28)
+
+- ENH: Button for creating zoomable image if missing
+
 ## 1.31.0 (2025-07-28)
 
 - ENH: Badges that show number of measurements, properties and attachments

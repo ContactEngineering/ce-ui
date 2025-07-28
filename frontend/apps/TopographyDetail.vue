@@ -2,8 +2,10 @@
 
 import axios from "axios";
 
-import {computed, inject, onMounted, ref} from "vue";
+import { computed, inject, onMounted, ref } from "vue";
 import {
+    BAlert,
+    BButton,
     BModal,
     BSpinner,
     BTab,
@@ -11,9 +13,9 @@ import {
     useToastController
 } from "bootstrap-vue-next";
 
-import {getIdFromUrl, subjectsToBase64} from "topobank/utils/api";
+import { getIdFromUrl, subjectsToBase64 } from "topobank/utils/api";
 
-import Attachments from '../manager/Attachments.vue';
+import Attachments from "../manager/Attachments.vue";
 
 import DeepZoomImage from "../components/DeepZoomImage.vue";
 import LineScanPlot from "../components/LineScanPlot.vue";
@@ -21,7 +23,7 @@ import LineScanPlot from "../components/LineScanPlot.vue";
 import TopographyBadges from "../manager/TopographyBadges.vue";
 import TopographyCard from "../manager/TopographyCard.vue";
 
-const {show} = useToastController();
+const { show } = useToastController();
 
 const props = defineProps({
     topographyUrl: String,
@@ -45,33 +47,35 @@ function getTopographyUrl() {
     return `${props.topographyUrlPrefix}${topographyId}`;
 }
 
-onMounted(() => {
-    updateCard();
+onMounted(async () => {
+    await updateCard(appProps.object);
 });
 
-function updateCard() {
-    /* Fetch JSON describing the card */
-    /*
-    axios.get(`${getTopographyUrl()}?permissions=yes&attachments=yes`).then(response => {
-        _topography.value = response.data;
-        _disabled.value = _topography.value === null || _topography.value.permissions.current_user.permission === 'view';
-    }).catch(error => {
-        show?.({
-            props: {
-                title: "Failed to fetch measurement",
-                body: error,
-                variant: 'danger'
-            }
-        });
-    });
-     */
-    _topography.value = appProps.object;
-    _disabled.value = _topography.value === null || _topography.value.permissions.current_user.permission === 'view';
+async function updateCard(topography = null) {
+    if (topography !== null) {
+        _topography.value = topography;
+        _disabled.value = _topography.value === null || _topography.value.permissions.current_user.permission === "view";
+    }
+
+    /* Fetch topography info from API endpoint if status is pending */
+    if (["pe", "st"].includes(topography.task_state)) {
+        try {
+            const response = await axios.get(_topography.value.url);
+        } catch (error) {
+            show?.({
+                props: {
+                    title: "Failed to load measurement",
+                    body: error,
+                    variant: "danger"
+                }
+            });
+        }
+    }
 }
 
 function deleteTopography() {
-    axios.delete(_topography.url).then(response => {
-        this.$emit('topography-deleted', _topography.value.url);
+    axios.delete(_topography.value.url).then(response => {
+        this.$emit("topography-deleted", _topography.value.url);
         const id = getIdFromUrl(_topography.value.surface);
         window.location.href = `/ui/dataset-detail/${id}/`;
     }).catch(error => {
@@ -79,10 +83,25 @@ function deleteTopography() {
             props: {
                 title: "Failed to delete measurement",
                 body: error,
-                variant: 'danger'
+                variant: "danger"
             }
         });
     });
+}
+
+async function forceInspect() {
+    try {
+        const response = await axios.post(_topography.value.api.force_inspect);
+        await updateCard(response.data);
+    } catch (error) {
+        show?.({
+            props: {
+                title: "Failed to create zoomable image",
+                body: error,
+                variant: "danger"
+            }
+        });
+    }
 }
 
 const base64Subjects = computed(() => {
@@ -98,7 +117,7 @@ const base64Subjects = computed(() => {
         <div v-if="_topography == null"
              class="d-flex justify-content-center mt-5">
             <div class="flex-column text-center">
-                <b-spinner/>
+                <b-spinner />
                 <p>Loading...</p>
             </div>
         </div>
@@ -111,12 +130,23 @@ const base64Subjects = computed(() => {
                        pills
                        vertical>
                     <BTab title="Visualization">
+                        <BAlert variant="warning"
+                                :show="_topography.deepzoom === null && _topography.size_y !== null">
+                            <p class="mb-2">
+                                This measurement does not have a zoomable image.
+                            </p>
+                            <BButton variant="secondary"
+                                     @click="forceInspect">
+                                Retry creation of zoomable image
+                            </BButton>
+                        </BAlert>
                         <LineScanPlot v-if="_topography.size_y === null"
                                       :topography="_topography">
                         </LineScanPlot>
-                        <DeepZoomImage v-if="_topography.size_y !== null"
-                                       :colorbar="true"
-                                       :folder-url="_topography.deepzoom">
+                        <DeepZoomImage
+                            v-if="_topography.deepzoom !== null && _topography.size_y !== null"
+                            :colorbar="true"
+                            :folder-url="_topography.deepzoom">
                         </DeepZoomImage>
                     </BTab>
                     <BTab title="Details">
@@ -132,7 +162,7 @@ const base64Subjects = computed(() => {
                         </Attachments>
                     </BTab>
                     <template #tabs-end>
-                        <hr/>
+                        <hr />
                         <a :href="`/ui/analysis-list/?subjects=${base64Subjects}`"
                            class="btn btn-success mb-2 mt-2">
                             Analyze
@@ -148,7 +178,7 @@ const base64Subjects = computed(() => {
                            @click="_showDeleteModal = true">
                             Delete
                         </a>
-                        <hr/>
+                        <hr />
                         <div class="card mt-2">
                             <div class="card-body">
                                 <topography-badges
