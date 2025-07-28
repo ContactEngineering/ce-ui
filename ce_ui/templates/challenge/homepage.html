@@ -5,12 +5,14 @@
 {% block content %}
     <div class="container mt-5">
         <div class="row">
-            <div class="col-4">
-                <img src="{% static 'images/stc_logo.png' %}"
-                     alt="Surface-Topography Challenge"
-                     width="350px">
+            <div class="col-lg-4 flex">
+                <div class="flex-column text-center">
+                    <img src="{% static 'images/stc_logo.png' %}"
+                         alt="Surface-Topography Challenge"
+                         width="330px">
+                </div>
             </div>
-            <div class="col-8">
+            <div class="col-lg-8">
                 <h3>The world’s most comprehensive statistical description of a surface
                 </h3>
                 <div class="accordion" id="accordion">
@@ -46,8 +48,7 @@
                                     data-bs-toggle="collapse"
                                     data-bs-target="#collapse-two"
                                     aria-expanded="false" aria-controls="collapse-two">
-                                The challenge has closed, but you can still explore the
-                                data
+                                Explore
                             </button>
                         </h2>
                         <div id="collapse-two" class="accordion-collapse collapse"
