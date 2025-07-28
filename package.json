@@ -6,7 +6,7 @@
     "doc": "docs"
   },
   "scripts": {
-    "dev": "webpack --mode development --devtool inline-source-map --watch",
+    "dev": "webpack --env=prefix=.. --mode development --devtool inline-source-map --watch",
     "build-dev": "webpack --mode development",
     "build-prod": "webpack --mode production"
   },
