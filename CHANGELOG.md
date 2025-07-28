@@ -1,5 +1,10 @@
 # Changelog for plugin *ce-ui*
 
+## 1.31.0 (2025-07-28)
+
+- ENH: Badges that show number of measurements, properties and attachments
+- ENH: Surface topography challenge homepage
+
 ## 1.30.6 (2025-04-23)
 
 - ENH: Report publication errors
