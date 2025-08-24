@@ -1,8 +1,8 @@
 import pytest
 from django.core.management import call_command
 from topobank.testing.factories import UserFactory
-from topobank.users.models import DEFAULT_GROUP_NAME
-from topobank.users.utils import get_default_group
+
+from ce_ui.utils import DEFAULT_GROUP_NAME, get_default_group
 
 
 @pytest.mark.django_db

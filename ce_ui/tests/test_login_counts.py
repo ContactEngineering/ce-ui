@@ -3,8 +3,9 @@ import datetime
 import pytest
 from freezegun import freeze_time
 from topobank.testing.factories import UserFactory
-from topobank.users.signals import track_user_login
 from trackstats.models import Metric, StatisticByDate
+
+from ce_ui.signals import track_user_login
 
 
 @pytest.mark.django_db
