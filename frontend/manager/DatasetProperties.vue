@@ -75,6 +75,8 @@ let formIsValid = computed(() => {
     return true;
 });
 
+const propertiesBeforeEdit = ref<any[]>([]);
+
 function showWarning(msg) {
     show?.({
         props: {
@@ -113,13 +115,16 @@ function deleteProperty(index) {
 
 // view -> edit
 function enterEditMode() {
+    if (!_isEditing.value) {
+        propertiesBeforeEdit.value = JSON.parse(JSON.stringify(_properties.value));
+    }
     _isEditing.value = true;
 }
 
 // edit -> view
 function discardChanges() {
     // restore properties
-    _properties.value = propertiesObjectToArray(properties.value);
+    _properties.value = JSON.parse(JSON.stringify(propertiesBeforeEdit.value)); // Deep copy
     _isEditing.value = false;
 }
 
