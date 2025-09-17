@@ -59,10 +59,9 @@ const selectedModel = computed({
 });
 
 // Switches controlling visibility
-const _descriptionVisible = ref(props.enlarged);
-const _filtersVisible = ref(props.enlarged);
-const _instrumentVisible = ref(props.enlarged);
-const _attachmentsVisible = ref(props.enlarged);
+
+const activeTab = ref('home'); // 'home' | 'description' | 'instrument' | 'filters' | 'attachments' these are the tab names possible
+
 
 // GUI logic
 const _editing = ref(props.batchEdit);
@@ -325,26 +324,41 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
             </BButtonGroup>
             <BButtonGroup size="sm" class="float-end me-2">
                 <BButton v-if="!enlarged"
-                         v-model:pressed="_descriptionVisible"
-                         variant="outline-secondary">
+                        :active="activeTab === 'home'"
+                        @click="activeTab = 'home'"
+                        variant="outline-secondary">
+                    Home
+                </BButton>
+
+                <BButton v-if="!enlarged"
+                        :active="activeTab === 'description'"
+                        @click="activeTab = 'description'"
+                        variant="outline-secondary">
                     Description
                 </BButton>
+
                 <BButton v-if="!enlarged"
-                         v-model:pressed="_instrumentVisible"
-                         variant="outline-secondary">
+                        :active="activeTab === 'instrument'"
+                        @click="activeTab = 'instrument'"
+                        variant="outline-secondary">
                     Instrument
                 </BButton>
+
                 <BButton v-if="!enlarged"
-                         v-model:pressed="_filtersVisible"
-                         variant="outline-secondary">
+                        :active="activeTab === 'filters'"
+                        @click="activeTab = 'filters'"
+                        variant="outline-secondary">
                     Filters
                 </BButton>
+
                 <BButton v-if="!enlarged"
-                         v-model:pressed="_attachmentsVisible"
-                         variant="outline-secondary">
+                        :active="activeTab === 'attachments'"
+                        @click="activeTab = 'attachments'"
+                        variant="outline-secondary">
                     Attachments
                 </BButton>
             </BButtonGroup>
+
         </template>
         <div v-if="topography == null" class="tab-content">
             <BSpinner small></BSpinner>
@@ -356,7 +370,7 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                            :data-source="topography">
                 </Thumbnail>
             </div>
-            <div class="col-10">
+            <div v-if="activeTab === 'home'" class="col-10">
                 <div class="container">
                     <div class="row">
                         <div class="col-6">
@@ -379,9 +393,9 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                         <div class="col-3">
                             <label for="input-periodic">Flags</label>
                             <BFormCheckbox id="input-periodic"
-                                           v-model="topography.is_periodic"
-                                           :class="highlightInput('is_periodic')"
-                                           :disabled="!_editing || !topography.is_periodic_editable">
+                                            v-model="topography.is_periodic"
+                                            :class="highlightInput('is_periodic')"
+                                            :disabled="!_editing || !topography.is_periodic_editable">
                                 Data is periodic
                             </BFormCheckbox>
                         </div>
@@ -411,10 +425,10 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                                     :disabled="!_editing || !topography.size_editable">
                                 </BFormInput>
                                 <BFormSelect class="unit-select"
-                                             :options="_units"
-                                             v-model="topography.unit"
-                                             :class="highlightInput('unit')"
-                                             :disabled="!_editing || !topography.unit_editable">
+                                                :options="_units"
+                                                v-model="topography.unit"
+                                                :class="highlightInput('unit')"
+                                                :disabled="!_editing || !topography.unit_editable">
                                 </BFormSelect>
                             </div>
                             <small v-if="batchEdit">
@@ -436,109 +450,110 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                     </div>
                 </div>
             </div>
-        </div>
-        <div v-if="_descriptionVisible">
-            <label for="input-description">Description</label>
-            <BFormTextarea id="input-description"
-                           placeholder="Please provide a short description of this measurement"
-                           v-model="topography.description"
-                           :class="highlightInput('description')"
-                           :disabled="!_editing"
-                           rows="5">
-            </BFormTextarea>
-        </div>
-        <div v-if="_instrumentVisible">
-            <div class="row">
-                <div class="col-6">
-                    <label for="input-instrument-name">Instrument name</label>
-                    <BFormInput id="input-instrument-name"
-                                :class="highlightInput('instrument_name')"
-                                v-model="topography.instrument_name"
-                                :disabled="!_editing">
-                    </BFormInput>
-                </div>
-                <div class="col-6">
-                    <label for="input-instrument-type">Instrument type</label>
-                    <BFormSelect id="input-instrument-type"
-                                 :options="_instrumentChoices"
-                                 :class="highlightInput('instrument_type')"
-                                 v-model="topography.instrument_type"
-                                 :disabled="!_editing">
-                    </BFormSelect>
-                </div>
+            <div v-if="activeTab === 'description'" class="col-10">
+                <label for="input-description">Description</label>
+                <BFormTextarea id="input-description"
+                            placeholder="Please provide a short description of this measurement"
+                            v-model="topography.description"
+                            :class="highlightInput('description')"
+                            :disabled="!_editing"
+                            rows="5">
+                </BFormTextarea>
             </div>
-            <div v-if="topography.instrument_type == 'microscope-based'" class="row">
-                <div class="col-12 mt-1">
-                    <label for="input-instrument-resolution">Lateral instrument
-                        resolution</label>
-                    <div id="input-instrument-resolution" class="input-group mb-1">
-                        <BFormInput type="number"
-                                    step="any"
-                                    :placeholder="defaultResolutionValue"
-                                    :class="highlightInput('instrument_parameters')"
-                                    v-model="instrumentParametersResolutionValue"
+            <div v-if="activeTab === 'instrument'" class="col-10">
+                <div class="row">
+                    <div class="col-6">
+                        <label for="input-instrument-name">Instrument name</label>
+                        <BFormInput id="input-instrument-name"
+                                    :class="highlightInput('instrument_name')"
+                                    v-model="topography.instrument_name"
                                     :disabled="!_editing">
                         </BFormInput>
-                        <BFormSelect style="width: 100px;"
-                                     :options="_units"
-                                     :placeholder="defaultResolutionUnit"
-                                     :class="highlightInput('instrument_parameters')"
-                                     v-model="instrumentParametersResolutionUnit"
-                                     :disabled="!_editing">
-                        </BFormSelect>
                     </div>
-                </div>
-            </div>
-            <div v-if="topography.instrument_type == 'contact-based'" class="row">
-                <div class="col-12 mt-1">
-                    <label for="input-instrument-tip-radius">Probe tip radius</label>
-                    <div id="input-instrument-tip-radius" class="input-group mb-1">
-                        <BFormInput type="number"
-                                    step="any"
-                                    :placeholder="defaultTipRadiusValue"
-                                    :class="highlightInput('instrument_parameters')"
-                                    v-model="instrumentParametersTipRadiusValue"
+                    <div class="col-6">
+                        <label for="input-instrument-type">Instrument type</label>
+                        <BFormSelect id="input-instrument-type"
+                                    :options="_instrumentChoices"
+                                    :class="highlightInput('instrument_type')"
+                                    v-model="topography.instrument_type"
                                     :disabled="!_editing">
-                        </BFormInput>
-                        <BFormSelect style="width: 100px;"
-                                     :options="_units"
-                                     :placeholder="defaultTipRadiusUnit"
-                                     :class="highlightInput('instrument_parameters')"
-                                     v-model="instrumentParametersTipRadiusUnit"
-                                     :disabled="!_editing">
                         </BFormSelect>
+                    </div>
+                </div>
+                <div v-if="topography.instrument_type == 'microscope-based'" class="row">
+                    <div class="col-12 mt-1">
+                        <label for="input-instrument-resolution">Lateral instrument
+                            resolution</label>
+                        <div id="input-instrument-resolution" class="input-group mb-1">
+                            <BFormInput type="number"
+                                        step="any"
+                                        :placeholder="defaultResolutionValue"
+                                        :class="highlightInput('instrument_parameters')"
+                                        v-model="instrumentParametersResolutionValue"
+                                        :disabled="!_editing">
+                            </BFormInput>
+                            <BFormSelect style="width: 100px;"
+                                        :options="_units"
+                                        :placeholder="defaultResolutionUnit"
+                                        :class="highlightInput('instrument_parameters')"
+                                        v-model="instrumentParametersResolutionUnit"
+                                        :disabled="!_editing">
+                            </BFormSelect>
+                        </div>
+                    </div>
+                </div>
+                <div v-if="topography.instrument_type == 'contact-based'" class="row">
+                    <div class="col-12 mt-1">
+                        <label for="input-instrument-tip-radius">Probe tip radius</label>
+                        <div id="input-instrument-tip-radius" class="input-group mb-1">
+                            <BFormInput type="number"
+                                        step="any"
+                                        :placeholder="defaultTipRadiusValue"
+                                        :class="highlightInput('instrument_parameters')"
+                                        v-model="instrumentParametersTipRadiusValue"
+                                        :disabled="!_editing">
+                            </BFormInput>
+                            <BFormSelect style="width: 100px;"
+                                        :options="_units"
+                                        :placeholder="defaultTipRadiusUnit"
+                                        :class="highlightInput('instrument_parameters')"
+                                        v-model="instrumentParametersTipRadiusUnit"
+                                        :disabled="!_editing">
+                            </BFormSelect>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div v-if="_filtersVisible">
-            <div class="row">
-                <div class="col-6 mt-1">
-                    <label for="input-detrending">Detrending</label>
-                    <div id="input-detrending" class="input-group mb-1">
-                        <BFormSelect :options="_detrendChoices"
-                                     v-model="topography.detrend_mode"
-                                     :class="highlightInput('detrend_mode')"
-                                     :disabled="!_editing">
-                        </BFormSelect>
+            <div v-if="activeTab === 'filters'" class="col-10">
+                <div class="row">
+                    <div class="col-6 mt-1">
+                        <label for="input-detrending">Detrending</label>
+                        <div id="input-detrending" class="input-group mb-1">
+                            <BFormSelect :options="_detrendChoices"
+                                        v-model="topography.detrend_mode"
+                                        :class="highlightInput('detrend_mode')"
+                                        :disabled="!_editing">
+                            </BFormSelect>
+                        </div>
                     </div>
-                </div>
-                <div class="col-6 mt-1">
-                    <label for="input-undefined-data">Undefined/missing data</label>
-                    <div id="input-undefined-data" class="input-group mb-1">
-                        <BFormSelect :options="_undefinedDataChoices"
-                                     v-model="topography.fill_undefined_data_mode"
-                                     :class="highlightInput('fill_undefined_data_mode')"
-                                     :disabled="!_editing">
-                        </BFormSelect>
+                    <div class="col-6 mt-1">
+                        <label for="input-undefined-data">Undefined/missing data</label>
+                        <div id="input-undefined-data" class="input-group mb-1">
+                            <BFormSelect :options="_undefinedDataChoices"
+                                        v-model="topography.fill_undefined_data_mode"
+                                        :class="highlightInput('fill_undefined_data_mode')"
+                                        :disabled="!_editing">
+                            </BFormSelect>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div v-if="!enlarged && _attachmentsVisible" class="container">
-            <Attachments :attachments-url="topography.attachments"
-                         :permission="topography.permissions.current_user.permission">
-            </Attachments>
+            <div v-if="!enlarged && activeTab === 'attachments'" class="container col-10" >
+                <Attachments :attachments-url="topography.attachments"
+                            :permission="topography.permissions.current_user.permission">
+                </Attachments>
+            </div>
+            
         </div>
         <template #footer>
             <TopographyBadges v-if="!batchEdit && !enlarged"
