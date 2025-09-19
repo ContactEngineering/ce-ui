@@ -13,7 +13,8 @@ from django.views.generic import (DetailView, ListView, RedirectView,
 from termsandconditions.models import TermsAndConditions
 from termsandconditions.views import (AcceptTermsView, GetTermsViewMixin,
                                       TermsView)
-from topobank.analysis.models import AnalysisFunction
+from topobank.analysis.models import Workflow
+
 from topobank.analysis.registry import get_analysis_function_names
 from topobank.analysis.serializers import WorkflowSerializer
 from topobank.manager.models import Surface, Topography
@@ -240,7 +241,7 @@ def extra_tabs_if_single_item_selected(context, subjects):
 
 
 class AnalysisDetailView(AppDetailView):
-    model = AnalysisFunction
+    model = Workflow
     slug_field = "name"
     vue_component = "AnalysisDetail"
     serializer_class = WorkflowSerializer
