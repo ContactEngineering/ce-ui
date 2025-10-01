@@ -169,22 +169,20 @@ const isMetadataIncomplete = computed(() => {
     }
 });
 
-const channelOptions = computed(() => {
-    if (props.topography == null) {
-        return [];
-    }
-
-    let options = [];
-    for (const [channelIndex, channelName] of props.topography.channel_names.entries()) {
-        const [name, unit] = channelName;
-        if (unit == null) {
-            options.push({value: channelIndex, text: name});
-        } else {
-            options.push({value: channelIndex, text: `${name} (${unit})`});
+    const channelOptions = computed(() => {
+        if (props.topography == null) {
+            return [];
         }
-    }
-    return options;
-});
+
+        const options = props.topography.channel_names.map(([name, unit], channelIndex) => {
+            return {
+                value: channelIndex,
+                text: unit == null ? name : `${name} (${unit})`
+            };
+        });
+
+        return options;
+    });
 
 // Select class for highlighting input fields. Field are highlighted
 // * danger/red if they are necessary for metadata to be complete
