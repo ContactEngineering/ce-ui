@@ -349,7 +349,7 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                     Filters
                 </BButton>
 
-                <BButton v-if="!enlarged"
+                <BButton v-if="!enlarged&&!batchEdit"
                         :active="activeTab === 'attachments'"
                         @click="activeTab = 'attachments'"
                         variant="outline-secondary">
