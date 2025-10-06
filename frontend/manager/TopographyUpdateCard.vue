@@ -38,7 +38,8 @@ const props = defineProps({
     selectable: {type: Boolean, default: false},
     selected: {type: Boolean, default: false},
     topography: {type: Object, default: null},
-    topographyUrl: {type: String, default: null}
+    topographyUrl: {type: String, default: null},
+    syncTab: { type: Boolean, default: false }
 });
 
 const emit = defineEmits([
@@ -58,9 +59,32 @@ const selectedModel = computed({
     }
 });
 
-// Switches controlling visibility
 
-const activeTab = ref('home'); // 'home' | 'description' | 'instrument' | 'filters' | 'attachments' these are the tab names possible
+// Switches controlling visibility
+const activeTab = defineModel('activeTab', {
+    type: String,
+    default: 'home'
+});
+
+function handlebatchTabChange(value) {  
+    activeTab.value = value;
+}
+
+const localTab = ref('home');
+
+const currentTab = computed({
+  get() {
+    return props.batchEdit||props.syncTab ? activeTab.value : localTab.value; 
+  },
+  set(value) {
+    if (props.batchEdit||props.syncTab) {
+      handlebatchTabChange(value);
+    } else {
+      localTab.value = value;
+    }
+  },
+});
+
 
 
 // GUI logic
@@ -322,36 +346,36 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
             </BButtonGroup>
             <BButtonGroup size="sm" class="float-end me-2">
                 <BButton v-if="!enlarged"
-                        :active="activeTab === 'home'"
-                        @click="activeTab = 'home'"
+                        :active="currentTab === 'home'"
+                        @click="currentTab = 'home'"
                         variant="outline-secondary">
                     Home
                 </BButton>
 
                 <BButton v-if="!enlarged"
-                        :active="activeTab === 'description'"
-                        @click="activeTab = 'description'"
+                        :active="currentTab === 'description'"
+                        @click="currentTab = 'description'"
                         variant="outline-secondary">
                     Description
                 </BButton>
 
                 <BButton v-if="!enlarged"
-                        :active="activeTab === 'instrument'"
-                        @click="activeTab = 'instrument'"
+                        :active="currentTab === 'instrument'"
+                        @click="currentTab = 'instrument'"
                         variant="outline-secondary">
                     Instrument
                 </BButton>
 
                 <BButton v-if="!enlarged"
-                        :active="activeTab === 'filters'"
-                        @click="activeTab = 'filters'"
+                        :active="currentTab === 'filters'"
+                        @click="currentTab = 'filters'"
                         variant="outline-secondary">
                     Filters
                 </BButton>
 
                 <BButton v-if="!enlarged&&!batchEdit"
-                        :active="activeTab === 'attachments'"
-                        @click="activeTab = 'attachments'"
+                        :active="currentTab === 'attachments'"
+                        @click="currentTab = 'attachments'"
                         variant="outline-secondary">
                     Attachments
                 </BButton>
@@ -368,7 +392,7 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                            :data-source="topography">
                 </Thumbnail>
             </div>
-            <div v-if="activeTab === 'home'" class="col-10">
+            <div v-if="currentTab === 'home'" class="col-10">
                 <div class="container">
                     <div class="row">
                         <div class="col-6">
@@ -448,7 +472,7 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                     </div>
                 </div>
             </div>
-            <div v-if="activeTab === 'description'" class="col-10">
+            <div v-if="currentTab === 'description'" class="col-10">
                 <label for="input-description">Description</label>
                 <BFormTextarea id="input-description"
                             placeholder="Please provide a short description of this measurement"
@@ -458,7 +482,7 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                             rows="5">
                 </BFormTextarea>
             </div>
-            <div v-if="activeTab === 'instrument'" class="col-10">
+            <div v-if="currentTab === 'instrument'" class="col-10">
                 <div class="row">
                     <div class="col-6">
                         <label for="input-instrument-name">Instrument name</label>
@@ -522,7 +546,7 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                     </div>
                 </div>
             </div>
-            <div v-if="activeTab === 'filters'" class="col-10">
+            <div v-if="currentTab === 'filters'" class="col-10">
                 <div class="row">
                     <div class="col-6 mt-1">
                         <label for="input-detrending">Detrending</label>
@@ -546,7 +570,7 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                     </div>
                 </div>
             </div>
-            <div v-if="!enlarged && activeTab === 'attachments'" class="container col-10" >
+            <div v-if="!enlarged && currentTab === 'attachments'" class="container col-10" >
                 <Attachments :attachments-url="topography.attachments"
                             :permission="topography.permissions.current_user.permission">
                 </Attachments>

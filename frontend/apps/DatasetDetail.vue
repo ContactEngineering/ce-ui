@@ -316,6 +316,10 @@ const measurementCount = computed(() => {
   return _topographies.value.filter(t => t !== null).length;
 });
 
+
+const batchActiveTab = ref('home'); // shared active tab for batch mode
+
+
 </script>
 
 <template>
@@ -341,6 +345,7 @@ const measurementCount = computed(() => {
                         </DropZone>
                         <topography-update-card v-if="anySelected"
                                                 v-model:topography="_batchEditTopography"
+                                                v-model:active-tab="batchActiveTab"
                                                 :batch-edit="true"
                                                 :saving="_saving"
                                                 @save:edit="saveBatchEdit"
@@ -359,9 +364,11 @@ const measurementCount = computed(() => {
                             <TopographyCard v-if="topography != null"
                                             v-model:selected="_selected[index]"
                                             v-model:topography="_topographies[index]"
+                                            v-model:active-tab="batchActiveTab"
                                             :disabled="!isEditable"
                                             :selectable="isEditable"
                                             :topography-url="topography.url"
+                                            :syncTab="anySelected"
                                             @delete:topography="() => deleteTopography(index)">
                             </TopographyCard>
                         </div>
