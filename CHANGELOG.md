@@ -1,8 +1,21 @@
 # Changelog for plugin *ce-ui*
 
-## Unreleased
+## Not yet published
 
 - ENH: Dataset Collection view and publish UI
+
+## 1.31.2 (2025-08-19)
+
+- BUG: Avoid error if _error is null
+
+## 1.31.1 (2025-07-28)
+
+- ENH: Button for creating zoomable image if missing
+
+## 1.31.0 (2025-07-28)
+
+- ENH: Badges that show number of measurements, properties and attachments
+- ENH: Surface topography challenge homepage
 
 ## 1.30.6 (2025-04-23)
 

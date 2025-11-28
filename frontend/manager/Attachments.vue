@@ -23,6 +23,12 @@ const props = defineProps({
     permission: String
 });
 
+const attachmentCount = defineModel("attachmentCount",{
+    type: Number,
+    default: 0
+});
+
+
 const {show} = useToastController();
 
 const attachments = ref({});
@@ -42,6 +48,7 @@ onMounted(() => {
 function refreshAttachments() {
     axios.get(props.attachmentsUrl).then(response => {
         attachments.value = response.data;
+        attachmentCount.value = Object.keys(attachments.value).length; // Update the attachment count
     }).catch(error => {
         show?.({
             props: {
@@ -69,6 +76,7 @@ function handleFileDrop(files) {
                 onUploadProgress: e => uploadIndicator.value[manifest.id].loaded = e.loaded / e.total * 100
             }).then(response => {
                 attachments.value[manifest.filename] = manifest;
+                attachmentCount.value = Object.keys(attachments.value).length;
                 uploadIndicator.value = {};
                 // We need to fetch the manifest information again to have a link to
                 // the file
@@ -113,6 +121,7 @@ function deleteAttachment(key) {
     axios.delete(attachment.url)
         .then(() => {
             delete attachments.value[key];
+            attachmentCount.value = Object.keys(attachments.value).length;
             deleteAttachmentKey.value = null;
         })
         .catch((error) => {
@@ -189,7 +198,7 @@ const attachmentToShowInfo = computed(() => {
                                     :value="indicator.loaded"></b-progress>
                     </div>
                 </div>
-                <div v-if="attachments.length == 0">
+                <div v-if="attachmentCount == 0">
                     <BAlert :model-value="true" variant="primary">
                         This digital surface twin does not have file attachments yet.
                     </BAlert>

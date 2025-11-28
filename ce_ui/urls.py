@@ -144,13 +144,27 @@ ui_urlpatterns = [
 urlpatterns += [path("ui/", include((ui_urlpatterns, app_name)))]
 
 #
-# Challenge redirect
+# Routes under the 'challenge/' prefix
 #
-if settings.CHALLENGE_REDIRECT_URL:
-    urlpatterns += [
-        path(
-            "challenge/",
-            RedirectView.as_view(url=settings.CHALLENGE_REDIRECT_URL, permanent=False),
-            name="challenge",
-        ),
-    ]
+challenge_urlpatterns = [
+    #
+    # User management
+    #
+    path(
+        r"",
+        view=views.ChallengeHomepageView.as_view(),
+        name="homepage",
+    ),
+    path(
+        r"list-of-published-data/",
+        view=views.ChallengeListOfPublishedDataView.as_view(),
+        name="list-of-published-data",
+    ),
+]
+
+urlpatterns += [
+    path(
+        "challenge/",
+        include((challenge_urlpatterns, "challenge"), namespace="challenge"),
+    )
+]

@@ -25,6 +25,11 @@ const properties = defineModel('properties', {
     default: {}
 });
 
+const propertyCount = defineModel("propertyCount", {
+    type: Number,
+    default: 0
+});
+
 const props = defineProps({
     surfaceUrl: String,
     permission: String
@@ -70,6 +75,8 @@ let formIsValid = computed(() => {
     return true;
 });
 
+const propertiesBeforeEdit = ref<any[]>([]);
+
 function showWarning(msg) {
     show?.({
         props: {
@@ -108,13 +115,16 @@ function deleteProperty(index) {
 
 // view -> edit
 function enterEditMode() {
+    if (!_isEditing.value) {
+        propertiesBeforeEdit.value = JSON.parse(JSON.stringify(_properties.value));
+    }
     _isEditing.value = true;
 }
 
 // edit -> view
 function discardChanges() {
     // restore properties
-    _properties.value = propertiesObjectToArray(properties.value);
+    _properties.value = JSON.parse(JSON.stringify(propertiesBeforeEdit.value)); // Deep copy
     _isEditing.value = false;
 }
 
@@ -148,7 +158,10 @@ function save() {
             }
         });
     });
+    propertyCount.value = Object.keys(propertiesArrayToObject(_properties.value)).length; // Update the property count
 }
+
+propertyCount.value = Object.keys(properties.value).length // Update the property count
 
 </script>
 

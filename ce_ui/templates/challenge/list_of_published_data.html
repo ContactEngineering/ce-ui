@@ -1,0 +1,35 @@
+{% extends "noapp.html" %}
+
+{% block title %}List of Published Data{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h3>
+            <a href="{% url 'challenge:homepage' %}"><i class="fa fa-arrow-left text-black"></i></a>
+            List of published data from the challenge
+        </h3>
+        <p>
+            All data required for recreation of the analysis presented in the paper can
+            also be found on
+            <a href="https://doi.org/10.5281/zenodo.15341939" target="_blank"
+               rel="noopener">Zenodo</a>.
+        </p>
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">Sample ID</th>
+                <th scope="col">DOI link</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for sample_id, item in data_list.items %}
+                <tr>
+                    <td>{{ sample_id }}</td>
+                    <td><a href="{{ item.doi_link }}"
+                           target="_blank">{{ item.doi_link }}</a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

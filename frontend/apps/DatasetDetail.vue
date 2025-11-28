@@ -7,6 +7,7 @@ import {
     BAccordion,
     BAccordionItem,
     BAlert,
+    BBadge,
     BCard,
     BCardText,
     BDropdown,
@@ -57,6 +58,10 @@ const appProps = inject("appProps");
 const emit = defineEmits([
     'delete:surface'
 ])
+
+const attachmentCount = ref(null);  // default count of the attachments 
+
+const propertyCount = ref(null);  // default count of the properties
 
 // Data that is displayed or can be edited
 const _surface = shallowRef(null);  // Surface data
@@ -188,7 +193,7 @@ function uploadNewTopography(file) {
 
 function deleteTopography(index) {
     _topographies.value[index] = null;
-}
+}    
 
 function saveBatchEdit(topography) {
     // Trigger saving spinner
@@ -307,6 +312,10 @@ const allSelected = computed({
     }
 });
 
+const measurementCount = computed(() => {
+  return _topographies.value.filter(t => t !== null).length;
+});
+
 </script>
 
 <template>
@@ -325,6 +334,9 @@ const allSelected = computed({
                        pills
                        vertical>
                     <BTab title="Measurements">
+                        <template #title>
+                            Measurements <BBadge>{{measurementCount}}</BBadge>
+                        </template>
                         <DropZone v-if="isEditable && !anySelected" @files-dropped="filesDropped">
                         </DropZone>
                         <topography-update-card v-if="anySelected"
@@ -386,16 +398,25 @@ const allSelected = computed({
                                             :tags="_surface.tags">
                         </DatasetDescription>
                     </BTab>
-                    <BTab title="Properties">
+                    <BTab title="Properties" v-if ="propertyCount !== 0 || isEditable"> 
+                        <template #title>
+                            Properties <BBadge>{{ propertyCount }}</BBadge>
+                        </template>
                         <DatasetProperties v-if="_surface != null"
                                            v-model:properties="_surface.properties"
                                            :permission="_permissions.current_user.permission"
-                                           :surface-url="_surface.url">
+                                           :surface-url="_surface.url"
+                                           v-model:propertyCount="propertyCount">
                         </DatasetProperties>
                     </BTab>
-                    <BTab title="Attachments">
+                    <BTab title="Attachments" v-if ="attachmentCount === null || attachmentCount !== 0 || isEditable"> <!--here the tab will not be displayed when attachment count is 0 and is editable is false -->
+                        <template #title>
+                            Attachments <BBadge>{{ attachmentCount }}</BBadge>
+                        </template>
                         <Attachments v-if="_surface != null" :attachments-url="_surface.attachments"
-                            :permission="_permissions.current_user.permission">
+                            :permission="_permissions.current_user.permission"
+                            v-model:attachmentCount="attachmentCount"
+                            >
                         </Attachments>
                     </BTab>
                     <BTab v-if="_surface != null"

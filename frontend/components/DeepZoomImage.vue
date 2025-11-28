@@ -207,7 +207,7 @@ function requestDzi() {
             _errorMessage.value = "Canceled loading of plot.";
         } else if (error_has_response && (error.response.status == 404)) {
             /* 404 indicates the resource is not yet available, retry */
-            console.log("Resource not yet available, retrying..")
+            console.log("Resource not yet available, retrying...")
             setTimeout(requestDzi, props.retryDelay);
         } else {
             /* Treat any other code as an actual error */

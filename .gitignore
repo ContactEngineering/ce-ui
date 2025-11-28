@@ -368,3 +368,10 @@ compose/local/django/pip-packages/*
 data/
 .envs/.local/.pypi-authfile
 
+# *.ttf and *.woff2 files
+static/js/*.ttf
+static/js/*.woff2
+
+# *.js files
+static/js/*.js
+
