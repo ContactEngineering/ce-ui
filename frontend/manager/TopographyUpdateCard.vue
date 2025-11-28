@@ -23,6 +23,7 @@ import {filterTopographyForPatchRequest, subjectsToBase64} from "../utils/api";
 import TopographyBadges from "./TopographyBadges.vue";
 import Attachments from './Attachments.vue';
 import Thumbnail from "./Thumbnail.vue";
+import TipTapEditor from "./TipTapEditor.vue";
 
 const {show} = useToastController();
 
@@ -474,13 +475,15 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
             </div>
             <div v-if="currentTab === 'description'" class="col-10">
                 <label for="input-description">Description</label>
-                <BFormTextarea id="input-description"
+                <!-- <BFormTextarea id="input-description"
                             placeholder="Please provide a short description of this measurement"
                             v-model="topography.description"
                             :class="highlightInput('description')"
                             :disabled="!_editing"
                             rows="5">
-                </BFormTextarea>
+                </BFormTextarea> -->
+                <TipTapEditor :disabled="!_editing" v-model="topography.description " />
+
             </div>
             <div v-if="currentTab === 'instrument'" class="col-10">
                 <div class="row">
