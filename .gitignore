@@ -53,6 +53,7 @@ splinter_tests.*/
 
 # Django stuff:
 staticfiles/
+static/
 
 # Sphinx documentation
 docs/_build/

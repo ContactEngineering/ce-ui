@@ -1,5 +1,9 @@
 # Changelog for plugin *ce-ui*
 
+## Not yet published
+
+- ENH: Dataset Collection view and publish UI
+
 ## 1.31.2 (2025-08-19)
 
 - BUG: Avoid error if _error is null

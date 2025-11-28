@@ -8,16 +8,22 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.urls import reverse
-from django.views.generic import (DetailView, ListView, RedirectView,
-                                  TemplateView, UpdateView)
+from django.views.generic import (
+    DetailView,
+    ListView,
+    RedirectView,
+    TemplateView,
+    UpdateView,
+)
 from termsandconditions.models import TermsAndConditions
-from termsandconditions.views import (AcceptTermsView, GetTermsViewMixin,
-                                      TermsView)
-from topobank.analysis.models import Workflow
-
+from termsandconditions.views import AcceptTermsView, GetTermsViewMixin, TermsView
+from topobank.analysis.models import AnalysisFunction
 from topobank.analysis.registry import get_analysis_function_names
 from topobank.analysis.serializers import WorkflowSerializer
 from topobank.manager.models import Surface, Topography
+from topobank_publication.models import PublicationCollection
+from topobank_publication.serializers import PublicationCollectionSerializer
+from topobank.manager.v1.serializers import SurfaceSerializer, TopographySerializer
 from topobank.manager.utils import subjects_from_base64, subjects_to_base64
 from topobank.manager.v1.serializers import (SurfaceSerializer,
                                              TopographySerializer)
@@ -121,6 +127,58 @@ class DatasetDetailView(AppDetailView):
         return context
 
 
+class DatasetCollectionPublishView(AppView):
+    vue_component = "DatasetCollectionPublish"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        #
+        # Breadcrumb navigation
+        #
+        breadcrumb.add_generic(
+            context,
+            {
+                "title": "Publish collection",
+                "icon": "paper-plane",
+                "icon_style_prefix": "far",
+                "active": True,
+                "login_required": True,
+            },
+        )
+
+        return context
+
+
+class DatasetCollectionView(AppDetailView):
+    model = PublicationCollection
+    vue_component = "DatasetCollection"
+    serializer_class = PublicationCollectionSerializer
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        #
+        # Breadcrumb navigation
+        #
+        breadcrumb.add_generic(
+            context,
+            {
+                "title": "Dataset collection",
+                "icon": "cubes",
+                "icon_style_prefix": "far",
+                "active": True,
+                "login_required": False,
+            },
+        )
+
+        return context
+
+
+class DatasetCollectionListView(AppView):
+    vue_component = "DatasetCollectionList"
+
+
 class DatasetPublishView(AppDetailView):
     model = Surface
     vue_component = "DatasetPublish"
@@ -147,7 +205,7 @@ class DatasetPublishView(AppDetailView):
                 "icon_style_prefix": "far",
                 "href": f"{reverse('ce_ui:dataset-publish', kwargs=dict(pk=self.object.id))}",
                 "active": True,
-                "login_required": False,
+                "login_required": True,
                 "tooltip": f"Publish '{self.object.label}'",
             },
         )
