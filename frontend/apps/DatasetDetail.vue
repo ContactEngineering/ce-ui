@@ -175,7 +175,6 @@ function uploadNewTopography(file) {
         surface: _surface.value.url,
         name: file.name
     }).then(response => {
-        console.log(response);
         let upload = response.data;
         upload.file = file;  // need to know which file to upload
         _topographies.value.push(upload);  // this will trigger showing a topography-upload-card

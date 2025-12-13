@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.contrib.auth.views import login_required
 from django.urls import include, path, re_path
 from django.views.generic import RedirectView

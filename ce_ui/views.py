@@ -8,27 +8,22 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.urls import reverse
-from django.views.generic import (
-    DetailView,
-    ListView,
-    RedirectView,
-    TemplateView,
-    UpdateView,
-)
+from django.views.generic import (DetailView, ListView, RedirectView,
+                                  TemplateView, UpdateView)
 from termsandconditions.models import TermsAndConditions
-from termsandconditions.views import AcceptTermsView, GetTermsViewMixin, TermsView
-from topobank.analysis.models import AnalysisFunction
+from termsandconditions.views import (AcceptTermsView, GetTermsViewMixin,
+                                      TermsView)
+from topobank.analysis.models import Workflow
 from topobank.analysis.registry import get_analysis_function_names
 from topobank.analysis.serializers import WorkflowSerializer
 from topobank.manager.models import Surface, Topography
-from topobank_publication.models import PublicationCollection
-from topobank_publication.serializers import PublicationCollectionSerializer
-from topobank.manager.v1.serializers import SurfaceSerializer, TopographySerializer
 from topobank.manager.utils import subjects_from_base64, subjects_to_base64
 from topobank.manager.v1.serializers import (SurfaceSerializer,
                                              TopographySerializer)
 from topobank.usage_stats.utils import increase_statistics_by_date
 from topobank.users.models import User
+from topobank_publication.models import PublicationCollection
+from topobank_publication.serializers import PublicationCollectionSerializer
 from trackstats.models import Metric, Period
 
 from ce_ui import breadcrumb
@@ -90,7 +85,6 @@ class AppDetailView(DetailView):
         context["serialized_object"] = self.get_serializer_class()(
             self.object, context={"request": self.request}
         ).data
-        print(context["serialized_object"])
 
         return context
 
