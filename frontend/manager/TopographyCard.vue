@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import axios from "axios";
-import {computed, onMounted} from "vue";
+import {computed, onMounted, onBeforeUnmount} from "vue";
 
 import TopographyErrorCard from "./TopographyErrorCard.vue";
 import TopographyPendingCard from "./TopographyPendingCard.vue";
@@ -49,6 +49,13 @@ let _currentTimeout = null;
 
 onMounted(() => {
     scheduleStateCheck(props.topography);
+});
+
+onBeforeUnmount(() => {
+    if (_currentTimeout != null) {
+        clearTimeout(_currentTimeout);
+        _currentTimeout = null;
+    }
 });
 
 const isUploading = computed(() => {

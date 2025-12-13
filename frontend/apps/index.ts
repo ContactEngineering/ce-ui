@@ -17,14 +17,14 @@ interface ComponentIndex {
     implementation: any
 }
 
-const componentIndex: ComponentIndex = [
+const componentIndex: ComponentIndex[] = [
     { name: "AnalysisDetail", implementation: AnalysisResultsDetail },
     { name: "AnalysisList", implementation: AnalysisResultsList },
     { name: "DatasetList", implementation: DatasetList },
     { name: "DatasetDetail", implementation: DatasetDetail },
     { name: "DatasetPublish", implementation: DatasetPublish },
     { name: "Home", implementation: Home },
-    { name: "TopographyDetail", implementation: TopographyDetail }
+    { name: "TopographyDetail", implementation: TopographyDetail },
     { name: "DatasetCollectionPublish", implementation: DatasetCollectionPublish },
     { name: "DatasetCollection", implementation: DatasetCollection },
     { name: "DatasetCollectionList", implementation: DatasetCollectionList },
