@@ -11,9 +11,9 @@ from topobank.testing.fixtures import (  # noqa: F401
 from .fixtures import orcid_socialapp  # noqa: F401
 
 
-@pytest.mark.django_db
 @pytest.fixture
-def user_with_plugin():
+def user_with_plugin(db):
+    """Fixture returning a user with ce_ui plugin access."""
     org_name = "Test Organization"
     org = OrganizationFactory(name=org_name, plugins_available="ce_ui")
     user = UserFactory()
