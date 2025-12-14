@@ -3,8 +3,7 @@ import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { Editor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
-
-
+import { BButton, BButtonGroup } from 'bootstrap-vue-next'
 
 // Props: modelValue for v-model, disabled for read-only
 const props = defineProps({
@@ -52,39 +51,109 @@ onBeforeUnmount(() => {
 <template>
   <div v-if="editor" class="container">
     <!-- Toolbar -->
-    <div class="toolbar">
-        <button 
-            @click="editor.chain().focus().toggleBold().run()" 
-            :class="{ 'is-active': editor.isActive('bold') }"
-            :disabled="disabled"
-        >
-        Bold
-        </button>
-        <button 
-            @click="editor.chain().focus().toggleItalic().run()" 
-            :class="{ 'is-active': editor.isActive('italic') }"
-            :disabled="disabled"
-        >
-        Italic
-        </button>
-        <button 
-            @click="editor.chain().focus().toggleUnderline().run()" 
-            :class="{ 'is-active': editor.isActive('underline') }"
-            :disabled="disabled"
-        >
-        Underline
-        </button>
-        <button
-          @click="editor.chain().focus().toggleBulletList().run()"
-          :class="{ 'is-active': editor.isActive('bulletList') }"
-          :disabled="disabled"
-        >
-          Bullet list
-        </button>
-    </div>
+    <b-button-group class="toolbar mb-2" role="group">
+      <b-button
+        size="sm"
+        variant="light"
+        class="btn-small"
+        :pressed="editor.isActive('bold')"
+        :disabled="disabled"
+        @click="editor.chain().focus().toggleBold().run()"
+        title="Bold"
+      >
+        <i class="fa fa-bold"></i>
+      </b-button>
+
+      <b-button
+        size="sm"
+        variant="light"
+        class="btn-small"
+        :pressed="editor.isActive('italic')"
+        :disabled="disabled"
+        @click="editor.chain().focus().toggleItalic().run()"
+        title="Italic"
+      >
+        <i class="fa fa-italic"></i>
+      </b-button>
+
+      <b-button
+        size="sm"
+        variant="light"
+        class="btn-small"
+        :pressed="editor.isActive('underline')"
+        :disabled="disabled"
+        @click="editor.chain().focus().toggleUnderline().run()"
+        title="Underline"
+      >
+        <i class="fa fa-underline"></i>
+      </b-button>
+
+      <b-button
+        size="sm"
+        variant="light"
+        class="btn-small"
+        :pressed="editor.isActive('bulletList')"
+        :disabled="disabled"
+        @click="editor.chain().focus().toggleBulletList().run()"
+        title="Bullet List"
+      >
+        <i class="fa fa-list-ul"></i>
+      </b-button>
+
+      <b-button
+        size="sm"
+        variant="light"
+        class="btn-small"
+        :pressed="editor.isActive('heading', { level: 1 })"
+        :disabled="disabled"
+        @click="editor.chain().focus().toggleHeading({ level: 1 }).run()"
+        title="Heading 1"
+      >
+        H1
+      </b-button>
+
+      <b-button
+        size="sm"
+        variant="light"
+        class="btn-small"
+        :pressed="editor.isActive('heading', { level: 2 })"
+        :disabled="disabled"
+        @click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
+        title="Heading 2"
+      >
+        H2
+      </b-button>
+
+      <b-button
+        size="sm"
+        variant="light"
+        class="btn-small"
+        :pressed="editor.isActive('heading', { level: 3 })"
+        :disabled="disabled"
+        @click="editor.chain().focus().toggleHeading({ level: 3 }).run()"
+        title="Heading 3"
+      >
+        H3
+      </b-button>
+
+      <b-button
+        size="sm"
+        variant="light"
+        class="btn-small"
+        :disabled="disabled"
+        @click="editor.chain().focus().clearNodes().unsetAllMarks().run()"
+        title="Clear formatting"
+      >
+        <i class="fa fa-eraser"></i>
+      </b-button>
+    </b-button-group>
 
     <!-- Editor -->
-    <editor-content class="tiptap" :class="{ 'is-disabled': disabled }" :editor="editor" :disabled="disabled"/>
+    <editor-content
+      class="tiptap"
+      :editor="editor"
+      :class="{ 'is-disabled': disabled }"
+    />
   </div>
 </template>
 
@@ -92,43 +161,37 @@ onBeforeUnmount(() => {
 .container {
   border: 1px solid #ccc;
   padding: 1rem;
-  min-height: 150px;
+  min-height: 200px;
+  border-radius: 6px;
+  background: #fff;
 }
 
 .toolbar {
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem; /* spacing between buttons */
 }
 
-button {
-  margin-right: 0.3rem;
-  padding: 0.3rem 0.6rem;
-  border: 1px solid #d0d0d0;   
-  border-radius: 4px;          
-  background: #f9f9f9; 
-}
-
-button.is-active {
-  background: #0F52BA;
-  color: white;
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.btn-small {
+  min-width: 32px; /* reduce width */
+  padding: 0.2rem 0.35rem; /* smaller padding */
+  font-size: 0.85rem; /* smaller text or icon */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .tiptap {
   background: #ffffff;
-  min-height: 100px;
+  min-height: 150px;
   padding: 0.5rem;
   border: 1px solid #ddd;
+  border-radius: 4px;
+  line-height: 1.4;
+  outline: none;
 }
 
 .tiptap.is-disabled {
   background: #f5f5f5;
-  min-height: 100px;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
 }
 </style>
