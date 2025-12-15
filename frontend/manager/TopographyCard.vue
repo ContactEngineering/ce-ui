@@ -36,6 +36,10 @@ const props = defineProps({
     topographyUrl: {
         type: String,
         default: null
+    },
+    syncTab: {
+    type: Boolean,
+    default: false
     }
 });
 
@@ -104,6 +108,12 @@ const selectedModel = computed({
     }
 });
 
+const activeTab = defineModel('activeTab', {
+    type: String,
+    default: 'home'
+});
+
+
 </script>
 
 <template>
@@ -134,7 +144,9 @@ const selectedModel = computed({
         :disabled="disabled"
         :enlarged="enlarged"
         :selectable="selectable"
+        :syncTab="syncTab"
         @delete:topography="topographyDeleted"
+        v-model:active-tab="activeTab"
         v-model:topography="topographyModel"
         v-model:selected="selectedModel">
     </TopographyUpdateCard>
