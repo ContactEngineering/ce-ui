@@ -9,17 +9,17 @@
  * - Click to navigate to topography detail
  */
 
-import { computed, ref, watch } from "vue";
+import { computed, ref } from "vue";
 
 import {
     Plot,
     XAxis,
     HBar,
-    Tooltip,
     useTooltip,
     Legend
 } from "@/lib/ce-plots";
-import type { PlotConfig, TooltipContext, DataSeries } from "@/lib/ce-plots";
+import type { PlotConfig, DataSeries } from "@/lib/ce-plots";
+import type { HBarDataPoint } from "@/lib/ce-plots/glyphs/HBar.vue";
 
 interface Topography {
     id: number;
@@ -34,7 +34,7 @@ const props = defineProps<{
     topographies: Topography[];
 }>();
 
-const { tooltipVisible, tooltipContext, tooltipPosition, showTooltip, hideTooltip, updatePosition } = useTooltip();
+const { visible: tooltipVisible, position: tooltipPosition, show: showTooltip, hide: hideTooltip, updatePosition } = useTooltip();
 
 // Current hover state for custom tooltip
 const _hoverData = ref<{
@@ -75,7 +75,7 @@ const processedData = computed(() => {
     // Build bar data for unreliable regions (up to short_reliability_cutoff)
     const unreliableBars = sorted
         .filter(t => t.short_reliability_cutoff !== null)
-        .map((t, i) => {
+        .map((t) => {
             const originalIndex = sorted.findIndex(s => s.id === t.id);
             return {
                 y: originalIndex,
@@ -126,28 +126,58 @@ const unreliableSeries = computed<DataSeries>(() => ({
     color: '#dc3545'
 }));
 
+// Properly typed bar data for HBar component
+const reliableBarData = computed<HBarDataPoint[]>(() =>
+    processedData.value.reliableBars.map(bar => ({
+        y: bar.y,
+        left: bar.left,
+        right: bar.right,
+        name: bar.name,
+        thumbnail: bar.thumbnail,
+        link: bar.link,
+        topographyId: bar.topographyId
+    }))
+);
+
+const unreliableBarData = computed<HBarDataPoint[]>(() =>
+    processedData.value.unreliableBars.map(bar => ({
+        y: bar.y,
+        left: bar.left,
+        right: bar.right,
+        name: bar.name,
+        thumbnail: bar.thumbnail,
+        link: bar.link,
+        topographyId: bar.topographyId
+    }))
+);
+
 const legendSeries = computed(() => [
     { id: 'reliable', name: 'Reliable', color: '#2c90d9', visible: true, data: [] },
     { id: 'unreliable', name: 'Unreliable', color: '#dc3545', visible: true, data: [] }
 ]);
 
-function handleHover(context: TooltipContext | null, event?: MouseEvent) {
-    if (context && event) {
-        _hoverData.value = {
-            name: context.point.name as string,
-            thumbnail: context.point.thumbnail as string | null
-        };
-        updatePosition(event.clientX, event.clientY);
-        showTooltip(context);
-    } else {
-        _hoverData.value = null;
-        hideTooltip();
-    }
+function handleBarEnter(_index: number, data: HBarDataPoint, event: MouseEvent) {
+    _hoverData.value = {
+        name: data.name as string,
+        thumbnail: data.thumbnail as string | null
+    };
+    updatePosition(event.clientX, event.clientY);
+    showTooltip({
+        point: { x: data.left, y: data.y, ...data },
+        series: { id: 'bar', name: data.name, data: [], color: '#2c90d9' },
+        screenX: event.clientX,
+        screenY: event.clientY
+    });
 }
 
-function handleClick(seriesId: string, pointIndex: number, point: any) {
-    if (point.link) {
-        window.location.href = point.link;
+function handleBarLeave(_index: number, _data: HBarDataPoint, _event: MouseEvent) {
+    _hoverData.value = null;
+    hideTooltip();
+}
+
+function handleBarClick(_index: number, data: HBarDataPoint) {
+    if (data.link) {
+        window.location.href = data.link as string;
     }
 }
 </script>
@@ -167,20 +197,26 @@ function handleClick(seriesId: string, pointIndex: number, point: any) {
 
             <!-- Reliable bars (full bandwidth) - rendered first (underneath) -->
             <HBar
-                :series="reliableSeries"
-                :height="0.8"
+                :data="reliableBarData"
+                :bar-height="0.8"
                 :color="reliableSeries.color"
-                @hover="handleHover"
-                @click="handleClick"
+                :clickable="true"
+                name="reliable"
+                @bar-enter="handleBarEnter"
+                @bar-leave="handleBarLeave"
+                @bar-click="handleBarClick"
             />
 
             <!-- Unreliable bars (partial, up to cutoff) - rendered on top -->
             <HBar
-                :series="unreliableSeries"
-                :height="0.8"
+                :data="unreliableBarData"
+                :bar-height="0.8"
                 :color="unreliableSeries.color"
-                @hover="handleHover"
-                @click="handleClick"
+                :clickable="true"
+                name="unreliable"
+                @bar-enter="handleBarEnter"
+                @bar-leave="handleBarLeave"
+                @bar-click="handleBarClick"
             />
         </Plot>
 

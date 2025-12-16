@@ -146,7 +146,7 @@ const _dashes: Array<'solid' | 'dashed' | 'dotted' | 'dashdot'> = ['solid', 'das
 const { loading, loadRaw } = useDataLoader();
 
 // Tooltip
-const { tooltipVisible, tooltipContext, tooltipPosition, showTooltip, hideTooltip, updatePosition } = useTooltip();
+const { visible: tooltipVisible, context: tooltipContext, position: tooltipPosition, show: showTooltip, hide: hideTooltip, updatePosition } = useTooltip();
 
 // Selection
 const { selection, hasSelection, select, clear: clearSelection, isSelected } = useSelection({
