@@ -9,10 +9,20 @@ const managerStatistics = ref(null);
 const analysisStatistics = ref(null);
 
 onMounted(async () => {
-    const managerResponse = await managerApiStatisticsRetrieve();
-    managerStatistics.value = managerResponse.data;
-    const analysisResponse = await analysisApiStatisticsRetrieve();
-    analysisStatistics.value = analysisResponse.data;
+    try {
+        const managerResponse = await managerApiStatisticsRetrieve();
+        managerStatistics.value = managerResponse.data;
+    } catch (error) {
+        // Statistics may not be available (e.g., user not authenticated)
+        console.warn("Failed to load manager statistics:", error);
+    }
+    try {
+        const analysisResponse = await analysisApiStatisticsRetrieve();
+        analysisStatistics.value = analysisResponse.data;
+    } catch (error) {
+        // Statistics may not be available (e.g., user not authenticated)
+        console.warn("Failed to load analysis statistics:", error);
+    }
 });
 
 </script>
