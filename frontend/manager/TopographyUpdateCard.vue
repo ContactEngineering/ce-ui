@@ -346,35 +346,31 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                 </BButton>
             </BButtonGroup>
             <BButtonGroup size="sm" class="float-end me-2">
-                <BButton v-if="!enlarged"
-                        :active="currentTab === 'home'"
+                <BButton :active="currentTab === 'home'"
                         @click="currentTab = 'home'"
                         variant="outline-secondary">
                     Home
                 </BButton>
 
-                <BButton v-if="!enlarged"
-                        :active="currentTab === 'description'"
+                <BButton :active="currentTab === 'description'"
                         @click="currentTab = 'description'"
                         variant="outline-secondary">
                     Description
                 </BButton>
 
-                <BButton v-if="!enlarged"
-                        :active="currentTab === 'instrument'"
+                <BButton :active="currentTab === 'instrument'"
                         @click="currentTab = 'instrument'"
                         variant="outline-secondary">
                     Instrument
                 </BButton>
 
-                <BButton v-if="!enlarged"
-                        :active="currentTab === 'filters'"
+                <BButton :active="currentTab === 'filters'"
                         @click="currentTab = 'filters'"
                         variant="outline-secondary">
                     Filters
                 </BButton>
 
-                <BButton v-if="!enlarged&&!batchEdit"
+                <BButton v-if="!enlarged && !batchEdit"
                         :active="currentTab === 'attachments'"
                         @click="currentTab = 'attachments'"
                         variant="outline-secondary">
@@ -482,7 +478,7 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                             :disabled="!_editing"
                             rows="5">
                 </BFormTextarea> -->
-                <TipTapEditor :disabled="!_editing" v-model="topography.description " />
+                <TipTapEditor :disabled="!_editing" v-model="topography.description" />
 
             </div>
             <div v-if="currentTab === 'instrument'" class="col-10">
