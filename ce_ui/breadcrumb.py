@@ -19,7 +19,7 @@ def add_surface(context, surface):
         context,
         {
             "title": f"{surface.label}",
-            "icon": "layer-group",
+            "icon": "photo_library",
             "icon_style_prefix": "fa",
             "href": f"{reverse('ce_ui:surface-detail', kwargs=dict(pk=surface.pk))}",
             "active": True,
@@ -42,7 +42,7 @@ def add_topography(context, topography):
     )
     topography_tab = {
         "title": f"{topography.name}",
-        "icon": "microscope",
+        "icon": "photo",
         "icon_style_prefix": "fa",
         "href": reverse("ce_ui:topography-detail", kwargs=dict(pk=topography.pk)),
         "active": True,
