@@ -1,6 +1,5 @@
 <script setup>
 
-import axios from "axios";
 import {cloneDeep} from "lodash";
 import {onMounted, ref} from "vue";
 
@@ -12,6 +11,8 @@ import {
     useToastController
 } from 'bootstrap-vue-next';
 
+import {managerApiTopographyDestroy} from "@/api";
+import {getIdFromUrl} from "@/utils/api";
 import {uploadFile} from "topobank/utils/upload";
 
 const {show} = useToastController();
@@ -65,8 +66,9 @@ onMounted(() => {
     });
 });
 
-function deleteTopography() {
-    axios.delete(props.topography.url);
+async function deleteTopography() {
+    const topographyId = getIdFromUrl(props.topography.url);
+    await managerApiTopographyDestroy({path: {id: topographyId}});
     emit('delete:topography', props.topography.url);
 }
 

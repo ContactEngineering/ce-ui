@@ -8,6 +8,9 @@ import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 // Axios
 import axios from "axios";
 
+// Generated API client
+import {client} from "@/api/client.gen";
+
 // Import the app components
 import {registerAppComponents} from './apps/index';
 import {registerAnalysisCardComponents} from "./analysis/index";
@@ -25,6 +28,8 @@ export function createAppFrame(element, csrfToken, appProps, componentProps) {
     app.use(pinia);
     app.use(createBootstrap());
     axios.defaults.headers.common['X-CSRFToken'] = csrfToken;
+    // Configure the generated API client with CSRF token
+    client.setConfig({headers: {'X-CSRFToken': csrfToken}});
     app.provide('csrfToken', csrfToken);
     app.provide('appProps', appProps);
     // Register all single-page components from the index

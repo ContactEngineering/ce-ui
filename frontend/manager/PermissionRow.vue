@@ -1,8 +1,10 @@
 <script setup lang="ts">
 
-import axios from "axios";
 import {onMounted, ref} from "vue";
 import {BForm, BFormSelect, BPlaceholder, useToastController} from "bootstrap-vue-next";
+
+import {usersV1UserRetrieve} from "@/api";
+import {getIdFromUrl} from "@/utils/api";
 
 const {show} = useToastController();
 
@@ -21,11 +23,13 @@ const options = [
     {value: 'full', text: 'Full access (including publishing and access control)'}
 ];
 
-onMounted(() => {
+onMounted(async () => {
     if (userPermission.value.user != null) {
-        axios.get(userPermission.value.user).then(response => {
+        try {
+            const userId = getIdFromUrl(userPermission.value.user);
+            const response = await usersV1UserRetrieve({path: {id: userId}});
             user.value = response.data;
-        }).catch(error => {
+        } catch (error: any) {
             show?.({
                 props: {
                     title: "Error while loading user",
@@ -33,7 +37,7 @@ onMounted(() => {
                     variant: "danger"
                 }
             });
-        });
+        }
     }
 });
 

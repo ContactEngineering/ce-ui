@@ -1,22 +1,18 @@
 <script setup lang="ts">
 
-import axios from "axios";
 import {onMounted, ref} from "vue";
 
-const props = defineProps({
-    apiUrl: {
-        type: String,
-        default: '/manager/api/versions/'
-    }
-});
+import {managerApiVersionsRetrieve} from "@/api";
 
 const versions = ref(null);
 
-onMounted(() => {
-    axios.get(props.apiUrl)
-        .then(response => {
-            versions.value = response.data;
-        });
+onMounted(async () => {
+    try {
+        const response = await managerApiVersionsRetrieve();
+        versions.value = response.data;
+    } catch (error) {
+        console.error("Failed to fetch version information:", error);
+    }
 });
 
 </script>

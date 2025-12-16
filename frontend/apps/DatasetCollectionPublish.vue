@@ -1,6 +1,5 @@
 <script setup lang="ts">
 
-import axios from "axios";
 import { inject, ref, computed } from "vue";
 
 import {
@@ -11,6 +10,13 @@ import {
     BSpinner,
     useToastController
 } from 'bootstrap-vue-next';
+
+import {
+    managerApiSurfaceRetrieve,
+    goPublicationRetrieve,
+    goPublishCollectionCreate
+} from "@/api";
+import { getIdFromUrl } from "@/utils/api";
 
 
 const appProps = inject("appProps");
@@ -25,62 +31,59 @@ const { show } = useToastController();
 const datasetIds = appProps.searchParams.getAll("dataset");
 const invalid_id = ref(false);
 
-datasetIds.forEach(datasetId => {
-    axios.get("/manager/api/surface/" + datasetId).then((datasetResponse) => {
-        axios.get(datasetResponse.data.publication).then((publicationResponse) => {
+async function loadDatasets() {
+    for (const datasetId of datasetIds) {
+        try {
+            const datasetResponse = await managerApiSurfaceRetrieve({path: {id: parseInt(datasetId)}});
+            const publicationId = getIdFromUrl(datasetResponse.data.publication);
+            const publicationResponse = await goPublicationRetrieve({path: {id: publicationId}});
             publications.value.push(publicationResponse.data);
             datasets.value.push(datasetResponse.data);
-        }).catch((err) => {
-            console.error("An error occured while getting the publication:\n", err);
+        } catch (err) {
+            console.error("An error occurred while getting the dataset or publication:\n", err);
             invalid_id.value = true;
             show?.({
                 props: {
-                    title: "Dataset not published",
-                    body: `For the dataset with ID:${datasetId} is not published.`,
+                    title: "Could not load dataset",
+                    body: `The dataset with ID:${datasetId} could not be found or is not published.`,
                     variant: 'danger'
                 }
             });
-        });
-    }).catch((err) => {
-        console.error("An error occured while getting the dataset:\n", err);
+        }
+    }
+}
 
-        invalid_id.value = true;
-        show?.({
-            props: {
-                title: "Could not find datasets",
-                body: `The dataset with ID:${datasetId} could not be found.`,
-                variant: 'danger'
-            }
-        });
-    });
-});
+loadDatasets();
 
 function datetimeToDateString(timestamp) {
     const date = new Date(timestamp);
     return date.toISOString().substring(0, 10);
 }
 
-function publish() {
+async function publish() {
     validTitle.value = title.value != "";
     if (validTitle.value) {
         pending_request.value = true;
-        axios.post('/go/publish-collection/', {
-            publication: publications.value.map(publication => publication.id),
-            title: title.value,
-            description: description.value
-        }).then((response) => {
+        try {
+            const response = await goPublishCollectionCreate({
+                body: {
+                    publication: publications.value.map(publication => publication.id),
+                    title: title.value,
+                    description: description.value
+                } as any
+            });
             window.location.href = `/ui/dataset-collection/${response.data.collection_id}/`;
-        }).catch((err) => {
-            console.error(err.response.statusText);
+        } catch (err: any) {
+            console.error(err.response?.statusText);
             pending_request.value = false;
             show?.({
                 props: {
                     title: "Publishing failed",
-                    body: err.response.statusText,
+                    body: err.response?.statusText,
                     variant: 'danger'
                 }
             });
-        });
+        }
     }
 }
 

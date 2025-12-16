@@ -1,7 +1,5 @@
 <script lang="ts">
 
-import axios from "axios";
-
 import {
     BAlert,
     BButton,
@@ -15,6 +13,9 @@ import {
     BFormTags,
     BSpinner
 } from "bootstrap-vue-next";
+
+import {managerApiSurfacePartialUpdate} from "@/api";
+import {getIdFromUrl} from "@/utils/api";
 
 import TipTapEditor from "./TipTapEditor.vue";
 
@@ -61,24 +62,29 @@ export default {
         };
     },
     methods: {
-        saveCard() {
+        async saveCard() {
             this._editing = false;
             this._saving = true;
-            axios.patch(this.surfaceUrl, {
-                name: this._name,
-                description: this._description,
-                category: this._category,
-                tags: this._tags
-            }).then(response => {
+            try {
+                const surfaceId = getIdFromUrl(this.surfaceUrl);
+                const response = await managerApiSurfacePartialUpdate({
+                    path: {id: surfaceId},
+                    body: {
+                        name: this._name,
+                        description: this._description,
+                        category: this._category,
+                        tags: this._tags
+                    }
+                });
                 this._error = null;
                 this.$emit("surface-updated", response.data);
-            }).catch(error => {
+            } catch (error) {
                 this._error = error;
                 this._name = this._savedName;
                 this._description = this._saveDescription;
-            }).finally(() => {
+            } finally {
                 this._saving = false;
-            });
+            }
         }
     },
     computed: {

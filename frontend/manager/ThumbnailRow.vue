@@ -1,9 +1,11 @@
 <script setup lang="ts">
 
-import axios from "axios";
 import {onMounted, ref} from "vue";
 
 import {BButton, BOverlay} from "bootstrap-vue-next";
+
+import {managerApiTopographyList} from "@/api";
+import {getIdFromUrl} from "@/utils/api";
 
 import Thumbnail from "./Thumbnail.vue";
 
@@ -24,17 +26,26 @@ onMounted(() => {
     loadMoreThumbnails();
 });
 
-function loadMoreThumbnails() {
+async function loadMoreThumbnails() {
     _isLoading.value = true;
-    axios.get(`${props.dataSourceListUrl}&offset=${_nbThumbnails.value}&limit=${_nbThumbnails.value + props.nbThumbnailsIncrement}`)
-        .then(response => {
-            _dataSources.value.push(...response.data.results);
-            _nbDataSources.value = response.data.count;
-            _nbThumbnails.value += props.nbThumbnailsIncrement;
-        })
-        .finally(() => {
-            _isLoading.value = false;
+    try {
+        // The dataSourceListUrl is formatted as: /manager/api/topography/?surface=<id>
+        // We need to extract the surface ID and pass it with pagination params
+        const url = new URL(props.dataSourceListUrl, window.location.origin);
+        const surfaceId = url.searchParams.get('surface');
+        const response = await managerApiTopographyList({
+            query: {
+                surface: surfaceId ? parseInt(surfaceId) : undefined,
+                offset: _nbThumbnails.value,
+                limit: _nbThumbnails.value + props.nbThumbnailsIncrement
+            } as any
         });
+        _dataSources.value.push(...response.data.results);
+        _nbDataSources.value = response.data.count;
+        _nbThumbnails.value += props.nbThumbnailsIncrement;
+    } finally {
+        _isLoading.value = false;
+    }
 }
 
 </script>

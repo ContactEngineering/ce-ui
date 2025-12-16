@@ -1,8 +1,10 @@
 <script setup lang="ts">
 
-import axios from "axios";
 import DropZone from '../components/DropZone.vue';
 import {ref, computed, onMounted} from 'vue';
+
+import {filesFolderRetrieve, filesManifestRetrieve, filesManifestDestroy} from "@/api";
+import {getIdFromUrl} from "@/utils/api";
 
 import {formatDateTime} from "topobank/utils/formatting";
 import {uploadFile, createFileManifest} from "topobank/utils/upload";
@@ -45,11 +47,13 @@ onMounted(() => {
     refreshAttachments();
 });
 
-function refreshAttachments() {
-    axios.get(props.attachmentsUrl).then(response => {
+async function refreshAttachments() {
+    try {
+        const folderId = getIdFromUrl(props.attachmentsUrl);
+        const response = await filesFolderRetrieve({path: {id: folderId}});
         attachments.value = response.data;
         attachmentCount.value = Object.keys(attachments.value).length; // Update the attachment count
-    }).catch(error => {
+    } catch (error: any) {
         show?.({
             props: {
                 title: "Error while listing attachments",
@@ -57,7 +61,7 @@ function refreshAttachments() {
                 variant: "danger"
             }
         });
-    });
+    }
 }
 
 function handleFileDrop(files) {
@@ -74,15 +78,17 @@ function handleFileDrop(files) {
                 uploadInstructions: manifest.upload_instructions,
                 file: file,
                 onUploadProgress: e => uploadIndicator.value[manifest.id].loaded = e.loaded / e.total * 100
-            }).then(response => {
+            }).then(async response => {
                 attachments.value[manifest.filename] = manifest;
                 attachmentCount.value = Object.keys(attachments.value).length;
                 uploadIndicator.value = {};
                 // We need to fetch the manifest information again to have a link to
                 // the file
-                axios.get(manifest.url).then(response => {
-                    attachments.value[manifest.filename] = response.data;
-                }).catch(error => {
+                try {
+                    const manifestId = getIdFromUrl(manifest.url);
+                    const manifestResponse = await filesManifestRetrieve({path: {id: manifestId}});
+                    attachments.value[manifest.filename] = manifestResponse.data;
+                } catch (error: any) {
                     show?.({
                         props: {
                             title: "Error while fetching attachment",
@@ -91,7 +97,7 @@ function handleFileDrop(files) {
                         }
                     });
                     console.error(error);
-                });
+                }
             }).catch(error => {
                 show?.({
                     props: {
@@ -116,24 +122,24 @@ function handleFileDrop(files) {
     }
 }
 
-function deleteAttachment(key) {
+async function deleteAttachment(key) {
     const attachment = attachments.value[key];
-    axios.delete(attachment.url)
-        .then(() => {
-            delete attachments.value[key];
-            attachmentCount.value = Object.keys(attachments.value).length;
-            deleteAttachmentKey.value = null;
-        })
-        .catch((error) => {
-            show?.({
-                props: {
-                    title: "Error while deleting",
-                    body: error.message,
-                    variant: 'danger'
-                }
-            });
-            console.error(error);
+    try {
+        const manifestId = getIdFromUrl(attachment.url);
+        await filesManifestDestroy({path: {id: manifestId}});
+        delete attachments.value[key];
+        attachmentCount.value = Object.keys(attachments.value).length;
+        deleteAttachmentKey.value = null;
+    } catch (error: any) {
+        show?.({
+            props: {
+                title: "Error while deleting",
+                body: error.message,
+                variant: 'danger'
+            }
         });
+        console.error(error);
+    }
 }
 
 const isEditable = computed(() => {

@@ -1,8 +1,13 @@
 <script lang="ts">
 
-import axios from "axios";
-
 import {BFormSelect} from "bootstrap-vue-next";
+
+import {
+    managerApiTopographyDestroy,
+    managerApiTopographyForceInspectCreate,
+    managerApiTopographyPartialUpdate
+} from "@/api";
+import {getIdFromUrl} from "@/utils/api";
 
 export default {
     name: 'topography-error-card',
@@ -20,19 +25,23 @@ export default {
         }
     },
     methods: {
-        deleteTopography() {
-            axios.delete(this.topography.url);
+        async deleteTopography() {
+            const topographyId = getIdFromUrl(this.topography.url);
+            await managerApiTopographyDestroy({path: {id: topographyId}});
             this.$emit('delete:topography', this.topography.url);
         },
-        forceInspect() {
-            axios.post(`${this.topography.url}force-inspect/`).then(response => {
-                this.$emit('update:topography', response.data);
-            });
+        async forceInspect() {
+            const topographyId = getIdFromUrl(this.topography.url);
+            const response = await managerApiTopographyForceInspectCreate({path: {id: topographyId}});
+            this.$emit('update:topography', response.data);
         },
-        dataSourceChanged(value) {
-            axios.patch(this.topography.url, {'data_source': this.topography.data_source}).then(response => {
-                this.$emit('update:topography', response.data);
+        async dataSourceChanged(value) {
+            const topographyId = getIdFromUrl(this.topography.url);
+            const response = await managerApiTopographyPartialUpdate({
+                path: {id: topographyId},
+                body: {'data_source': this.topography.data_source}
             });
+            this.$emit('update:topography', response.data);
         }
     },
     computed: {

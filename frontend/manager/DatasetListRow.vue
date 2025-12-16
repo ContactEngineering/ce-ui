@@ -2,8 +2,8 @@
 
 import { computed, onMounted, ref } from "vue";
 
-import axios from "axios";
-import { subjectsToBase64 } from "topobank/utils/api";
+import { getIdFromUrl, subjectsToBase64 } from "topobank/utils/api";
+import { usersV1UserRetrieve, goPublicationRetrieve } from "@/api";
 
 import {
     BBadge,
@@ -24,15 +24,24 @@ const props = defineProps({
 const _creator = ref(null);
 const _publication = ref(null);
 
-onMounted(() => {
-    axios.get(props.dataset.creator)
-        .then(response => {
+onMounted(async () => {
+    if (props.dataset.creator) {
+        try {
+            const userId = getIdFromUrl(props.dataset.creator);
+            const response = await usersV1UserRetrieve({path: {id: userId}});
             _creator.value = response.data.name;
-        });
+        } catch (error) {
+            // Ignore error - creator may not exist
+        }
+    }
     if (props.dataset?.publication) {
-        axios.get(props.dataset.publication).then(response => {
+        try {
+            const publicationId = getIdFromUrl(props.dataset.publication);
+            const response = await goPublicationRetrieve({path: {id: publicationId}});
             _publication.value = response.data;
-        });
+        } catch (error) {
+            // Ignore error - publication may not exist
+        }
     }
 });
 

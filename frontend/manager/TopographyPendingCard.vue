@@ -1,10 +1,14 @@
 <script lang="ts">
 
-import axios from "axios";
-
 import {
     BSpinner
 } from 'bootstrap-vue-next';
+
+import {
+    managerApiTopographyDestroy,
+    managerApiTopographyForceInspectCreate
+} from "@/api";
+import {getIdFromUrl} from "@/utils/api";
 
 export default {
     name: 'topography-pending-card',
@@ -21,14 +25,15 @@ export default {
         taskState: String  // State of task, 'pe', 'st', etc
     },
     methods: {
-        deleteTopography() {
-            axios.delete(this.url);
+        async deleteTopography() {
+            const topographyId = getIdFromUrl(this.url);
+            await managerApiTopographyDestroy({path: {id: topographyId}});
             this.$emit('delete:topography', this.url);
         },
-        forceInspect() {
-            axios.post(`${this.url}force-inspect/`).then(response => {
-                this.$emit('update:topography', response.data);
-            });
+        async forceInspect() {
+            const topographyId = getIdFromUrl(this.url);
+            const response = await managerApiTopographyForceInspectCreate({path: {id: topographyId}});
+            this.$emit('update:topography', response.data);
         }
     }
 };

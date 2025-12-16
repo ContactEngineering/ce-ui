@@ -1,6 +1,5 @@
 <script setup lang="ts">
 
-import axios from "axios";
 import {cloneDeep} from "lodash";
 import {computed, ref} from "vue";
 
@@ -18,7 +17,13 @@ import {
     useToastController
 } from 'bootstrap-vue-next';
 
-import {filterTopographyForPatchRequest, subjectsToBase64} from "../utils/api";
+import {
+    managerApiTopographyPartialUpdate,
+    managerApiTopographyDestroy,
+    managerApiTopographyForceInspectCreate
+} from "@/api";
+
+import {filterTopographyForPatchRequest, getIdFromUrl, subjectsToBase64} from "../utils/api";
 
 import TopographyBadges from "./TopographyBadges.vue";
 import Attachments from './Attachments.vue';
@@ -130,24 +135,29 @@ const _undefinedDataChoices = [
     }
 ];
 
-function saveEdits() {
+async function saveEdits() {
     if (props.batchEdit) {
         emit('save:edit', props.topography);
     } else {
         _editing.value = false;
         _saving.value = true;
-        axios.patch(props.topographyUrl, filterTopographyForPatchRequest(props.topography)).then(response => {
+        try {
+            const topographyId = getIdFromUrl(props.topographyUrl);
+            const response = await managerApiTopographyPartialUpdate({
+                path: {id: topographyId},
+                body: filterTopographyForPatchRequest(props.topography)
+            });
             emit('update:topography', response.data);
-        }).catch(error => {
+        } catch (error) {
             show?.({
                 title: "Failed to save changes",
                 body: error,
                 variant: 'danger'
             });
             emit('update:topography', _savedTopography);
-        }).finally(() => {
+        } finally {
             _saving.value = false;
-        });
+        }
     }
 }
 
@@ -162,28 +172,32 @@ function discardEdits() {
     }
 }
 
-function deleteTopography() {
-    axios.delete(props.topographyUrl).then(response => {
+async function deleteTopography() {
+    try {
+        const topographyId = getIdFromUrl(props.topographyUrl);
+        await managerApiTopographyDestroy({path: {id: topographyId}});
         emit('delete:topography', props.topographyUrl);
-    }).catch(error => {
+    } catch (error) {
         show?.({
             title: "Failed to delete measurement",
             body: error,
             variant: 'danger'
         });
-    });
+    }
 }
 
-function forceInspect() {
-    axios.post(`${props.topographyUrl}force-inspect/`).then(response => {
+async function forceInspect() {
+    try {
+        const topographyId = getIdFromUrl(props.topographyUrl);
+        const response = await managerApiTopographyForceInspectCreate({path: {id: topographyId}});
         emit('update:topography', response.data);
-    }).catch(error => {
+    } catch (error) {
         show?.({
             title: "Failed to force file inspection",
             body: error,
             variant: 'danger'
         });
-    });
+    }
 }
 
 const isMetadataIncomplete = computed(() => {

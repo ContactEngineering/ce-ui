@@ -1,9 +1,18 @@
 <script setup lang="ts">
 
-import axios from "axios";
 import {computed, onMounted, onBeforeUnmount, ref, watch} from "vue";
 
 import {BButton, useToastController} from "bootstrap-vue-next";
+
+import {
+    analysisApiWorkflowRetrieve,
+    analysisApiResultRetrieve,
+    analysisApiResultUpdate,
+    managerApiSurfaceRetrieve,
+    managerApiTopographyRetrieve,
+    filesFolderRetrieve
+} from "@/api";
+import {getIdFromUrl} from "@/utils/api";
 
 import {prettyBytes} from "../utils/formatting";
 
@@ -36,17 +45,18 @@ onBeforeUnmount(() => {
     }
 });
 
-function scheduleStateCheck() {
+async function scheduleStateCheck() {
     // Tasks are still pending or running if this state check is scheduled
 
     // Get function information if we don't have it yet
     if (_function.value == null) {
-        axios.get(analysis.value.function)
-            .then(response => {
-                _function.value = response.data;
-            }).catch(error => {
-            show?.({props: {title: "Request failed", body: error, variant: 'danger'}});
-        });
+        try {
+            const workflowId = getIdFromUrl(analysis.value.function);
+            const response = await analysisApiWorkflowRetrieve({path: {id: workflowId}});
+            _function.value = response.data;
+        } catch (error: any) {
+            show?.({props: {title: "Request failed", body: error.message, variant: 'danger'}});
+        }
     }
 
     // Get subject information if we don't have it yet
@@ -58,12 +68,21 @@ function scheduleStateCheck() {
         if (subjectUrl == null) {
             show?.({props: {title: "Error", body: "Unable to determine subject for analysis", variant: 'danger'}});
         } else {
-            axios.get(subjectUrl)
-                .then(response => {
+            try {
+                const subjectId = getIdFromUrl(subjectUrl);
+                if (subject.topography != null) {
+                    const response = await managerApiTopographyRetrieve({path: {id: subjectId}});
                     _subject.value = response.data;
-                }).catch(error => {
-                show?.({props: {title: "Request failed", body: error, variant: 'danger'}});
-            });
+                } else if (subject.surface != null) {
+                    const response = await managerApiSurfaceRetrieve({path: {id: subjectId}});
+                    _subject.value = response.data;
+                } else {
+                    // Tag - keep as fallback, may need specific API
+                    show?.({props: {title: "Warning", body: "Tag subjects not fully supported", variant: 'warning'}});
+                }
+            } catch (error: any) {
+                show?.({props: {title: "Request failed", body: error.message, variant: 'danger'}});
+            }
         }
     }
 
@@ -76,11 +95,20 @@ function scheduleStateCheck() {
         if (analysis.value.error == null) {
             // The analysis function did not raise an exception itself. This means it actually finished and
             // we have a result.json, that should contain an error message.
-            axios.get(analysis.value.folder).then(response => {
-                axios.get(response.data["result.json"].url).then(response => {
-                    _error.value = response.data.message;
-                });
-            });
+            try {
+                const folderId = getIdFromUrl(analysis.value.folder);
+                const folderResponse = await filesFolderRetrieve({path: {id: folderId}});
+                // The folder response contains file URLs - we need to fetch result.json
+                // Note: The file URL is external (S3/storage), keeping as fetch
+                const resultFile = folderResponse.data["result.json"];
+                if (resultFile?.url) {
+                    const response = await fetch(resultFile.url);
+                    const data = await response.json();
+                    _error.value = data.message;
+                }
+            } catch (error: any) {
+                console.error("Failed to fetch error details:", error);
+            }
         } else {
             // The analysis function failed and we have an error message (Python exception).
             _error.value = analysis.value.error;
@@ -88,24 +116,28 @@ function scheduleStateCheck() {
     }
 }
 
-function checkState() {
+async function checkState() {
     _timeoutID = null;  // Indicate that no timer is currently running
-    axios.get(analysis.value.url).then(response => {
+    try {
+        const resultId = getIdFromUrl(analysis.value.url);
+        const response = await analysisApiResultRetrieve({path: {id: resultId}});
         // Update current state of the analysis
-        analysis.value = response.data;  // This will trigger a check throw a watch
-    }).catch(error => {
-        show?.({props: {title: "Request failed", body: error, variant: 'danger'}});
-    });
+        analysis.value = response.data;  // This will trigger a check through a watch
+    } catch (error: any) {
+        show?.({props: {title: "Request failed", body: error.message, variant: 'danger'}});
+    }
 }
 
-function renew() {
+async function renew() {
     analysis.value.task_state = 'pe';
     // A PUT request triggers renewal of the analysis
-    axios.put(analysis.value.url).then(response => {
-        analysis.value = response.data;  // This will trigger a check throw a watch
-    }).catch(error => {
-        show?.({props: {title: "Request failed", body: error, variant: 'danger'}});
-    });
+    try {
+        const resultId = getIdFromUrl(analysis.value.url);
+        const response = await analysisApiResultUpdate({path: {id: resultId}});
+        analysis.value = response.data;  // This will trigger a check through a watch
+    } catch (error: any) {
+        show?.({props: {title: "Request failed", body: error.message, variant: 'danger'}});
+    }
 }
 
 const taskMemoryPretty = computed(() => {

@@ -1,5 +1,9 @@
 <script lang="ts">
 
+// NOTE: This component uses axios directly because the user search API endpoint
+// (/users/api/user/?name=...&max=...) is not in the OpenAPI schema.
+// The schema only has /users/v1/user/ with limit/offset params, not name search.
+// Consider updating the backend OpenAPI schema to include this endpoint.
 import axios from "axios";
 
 import {

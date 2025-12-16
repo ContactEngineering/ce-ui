@@ -1,6 +1,5 @@
 <script setup lang="ts">
 
-import axios from "axios";
 import {computed, inject, onMounted, ref, shallowRef} from "vue";
 
 import {
@@ -21,6 +20,14 @@ import {
 } from 'bootstrap-vue-next';
 
 import {
+    goPublicationList,
+    goPublicationRetrieve,
+    managerApiSurfaceDestroy,
+    managerApiTopographyCreate,
+    managerApiTopographyPartialUpdate
+} from "@/api";
+
+import {
     filterTopographyForPatchRequest,
     getIdFromUrl,
     subjectsToBase64
@@ -39,10 +46,6 @@ import TopographyUpdateCard from "../manager/TopographyUpdateCard.vue";
 const {show} = useToastController();
 
 const props = defineProps({
-    newTopographyUrl: {
-        type: String,
-        default: '/manager/api/topography/'
-    },
     categories: {
         type: Object,
         default: {
@@ -130,15 +133,17 @@ function updateCard() {
     updatePublication();
 }
 
-function updatePublication() {
+async function updatePublication() {
     if (_surface.value.publication == null) {
         _publication.value = null;
         updateVersions();
     } else {
-        axios.get(_surface.value.publication).then(response => {
+        try {
+            const publicationId = getIdFromUrl(_surface.value.publication);
+            const response = await goPublicationRetrieve({path: {id: publicationId}});
             _publication.value = response.data;
             updateVersions();
-        }).catch(error => {
+        } catch (error) {
             show?.({
                 props: {
                     title: "Failed to fetch publication information",
@@ -146,14 +151,17 @@ function updatePublication() {
                     variant: 'danger'
                 }
             });
-        });
+        }
     }
 }
 
-function updateVersions() {
-    axios.get(`/go/publication/?original_surface=${getOriginalSurfaceId()}`).then(response => {
+async function updateVersions() {
+    try {
+        const response = await goPublicationList({
+            query: {original_surface: getOriginalSurfaceId()} as any
+        });
         _versions.value = response.data;
-    }).catch(error => {
+    } catch (error) {
         show?.({
             props: {
                 title: "Failed to fetch published versions",
@@ -161,7 +169,7 @@ function updateVersions() {
                 variant: 'danger'
             }
         });
-    });
+    }
 }
 
 function filesDropped(files) {
@@ -170,16 +178,19 @@ function filesDropped(files) {
     }
 }
 
-function uploadNewTopography(file) {
-    axios.post(props.newTopographyUrl, {
-        surface: _surface.value.url,
-        name: file.name
-    }).then(response => {
+async function uploadNewTopography(file) {
+    try {
+        const response = await managerApiTopographyCreate({
+            body: {
+                surface: _surface.value.url,
+                name: file.name
+            }
+        });
         let upload = response.data;
         upload.file = file;  // need to know which file to upload
         _topographies.value.push(upload);  // this will trigger showing a topography-upload-card
         _selected.value.push(false);  // initially unselected
-    });/*.catch(error => {
+    } catch (error) {
         show?.({
             props: {
                 title: "Failed to create a new measurement",
@@ -187,14 +198,14 @@ function uploadNewTopography(file) {
                 variant: 'danger'
             }
         });
-    });*/
+    }
 }
 
 function deleteTopography(index) {
     _topographies.value[index] = null;
 }    
 
-function saveBatchEdit(topography) {
+async function saveBatchEdit(topography) {
     // Trigger saving spinner
     _saving.value = true;
 
@@ -202,14 +213,18 @@ function saveBatchEdit(topography) {
     const cleanedBatchEditTopography = filterTopographyForPatchRequest(topography);
 
     // Update all topographies and issue patch request
+    const updatePromises = [];
     for (const i in _topographies.value) {
         if (_selected.value[i]) {
             const t = {
                 ..._topographies.value[i],
                 ...cleanedBatchEditTopography
             }
-
-            axios.patch(t.url, filterTopographyForPatchRequest(t)).then(response => {
+            const topographyId = getIdFromUrl(t.url);
+            const updatePromise = managerApiTopographyPartialUpdate({
+                path: {id: topographyId},
+                body: filterTopographyForPatchRequest(t)
+            }).then(response => {
                 _topographies.value[i] = response.data;
             }).catch(error => {
                 show?.({
@@ -220,8 +235,12 @@ function saveBatchEdit(topography) {
                     }
                 });
             });
+            updatePromises.push(updatePromise);
         }
     }
+
+    // Wait for all updates to complete
+    await Promise.all(updatePromises);
 
     // Reset selection
     _selected.value.fill(false);
@@ -245,11 +264,13 @@ function surfaceHrefForVersion(version) {
     return `/ui/dataset-detail/${getIdFromUrl(version.surface)}/`;
 }
 
-function deleteSurface() {
-    axios.delete(_surface.value.url).then(response => {
+async function deleteSurface() {
+    try {
+        const surfaceId = getIdFromUrl(_surface.value.url);
+        await managerApiSurfaceDestroy({path: {id: surfaceId}});
         emit('delete:surface', _surface.value.url);
         window.location.href = `/ui/dataset-list/`;
-    }).catch(error => {
+    } catch (error) {
         show?.({
             props: {
                 title: "Failed to delete digital surface twin",
@@ -257,7 +278,7 @@ function deleteSurface() {
                 variant: 'danger'
             }
         });
-    });
+    }
 }
 
 const base64Subjects = computed(() => {

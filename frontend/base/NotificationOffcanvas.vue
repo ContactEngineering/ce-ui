@@ -1,5 +1,8 @@
 <script setup lang="ts">
 
+// NOTE: This component uses axios directly because the notification API endpoint
+// (/inbox/notifications/api/unread_list/) is not in the OpenAPI schema.
+// Consider updating the backend OpenAPI schema to include this endpoint.
 import axios from "axios";
 import {onMounted, ref} from "vue";
 

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 
-import axios from "axios";
 import { computed, onMounted, ref } from "vue";
 
 import { BDropdownDivider, BDropdownItem, useToastController } from "bootstrap-vue-next";
@@ -10,8 +9,9 @@ import DataTablesLib from "datatables.net-bs5";
 
 DataTable.use(DataTablesLib);
 
+import { pluginsStatisticsCardRoughnessParametersRetrieve } from "@/api";
 import { formatExponential } from "topobank/utils/formatting";
-import {subjectsToBase64} from "topobank/utils/api";
+import { subjectsToBase64 } from "topobank/utils/api";
 
 import AnalysisCard from "topobank/analysis/AnalysisCard.vue";
 
@@ -82,36 +82,37 @@ const analysisIds = computed(() => {
     return _analyses.value.map(a => a.id).join();
 });
 
-function updateCard() {
+async function updateCard() {
     /* Fetch JSON describing the card */
     _nbPendingAjaxRequests.value++;
-    axios.get(`${props.apiUrl}/${props.functionName}?subjects=${subjectsToBase64(props.subjects)}`)
-        .then(response => {
-            _analyses.value = response.data.analyses;
-            /** replace null in value with NaN
-             * This is needed because we cannot pass NaN through JSON without
-             * extra libraries, so it is passed as null (workaround) */
-            _data.value = response.data.tableData.map(x => {
-                if (x["value"] === null) {
-                    x["value"] = NaN;
-                }
-                return x;
-            });
-            _dois.value = response.data.dois;
-            _messages.value = response.data.messages;
-        })
-        .catch(error => {
-            show?.({
-                props: {
-                    title: "Error fetching roughness parameters",
-                    body: error.message,
-                    variant: "danger"
-                }
-            });
-        })
-        .finally(() => {
-            _nbPendingAjaxRequests.value--;
+    try {
+        const response = await pluginsStatisticsCardRoughnessParametersRetrieve({
+            path: {workflow: props.functionName},
+            query: {subjects: subjectsToBase64(props.subjects)}
+        } as any);
+        _analyses.value = response.data.analyses;
+        /** replace null in value with NaN
+         * This is needed because we cannot pass NaN through JSON without
+         * extra libraries, so it is passed as null (workaround) */
+        _data.value = response.data.tableData.map(x => {
+            if (x["value"] === null) {
+                x["value"] = NaN;
+            }
+            return x;
         });
+        _dois.value = response.data.dois;
+        _messages.value = response.data.messages;
+    } catch (error: any) {
+        show?.({
+            props: {
+                title: "Error fetching roughness parameters",
+                body: error.message,
+                variant: "danger"
+            }
+        });
+    } finally {
+        _nbPendingAjaxRequests.value--;
+    }
 }
 
 </script>

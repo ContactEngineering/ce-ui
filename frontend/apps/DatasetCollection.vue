@@ -1,9 +1,15 @@
 <script setup lang="ts">
 
-import axios from "axios";
 import { inject, ref } from "vue";
 
 import { BBadge, useToastController } from "bootstrap-vue-next";
+
+import {
+    goPublicationCollectionRetrieve,
+    goPublicationRetrieve,
+    managerApiSurfaceRetrieve
+} from "@/api";
+import { getIdFromUrl } from "@/utils/api";
 
 const { show } = useToastController();
 const appProps = inject("appProps");
@@ -17,42 +23,54 @@ function datetimeToDateString(timestamp) {
     return date.toISOString().substring(0, 10);
 }
 
-axios.get(appProps.object.url).then((response) => {
-    collection.value = response.data;
-    response.data.publications.forEach((publication_url) => {
-        axios.get(publication_url).then((response) => {
-            publications.value.push(response.data);
-            axios.get(response.data.surface).then((response) => {
-                datasets.value.push(response.data);
-            }).catch(() => {
+async function loadCollection() {
+    try {
+        const collectionId = getIdFromUrl(appProps.object.url);
+        const collectionResponse = await goPublicationCollectionRetrieve({path: {id: collectionId}});
+        collection.value = collectionResponse.data;
+
+        for (const publication_url of collectionResponse.data.publications) {
+            try {
+                const publicationId = getIdFromUrl(publication_url);
+                const publicationResponse = await goPublicationRetrieve({path: {id: publicationId}});
+                publications.value.push(publicationResponse.data);
+
+                try {
+                    const surfaceId = getIdFromUrl(publicationResponse.data.surface);
+                    const surfaceResponse = await managerApiSurfaceRetrieve({path: {id: surfaceId}});
+                    datasets.value.push(surfaceResponse.data);
+                } catch {
+                    show?.({
+                        props: {
+                            title: "API error",
+                            body: `Dataset \"${publicationResponse.data.surface}\" could not be found.`,
+                            variant: 'danger'
+                        }
+                    });
+                }
+            } catch {
                 show?.({
                     props: {
                         title: "API error",
-                        body: `Dataset \"${response.data.surface}\" could not be found.`,
+                        body: `Publication \"${publication_url}\" could not be found.`,
                         variant: 'danger'
                     }
                 });
-            });
-        }).catch(() => {
-            show?.({
-                props: {
-                    title: "API error",
-                    body: `Publication \"${publication_url}\" could not be found.`,
-                    variant: 'danger'
-                }
-            });
-        });
-    })
-}).catch((err) => {
-    console.error(err);
-    show?.({
-        props: {
-            title: "API error",
-            body: `Publication Collection \"${appProps.object.url}\" could not be found.`,
-            variant: 'danger'
+            }
         }
-    });
-});
+    } catch (err) {
+        console.error(err);
+        show?.({
+            props: {
+                title: "API error",
+                body: `Publication Collection \"${appProps.object.url}\" could not be found.`,
+                variant: 'danger'
+            }
+        });
+    }
+}
+
+loadCollection();
 
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {

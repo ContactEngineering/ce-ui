@@ -1,6 +1,5 @@
 <script setup lang="ts">
 
-import axios from "axios";
 import {computed, inject, onMounted, ref} from "vue";
 
 import {
@@ -10,16 +9,14 @@ import {
     BFormGroup,
 } from "bootstrap-vue-next";
 
+import {analysisApiWorkflowList} from "@/api";
+
 import {subjectsFromBase64} from "../utils/api";
 import {useAnalysisStore} from "topobank/stores/analysis";
 
 const analysis = useAnalysisStore();
 
 const props = defineProps({
-    apiRegistryUrl: {
-        type: String,
-        default: '/analysis/api/workflow/'
-    },
     subjects: String
 });
 
@@ -42,11 +39,9 @@ const subjectsDict = computed(() => {
     return getSubjectsDict();
 });
 
-onMounted(() => {
-    let queryParams = '';
-    axios.get(`${props.apiRegistryUrl}${queryParams}`).then(response => {
-        _cards.value = response.data;
-    });
+onMounted(async () => {
+    const response = await analysisApiWorkflowList();
+    _cards.value = response.data;
 });
 
 </script>

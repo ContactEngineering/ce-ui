@@ -1,7 +1,5 @@
 <script setup lang="ts">
 
-import axios from "axios";
-
 import { computed, inject, onMounted, ref } from "vue";
 import {
     BAlert,
@@ -12,6 +10,12 @@ import {
     BTabs,
     useToastController
 } from "bootstrap-vue-next";
+
+import {
+    managerApiTopographyRetrieve,
+    managerApiTopographyDestroy,
+    managerApiTopographyForceInspectCreate
+} from "@/api";
 
 import { getIdFromUrl, subjectsToBase64 } from "topobank/utils/api";
 
@@ -60,7 +64,8 @@ async function updateCard(topography = null) {
     /* Fetch topography info from API endpoint if status is pending */
     if (["pe", "st"].includes(topography.task_state)) {
         try {
-            const response = await axios.get(_topography.value.url);
+            const topographyId = getIdFromUrl(_topography.value.url);
+            await managerApiTopographyRetrieve({path: {id: topographyId}});
         } catch (error) {
             show?.({
                 props: {
@@ -73,12 +78,13 @@ async function updateCard(topography = null) {
     }
 }
 
-function deleteTopography() {
-    axios.delete(_topography.value.url).then(response => {
-        this.$emit("topography-deleted", _topography.value.url);
+async function deleteTopography() {
+    try {
+        const topographyId = getIdFromUrl(_topography.value.url);
+        await managerApiTopographyDestroy({path: {id: topographyId}});
         const id = getIdFromUrl(_topography.value.surface);
         window.location.href = `/ui/dataset-detail/${id}/`;
-    }).catch(error => {
+    } catch (error) {
         show?.({
             props: {
                 title: "Failed to delete measurement",
@@ -86,12 +92,13 @@ function deleteTopography() {
                 variant: "danger"
             }
         });
-    });
+    }
 }
 
 async function forceInspect() {
     try {
-        const response = await axios.post(_topography.value.api.force_inspect);
+        const topographyId = getIdFromUrl(_topography.value.url);
+        const response = await managerApiTopographyForceInspectCreate({path: {id: topographyId}});
         await updateCard(response.data);
     } catch (error) {
         show?.({

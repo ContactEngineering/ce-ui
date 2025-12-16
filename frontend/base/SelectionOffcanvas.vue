@@ -1,7 +1,5 @@
 <script setup lang="ts">
 
-import axios from "axios";
-
 import {
     BAlert,
     BListGroup,
@@ -12,6 +10,7 @@ import {
     useToastController
 } from "bootstrap-vue-next";
 
+import {managerApiSurfaceRetrieve} from "@/api";
 import { useDatasetSelectionStore } from "@/stores/datasetSelection";
 import { onMounted, ref, computed } from "vue";
 
@@ -39,7 +38,7 @@ onMounted(async () => {
 
 async function refreshDatasets() {
     datasets.value = (await Promise.all(selection.datasetIds.map(async (id) => {
-        return axios.get("/manager/api/surface/" + id);
+        return managerApiSurfaceRetrieve({path: {id}});
     }))).map(response => {
         return response.data;
     });

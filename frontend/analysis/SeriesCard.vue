@@ -1,11 +1,11 @@
 <script setup lang="ts">
 
-import axios from "axios";
 import { computed, onMounted, ref } from "vue";
 
 import { BDropdownDivider, BDropdownItem, useToastController } from "bootstrap-vue-next";
 
-import { subjectsToBase64 } from "../utils/api";
+import { analysisApiCardSeriesRetrieve } from "@/api";
+import { subjectsToBase64 } from "@/utils/api";
 
 import AnalysisCard from "./AnalysisCard.vue";
 import BokehPlot from "../components/BokehPlot.vue";
@@ -66,39 +66,40 @@ const analysisIds = computed(() => {
     }
 });
 
-function updateCard() {
+async function updateCard() {
     /* Fetch JSON describing the card */
     _nbPendingAjaxRequests.value++;
-    axios.get(`${props.apiUrl}/${props.functionName}?subjects=${subjectsToBase64(props.subjects)}`)
-        .then(response => {
-            _analyses.value = response.data.analyses;
-            _title.value = response.data.plotConfiguration.title;
-            _plots.value = [{
-                title: "default",
-                xAxisLabel: response.data.plotConfiguration.xAxisLabel,
-                yAxisLabel: response.data.plotConfiguration.yAxisLabel,
-                xAxisType: response.data.plotConfiguration.xAxisType,
-                yAxisType: response.data.plotConfiguration.yAxisType
-            }];
-            _dataSources.value = response.data.plotConfiguration.dataSources;
-            _categories.value = response.data.plotConfiguration.categories;
-            _outputBackend.value = response.data.plotConfiguration.outputBackend;
-            _showSymbols.value = response.data.plotConfiguration.showSymbols;
-            _dois.value = response.data.dois;
-            _messages.value = response.data.messages;
-        })
-        .catch(error => {
-            show?.({
-                props: {
-                    title: "Error fetching analysis result",
-                    body: error.message,
-                    variant: "danger"
-                }
-            });
-        })
-        .finally(() => {
-            _nbPendingAjaxRequests.value--;
+    try {
+        const response = await analysisApiCardSeriesRetrieve({
+            path: {workflow: props.functionName},
+            query: {subjects: subjectsToBase64(props.subjects)}
+        } as any);
+        _analyses.value = response.data.analyses;
+        _title.value = response.data.plotConfiguration.title;
+        _plots.value = [{
+            title: "default",
+            xAxisLabel: response.data.plotConfiguration.xAxisLabel,
+            yAxisLabel: response.data.plotConfiguration.yAxisLabel,
+            xAxisType: response.data.plotConfiguration.xAxisType,
+            yAxisType: response.data.plotConfiguration.yAxisType
+        }];
+        _dataSources.value = response.data.plotConfiguration.dataSources;
+        _categories.value = response.data.plotConfiguration.categories;
+        _outputBackend.value = response.data.plotConfiguration.outputBackend;
+        _showSymbols.value = response.data.plotConfiguration.showSymbols;
+        _dois.value = response.data.dois;
+        _messages.value = response.data.messages;
+    } catch (error: any) {
+        show?.({
+            props: {
+                title: "Error fetching analysis result",
+                body: error.message,
+                variant: "danger"
+            }
         });
+    } finally {
+        _nbPendingAjaxRequests.value--;
+    }
 }
 
 </script>

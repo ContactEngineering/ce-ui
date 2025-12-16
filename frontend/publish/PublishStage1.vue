@@ -1,8 +1,9 @@
 <script setup lang="ts">
 
 import {BButton} from 'bootstrap-vue-next';
-import {ref} from 'vue';
-import axios from "axios";
+import {onMounted, ref} from 'vue';
+
+import {managerApiSurfaceRetrieve} from "@/api";
 
 const props = defineProps({
     stage: Number,
@@ -14,11 +15,14 @@ const emit = defineEmits(['continue']);
 const surface = ref();
 const error = ref(false)
 
-axios.get(`/manager/api/surface/${props.surfaceId}`).then((response) => {
-    surface.value = response.data;
-}).catch((response) => {
-    error.value = true;
-    console.error(response)
+onMounted(async () => {
+    try {
+        const response = await managerApiSurfaceRetrieve({path: {id: props.surfaceId}});
+        surface.value = response.data;
+    } catch (err) {
+        error.value = true;
+        console.error(err);
+    }
 });
 </script>
 <template>

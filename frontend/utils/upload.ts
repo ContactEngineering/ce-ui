@@ -1,12 +1,15 @@
 import axios from "axios";
+import {filesV2ManifestCreate} from "@/api";
 
-const manifestUrl: string = "/files/manifest/";
-
-export function createFileManifest({folderUrl, fileName}) {
-    const body = {
-        folder: folderUrl, filename: fileName
-    }
-    return axios.post(manifestUrl, body);
+export async function createFileManifest({folderUrl, fileName}) {
+    const response = await filesV2ManifestCreate({
+        body: {
+            folder: folderUrl,
+            filename: fileName
+        }
+    });
+    // Return axios-compatible response format for backwards compatibility
+    return response;
 }
 
 export function uploadFile({uploadInstructions, file, onUploadProgress}) {

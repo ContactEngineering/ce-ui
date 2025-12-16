@@ -1,11 +1,11 @@
 <script setup lang="ts">
 
-import axios from "axios";
 import { computed, onMounted, ref } from "vue";
 
 import { BDropdownDivider, BDropdownItem, BSpinner, BTab, BTabs, useToastController } from "bootstrap-vue-next";
 
-import { subjectsToBase64 } from "@/utils/api";
+import { pluginsContactCardContactMechanicsRetrieve, filesFolderRetrieve } from "@/api";
+import { subjectsToBase64, getIdFromUrl } from "@/utils/api";
 
 import BokehPlot from "@/components/BokehPlot.vue";
 import ContactMechanicsParametersModal from "@/analysis/ContactMechanicsParametersModal.vue";
@@ -56,62 +56,66 @@ onMounted(() => {
     updateCard();
 });
 
-function updateCard() {
+async function updateCard() {
     /* Fetch JSON describing the card */
     let functionKwargsBase64 = btoa(JSON.stringify(_functionKwargs.value));
     _nbPendingAjaxRequests.value++;
-    axios.get(`${props.apiUrl}/${props.functionName}?subjects=${subjectsToBase64(props.subjects)}&function_kwargs=${functionKwargsBase64}`)
-        .then(response => {
-            _analyses.value = response.data.analyses;
-            _analysesById = {};
-            for (const analysis of response.data.analyses) {
-                _analysesById[analysis.id] = analysis;
+    try {
+        const response = await pluginsContactCardContactMechanicsRetrieve({
+            path: {workflow: props.functionName},
+            query: {
+                subjects: subjectsToBase64(props.subjects),
+                function_kwargs: functionKwargsBase64
             }
-            _dois.value = response.data.dois;
-            if (_functionKwargs.value === null) {
-                _functionKwargs.value = response.data.unique_kwargs;
-            } else {
-                _functionKwargs.value = {
-                    ..._functionKwargs.value,
-                    ...response.data.unique_kwargs  // override since the server may report changes
-                };
-            }
-            _limitsToFunctionKwargs.value = response.data.limitsToFunctionKwargs;
-            _api.value = response.data.api;
+        } as any);
+        _analyses.value = response.data.analyses;
+        _analysesById = {};
+        for (const analysis of response.data.analyses) {
+            _analysesById[analysis.id] = analysis;
+        }
+        _dois.value = response.data.dois;
+        if (_functionKwargs.value === null) {
+            _functionKwargs.value = response.data.unique_kwargs;
+        } else {
+            _functionKwargs.value = {
+                ..._functionKwargs.value,
+                ...response.data.unique_kwargs  // override since the server may report changes
+            };
+        }
+        _limitsToFunctionKwargs.value = response.data.limitsToFunctionKwargs;
+        _api.value = response.data.api;
 
-            _dataSources.value = response.data.plotConfiguration?.dataSources;
-            _outputBackend.value = response.data.plotConfiguration?.outputBackend;
-        })
-        .catch(error => {
-            show?.({
-                props: {
-                    title: "Error fetching contact mechanics analysis results",
-                    body: error.message,
-                    variant: "danger"
-                }
-            });
-        })
-        .finally(() => {
-            _nbPendingAjaxRequests.value--;
+        _dataSources.value = response.data.plotConfiguration?.dataSources;
+        _outputBackend.value = response.data.plotConfiguration?.outputBackend;
+    } catch (error: any) {
+        show?.({
+            props: {
+                title: "Error fetching contact mechanics analysis results",
+                body: error.message,
+                variant: "danger"
+            }
         });
+    } finally {
+        _nbPendingAjaxRequests.value--;
+    }
 }
 
-function onSelected(obj, data) {
+async function onSelected(obj, data) {
     const name = data.source.name;
     const path = data.source.data.dataPath[data.source.selected.indices[0]];
     const analysisId = parseInt(name.split("-")[1]);
     const folder = _analysesById[analysisId].folder;
     _isLoading.value = true;
-    axios.get(folder).then(response => {
-        _isLoading.value = false;
+    try {
+        const folderId = getIdFromUrl(folder);
+        const response = await filesFolderRetrieve({path: {id: folderId}});
         _selection.value = {
             analysisId: analysisId,
             dataPath: path,
             folder: folder,
             folderInventory: response.data
         };
-    }).catch(error => {
-        _isLoading.value = false;
+    } catch (error: any) {
         show?.({
             props: {
                 title: "Error analysis results",
@@ -119,7 +123,9 @@ function onSelected(obj, data) {
                 variant: "danger"
             }
         });
-    });
+    } finally {
+        _isLoading.value = false;
+    }
 }
 
 const contactMechanicsPlots = computed(() => {

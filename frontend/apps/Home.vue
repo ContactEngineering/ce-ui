@@ -1,31 +1,18 @@
 <script setup lang="ts">
 
-import axios from "axios";
 import {inject, onMounted, ref} from "vue";
-
-const props = defineProps({
-    managerStatisticsApiUrl: {
-        type: String,
-        default: "/manager/api/statistics"
-    },
-    analysisStatisticsApiUrl: {
-        type: String,
-        default: "/analysis/api/statistics"
-    }
-});
+import {managerApiStatisticsRetrieve, analysisApiStatisticsRetrieve} from "@/api";
 
 const appProps = inject("appProps");
 
 const managerStatistics = ref(null);
 const analysisStatistics = ref(null);
 
-onMounted(() => {
-    axios.get(props.managerStatisticsApiUrl).then(response => {
-        managerStatistics.value = response.data;
-    });
-    axios.get(props.analysisStatisticsApiUrl).then(response => {
-        analysisStatistics.value = response.data;
-    });
+onMounted(async () => {
+    const managerResponse = await managerApiStatisticsRetrieve();
+    managerStatistics.value = managerResponse.data;
+    const analysisResponse = await analysisApiStatisticsRetrieve();
+    analysisStatistics.value = analysisResponse.data;
 });
 
 </script>

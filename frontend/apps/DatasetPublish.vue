@@ -4,7 +4,8 @@ import { inject, ref } from "vue";
 
 import { useToastController } from "bootstrap-vue-next";
 
-import axios from "axios";
+import { goPublishCreate } from "@/api";
+
 import PublishStage1 from "@/publish/PublishStage1.vue";
 import PublishStage2 from "@/publish/PublishStage2.vue";
 import PublishStage3 from "@/publish/PublishStage3.vue";
@@ -25,7 +26,7 @@ const pending_request = ref(false);
 let authors;
 let license;
 
-function publish() {
+async function publish() {
     pending_request.value = true;
     // NOTE: The django view expects the author data in a structure thats not convenient
     // NOTE: for vue. Thats why we transform the structure here.
@@ -42,14 +43,17 @@ function publish() {
             })
         };
     });
-    axios.post("/go/publish/", {
-        "surface": appProps.object.id,
-        "authors": authorsTransformed,
-        "license": license
-    }).then((response) => {
+    try {
+        const response = await goPublishCreate({
+            body: {
+                surface: appProps.object.id,
+                authors: authorsTransformed,
+                license: license
+            } as any
+        });
         window.location.href = `/ui/dataset-detail/${response.data.dataset_id}/`;
-    }).catch((error) => {
-        if (error.response.status == 429) { // Too Many Requests
+    } catch (error: any) {
+        if (error.response?.status == 429) { // Too Many Requests
             show?.({
                 props: {
                     title: "Too many requests",
@@ -67,7 +71,7 @@ function publish() {
             });
         }
         pending_request.value = false;
-    });
+    }
 }
 </script>
 

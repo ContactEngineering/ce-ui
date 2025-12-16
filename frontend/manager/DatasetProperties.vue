@@ -1,6 +1,5 @@
 <script setup lang="ts">
 
-import axios from "axios";
 import { computed, ref } from 'vue';
 
 import {
@@ -18,6 +17,9 @@ import {
     BTr,
     useToastController
 } from 'bootstrap-vue-next';
+
+import {managerApiSurfacePartialUpdate} from "@/api";
+import {getIdFromUrl} from "@/utils/api";
 
 const { show } = useToastController();
 
@@ -128,7 +130,7 @@ function discardChanges() {
     _isEditing.value = false;
 }
 
-function save() {
+async function save() {
     // Check for empty names and give warning
     if (_properties.value.filter((property) => property.name === "").length > 0) {
         showWarning("Property names cannot be empty");
@@ -142,22 +144,27 @@ function save() {
     // Update properties
     _isEditing.value = false;
     _isSaving.value = true;
-    axios.patch(props.surfaceUrl, { properties: propertiesArrayToObject(_properties.value) }).then(response => {
+    try {
+        const surfaceId = getIdFromUrl(props.surfaceUrl);
+        const response = await managerApiSurfacePartialUpdate({
+            path: {id: surfaceId},
+            body: { properties: propertiesArrayToObject(_properties.value) }
+        });
         properties.value = response.data["properties"];
         _properties.value = propertiesObjectToArray(response.data["properties"]);
-        _isSaving.value = false;
-    }).catch((error) => {
-        _isSaving.value = false;
+    } catch (error: any) {
         // Restore properties
         _properties.value = propertiesObjectToArray(properties.value);
-        const msg = `Upload Failed: ${error.response.data.detail}. Please report this bug!`
+        const msg = `Upload Failed: ${error.response?.data?.detail}. Please report this bug!`
         show?.({
             props: {
                 body: msg,
                 variant: "warning"
             }
         });
-    });
+    } finally {
+        _isSaving.value = false;
+    }
     propertyCount.value = Object.keys(propertiesArrayToObject(_properties.value)).length; // Update the property count
 }
 

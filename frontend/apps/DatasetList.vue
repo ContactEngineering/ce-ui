@@ -1,7 +1,5 @@
 <script setup lang="ts">
 
-import axios from "axios";
-
 import {computed, onMounted, ref} from "vue";
 
 import {
@@ -18,6 +16,8 @@ import {
     useToastController
 } from "bootstrap-vue-next";
 
+import {managerApiSurfaceList, managerApiSurfaceCreate} from "@/api";
+
 import {useDatasetSelectionStore} from "../stores/datasetSelection";
 
 import DatasetListRow from '../manager/DatasetListRow.vue';
@@ -27,10 +27,6 @@ const {show} = useToastController();
 const selection = useDatasetSelectionStore();
 
 const props = defineProps({
-    apiUrl: {
-        type: String,
-        default: "/manager/api/surface/"
-    },
     currentPage: {
         Number,
         default: 0
@@ -81,24 +77,28 @@ const _previousUrl = ref(null);
 
 let searchDelayTimer = null;
 
-function getDatasets(offset: number = 0) {
+async function getDatasets(offset: number = 0) {
     searchDelayTimer = null;
     _isLoading.value = true;
     _currentPage.value = offset / _pageSize.value + 1;
-    let queryUrl = `${props.apiUrl}?offset=${offset}&limit=${_pageSize.value}`;
-    queryUrl += `&order_by=${_orderBy.value}`;
-    queryUrl += `&sharing_status=${_sharingStatus.value}`;
-    if (_searchTerm != null) {
-        queryUrl += `&search=${_searchTerm.value}`;
-    }
-    axios.get(queryUrl).then(response => {
+    try {
+        // Note: order_by, sharing_status, and search are not in the OpenAPI schema
+        // but are supported by the backend. Using type assertion to pass them.
+        const response = await managerApiSurfaceList({
+            query: {
+                offset,
+                limit: _pageSize.value,
+                order_by: _orderBy.value,
+                sharing_status: _sharingStatus.value,
+                search: _searchTerm.value || undefined
+            } as any
+        });
         _nbDatasets.value = response.data.count;
         _nbDatasetsOnCurrentPage.value = Math.min(response.data.results.length, _pageSize.value);
         _nextUrl.value = response.data.next;
         _previousUrl.value = response.data.previous;
         _datasets.value = response.data.results;
-        _isLoading.value = false;
-    }).catch(error => {
+    } catch (error) {
         show?.({
             props: {
                 title: "Error fetching datasets",
@@ -106,8 +106,9 @@ function getDatasets(offset: number = 0) {
                 variant: 'danger'
             }
         });
+    } finally {
         _isLoading.value = false;
-    });
+    }
 }
 
 onMounted(() => {
@@ -157,10 +158,9 @@ const searchTerm = computed({
     }
 });
 
-function createSurface() {
-    axios.post('/manager/api/surface/').then(response => {
-        window.location.href = `/ui/dataset-detail/${response.data.id}/`;
-    });
+async function createSurface() {
+    const response = await managerApiSurfaceCreate();
+    window.location.href = `/ui/dataset-detail/${response.data.id}/`;
 }
 
 function select(dataset) {

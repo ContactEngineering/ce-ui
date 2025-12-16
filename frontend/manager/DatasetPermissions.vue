@@ -1,6 +1,5 @@
 <script setup lang="ts">
 
-import axios from "axios";
 import {ref} from "vue";
 
 import {
@@ -11,6 +10,9 @@ import {
     BSpinner,
     useToastController
 } from 'bootstrap-vue-next';
+
+import {managerApiSurfaceSetPermissionsPartialUpdate} from "@/api";
+import {getIdFromUrl} from "@/utils/api";
 
 import SearchUserModal from "../components/SearchUserModal.vue";
 import PermissionRow from "topobank/manager/PermissionRow.vue";
@@ -32,12 +34,17 @@ const selfPermissions = ref(props.permissions);
 const savedPermissions = ref(props.permissions);
 const searchUser = ref(false);
 
-function saveCard() {
+async function saveCard() {
     isEditing.value = false;
     isSaving.value = true;
-    axios.patch(props.setPermissionsUrl, selfPermissions.value.other_users).then(response => {
+    try {
+        const surfaceId = getIdFromUrl(props.setPermissionsUrl);
+        const response = await managerApiSurfaceSetPermissionsPartialUpdate({
+            path: {id: surfaceId},
+            body: selfPermissions.value.other_users
+        });
         emit('update:permissions', response.data);
-    }).catch(error => {
+    } catch (error) {
         show?.({
             props: {
                 title: "Permission update failed",
@@ -45,10 +52,10 @@ function saveCard() {
                 variant: 'danger'
             }
         });
-        selfPermissions.value = this.savedPermissions;
-    }).finally(() => {
+        selfPermissions.value = savedPermissions.value;
+    } finally {
         isSaving.value = false;
-    });
+    }
 }
 
 function addUser(user) {
