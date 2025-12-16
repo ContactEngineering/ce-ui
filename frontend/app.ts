@@ -28,8 +28,14 @@ export function createAppFrame(element, csrfToken, appProps, componentProps) {
     app.use(pinia);
     app.use(createBootstrap());
     axios.defaults.headers.common['X-CSRFToken'] = csrfToken;
-    // Configure the generated API client with CSRF token
-    client.setConfig({headers: {'X-CSRFToken': csrfToken}});
+    // Configure the generated API client with CSRF token and relative base URL
+    // The baseURL must be empty to use relative URLs (same origin as the page)
+    // withCredentials is needed to send session cookies for authentication
+    client.setConfig({
+        baseURL: '',
+        withCredentials: true,
+        headers: {'X-CSRFToken': csrfToken}
+    });
     app.provide('csrfToken', csrfToken);
     app.provide('appProps', appProps);
     // Register all single-page components from the index
