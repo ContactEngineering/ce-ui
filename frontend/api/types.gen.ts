@@ -13,13 +13,6 @@ export type ClientOptions = {
 export type Allow254Enum = 'no-access' | 'view' | 'edit' | 'full';
 
 /**
- * * `view` - Read-only access
- * * `edit` - Change the model data
- * * `full` - Grant/revoke permissions of other users
- */
-export type AllowF47Enum = 'view' | 'edit' | 'full';
-
-/**
  * * `exp` - Experimental data
  * * `sim` - Simulated data
  * * `dum` - Dummy data
@@ -27,44 +20,26 @@ export type AllowF47Enum = 'view' | 'edit' | 'full';
 export type CategoryEnum = 'exp' | 'sim' | 'dum';
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * Serializer for Configuration model.
  */
 export type Configuration = {
     readonly valid_since: string;
-    readonly versions: string;
+    readonly versions: {
+        [key: string]: string;
+    };
+};
+
+/**
+ * v2 Serializer for Configuration model.
+ */
+export type ConfigurationV2 = {
+    readonly valid_since: string;
+    /**
+     * Dictionary mapping dependency names to their version numbers
+     */
+    readonly versions: {
+        [key: string]: string;
+    };
 };
 
 /**
@@ -148,40 +123,7 @@ export type KindEnum = 'N/A' | 'att' | 'der' | 'raw';
 export type LicenseEnum = 'cc0-1.0' | 'ccby-4.0' | 'ccbysa-4.0';
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * Serializer for Manifest model.
  */
 export type Manifest = {
     readonly url: string;
@@ -200,43 +142,51 @@ export type Manifest = {
     };
 };
 
+/**
+ * Serializer for Manifest model.
+ */
+export type ManifestV2 = {
+    readonly id: number;
+    readonly url: string;
+    readonly created_by: {
+        readonly id: number;
+        readonly url: string;
+        readonly name: string;
+    };
+    readonly updated_by: {
+        readonly id: number;
+        readonly url: string;
+        readonly name: string;
+    };
+    readonly created_at: string;
+    readonly updated_at: string;
+    readonly confirmed_at: string;
+    readonly upload_instructions: {
+        method: string;
+        url: string;
+    };
+    readonly folder: {
+        id?: number;
+        url?: string;
+    };
+    filename: string;
+    readonly file: string;
+    kind: KindEnum;
+};
+
+/**
+ * Serializer for creating Manifest model instances.
+ */
+export type ManifestV2Create = {
+    filename: string;
+    folder?: string | null;
+    kind?: KindEnum;
+};
+
 export type NullEnum = unknown;
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * Serializer for Organization model.
  */
 export type Organization = {
     readonly url: string;
@@ -266,7 +216,14 @@ export type Organization = {
 export type OrganizationPermission = {
     readonly id: number;
     organization: Organization;
-    allow: AllowF47Enum;
+    allow: PermissionAllowEnum;
+};
+
+export type PaginatedManifestV2List = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<ManifestV2>;
 };
 
 export type PaginatedOrganizationList = {
@@ -274,6 +231,13 @@ export type PaginatedOrganizationList = {
     next?: string | null;
     previous?: string | null;
     results: Array<Organization>;
+};
+
+export type PaginatedPublicationCollectionList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<PublicationCollection>;
 };
 
 export type PaginatedPublicationList = {
@@ -288,6 +252,13 @@ export type PaginatedResultList = {
     next?: string | null;
     previous?: string | null;
     results: Array<Result>;
+};
+
+export type PaginatedResultV2ListList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<ResultV2List>;
 };
 
 export type PaginatedSurfaceList = {
@@ -332,41 +303,15 @@ export type PaginatedUserList = {
     results: Array<User>;
 };
 
+export type PaginatedWorkflowV2List = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<WorkflowV2>;
+};
+
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * Serializer for Manifest model.
  */
 export type PatchedManifest = {
     readonly url?: string;
@@ -386,40 +331,39 @@ export type PatchedManifest = {
 };
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * Serializer for Manifest model.
+ */
+export type PatchedManifestV2 = {
+    readonly id?: number;
+    readonly url?: string;
+    readonly created_by?: {
+        readonly id: number;
+        readonly url: string;
+        readonly name: string;
+    };
+    readonly updated_by?: {
+        readonly id: number;
+        readonly url: string;
+        readonly name: string;
+    };
+    readonly created_at?: string;
+    readonly updated_at?: string;
+    readonly confirmed_at?: string;
+    readonly upload_instructions?: {
+        method: string;
+        url: string;
+    };
+    readonly folder?: {
+        id?: number;
+        url?: string;
+    };
+    filename?: string;
+    readonly file?: string;
+    kind?: KindEnum;
+};
+
+/**
+ * Serializer for Organization model.
  */
 export type PatchedOrganization = {
     readonly url?: string;
@@ -444,40 +388,76 @@ export type PatchedOrganization = {
 };
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * v2 Serializer for WorkflowResult Detail model.
+ */
+export type PatchedResultV2Detail = {
+    readonly id?: number;
+    readonly url?: string;
+    readonly dependencies?: {
+        readonly count: number;
+        readonly url: string;
+    };
+    function?: WorkflowV2;
+    readonly subject?: {
+        readonly id: number;
+        readonly url: string;
+        readonly name: string;
+        readonly type: string;
+    };
+    readonly kwargs?: unknown;
+    readonly created_at?: string;
+    readonly updated_at?: string;
+    readonly dois?: unknown;
+    readonly configuration?: {
+        id?: number;
+        url?: string;
+    };
+    readonly folder?: {
+        id?: number;
+        url?: string;
+    };
+    readonly created_by?: {
+        readonly id: number;
+        readonly url: string;
+        readonly name: string;
+    };
+    readonly updated_by?: {
+        readonly id: number;
+        readonly url: string;
+        readonly name: string;
+    };
+    readonly owned_by?: {
+        readonly id: number;
+        readonly url: string;
+        readonly name: string;
+    };
+    readonly permissions?: {
+        readonly id: number;
+        readonly url: string;
+        allow: PermissionAllowEnum;
+    };
+    readonly metadata?: unknown;
+    readonly task_state?: string;
+    readonly task_progress?: number;
+    readonly task_messages?: Array<string>;
+    readonly task_memory?: number | null;
+    readonly task_error?: string;
+    readonly task_traceback?: string | null;
+    readonly task_submission_time?: string | null;
+    readonly task_start_time?: string | null;
+    readonly task_end_time?: string | null;
+    readonly task_duration?: string;
+    readonly task_id?: string | null;
+    readonly launcher_task_id?: string | null;
+    name?: string | null;
+    /**
+     * Optional description of the analysis.
+     */
+    description?: string | null;
+};
+
+/**
+ * Serializer for Surface model.
  */
 export type PatchedSurface = {
     readonly url?: string;
@@ -497,7 +477,16 @@ export type PatchedSurface = {
     tags?: Array<string>;
     readonly creation_datetime?: string;
     readonly modification_datetime?: string;
-    readonly permissions?: string;
+    readonly permissions?: {
+        current_user?: {
+            user?: string;
+            permission?: string;
+        };
+        other_users?: Array<{
+            user?: string;
+            permission?: string;
+        }>;
+    };
     properties?: {
         [key: string]: never;
     };
@@ -505,40 +494,7 @@ export type PatchedSurface = {
 };
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * v2 Serializer for Surface model.
  */
 export type PatchedSurfaceV2 = {
     readonly url?: string;
@@ -548,19 +504,27 @@ export type PatchedSurfaceV2 = {
         topographies: string;
     };
     readonly permissions?: {
-        id: number;
-        url: string;
-        allow: 'view' | 'edit' | 'full';
+        readonly id: number;
+        readonly url: string;
+        allow: PermissionAllowEnum;
     };
-    readonly creator?: {
-        id: number;
-        url: string;
-        name: string;
+    readonly created_by?: {
+        readonly id: number;
+        readonly url: string;
+        readonly name: string;
     };
-    readonly owner?: {
-        id?: number;
-        url?: string;
+    readonly updated_by?: {
+        readonly id: number;
+        readonly url: string;
+        readonly name: string;
     };
+    readonly owned_by?: {
+        readonly id: number;
+        readonly url: string;
+        readonly name: string;
+    };
+    readonly created_at?: string | null;
+    readonly updated_at?: string | null;
     readonly attachments?: {
         id?: number;
         url?: string;
@@ -569,48 +533,13 @@ export type PatchedSurfaceV2 = {
     category?: CategoryEnum | NullEnum | null;
     description?: string;
     tags?: Array<string>;
-    readonly creation_time?: string | null;
-    readonly modification_time?: string | null;
     properties?: {
         [key: string]: never;
     };
 };
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * Serializer for Topography model.
  */
 export type PatchedTopography = {
     readonly url?: string;
@@ -660,45 +589,19 @@ export type PatchedTopography = {
     readonly task_state?: string;
     tags?: Array<string>;
     readonly permissions?: {
-        [key: string]: unknown;
+        current_user?: {
+            user?: string;
+            permission?: string;
+        };
+        other_users?: Array<{
+            user?: string;
+            permission?: string;
+        }>;
     };
 };
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * v2 Serializer for Topography model.
  */
 export type PatchedTopographyV2 = {
     readonly url?: string;
@@ -707,53 +610,74 @@ export type PatchedTopographyV2 = {
         force_inspect: string;
     };
     readonly permissions?: {
-        id: number;
-        url: string;
-        allow: 'view' | 'edit' | 'full';
+        readonly id: number;
+        readonly url: string;
+        allow: PermissionAllowEnum;
     };
-    surface?: {
-        id?: number;
-        url?: string;
+    readonly created_by?: {
+        readonly id: number;
+        readonly url: string;
+        readonly name: string;
     };
-    readonly creator?: {
-        id: number;
-        url: string;
-        name: string;
+    readonly updated_by?: {
+        readonly id: number;
+        readonly url: string;
+        readonly name: string;
+    };
+    readonly owned_by?: {
+        readonly id: number;
+        readonly url: string;
+        readonly name: string;
     };
     readonly datafile?: {
-        id?: number;
-        url?: string;
+        readonly id: number;
+        readonly url: string;
+        readonly file?: string;
     };
     readonly squeezed_datafile?: {
-        id?: number;
-        url?: string;
+        readonly id: number;
+        readonly url: string;
+        readonly file?: string;
     };
     readonly thumbnail?: {
-        id?: number;
-        url?: string;
-    };
-    readonly attachments?: {
-        id?: number;
-        url?: string;
+        readonly id: number;
+        readonly url: string;
+        readonly file?: string;
     };
     readonly deepzoom?: {
         id?: number;
         url?: string;
     };
-    name?: string;
-    datafile_format?: string | null;
-    channel_names?: unknown;
+    readonly datafile_format?: string | null;
+    readonly channel_names?: unknown;
+    readonly created_at?: string | null;
+    readonly updated_at?: string | null;
+    readonly task_duration?: string;
+    readonly task_error?: string;
+    readonly task_progress?: number;
+    readonly task_state?: string;
+    readonly size_editable?: boolean;
+    readonly unit_editable?: boolean;
+    readonly height_scale_editable?: boolean;
+    readonly has_undefined_data?: boolean | null;
+    readonly is_periodic_editable?: boolean;
+    readonly is_metadata_complete?: boolean;
+    surface?: {
+        id?: number;
+        url?: string;
+    };
     data_source?: number | null;
+    readonly attachments?: {
+        id?: number;
+        url?: string;
+    };
+    name?: string;
     description?: string;
     measurement_date?: string | null;
-    readonly size_editable?: boolean;
     size_x?: number | null;
     size_y?: number | null;
-    readonly unit_editable?: boolean;
     unit?: UnitEnum | NullEnum | null;
-    readonly height_scale_editable?: boolean;
     height_scale?: number;
-    has_undefined_data?: boolean | null;
     fill_undefined_data_mode?: FillUndefinedDataModeEnum;
     detrend_mode?: DetrendModeEnum;
     readonly resolution_x?: number | null;
@@ -761,64 +685,23 @@ export type PatchedTopographyV2 = {
     readonly bandwidth_lower?: number | null;
     readonly bandwidth_upper?: number | null;
     readonly short_reliability_cutoff?: number | null;
-    readonly is_periodic_editable?: boolean;
     is_periodic?: boolean;
     instrument_name?: string;
     instrument_type?: InstrumentTypeEnum;
     instrument_parameters?: unknown;
-    readonly is_metadata_complete?: string;
-    readonly creation_time?: string;
-    readonly modification_time?: string | null;
-    readonly task_duration?: string;
-    readonly task_error?: string;
-    readonly task_progress?: number;
-    readonly task_state?: string;
     tags?: Array<string>;
 };
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * Serializer for User model.
  */
 export type PatchedUser = {
     readonly url?: string;
     readonly id?: number;
     readonly api?: {
-        organizations: string;
-        add_organization: string;
-        remove_organization: string;
+        readonly organizations: string;
+        readonly add_organization: string;
+        readonly remove_organization: string;
     };
     /**
      * Name of User
@@ -838,48 +721,11 @@ export type PatchedUser = {
 };
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * * `view` - Read-only access
+ * * `edit` - Change the model data
+ * * `full` - Grant/revoke permissions of other users
  */
-export type PatchedWorkflowTemplate = {
-    readonly id?: number;
-    name?: string;
-    kwargs?: unknown;
-    implementation?: string | null;
-    readonly creator?: string;
-};
+export type PermissionAllowEnum = 'view' | 'edit' | 'full';
 
 /**
  * Serializer for permission sets
@@ -917,41 +763,19 @@ export type Publication = {
     readonly download_url: string;
 };
 
+export type PublicationCollection = {
+    readonly id: number;
+    readonly url: string;
+    doi_name?: string;
+    title: string;
+    description?: string;
+    short_url?: string | null;
+    publisher: User;
+    readonly publications: Array<string>;
+};
+
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * Serializer for WorkflowResult model.
  */
 export type Result = {
     readonly url: string;
@@ -981,10 +805,131 @@ export type Result = {
     readonly folder: string;
     readonly name: string | null;
     readonly creator: {
-        id: number;
-        url: string;
-        name: string;
+        readonly id: number;
+        readonly url: string;
+        readonly name: string;
     };
+};
+
+/**
+ * v2 Serializer for creating WorkflowResult instances.
+ */
+export type ResultV2Create = {
+    /**
+     * A field that accepts either a string or an integer.
+     */
+    function: string | number;
+    /**
+     * A field that accepts either a string or an integer.
+     */
+    subject: string | number;
+    subject_type: string;
+    kwargs?: unknown;
+};
+
+/**
+ * v2 Serializer for WorkflowResult Detail model.
+ */
+export type ResultV2Detail = {
+    readonly id: number;
+    readonly url: string;
+    readonly dependencies: {
+        readonly count: number;
+        readonly url: string;
+    };
+    function: WorkflowV2;
+    readonly subject: {
+        readonly id: number;
+        readonly url: string;
+        readonly name: string;
+        readonly type: string;
+    };
+    readonly kwargs: unknown;
+    readonly created_at: string;
+    readonly updated_at: string;
+    readonly dois: unknown;
+    readonly configuration: {
+        id?: number;
+        url?: string;
+    };
+    readonly folder: {
+        id?: number;
+        url?: string;
+    };
+    readonly created_by: {
+        readonly id: number;
+        readonly url: string;
+        readonly name: string;
+    };
+    readonly updated_by: {
+        readonly id: number;
+        readonly url: string;
+        readonly name: string;
+    };
+    readonly owned_by: {
+        readonly id: number;
+        readonly url: string;
+        readonly name: string;
+    };
+    readonly permissions: {
+        readonly id: number;
+        readonly url: string;
+        allow: PermissionAllowEnum;
+    };
+    readonly metadata: unknown;
+    readonly task_state: string;
+    readonly task_progress: number;
+    readonly task_messages: Array<string>;
+    readonly task_memory: number | null;
+    readonly task_error: string;
+    readonly task_traceback: string | null;
+    readonly task_submission_time: string | null;
+    readonly task_start_time: string | null;
+    readonly task_end_time: string | null;
+    readonly task_duration: string;
+    readonly task_id: string | null;
+    readonly launcher_task_id: string | null;
+    name?: string | null;
+    /**
+     * Optional description of the analysis.
+     */
+    description?: string | null;
+};
+
+/**
+ * v2 Serializer for WorkflowResult List model.
+ */
+export type ResultV2List = {
+    readonly id: number;
+    readonly url: string;
+    function: WorkflowV2;
+    readonly subject: {
+        readonly id: number;
+        readonly url: string;
+        readonly name: string;
+        readonly type: string;
+    };
+    readonly created_at: string;
+    readonly updated_at: string;
+    readonly name: string | null;
+    readonly created_by: {
+        readonly id: number;
+        readonly url: string;
+        readonly name: string;
+    };
+    readonly updated_by: {
+        readonly id: number;
+        readonly url: string;
+        readonly name: string;
+    };
+    readonly permissions: {
+        readonly id: number;
+        readonly url: string;
+        allow: PermissionAllowEnum;
+    };
+    readonly task_state: string;
+    readonly task_progress: number;
+    readonly task_messages: Array<string>;
 };
 
 /**
@@ -1008,40 +953,60 @@ export type RevokeUserRequest = {
 };
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * Serializer for shared organization permissions across multiple permission sets
+ */
+export type SharedOrganizationPermission = {
+    organization: Organization;
+    /**
+     * Effective permission level across all considered permission sets
+     *
+     * * `no-access` - No Access
+     * * `view` - View
+     * * `edit` - Edit
+     * * `full` - Full
+     */
+    allow: Allow254Enum;
+    /**
+     * True if the permission level is the same across all permission sets
+     */
+    is_unique: boolean;
+};
+
+/**
+ * Serializer for shared permission sets
+ */
+export type SharedPermissionSet = {
+    user_permissions: Array<SharedUserPermission>;
+    organization_permissions: Array<SharedOrganizationPermission>;
+};
+
+/**
+ * Serializer for shared user permissions across multiple permission sets
+ */
+export type SharedUserPermission = {
+    readonly user: {
+        readonly id: number;
+        readonly url: string;
+        readonly name: string;
+    };
+    /**
+     * Effective permission level across all considered permission sets
+     *
+     * * `no-access` - No Access
+     * * `view` - View
+     * * `edit` - Edit
+     * * `full` - Full
+     */
+    allow: Allow254Enum;
+    is_current_user: boolean;
+    /**
+     * True if the permission level is the same across all permission sets
+     */
+    is_unique: boolean;
+};
+
+/**
+ * Serializer for WorkflowSubject model.
  */
 export type Subject = {
     readonly id: number;
@@ -1051,40 +1016,7 @@ export type Subject = {
 };
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * Serializer for Surface model.
  */
 export type Surface = {
     readonly url: string;
@@ -1104,7 +1036,16 @@ export type Surface = {
     tags?: Array<string>;
     readonly creation_datetime: string;
     readonly modification_datetime: string;
-    readonly permissions: string;
+    readonly permissions: {
+        current_user?: {
+            user?: string;
+            permission?: string;
+        };
+        other_users?: Array<{
+            user?: string;
+            permission?: string;
+        }>;
+    };
     properties?: {
         [key: string]: never;
     };
@@ -1112,40 +1053,7 @@ export type Surface = {
 };
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * v2 Serializer for Surface model.
  */
 export type SurfaceV2 = {
     readonly url: string;
@@ -1155,19 +1063,27 @@ export type SurfaceV2 = {
         topographies: string;
     };
     readonly permissions: {
-        id: number;
-        url: string;
-        allow: 'view' | 'edit' | 'full';
+        readonly id: number;
+        readonly url: string;
+        allow: PermissionAllowEnum;
     };
-    readonly creator: {
-        id: number;
-        url: string;
-        name: string;
+    readonly created_by: {
+        readonly id: number;
+        readonly url: string;
+        readonly name: string;
     };
-    readonly owner: {
-        id?: number;
-        url?: string;
+    readonly updated_by: {
+        readonly id: number;
+        readonly url: string;
+        readonly name: string;
     };
+    readonly owned_by: {
+        readonly id: number;
+        readonly url: string;
+        readonly name: string;
+    };
+    readonly created_at: string | null;
+    readonly updated_at: string | null;
     readonly attachments: {
         id?: number;
         url?: string;
@@ -1176,48 +1092,13 @@ export type SurfaceV2 = {
     category?: CategoryEnum | NullEnum | null;
     description?: string;
     tags?: Array<string>;
-    readonly creation_time: string | null;
-    readonly modification_time: string | null;
     properties?: {
         [key: string]: never;
     };
 };
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * Serializer for Tag model.
  */
 export type Tag = {
     readonly url: string;
@@ -1228,7 +1109,7 @@ export type Tag = {
     };
     readonly id: number;
     name: string;
-    readonly children: string;
+    readonly children: Array<string>;
     path: string;
     /**
      * The name of the tag, without ancestors
@@ -1246,40 +1127,7 @@ export type Tag = {
 };
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * Serializer for Topography model.
  */
 export type Topography = {
     readonly url: string;
@@ -1329,45 +1177,19 @@ export type Topography = {
     readonly task_state: string;
     tags?: Array<string>;
     readonly permissions: {
-        [key: string]: unknown;
+        current_user?: {
+            user?: string;
+            permission?: string;
+        };
+        other_users?: Array<{
+            user?: string;
+            permission?: string;
+        }>;
     };
 };
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * v2 Serializer for Topography model.
  */
 export type TopographyV2 = {
     readonly url: string;
@@ -1376,53 +1198,74 @@ export type TopographyV2 = {
         force_inspect: string;
     };
     readonly permissions: {
-        id: number;
-        url: string;
-        allow: 'view' | 'edit' | 'full';
+        readonly id: number;
+        readonly url: string;
+        allow: PermissionAllowEnum;
     };
-    surface: {
-        id?: number;
-        url?: string;
+    readonly created_by: {
+        readonly id: number;
+        readonly url: string;
+        readonly name: string;
     };
-    readonly creator: {
-        id: number;
-        url: string;
-        name: string;
+    readonly updated_by: {
+        readonly id: number;
+        readonly url: string;
+        readonly name: string;
+    };
+    readonly owned_by: {
+        readonly id: number;
+        readonly url: string;
+        readonly name: string;
     };
     readonly datafile: {
-        id?: number;
-        url?: string;
+        readonly id: number;
+        readonly url: string;
+        readonly file?: string;
     };
     readonly squeezed_datafile: {
-        id?: number;
-        url?: string;
+        readonly id: number;
+        readonly url: string;
+        readonly file?: string;
     };
     readonly thumbnail: {
-        id?: number;
-        url?: string;
-    };
-    readonly attachments: {
-        id?: number;
-        url?: string;
+        readonly id: number;
+        readonly url: string;
+        readonly file?: string;
     };
     readonly deepzoom: {
         id?: number;
         url?: string;
     };
-    name: string;
-    datafile_format?: string | null;
-    channel_names?: unknown;
+    readonly datafile_format: string | null;
+    readonly channel_names: unknown;
+    readonly created_at: string | null;
+    readonly updated_at: string | null;
+    readonly task_duration: string;
+    readonly task_error: string;
+    readonly task_progress: number;
+    readonly task_state: string;
+    readonly size_editable: boolean;
+    readonly unit_editable: boolean;
+    readonly height_scale_editable: boolean;
+    readonly has_undefined_data: boolean | null;
+    readonly is_periodic_editable: boolean;
+    readonly is_metadata_complete: boolean;
+    surface: {
+        id?: number;
+        url?: string;
+    };
     data_source?: number | null;
+    readonly attachments: {
+        id?: number;
+        url?: string;
+    };
+    name: string;
     description?: string;
     measurement_date?: string | null;
-    readonly size_editable: boolean;
     size_x?: number | null;
     size_y?: number | null;
-    readonly unit_editable: boolean;
     unit?: UnitEnum | NullEnum | null;
-    readonly height_scale_editable: boolean;
     height_scale?: number;
-    has_undefined_data?: boolean | null;
     fill_undefined_data_mode?: FillUndefinedDataModeEnum;
     detrend_mode?: DetrendModeEnum;
     readonly resolution_x: number | null;
@@ -1430,19 +1273,25 @@ export type TopographyV2 = {
     readonly bandwidth_lower: number | null;
     readonly bandwidth_upper: number | null;
     readonly short_reliability_cutoff: number | null;
-    readonly is_periodic_editable: boolean;
     is_periodic?: boolean;
     instrument_name?: string;
     instrument_type?: InstrumentTypeEnum;
     instrument_parameters?: unknown;
-    readonly is_metadata_complete: string;
-    readonly creation_time: string;
-    readonly modification_time: string | null;
-    readonly task_duration: string;
-    readonly task_error: string;
-    readonly task_progress: number;
-    readonly task_state: string;
     tags?: Array<string>;
+};
+
+export type TopographyV2Create = {
+    surface: {
+        id?: number;
+        url?: string;
+    };
+    name: string;
+    datafile: {
+        id?: number;
+        url?: string;
+    };
+    tags?: Array<string>;
+    description?: string;
 };
 
 /**
@@ -1457,48 +1306,15 @@ export type TopographyV2 = {
 export type UnitEnum = 'km' | 'm' | 'mm' | 'µm' | 'nm' | 'Å' | 'pm';
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * Serializer for User model.
  */
 export type User = {
     readonly url: string;
     readonly id: number;
     readonly api: {
-        organizations: string;
-        add_organization: string;
-        remove_organization: string;
+        readonly organizations: string;
+        readonly add_organization: string;
+        readonly remove_organization: string;
     };
     /**
      * Name of User
@@ -1523,49 +1339,16 @@ export type User = {
 export type UserPermission = {
     readonly id: number;
     readonly user: {
-        id: number;
-        url: string;
-        name: string;
+        readonly id: number;
+        readonly url: string;
+        readonly name: string;
     };
-    allow: AllowF47Enum;
+    allow: PermissionAllowEnum;
     readonly is_current_user: boolean;
 };
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * Serializer for Workflow model.
  */
 export type Workflow = {
     readonly id: number;
@@ -1579,55 +1362,29 @@ export type Workflow = {
      */
     display_name: string;
     readonly visualization_type: string;
-    readonly kwargs_schema: string;
+    readonly kwargs_schema: {
+        [key: string]: unknown;
+    };
 };
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * v2 Serializer for Workflow model.
  */
-export type WorkflowTemplate = {
+export type WorkflowV2 = {
     readonly id: number;
-    name: string;
-    kwargs?: unknown;
-    implementation: string | null;
-    readonly creator: string;
+    readonly url: string;
+    /**
+     * Internal unique identifier
+     */
+    readonly name: string;
+    /**
+     * Human-readable name
+     */
+    readonly display_name: string;
 };
 
 /**
- * Serializer for ZipContainer model.
+ * v2 Serializer for ZipContainer model.
  */
 export type ZipContainerV2 = {
     readonly url: string;
@@ -1636,61 +1393,39 @@ export type ZipContainerV2 = {
         upload_finished: string;
     };
     readonly permissions: {
-        id: number;
-        url: string;
-        allow: 'view' | 'edit' | 'full';
-    };
-    readonly manifest: {
-        id?: number;
-        url?: string;
+        readonly id: number;
+        readonly url: string;
+        allow: PermissionAllowEnum;
     };
     readonly task_duration: string;
     readonly task_error: string;
     readonly task_progress: number;
     readonly task_state: string;
-    task_memory?: number | null;
-    task_traceback?: string | null;
+    readonly task_memory: number | null;
+    readonly task_traceback: string | null;
     readonly celery_task_state: string;
     readonly self_reported_task_state: string;
-    readonly creation_time: string;
-    readonly modification_time: string;
+    readonly created_at: string;
+    readonly updated_at: string;
+    readonly created_by: {
+        readonly id: number;
+        readonly url: string;
+        readonly name: string;
+    };
+    readonly updated_by: {
+        readonly id: number;
+        readonly url: string;
+        readonly name: string;
+    };
+    readonly manifest: {
+        readonly id: number;
+        readonly url: string;
+        readonly file?: string;
+    };
 };
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * Serializer for Manifest model.
  */
 export type ManifestWritable = {
     folder: string;
@@ -1698,40 +1433,14 @@ export type ManifestWritable = {
 };
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * Serializer for Manifest model.
+ */
+export type ManifestV2Writable = {
+    filename: string;
+};
+
+/**
+ * Serializer for Organization model.
  */
 export type OrganizationWritable = {
     /**
@@ -1752,7 +1461,14 @@ export type OrganizationWritable = {
  * Serializer for organization permissions
  */
 export type OrganizationPermissionWritable = {
-    allow: AllowF47Enum;
+    allow: PermissionAllowEnum;
+};
+
+export type PaginatedManifestV2ListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<ManifestV2Writable>;
 };
 
 export type PaginatedOrganizationListWritable = {
@@ -1760,6 +1476,13 @@ export type PaginatedOrganizationListWritable = {
     next?: string | null;
     previous?: string | null;
     results: Array<OrganizationWritable>;
+};
+
+export type PaginatedPublicationCollectionListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<PublicationCollectionWritable>;
 };
 
 export type PaginatedPublicationListWritable = {
@@ -1774,6 +1497,13 @@ export type PaginatedResultListWritable = {
     next?: string | null;
     previous?: string | null;
     results: Array<ResultWritable>;
+};
+
+export type PaginatedResultV2ListListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<unknown>;
 };
 
 export type PaginatedSurfaceListWritable = {
@@ -1818,41 +1548,15 @@ export type PaginatedUserListWritable = {
     results: Array<UserWritable>;
 };
 
+export type PaginatedWorkflowV2ListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<unknown>;
+};
+
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * Serializer for Manifest model.
  */
 export type PatchedManifestWritable = {
     folder?: string;
@@ -1860,40 +1564,14 @@ export type PatchedManifestWritable = {
 };
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * Serializer for Manifest model.
+ */
+export type PatchedManifestV2Writable = {
+    filename?: string;
+};
+
+/**
+ * Serializer for Organization model.
  */
 export type PatchedOrganizationWritable = {
     /**
@@ -1911,40 +1589,18 @@ export type PatchedOrganizationWritable = {
 };
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * v2 Serializer for WorkflowResult Detail model.
+ */
+export type PatchedResultV2DetailWritable = {
+    name?: string | null;
+    /**
+     * Optional description of the analysis.
+     */
+    description?: string | null;
+};
+
+/**
+ * Serializer for Surface model.
  */
 export type PatchedSurfaceWritable = {
     name?: string;
@@ -1957,40 +1613,7 @@ export type PatchedSurfaceWritable = {
 };
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * v2 Serializer for Surface model.
  */
 export type PatchedSurfaceV2Writable = {
     name?: string;
@@ -2003,40 +1626,7 @@ export type PatchedSurfaceV2Writable = {
 };
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * Serializer for Topography model.
  */
 export type PatchedTopographyWritable = {
     surface?: string;
@@ -2064,57 +1654,21 @@ export type PatchedTopographyWritable = {
 };
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * v2 Serializer for Topography model.
  */
 export type PatchedTopographyV2Writable = {
     surface?: {
         id?: number;
         url?: string;
     };
-    name?: string;
-    datafile_format?: string | null;
-    channel_names?: unknown;
     data_source?: number | null;
+    name?: string;
     description?: string;
     measurement_date?: string | null;
     size_x?: number | null;
     size_y?: number | null;
     unit?: UnitEnum | NullEnum | null;
     height_scale?: number;
-    has_undefined_data?: boolean | null;
     fill_undefined_data_mode?: FillUndefinedDataModeEnum;
     detrend_mode?: DetrendModeEnum;
     is_periodic?: boolean;
@@ -2125,40 +1679,7 @@ export type PatchedTopographyV2Writable = {
 };
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * Serializer for User model.
  */
 export type PatchedUserWritable = {
     /**
@@ -2173,48 +1694,6 @@ export type PatchedUserWritable = {
      * Email address
      */
     email?: string;
-};
-
-/**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
- */
-export type PatchedWorkflowTemplateWritable = {
-    name?: string;
-    kwargs?: unknown;
-    implementation?: string | null;
 };
 
 /**
@@ -2235,81 +1714,80 @@ export type PublicationWritable = {
     doi_state?: DoiStateEnum;
 };
 
+export type PublicationCollectionWritable = {
+    doi_name?: string;
+    title: string;
+    description?: string;
+    short_url?: string | null;
+};
+
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * Serializer for WorkflowResult model.
  */
 export type ResultWritable = {
     [key: string]: unknown;
 };
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * v2 Serializer for WorkflowResult Detail model.
+ */
+export type ResultV2DetailWritable = {
+    name?: string | null;
+    /**
+     * Optional description of the analysis.
+     */
+    description?: string | null;
+};
+
+/**
+ * Serializer for shared organization permissions across multiple permission sets
+ */
+export type SharedOrganizationPermissionWritable = {
+    /**
+     * Effective permission level across all considered permission sets
+     *
+     * * `no-access` - No Access
+     * * `view` - View
+     * * `edit` - Edit
+     * * `full` - Full
+     */
+    allow: Allow254Enum;
+    /**
+     * True if the permission level is the same across all permission sets
+     */
+    is_unique: boolean;
+};
+
+/**
+ * Serializer for shared permission sets
+ */
+export type SharedPermissionSetWritable = {
+    user_permissions: Array<SharedUserPermissionWritable>;
+    organization_permissions: Array<SharedOrganizationPermissionWritable>;
+};
+
+/**
+ * Serializer for shared user permissions across multiple permission sets
+ */
+export type SharedUserPermissionWritable = {
+    /**
+     * Effective permission level across all considered permission sets
+     *
+     * * `no-access` - No Access
+     * * `view` - View
+     * * `edit` - Edit
+     * * `full` - Full
+     */
+    allow: Allow254Enum;
+    is_current_user: boolean;
+    /**
+     * True if the permission level is the same across all permission sets
+     */
+    is_unique: boolean;
+};
+
+/**
+ * Serializer for Surface model.
  */
 export type SurfaceWritable = {
     name?: string;
@@ -2322,40 +1800,7 @@ export type SurfaceWritable = {
 };
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * v2 Serializer for Surface model.
  */
 export type SurfaceV2Writable = {
     name?: string;
@@ -2368,40 +1813,7 @@ export type SurfaceV2Writable = {
 };
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * Serializer for Tag model.
  */
 export type TagWritable = {
     name: string;
@@ -2422,40 +1834,7 @@ export type TagWritable = {
 };
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * Serializer for Topography model.
  */
 export type TopographyWritable = {
     surface: string;
@@ -2483,57 +1862,21 @@ export type TopographyWritable = {
 };
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * v2 Serializer for Topography model.
  */
 export type TopographyV2Writable = {
     surface: {
         id?: number;
         url?: string;
     };
-    name: string;
-    datafile_format?: string | null;
-    channel_names?: unknown;
     data_source?: number | null;
+    name: string;
     description?: string;
     measurement_date?: string | null;
     size_x?: number | null;
     size_y?: number | null;
     unit?: UnitEnum | NullEnum | null;
     height_scale?: number;
-    has_undefined_data?: boolean | null;
     fill_undefined_data_mode?: FillUndefinedDataModeEnum;
     detrend_mode?: DetrendModeEnum;
     is_periodic?: boolean;
@@ -2544,40 +1887,7 @@ export type TopographyV2Writable = {
 };
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * Serializer for User model.
  */
 export type UserWritable = {
     /**
@@ -2598,44 +1908,11 @@ export type UserWritable = {
  * Serializer for user permissions
  */
 export type UserPermissionWritable = {
-    allow: AllowF47Enum;
+    allow: PermissionAllowEnum;
 };
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
+ * Serializer for Workflow model.
  */
 export type WorkflowWritable = {
     /**
@@ -2649,53 +1926,10 @@ export type WorkflowWritable = {
 };
 
 /**
- * A mixin that enforces strict field validation for Django REST Framework serializers.
- *
- * This mixin provides two levels of validation:
- * 1. Ensures that only fields defined in the serializer are accepted in input data
- * 2. Prevents read-only fields from being included in input data
- *
- * By default, DRF silently ignores unknown fields and read-only fields in input data.
- * This mixin makes the API more explicit by raising validation errors when clients
- * attempt to provide invalid fields, helping catch bugs and improve API clarity.
- *
- * Usage
- * -----
- * Mix this class into your serializer before the base serializer class::
- *
- * class MySerializer(StrictFieldMixin, serializers.ModelSerializer):
- * class Meta:
- * model = MyModel
- * fields = ['id', 'name', 'description']
- * read_only_fields = ['id']
- *
- * Examples
- * --------
- * With the above serializer, these requests would raise validation errors:
- *
- * - Invalid field: ``{"name": "Test", "invalid_field": "value"}``
- * Error: ``{"invalid_field": "This field does not exist"}``
- *
- * - Read-only field: ``{"id": 123, "name": "Test"}``
- * Error: ``{"id": "This field is read only"}``
- *
- * Notes
- * -----
- * Credit: RomanKhudobei
- * Source: https://github.com/encode/django-rest-framework/issues/1655
- */
-export type WorkflowTemplateWritable = {
-    name: string;
-    kwargs?: unknown;
-    implementation: string | null;
-};
-
-/**
- * Serializer for ZipContainer model.
+ * v2 Serializer for ZipContainer model.
  */
 export type ZipContainerV2Writable = {
-    task_memory?: number | null;
-    task_traceback?: string | null;
+    [key: string]: unknown;
 };
 
 export type AnalysisApiCardSeriesRetrieveData = {
@@ -2708,11 +1942,12 @@ export type AnalysisApiCardSeriesRetrieveData = {
 };
 
 export type AnalysisApiCardSeriesRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: {
+        [key: string]: unknown;
+    };
 };
+
+export type AnalysisApiCardSeriesRetrieveResponse = AnalysisApiCardSeriesRetrieveResponses[keyof AnalysisApiCardSeriesRetrieveResponses];
 
 export type AnalysisApiConfigurationRetrieveData = {
     body?: never;
@@ -2740,39 +1975,43 @@ export type AnalysisApiMemoryUsageRetrieveData = {
 };
 
 export type AnalysisApiMemoryUsageRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: {
+        [key: string]: unknown;
+    };
 };
 
-export type AnalysisApiNamedResultRetrieveData = {
+export type AnalysisApiMemoryUsageRetrieveResponse = AnalysisApiMemoryUsageRetrieveResponses[keyof AnalysisApiMemoryUsageRetrieveResponses];
+
+export type AnalysisApiNamedResultListData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Filter results by name (case-insensitive contains)
+         */
+        name?: string;
+    };
     url: '/analysis/api/named-result';
 };
 
-export type AnalysisApiNamedResultRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+export type AnalysisApiNamedResultListResponses = {
+    200: Array<Result>;
 };
 
-export type AnalysisApiPendingRetrieveData = {
+export type AnalysisApiNamedResultListResponse = AnalysisApiNamedResultListResponses[keyof AnalysisApiNamedResultListResponses];
+
+export type AnalysisApiPendingListData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/analysis/api/pending';
 };
 
-export type AnalysisApiPendingRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+export type AnalysisApiPendingListResponses = {
+    200: Array<Result>;
 };
+
+export type AnalysisApiPendingListResponse = AnalysisApiPendingListResponses[keyof AnalysisApiPendingListResponses];
 
 export type AnalysisApiResultListData = {
     body?: never;
@@ -2786,6 +2025,14 @@ export type AnalysisApiResultListData = {
          * The initial index from which to return the results.
          */
         offset?: number;
+        /**
+         * The tag to filter results by.
+         */
+        tag?: string;
+        /**
+         * The name of the workflow to filter results by.
+         */
+        workflow?: string;
     };
     url: '/analysis/api/result/';
 };
@@ -2856,6 +2103,9 @@ export type AnalysisApiResultUpdateResponse = AnalysisApiResultUpdateResponses[k
 export type AnalysisApiResultDependenciesRetrieveData = {
     body?: never;
     path: {
+        /**
+         * ID of the workflow result
+         */
         workflow_id: number;
     };
     query?: never;
@@ -2863,15 +2113,21 @@ export type AnalysisApiResultDependenciesRetrieveData = {
 };
 
 export type AnalysisApiResultDependenciesRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: {
+        [key: string]: unknown;
+    };
 };
 
+export type AnalysisApiResultDependenciesRetrieveResponse = AnalysisApiResultDependenciesRetrieveResponses[keyof AnalysisApiResultDependenciesRetrieveResponses];
+
 export type AnalysisApiResultSetNameCreateData = {
-    body?: never;
+    body?: {
+        [key: string]: unknown;
+    };
     path: {
+        /**
+         * ID of the workflow result
+         */
         workflow_id: number;
     };
     query?: never;
@@ -2879,26 +2135,34 @@ export type AnalysisApiResultSetNameCreateData = {
 };
 
 export type AnalysisApiResultSetNameCreateResponses = {
-    /**
-     * No response body
-     */
     200: unknown;
 };
 
 export type AnalysisApiSetResultPermissionsPartialUpdateData = {
-    body?: never;
+    body?: {
+        [key: string]: unknown;
+    };
     path: {
+        /**
+         * ID of the workflow result
+         */
         workflow_id: number;
     };
     query?: never;
     url: '/analysis/api/set-result-permissions/{workflow_id}';
 };
 
+export type AnalysisApiSetResultPermissionsPartialUpdateErrors = {
+    405: {
+        [key: string]: unknown;
+    };
+};
+
+export type AnalysisApiSetResultPermissionsPartialUpdateError = AnalysisApiSetResultPermissionsPartialUpdateErrors[keyof AnalysisApiSetResultPermissionsPartialUpdateErrors];
+
 export type AnalysisApiSetResultPermissionsPartialUpdateResponses = {
-    /**
-     * No response body
-     */
     200: unknown;
+    204: unknown;
 };
 
 export type AnalysisApiStatisticsRetrieveData = {
@@ -2909,112 +2173,12 @@ export type AnalysisApiStatisticsRetrieveData = {
 };
 
 export type AnalysisApiStatisticsRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
-};
-
-export type AnalysisApiTemplateListData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/analysis/api/template/';
-};
-
-export type AnalysisApiTemplateListResponses = {
-    200: Array<WorkflowTemplate>;
-};
-
-export type AnalysisApiTemplateListResponse = AnalysisApiTemplateListResponses[keyof AnalysisApiTemplateListResponses];
-
-export type AnalysisApiTemplateCreateData = {
-    body: WorkflowTemplateWritable;
-    path?: never;
-    query?: never;
-    url: '/analysis/api/template/';
-};
-
-export type AnalysisApiTemplateCreateResponses = {
-    201: WorkflowTemplate;
-};
-
-export type AnalysisApiTemplateCreateResponse = AnalysisApiTemplateCreateResponses[keyof AnalysisApiTemplateCreateResponses];
-
-export type AnalysisApiTemplateDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this workflow template.
-         */
-        id: number;
+    200: {
+        [key: string]: unknown;
     };
-    query?: never;
-    url: '/analysis/api/template/{id}/';
 };
 
-export type AnalysisApiTemplateDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type AnalysisApiTemplateDestroyResponse = AnalysisApiTemplateDestroyResponses[keyof AnalysisApiTemplateDestroyResponses];
-
-export type AnalysisApiTemplateRetrieveData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this workflow template.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/analysis/api/template/{id}/';
-};
-
-export type AnalysisApiTemplateRetrieveResponses = {
-    200: WorkflowTemplate;
-};
-
-export type AnalysisApiTemplateRetrieveResponse = AnalysisApiTemplateRetrieveResponses[keyof AnalysisApiTemplateRetrieveResponses];
-
-export type AnalysisApiTemplatePartialUpdateData = {
-    body?: PatchedWorkflowTemplateWritable;
-    path: {
-        /**
-         * A unique integer value identifying this workflow template.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/analysis/api/template/{id}/';
-};
-
-export type AnalysisApiTemplatePartialUpdateResponses = {
-    200: WorkflowTemplate;
-};
-
-export type AnalysisApiTemplatePartialUpdateResponse = AnalysisApiTemplatePartialUpdateResponses[keyof AnalysisApiTemplatePartialUpdateResponses];
-
-export type AnalysisApiTemplateUpdateData = {
-    body: WorkflowTemplateWritable;
-    path: {
-        /**
-         * A unique integer value identifying this workflow template.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/analysis/api/template/{id}/';
-};
-
-export type AnalysisApiTemplateUpdateResponses = {
-    200: WorkflowTemplate;
-};
-
-export type AnalysisApiTemplateUpdateResponse = AnalysisApiTemplateUpdateResponses[keyof AnalysisApiTemplateUpdateResponses];
+export type AnalysisApiStatisticsRetrieveResponse = AnalysisApiStatisticsRetrieveResponses[keyof AnalysisApiStatisticsRetrieveResponses];
 
 export type AnalysisApiWorkflowListData = {
     body?: never;
@@ -3047,7 +2211,13 @@ export type AnalysisApiWorkflowRetrieveResponse = AnalysisApiWorkflowRetrieveRes
 export type AnalysisDownloadRetrieveData = {
     body?: never;
     path: {
+        /**
+         * File format (e.g., 'txt', 'xlsx')
+         */
         file_format: string;
+        /**
+         * Comma-separated list of analysis IDs
+         */
         ids: string;
     };
     query?: never;
@@ -3055,11 +2225,278 @@ export type AnalysisDownloadRetrieveData = {
 };
 
 export type AnalysisDownloadRetrieveResponses = {
+    200: Blob | File;
+};
+
+export type AnalysisDownloadRetrieveResponse = AnalysisDownloadRetrieveResponses[keyof AnalysisDownloadRetrieveResponses];
+
+export type AnalysisV2ConfigurationsRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this configuration.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/analysis/v2/configurations/{id}/';
+};
+
+export type AnalysisV2ConfigurationsRetrieveResponses = {
+    200: ConfigurationV2;
+};
+
+export type AnalysisV2ConfigurationsRetrieveResponse = AnalysisV2ConfigurationsRetrieveResponses[keyof AnalysisV2ConfigurationsRetrieveResponses];
+
+export type AnalysisV2ResultsListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Created on or after
+         */
+        created_gte?: string;
+        /**
+         * Created on or before
+         */
+        created_lte?: string;
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number;
+        named?: boolean;
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number;
+        subject_id?: number;
+        subject_ids?: Array<string>;
+        subject_name?: string;
+        /**
+         * * `tag` - Tag
+         * * `surface` - Surface
+         * * `topography` - Topography
+         */
+        subject_type?: 'surface' | 'tag' | 'topography';
+        tag?: string;
+        /**
+         * Filter by task state. Can be specified multiple times: task_state=su&task_state=fa
+         */
+        task_state?: Array<'fa' | 'no' | 'pe' | 're' | 'st' | 'su'>;
+        /**
+         * Workflow name
+         */
+        workflow_name?: string;
+    };
+    url: '/analysis/v2/results/';
+};
+
+export type AnalysisV2ResultsListResponses = {
+    200: PaginatedResultV2ListList;
+};
+
+export type AnalysisV2ResultsListResponse = AnalysisV2ResultsListResponses[keyof AnalysisV2ResultsListResponses];
+
+export type AnalysisV2ResultsCreateData = {
+    body: ResultV2Create;
+    path?: never;
+    query?: never;
+    url: '/analysis/v2/results/';
+};
+
+export type AnalysisV2ResultsCreateResponses = {
+    201: ResultV2Create;
+};
+
+export type AnalysisV2ResultsCreateResponse = AnalysisV2ResultsCreateResponses[keyof AnalysisV2ResultsCreateResponses];
+
+export type AnalysisV2ResultsDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this workflow result.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/analysis/v2/results/{id}/';
+};
+
+export type AnalysisV2ResultsDestroyResponses = {
     /**
      * No response body
      */
-    200: unknown;
+    204: void;
 };
+
+export type AnalysisV2ResultsDestroyResponse = AnalysisV2ResultsDestroyResponses[keyof AnalysisV2ResultsDestroyResponses];
+
+export type AnalysisV2ResultsRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this workflow result.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/analysis/v2/results/{id}/';
+};
+
+export type AnalysisV2ResultsRetrieveResponses = {
+    200: ResultV2Detail;
+};
+
+export type AnalysisV2ResultsRetrieveResponse = AnalysisV2ResultsRetrieveResponses[keyof AnalysisV2ResultsRetrieveResponses];
+
+export type AnalysisV2ResultsPartialUpdateData = {
+    body?: PatchedResultV2DetailWritable;
+    path: {
+        /**
+         * A unique integer value identifying this workflow result.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/analysis/v2/results/{id}/';
+};
+
+export type AnalysisV2ResultsPartialUpdateResponses = {
+    200: ResultV2Detail;
+};
+
+export type AnalysisV2ResultsPartialUpdateResponse = AnalysisV2ResultsPartialUpdateResponses[keyof AnalysisV2ResultsPartialUpdateResponses];
+
+export type AnalysisV2ResultsUpdateData = {
+    body?: ResultV2DetailWritable;
+    path: {
+        /**
+         * A unique integer value identifying this workflow result.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/analysis/v2/results/{id}/';
+};
+
+export type AnalysisV2ResultsUpdateResponses = {
+    200: ResultV2Detail;
+};
+
+export type AnalysisV2ResultsUpdateResponse = AnalysisV2ResultsUpdateResponses[keyof AnalysisV2ResultsUpdateResponses];
+
+export type AnalysisV2ResultsDependenciesRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this workflow result.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/analysis/v2/results/{id}/dependencies/';
+};
+
+export type AnalysisV2ResultsDependenciesRetrieveResponses = {
+    200: ResultV2Detail;
+};
+
+export type AnalysisV2ResultsDependenciesRetrieveResponse = AnalysisV2ResultsDependenciesRetrieveResponses[keyof AnalysisV2ResultsDependenciesRetrieveResponses];
+
+export type AnalysisV2ResultsFilesRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this workflow result.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/analysis/v2/results/{id}/files/';
+};
+
+export type AnalysisV2ResultsFilesRetrieveResponses = {
+    200: ResultV2Detail;
+};
+
+export type AnalysisV2ResultsFilesRetrieveResponse = AnalysisV2ResultsFilesRetrieveResponses[keyof AnalysisV2ResultsFilesRetrieveResponses];
+
+export type AnalysisV2ResultsRunCreateData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this workflow result.
+         */
+        id: number;
+    };
+    query?: {
+        /**
+         * Force re-run of analysis even if already running or completed
+         */
+        force?: boolean;
+    };
+    url: '/analysis/v2/results/{id}/run/';
+};
+
+export type AnalysisV2ResultsRunCreateResponses = {
+    200: ResultV2Detail;
+};
+
+export type AnalysisV2ResultsRunCreateResponse = AnalysisV2ResultsRunCreateResponses[keyof AnalysisV2ResultsRunCreateResponses];
+
+export type AnalysisV2WorkflowsListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * * `sds_ml` - SDS ML
+         * * `topobank_statistics` - Contact
+         * * `topobank_contact` - Statistics
+         */
+        app?: 'sds_ml' | 'topobank_contact' | 'topobank_statistics';
+        display_name?: string;
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number;
+        name?: string;
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number;
+        /**
+         * * `tag` - Tag
+         * * `surface` - Surface
+         * * `topography` - Topography
+         */
+        subject_type?: 'surface' | 'tag' | 'topography';
+    };
+    url: '/analysis/v2/workflows/';
+};
+
+export type AnalysisV2WorkflowsListResponses = {
+    200: PaginatedWorkflowV2List;
+};
+
+export type AnalysisV2WorkflowsListResponse = AnalysisV2WorkflowsListResponses[keyof AnalysisV2WorkflowsListResponses];
+
+export type AnalysisV2WorkflowsRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this workflow.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/analysis/v2/workflows/{id}/';
+};
+
+export type AnalysisV2WorkflowsRetrieveResponses = {
+    200: WorkflowV2;
+};
+
+export type AnalysisV2WorkflowsRetrieveResponse = AnalysisV2WorkflowsRetrieveResponses[keyof AnalysisV2WorkflowsRetrieveResponses];
 
 export type AuthorizationV2GrantOrganizationAccessCreateData = {
     body: GrantOrganizationRequest;
@@ -3115,6 +2552,24 @@ export type AuthorizationV2PermissionSetRetrieveResponses = {
 
 export type AuthorizationV2PermissionSetRetrieveResponse = AuthorizationV2PermissionSetRetrieveResponses[keyof AuthorizationV2PermissionSetRetrieveResponses];
 
+export type AuthorizationV2PermissionSetSharedRetrieveData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * List of permission set IDs to find user intersection
+         */
+        sets: Array<number>;
+    };
+    url: '/authorization/v2/permission-set/shared/';
+};
+
+export type AuthorizationV2PermissionSetSharedRetrieveResponses = {
+    200: SharedPermissionSet;
+};
+
+export type AuthorizationV2PermissionSetSharedRetrieveResponse = AuthorizationV2PermissionSetSharedRetrieveResponses[keyof AuthorizationV2PermissionSetSharedRetrieveResponses];
+
 export type AuthorizationV2RevokeOrganizationAccessCreateData = {
     body: RevokeOrganizationRequest;
     path: {
@@ -3165,27 +2620,33 @@ export type EntryPointsRetrieveData = {
 };
 
 export type EntryPointsRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: {
+        [key: string]: unknown;
+    };
 };
+
+export type EntryPointsRetrieveResponse = EntryPointsRetrieveResponses[keyof EntryPointsRetrieveResponses];
 
 export type FilesFolderRetrieveData = {
     body?: never;
     path: {
         id: number;
+        /**
+         * Folder ID
+         */
+        pk: number;
     };
     query?: never;
     url: '/files/folder/{id}/';
 };
 
 export type FilesFolderRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: {
+        [key: string]: unknown;
+    };
 };
+
+export type FilesFolderRetrieveResponse = FilesFolderRetrieveResponses[keyof FilesFolderRetrieveResponses];
 
 export type FilesManifestCreateData = {
     body: ManifestWritable;
@@ -3275,6 +2736,116 @@ export type FilesManifestUpdateResponses = {
 
 export type FilesManifestUpdateResponse = FilesManifestUpdateResponses[keyof FilesManifestUpdateResponses];
 
+export type FilesV2ManifestListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number;
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number;
+    };
+    url: '/files/v2/manifest/';
+};
+
+export type FilesV2ManifestListResponses = {
+    200: PaginatedManifestV2List;
+};
+
+export type FilesV2ManifestListResponse = FilesV2ManifestListResponses[keyof FilesV2ManifestListResponses];
+
+export type FilesV2ManifestCreateData = {
+    body: ManifestV2Create;
+    path?: never;
+    query?: never;
+    url: '/files/v2/manifest/';
+};
+
+export type FilesV2ManifestCreateResponses = {
+    201: ManifestV2Create;
+};
+
+export type FilesV2ManifestCreateResponse = FilesV2ManifestCreateResponses[keyof FilesV2ManifestCreateResponses];
+
+export type FilesV2ManifestDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this manifest.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/files/v2/manifest/{id}/';
+};
+
+export type FilesV2ManifestDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type FilesV2ManifestDestroyResponse = FilesV2ManifestDestroyResponses[keyof FilesV2ManifestDestroyResponses];
+
+export type FilesV2ManifestRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this manifest.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/files/v2/manifest/{id}/';
+};
+
+export type FilesV2ManifestRetrieveResponses = {
+    200: ManifestV2;
+};
+
+export type FilesV2ManifestRetrieveResponse = FilesV2ManifestRetrieveResponses[keyof FilesV2ManifestRetrieveResponses];
+
+export type FilesV2ManifestPartialUpdateData = {
+    body?: PatchedManifestV2Writable;
+    path: {
+        /**
+         * A unique integer value identifying this manifest.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/files/v2/manifest/{id}/';
+};
+
+export type FilesV2ManifestPartialUpdateResponses = {
+    200: ManifestV2;
+};
+
+export type FilesV2ManifestPartialUpdateResponse = FilesV2ManifestPartialUpdateResponses[keyof FilesV2ManifestPartialUpdateResponses];
+
+export type FilesV2ManifestUpdateData = {
+    body: ManifestV2Writable;
+    path: {
+        /**
+         * A unique integer value identifying this manifest.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/files/v2/manifest/{id}/';
+};
+
+export type FilesV2ManifestUpdateResponses = {
+    200: ManifestV2;
+};
+
+export type FilesV2ManifestUpdateResponse = FilesV2ManifestUpdateResponses[keyof FilesV2ManifestUpdateResponses];
+
 export type GoPublicationListData = {
     body?: never;
     path?: never;
@@ -3296,6 +2867,46 @@ export type GoPublicationListResponses = {
 };
 
 export type GoPublicationListResponse = GoPublicationListResponses[keyof GoPublicationListResponses];
+
+export type GoPublicationCollectionListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of results to return per page.
+         */
+        limit?: number;
+        /**
+         * The initial index from which to return the results.
+         */
+        offset?: number;
+    };
+    url: '/go/publication-collection/';
+};
+
+export type GoPublicationCollectionListResponses = {
+    200: PaginatedPublicationCollectionList;
+};
+
+export type GoPublicationCollectionListResponse = GoPublicationCollectionListResponses[keyof GoPublicationCollectionListResponses];
+
+export type GoPublicationCollectionRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this publication collection.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/go/publication-collection/{id}/';
+};
+
+export type GoPublicationCollectionRetrieveResponses = {
+    200: PublicationCollection;
+};
+
+export type GoPublicationCollectionRetrieveResponse = GoPublicationCollectionRetrieveResponses[keyof GoPublicationCollectionRetrieveResponses];
 
 export type GoPublicationRetrieveData = {
     body?: never;
@@ -3329,6 +2940,20 @@ export type GoPublishCreateResponses = {
     200: unknown;
 };
 
+export type GoPublishCollectionCreateData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/go/publish-collection/';
+};
+
+export type GoPublishCollectionCreateResponses = {
+    /**
+     * No response body
+     */
+    200: unknown;
+};
+
 export type ManagerApiDownloadTagRetrieveData = {
     body?: never;
     path: {
@@ -3339,11 +2964,12 @@ export type ManagerApiDownloadTagRetrieveData = {
 };
 
 export type ManagerApiDownloadTagRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: {
+        [key: string]: unknown;
+    };
 };
+
+export type ManagerApiDownloadTagRetrieveResponse = ManagerApiDownloadTagRetrieveResponses[keyof ManagerApiDownloadTagRetrieveResponses];
 
 export type ManagerApiImportSurfaceCreateData = {
     body?: never;
@@ -3546,18 +3172,29 @@ export type ManagerApiSurfaceUpdateResponses = {
 export type ManagerApiSurfaceUpdateResponse = ManagerApiSurfaceUpdateResponses[keyof ManagerApiSurfaceUpdateResponses];
 
 export type ManagerApiSurfaceSetPermissionsPartialUpdateData = {
-    body?: never;
+    body?: {
+        [key: string]: unknown;
+    };
     path: {
-        id: string;
+        id: number;
+        /**
+         * Surface ID
+         */
+        pk: number;
     };
     query?: never;
     url: '/manager/api/surface/{id}/set-permissions/';
 };
 
+export type ManagerApiSurfaceSetPermissionsPartialUpdateErrors = {
+    405: {
+        [key: string]: unknown;
+    };
+};
+
+export type ManagerApiSurfaceSetPermissionsPartialUpdateError = ManagerApiSurfaceSetPermissionsPartialUpdateErrors[keyof ManagerApiSurfaceSetPermissionsPartialUpdateErrors];
+
 export type ManagerApiSurfaceSetPermissionsPartialUpdateResponses = {
-    /**
-     * No response body
-     */
     200: unknown;
 };
 
@@ -3571,11 +3208,12 @@ export type ManagerApiSurfaceDownloadRetrieveData = {
 };
 
 export type ManagerApiSurfaceDownloadRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: {
+        [key: string]: unknown;
+    };
 };
+
+export type ManagerApiSurfaceDownloadRetrieveResponse = ManagerApiSurfaceDownloadRetrieveResponses[keyof ManagerApiSurfaceDownloadRetrieveResponses];
 
 export type ManagerApiTagListData = {
     body?: never;
@@ -3727,18 +3365,23 @@ export type ManagerApiTopographyUpdateResponse = ManagerApiTopographyUpdateRespo
 export type ManagerApiTopographyForceInspectCreateData = {
     body?: never;
     path: {
-        id: string;
+        id: number;
+        /**
+         * Topography ID
+         */
+        pk: number;
     };
     query?: never;
     url: '/manager/api/topography/{id}/force-inspect/';
 };
 
 export type ManagerApiTopographyForceInspectCreateResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: {
+        [key: string]: unknown;
+    };
 };
+
+export type ManagerApiTopographyForceInspectCreateResponse = ManagerApiTopographyForceInspectCreateResponses[keyof ManagerApiTopographyForceInspectCreateResponses];
 
 export type ManagerApiVersionsRetrieveData = {
     body?: never;
@@ -3748,11 +3391,12 @@ export type ManagerApiVersionsRetrieveData = {
 };
 
 export type ManagerApiVersionsRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: {
+        [key: string]: unknown;
+    };
 };
+
+export type ManagerApiVersionsRetrieveResponse = ManagerApiVersionsRetrieveResponses[keyof ManagerApiVersionsRetrieveResponses];
 
 export type ManagerV2DownloadSurfaceCreateData = {
     body?: never;
@@ -3764,11 +3408,10 @@ export type ManagerV2DownloadSurfaceCreateData = {
 };
 
 export type ManagerV2DownloadSurfaceCreateResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: ZipContainerV2;
 };
+
+export type ManagerV2DownloadSurfaceCreateResponse = ManagerV2DownloadSurfaceCreateResponses[keyof ManagerV2DownloadSurfaceCreateResponses];
 
 export type ManagerV2DownloadTagCreateData = {
     body?: never;
@@ -3780,24 +3423,45 @@ export type ManagerV2DownloadTagCreateData = {
 };
 
 export type ManagerV2DownloadTagCreateResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: ZipContainerV2;
 };
+
+export type ManagerV2DownloadTagCreateResponse = ManagerV2DownloadTagCreateResponses[keyof ManagerV2DownloadTagCreateResponses];
 
 export type ManagerV2SurfaceListData = {
     body?: never;
     path?: never;
     query?: {
+        created_by?: string;
+        has_tags?: boolean;
         /**
          * Number of results to return per page.
          */
         limit?: number;
+        name?: string;
         /**
          * The initial index from which to return the results.
          */
         offset?: number;
+        /**
+         * Ordering
+         *
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         * * `updated_at` - Updated at
+         * * `-updated_at` - Updated at (descending)
+         */
+        order?: Array<'-created_at' | '-updated_at' | 'created_at' | 'updated_at'>;
+        owned_by?: string;
+        property?: string;
+        tag?: string;
+        tag_contains?: string;
+        tag_startswith?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        topography?: Array<number>;
+        updated_by?: string;
     };
     url: '/manager/v2/surface/';
 };
@@ -3896,30 +3560,64 @@ export type ManagerV2SurfaceUpdateResponses = {
 
 export type ManagerV2SurfaceUpdateResponse = ManagerV2SurfaceUpdateResponses[keyof ManagerV2SurfaceUpdateResponses];
 
+export type ManagerV2TagTreeRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Optional root tag to use as the starting point for the tree. Only this tag and its descendants will be included. Example: 'material' or 'material/steel'
+         */
+        tag?: string;
+    };
+    url: '/manager/v2/tag-tree/';
+};
+
+export type ManagerV2TagTreeRetrieveResponses = {
+    /**
+     * A nested tree structure of all tags accessible to the user
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type ManagerV2TagTreeRetrieveResponse = ManagerV2TagTreeRetrieveResponses[keyof ManagerV2TagTreeRetrieveResponses];
+
 export type ManagerV2TopographyListData = {
     body?: never;
     path?: never;
     query?: {
+        created_by?: string;
         /**
          * Number of results to return per page.
          */
         limit?: number;
         /**
+         * If set to true, the response will include the direct URL to the file (thumbnail).
+         */
+        link_file?: boolean;
+        name?: string;
+        /**
          * The initial index from which to return the results.
          */
         offset?: number;
         /**
-         * Filter topographies by surface ID
+         * Ordering
+         *
+         * * `created_at` - Created at
+         * * `-created_at` - Created at (descending)
+         * * `updated_at` - Updated at
+         * * `-updated_at` - Updated at (descending)
          */
-        surface?: number;
+        order?: Array<'-created_at' | '-updated_at' | 'created_at' | 'updated_at'>;
+        owned_by?: string;
         /**
-         * Filter topographies by tag
+         * Multiple values may be separated by commas.
          */
+        surface?: Array<number>;
         tag?: string;
-        /**
-         * Filter topographies by tag prefix
-         */
         tag_startswith?: string;
+        updated_by?: string;
     };
     url: '/manager/v2/topography/';
 };
@@ -3931,14 +3629,14 @@ export type ManagerV2TopographyListResponses = {
 export type ManagerV2TopographyListResponse = ManagerV2TopographyListResponses[keyof ManagerV2TopographyListResponses];
 
 export type ManagerV2TopographyCreateData = {
-    body: TopographyV2Writable;
+    body: TopographyV2Create;
     path?: never;
     query?: never;
     url: '/manager/v2/topography/';
 };
 
 export type ManagerV2TopographyCreateResponses = {
-    201: TopographyV2;
+    201: TopographyV2Create;
 };
 
 export type ManagerV2TopographyCreateResponse = ManagerV2TopographyCreateResponses[keyof ManagerV2TopographyCreateResponses];
@@ -4021,18 +3719,17 @@ export type ManagerV2TopographyUpdateResponse = ManagerV2TopographyUpdateRespons
 export type ManagerV2UploadZipFinishCreateData = {
     body?: never;
     path: {
-        id: string;
+        id: number;
     };
     query?: never;
     url: '/manager/v2/upload-zip/finish/{id}/';
 };
 
 export type ManagerV2UploadZipFinishCreateResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: ZipContainerV2;
 };
+
+export type ManagerV2UploadZipFinishCreateResponse = ManagerV2UploadZipFinishCreateResponses[keyof ManagerV2UploadZipFinishCreateResponses];
 
 export type ManagerV2UploadZipStartCreateData = {
     body?: never;
@@ -4066,18 +3763,21 @@ export type ManagerV2ZipContainerRetrieveResponses = {
 export type ManagerV2ZipContainerRetrieveResponse = ManagerV2ZipContainerRetrieveResponses[keyof ManagerV2ZipContainerRetrieveResponses];
 
 export type OrganizationsV1AddUserCreateData = {
-    body?: never;
+    body?: {
+        [key: string]: unknown;
+    };
     path: {
-        id: string;
+        id: number;
+        /**
+         * Organization ID
+         */
+        pk: number;
     };
     query?: never;
     url: '/organizations/v1/add-user/{id}/';
 };
 
 export type OrganizationsV1AddUserCreateResponses = {
-    /**
-     * No response body
-     */
     200: unknown;
 };
 
@@ -4192,18 +3892,21 @@ export type OrganizationsV1OrganizationUpdateResponses = {
 export type OrganizationsV1OrganizationUpdateResponse = OrganizationsV1OrganizationUpdateResponses[keyof OrganizationsV1OrganizationUpdateResponses];
 
 export type OrganizationsV1RemoveUserCreateData = {
-    body?: never;
+    body?: {
+        [key: string]: unknown;
+    };
     path: {
-        id: string;
+        id: number;
+        /**
+         * Organization ID
+         */
+        pk: number;
     };
     query?: never;
     url: '/organizations/v1/remove-user/{id}/';
 };
 
 export type OrganizationsV1RemoveUserCreateResponses = {
-    /**
-     * No response body
-     */
     200: unknown;
 };
 
@@ -4233,41 +3936,48 @@ export type PluginsStatisticsCardRoughnessParametersRetrieveData = {
 };
 
 export type PluginsStatisticsCardRoughnessParametersRetrieveResponses = {
-    /**
-     * No response body
-     */
-    200: unknown;
+    200: {
+        [key: string]: unknown;
+    };
 };
 
+export type PluginsStatisticsCardRoughnessParametersRetrieveResponse = PluginsStatisticsCardRoughnessParametersRetrieveResponses[keyof PluginsStatisticsCardRoughnessParametersRetrieveResponses];
+
 export type UsersV1AddOrganizationCreateData = {
-    body?: never;
+    body?: {
+        [key: string]: unknown;
+    };
     path: {
-        id: string;
+        id: number;
+        /**
+         * User ID
+         */
+        pk: number;
     };
     query?: never;
     url: '/users/v1/add-organization/{id}/';
 };
 
 export type UsersV1AddOrganizationCreateResponses = {
-    /**
-     * No response body
-     */
     200: unknown;
 };
 
 export type UsersV1RemoveOrganizationCreateData = {
-    body?: never;
+    body?: {
+        [key: string]: unknown;
+    };
     path: {
-        id: string;
+        id: number;
+        /**
+         * User ID
+         */
+        pk: number;
     };
     query?: never;
     url: '/users/v1/remove-organization/{id}/';
 };
 
 export type UsersV1RemoveOrganizationCreateResponses = {
-    /**
-     * No response body
-     */
     200: unknown;
 };
 

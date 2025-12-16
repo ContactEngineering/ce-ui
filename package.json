@@ -8,7 +8,8 @@
   "scripts": {
     "dev": "webpack --env=prefix=.. --mode development --devtool inline-source-map --watch",
     "build-dev": "webpack --mode development",
-    "build-prod": "webpack --mode production"
+    "build-prod": "webpack --mode production",
+    "openapi-ts": "openapi-ts --file openapi.config.ts"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +22,7 @@
     "@fortawesome/fontawesome-svg-core": "^7.0.0",
     "@fortawesome/free-regular-svg-icons": "^7.0.0",
     "@fortawesome/free-solid-svg-icons": "^7.0.0",
+    "@hey-api/openapi-ts": "^0.89.0",
     "@tiptap/pm": "^3.11.1",
     "@tiptap/starter-kit": "^3.11.1",
     "@tiptap/vue-3": "^3.11.1",

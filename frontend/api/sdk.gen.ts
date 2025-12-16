@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AnalysisApiCardSeriesRetrieveData, AnalysisApiCardSeriesRetrieveResponses, AnalysisApiConfigurationRetrieveData, AnalysisApiConfigurationRetrieveResponses, AnalysisApiMemoryUsageRetrieveData, AnalysisApiMemoryUsageRetrieveResponses, AnalysisApiNamedResultRetrieveData, AnalysisApiNamedResultRetrieveResponses, AnalysisApiPendingRetrieveData, AnalysisApiPendingRetrieveResponses, AnalysisApiResultDependenciesRetrieveData, AnalysisApiResultDependenciesRetrieveResponses, AnalysisApiResultDestroyData, AnalysisApiResultDestroyResponses, AnalysisApiResultListData, AnalysisApiResultListResponses, AnalysisApiResultRetrieveData, AnalysisApiResultRetrieveResponses, AnalysisApiResultSetNameCreateData, AnalysisApiResultSetNameCreateResponses, AnalysisApiResultUpdateData, AnalysisApiResultUpdateResponses, AnalysisApiSetResultPermissionsPartialUpdateData, AnalysisApiSetResultPermissionsPartialUpdateResponses, AnalysisApiStatisticsRetrieveData, AnalysisApiStatisticsRetrieveResponses, AnalysisApiTemplateCreateData, AnalysisApiTemplateCreateResponses, AnalysisApiTemplateDestroyData, AnalysisApiTemplateDestroyResponses, AnalysisApiTemplateListData, AnalysisApiTemplateListResponses, AnalysisApiTemplatePartialUpdateData, AnalysisApiTemplatePartialUpdateResponses, AnalysisApiTemplateRetrieveData, AnalysisApiTemplateRetrieveResponses, AnalysisApiTemplateUpdateData, AnalysisApiTemplateUpdateResponses, AnalysisApiWorkflowListData, AnalysisApiWorkflowListResponses, AnalysisApiWorkflowRetrieveData, AnalysisApiWorkflowRetrieveResponses, AnalysisDownloadRetrieveData, AnalysisDownloadRetrieveResponses, AuthorizationV2GrantOrganizationAccessCreateData, AuthorizationV2GrantOrganizationAccessCreateResponses, AuthorizationV2GrantUserAccessCreateData, AuthorizationV2GrantUserAccessCreateResponses, AuthorizationV2PermissionSetRetrieveData, AuthorizationV2PermissionSetRetrieveResponses, AuthorizationV2RevokeOrganizationAccessCreateData, AuthorizationV2RevokeOrganizationAccessCreateResponses, AuthorizationV2RevokeUserAccessCreateData, AuthorizationV2RevokeUserAccessCreateResponses, EntryPointsRetrieveData, EntryPointsRetrieveResponses, FilesFolderRetrieveData, FilesFolderRetrieveResponses, FilesManifestCreateData, FilesManifestCreateResponses, FilesManifestDestroyData, FilesManifestDestroyResponses, FilesManifestPartialUpdateData, FilesManifestPartialUpdateResponses, FilesManifestRetrieveData, FilesManifestRetrieveResponses, FilesManifestUpdateData, FilesManifestUpdateResponses, GoPublicationListData, GoPublicationListResponses, GoPublicationRetrieveData, GoPublicationRetrieveResponses, GoPublishCreateData, GoPublishCreateResponses, ManagerApiDownloadTagRetrieveData, ManagerApiDownloadTagRetrieveResponses, ManagerApiImportSurfaceCreateData, ManagerApiImportSurfaceCreateResponses, ManagerApiMemoryUsageRetrieveData, ManagerApiMemoryUsageRetrieveResponses, ManagerApiPropertiesInTagCategoricalRetrieveData, ManagerApiPropertiesInTagCategoricalRetrieveResponses, ManagerApiPropertiesInTagNumericalRetrieveData, ManagerApiPropertiesInTagNumericalRetrieveResponses, ManagerApiSetTagPermissionsPartialUpdateData, ManagerApiSetTagPermissionsPartialUpdateResponses, ManagerApiStatisticsRetrieveData, ManagerApiStatisticsRetrieveResponses, ManagerApiSurfaceCreateData, ManagerApiSurfaceCreateResponses, ManagerApiSurfaceDestroyData, ManagerApiSurfaceDestroyResponses, ManagerApiSurfaceDownloadRetrieveData, ManagerApiSurfaceDownloadRetrieveResponses, ManagerApiSurfaceListData, ManagerApiSurfaceListResponses, ManagerApiSurfacePartialUpdateData, ManagerApiSurfacePartialUpdateResponses, ManagerApiSurfaceRetrieveData, ManagerApiSurfaceRetrieveResponses, ManagerApiSurfaceSetPermissionsPartialUpdateData, ManagerApiSurfaceSetPermissionsPartialUpdateResponses, ManagerApiSurfaceUpdateData, ManagerApiSurfaceUpdateResponses, ManagerApiTagListData, ManagerApiTagListResponses, ManagerApiTagRetrieveData, ManagerApiTagRetrieveResponses, ManagerApiTopographyCreateData, ManagerApiTopographyCreateResponses, ManagerApiTopographyDestroyData, ManagerApiTopographyDestroyResponses, ManagerApiTopographyForceInspectCreateData, ManagerApiTopographyForceInspectCreateResponses, ManagerApiTopographyListData, ManagerApiTopographyListResponses, ManagerApiTopographyPartialUpdateData, ManagerApiTopographyPartialUpdateResponses, ManagerApiTopographyRetrieveData, ManagerApiTopographyRetrieveResponses, ManagerApiTopographyUpdateData, ManagerApiTopographyUpdateResponses, ManagerApiVersionsRetrieveData, ManagerApiVersionsRetrieveResponses, ManagerV2DownloadSurfaceCreateData, ManagerV2DownloadSurfaceCreateResponses, ManagerV2DownloadTagCreateData, ManagerV2DownloadTagCreateResponses, ManagerV2SurfaceCreateData, ManagerV2SurfaceCreateResponses, ManagerV2SurfaceDestroyData, ManagerV2SurfaceDestroyResponses, ManagerV2SurfaceListData, ManagerV2SurfaceListResponses, ManagerV2SurfacePartialUpdateData, ManagerV2SurfacePartialUpdateResponses, ManagerV2SurfaceRetrieveData, ManagerV2SurfaceRetrieveResponses, ManagerV2SurfaceUpdateData, ManagerV2SurfaceUpdateResponses, ManagerV2TopographyCreateData, ManagerV2TopographyCreateResponses, ManagerV2TopographyDestroyData, ManagerV2TopographyDestroyResponses, ManagerV2TopographyListData, ManagerV2TopographyListResponses, ManagerV2TopographyPartialUpdateData, ManagerV2TopographyPartialUpdateResponses, ManagerV2TopographyRetrieveData, ManagerV2TopographyRetrieveResponses, ManagerV2TopographyUpdateData, ManagerV2TopographyUpdateResponses, ManagerV2UploadZipFinishCreateData, ManagerV2UploadZipFinishCreateResponses, ManagerV2UploadZipStartCreateData, ManagerV2UploadZipStartCreateResponses, ManagerV2ZipContainerRetrieveData, ManagerV2ZipContainerRetrieveResponses, OrganizationsV1AddUserCreateData, OrganizationsV1AddUserCreateResponses, OrganizationsV1OrganizationCreateData, OrganizationsV1OrganizationCreateResponses, OrganizationsV1OrganizationDestroyData, OrganizationsV1OrganizationDestroyResponses, OrganizationsV1OrganizationListData, OrganizationsV1OrganizationListResponses, OrganizationsV1OrganizationPartialUpdateData, OrganizationsV1OrganizationPartialUpdateResponses, OrganizationsV1OrganizationRetrieveData, OrganizationsV1OrganizationRetrieveResponses, OrganizationsV1OrganizationUpdateData, OrganizationsV1OrganizationUpdateResponses, OrganizationsV1RemoveUserCreateData, OrganizationsV1RemoveUserCreateResponses, PluginsContactCardContactMechanicsRetrieveData, PluginsContactCardContactMechanicsRetrieveResponses, PluginsStatisticsCardRoughnessParametersRetrieveData, PluginsStatisticsCardRoughnessParametersRetrieveResponses, UsersV1AddOrganizationCreateData, UsersV1AddOrganizationCreateResponses, UsersV1RemoveOrganizationCreateData, UsersV1RemoveOrganizationCreateResponses, UsersV1UserCreateData, UsersV1UserCreateResponses, UsersV1UserDestroyData, UsersV1UserDestroyResponses, UsersV1UserListData, UsersV1UserListResponses, UsersV1UserPartialUpdateData, UsersV1UserPartialUpdateResponses, UsersV1UserRetrieveData, UsersV1UserRetrieveResponses, UsersV1UserUpdateData, UsersV1UserUpdateResponses } from './types.gen';
+import type { AnalysisApiCardSeriesRetrieveData, AnalysisApiCardSeriesRetrieveResponses, AnalysisApiConfigurationRetrieveData, AnalysisApiConfigurationRetrieveResponses, AnalysisApiMemoryUsageRetrieveData, AnalysisApiMemoryUsageRetrieveResponses, AnalysisApiNamedResultListData, AnalysisApiNamedResultListResponses, AnalysisApiPendingListData, AnalysisApiPendingListResponses, AnalysisApiResultDependenciesRetrieveData, AnalysisApiResultDependenciesRetrieveResponses, AnalysisApiResultDestroyData, AnalysisApiResultDestroyResponses, AnalysisApiResultListData, AnalysisApiResultListResponses, AnalysisApiResultRetrieveData, AnalysisApiResultRetrieveResponses, AnalysisApiResultSetNameCreateData, AnalysisApiResultSetNameCreateResponses, AnalysisApiResultUpdateData, AnalysisApiResultUpdateResponses, AnalysisApiSetResultPermissionsPartialUpdateData, AnalysisApiSetResultPermissionsPartialUpdateErrors, AnalysisApiSetResultPermissionsPartialUpdateResponses, AnalysisApiStatisticsRetrieveData, AnalysisApiStatisticsRetrieveResponses, AnalysisApiWorkflowListData, AnalysisApiWorkflowListResponses, AnalysisApiWorkflowRetrieveData, AnalysisApiWorkflowRetrieveResponses, AnalysisDownloadRetrieveData, AnalysisDownloadRetrieveResponses, AnalysisV2ConfigurationsRetrieveData, AnalysisV2ConfigurationsRetrieveResponses, AnalysisV2ResultsCreateData, AnalysisV2ResultsCreateResponses, AnalysisV2ResultsDependenciesRetrieveData, AnalysisV2ResultsDependenciesRetrieveResponses, AnalysisV2ResultsDestroyData, AnalysisV2ResultsDestroyResponses, AnalysisV2ResultsFilesRetrieveData, AnalysisV2ResultsFilesRetrieveResponses, AnalysisV2ResultsListData, AnalysisV2ResultsListResponses, AnalysisV2ResultsPartialUpdateData, AnalysisV2ResultsPartialUpdateResponses, AnalysisV2ResultsRetrieveData, AnalysisV2ResultsRetrieveResponses, AnalysisV2ResultsRunCreateData, AnalysisV2ResultsRunCreateResponses, AnalysisV2ResultsUpdateData, AnalysisV2ResultsUpdateResponses, AnalysisV2WorkflowsListData, AnalysisV2WorkflowsListResponses, AnalysisV2WorkflowsRetrieveData, AnalysisV2WorkflowsRetrieveResponses, AuthorizationV2GrantOrganizationAccessCreateData, AuthorizationV2GrantOrganizationAccessCreateResponses, AuthorizationV2GrantUserAccessCreateData, AuthorizationV2GrantUserAccessCreateResponses, AuthorizationV2PermissionSetRetrieveData, AuthorizationV2PermissionSetRetrieveResponses, AuthorizationV2PermissionSetSharedRetrieveData, AuthorizationV2PermissionSetSharedRetrieveResponses, AuthorizationV2RevokeOrganizationAccessCreateData, AuthorizationV2RevokeOrganizationAccessCreateResponses, AuthorizationV2RevokeUserAccessCreateData, AuthorizationV2RevokeUserAccessCreateResponses, EntryPointsRetrieveData, EntryPointsRetrieveResponses, FilesFolderRetrieveData, FilesFolderRetrieveResponses, FilesManifestCreateData, FilesManifestCreateResponses, FilesManifestDestroyData, FilesManifestDestroyResponses, FilesManifestPartialUpdateData, FilesManifestPartialUpdateResponses, FilesManifestRetrieveData, FilesManifestRetrieveResponses, FilesManifestUpdateData, FilesManifestUpdateResponses, FilesV2ManifestCreateData, FilesV2ManifestCreateResponses, FilesV2ManifestDestroyData, FilesV2ManifestDestroyResponses, FilesV2ManifestListData, FilesV2ManifestListResponses, FilesV2ManifestPartialUpdateData, FilesV2ManifestPartialUpdateResponses, FilesV2ManifestRetrieveData, FilesV2ManifestRetrieveResponses, FilesV2ManifestUpdateData, FilesV2ManifestUpdateResponses, GoPublicationCollectionListData, GoPublicationCollectionListResponses, GoPublicationCollectionRetrieveData, GoPublicationCollectionRetrieveResponses, GoPublicationListData, GoPublicationListResponses, GoPublicationRetrieveData, GoPublicationRetrieveResponses, GoPublishCollectionCreateData, GoPublishCollectionCreateResponses, GoPublishCreateData, GoPublishCreateResponses, ManagerApiDownloadTagRetrieveData, ManagerApiDownloadTagRetrieveResponses, ManagerApiImportSurfaceCreateData, ManagerApiImportSurfaceCreateResponses, ManagerApiMemoryUsageRetrieveData, ManagerApiMemoryUsageRetrieveResponses, ManagerApiPropertiesInTagCategoricalRetrieveData, ManagerApiPropertiesInTagCategoricalRetrieveResponses, ManagerApiPropertiesInTagNumericalRetrieveData, ManagerApiPropertiesInTagNumericalRetrieveResponses, ManagerApiSetTagPermissionsPartialUpdateData, ManagerApiSetTagPermissionsPartialUpdateResponses, ManagerApiStatisticsRetrieveData, ManagerApiStatisticsRetrieveResponses, ManagerApiSurfaceCreateData, ManagerApiSurfaceCreateResponses, ManagerApiSurfaceDestroyData, ManagerApiSurfaceDestroyResponses, ManagerApiSurfaceDownloadRetrieveData, ManagerApiSurfaceDownloadRetrieveResponses, ManagerApiSurfaceListData, ManagerApiSurfaceListResponses, ManagerApiSurfacePartialUpdateData, ManagerApiSurfacePartialUpdateResponses, ManagerApiSurfaceRetrieveData, ManagerApiSurfaceRetrieveResponses, ManagerApiSurfaceSetPermissionsPartialUpdateData, ManagerApiSurfaceSetPermissionsPartialUpdateErrors, ManagerApiSurfaceSetPermissionsPartialUpdateResponses, ManagerApiSurfaceUpdateData, ManagerApiSurfaceUpdateResponses, ManagerApiTagListData, ManagerApiTagListResponses, ManagerApiTagRetrieveData, ManagerApiTagRetrieveResponses, ManagerApiTopographyCreateData, ManagerApiTopographyCreateResponses, ManagerApiTopographyDestroyData, ManagerApiTopographyDestroyResponses, ManagerApiTopographyForceInspectCreateData, ManagerApiTopographyForceInspectCreateResponses, ManagerApiTopographyListData, ManagerApiTopographyListResponses, ManagerApiTopographyPartialUpdateData, ManagerApiTopographyPartialUpdateResponses, ManagerApiTopographyRetrieveData, ManagerApiTopographyRetrieveResponses, ManagerApiTopographyUpdateData, ManagerApiTopographyUpdateResponses, ManagerApiVersionsRetrieveData, ManagerApiVersionsRetrieveResponses, ManagerV2DownloadSurfaceCreateData, ManagerV2DownloadSurfaceCreateResponses, ManagerV2DownloadTagCreateData, ManagerV2DownloadTagCreateResponses, ManagerV2SurfaceCreateData, ManagerV2SurfaceCreateResponses, ManagerV2SurfaceDestroyData, ManagerV2SurfaceDestroyResponses, ManagerV2SurfaceListData, ManagerV2SurfaceListResponses, ManagerV2SurfacePartialUpdateData, ManagerV2SurfacePartialUpdateResponses, ManagerV2SurfaceRetrieveData, ManagerV2SurfaceRetrieveResponses, ManagerV2SurfaceUpdateData, ManagerV2SurfaceUpdateResponses, ManagerV2TagTreeRetrieveData, ManagerV2TagTreeRetrieveResponses, ManagerV2TopographyCreateData, ManagerV2TopographyCreateResponses, ManagerV2TopographyDestroyData, ManagerV2TopographyDestroyResponses, ManagerV2TopographyListData, ManagerV2TopographyListResponses, ManagerV2TopographyPartialUpdateData, ManagerV2TopographyPartialUpdateResponses, ManagerV2TopographyRetrieveData, ManagerV2TopographyRetrieveResponses, ManagerV2TopographyUpdateData, ManagerV2TopographyUpdateResponses, ManagerV2UploadZipFinishCreateData, ManagerV2UploadZipFinishCreateResponses, ManagerV2UploadZipStartCreateData, ManagerV2UploadZipStartCreateResponses, ManagerV2ZipContainerRetrieveData, ManagerV2ZipContainerRetrieveResponses, OrganizationsV1AddUserCreateData, OrganizationsV1AddUserCreateResponses, OrganizationsV1OrganizationCreateData, OrganizationsV1OrganizationCreateResponses, OrganizationsV1OrganizationDestroyData, OrganizationsV1OrganizationDestroyResponses, OrganizationsV1OrganizationListData, OrganizationsV1OrganizationListResponses, OrganizationsV1OrganizationPartialUpdateData, OrganizationsV1OrganizationPartialUpdateResponses, OrganizationsV1OrganizationRetrieveData, OrganizationsV1OrganizationRetrieveResponses, OrganizationsV1OrganizationUpdateData, OrganizationsV1OrganizationUpdateResponses, OrganizationsV1RemoveUserCreateData, OrganizationsV1RemoveUserCreateResponses, PluginsContactCardContactMechanicsRetrieveData, PluginsContactCardContactMechanicsRetrieveResponses, PluginsStatisticsCardRoughnessParametersRetrieveData, PluginsStatisticsCardRoughnessParametersRetrieveResponses, UsersV1AddOrganizationCreateData, UsersV1AddOrganizationCreateResponses, UsersV1RemoveOrganizationCreateData, UsersV1RemoveOrganizationCreateResponses, UsersV1UserCreateData, UsersV1UserCreateResponses, UsersV1UserDestroyData, UsersV1UserDestroyResponses, UsersV1UserListData, UsersV1UserListResponses, UsersV1UserPartialUpdateData, UsersV1UserPartialUpdateResponses, UsersV1UserRetrieveData, UsersV1UserRetrieveResponses, UsersV1UserUpdateData, UsersV1UserUpdateResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -18,1601 +18,1741 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
     meta?: Record<string, unknown>;
 };
 
-export const analysisApiCardSeriesRetrieve = <ThrowOnError extends boolean = false>(options: Options<AnalysisApiCardSeriesRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<AnalysisApiCardSeriesRetrieveResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/analysis/api/card/series/{workflow}',
-        ...options
-    });
-};
+/**
+ * Get series card view data for plotting workflow results
+ */
+export const analysisApiCardSeriesRetrieve = <ThrowOnError extends boolean = false>(options: Options<AnalysisApiCardSeriesRetrieveData, ThrowOnError>) => (options.client ?? client).get<AnalysisApiCardSeriesRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/analysis/api/card/series/{workflow}',
+    ...options
+});
 
-export const analysisApiConfigurationRetrieve = <ThrowOnError extends boolean = false>(options: Options<AnalysisApiConfigurationRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<AnalysisApiConfigurationRetrieveResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/analysis/api/configuration/{id}/',
-        ...options
-    });
-};
+export const analysisApiConfigurationRetrieve = <ThrowOnError extends boolean = false>(options: Options<AnalysisApiConfigurationRetrieveData, ThrowOnError>) => (options.client ?? client).get<AnalysisApiConfigurationRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/analysis/api/configuration/{id}/',
+    ...options
+});
 
-export const analysisApiMemoryUsageRetrieve = <ThrowOnError extends boolean = false>(options?: Options<AnalysisApiMemoryUsageRetrieveData, ThrowOnError>) => {
-    return (options?.client ?? client).get<AnalysisApiMemoryUsageRetrieveResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/analysis/api/memory-usage/',
-        ...options
-    });
-};
+/**
+ * Get memory usage statistics for workflow results
+ */
+export const analysisApiMemoryUsageRetrieve = <ThrowOnError extends boolean = false>(options?: Options<AnalysisApiMemoryUsageRetrieveData, ThrowOnError>) => (options?.client ?? client).get<AnalysisApiMemoryUsageRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/analysis/api/memory-usage/',
+    ...options
+});
 
-export const analysisApiNamedResultRetrieve = <ThrowOnError extends boolean = false>(options?: Options<AnalysisApiNamedResultRetrieveData, ThrowOnError>) => {
-    return (options?.client ?? client).get<AnalysisApiNamedResultRetrieveResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/analysis/api/named-result',
-        ...options
-    });
-};
+export const analysisApiNamedResultList = <ThrowOnError extends boolean = false>(options?: Options<AnalysisApiNamedResultListData, ThrowOnError>) => (options?.client ?? client).get<AnalysisApiNamedResultListResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/analysis/api/named-result',
+    ...options
+});
 
-export const analysisApiPendingRetrieve = <ThrowOnError extends boolean = false>(options?: Options<AnalysisApiPendingRetrieveData, ThrowOnError>) => {
-    return (options?.client ?? client).get<AnalysisApiPendingRetrieveResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/analysis/api/pending',
-        ...options
-    });
-};
+/**
+ * Get all pending workflow results for the current user
+ */
+export const analysisApiPendingList = <ThrowOnError extends boolean = false>(options?: Options<AnalysisApiPendingListData, ThrowOnError>) => (options?.client ?? client).get<AnalysisApiPendingListResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/analysis/api/pending',
+    ...options
+});
+
+/**
+ * List all results for a given workflow.
+ */
+export const analysisApiResultList = <ThrowOnError extends boolean = false>(options?: Options<AnalysisApiResultListData, ThrowOnError>) => (options?.client ?? client).get<AnalysisApiResultListResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/analysis/api/result/',
+    ...options
+});
 
 /**
  * Retrieve status of analysis (GET) and renew analysis (PUT)
  */
-export const analysisApiResultList = <ThrowOnError extends boolean = false>(options?: Options<AnalysisApiResultListData, ThrowOnError>) => {
-    return (options?.client ?? client).get<AnalysisApiResultListResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/analysis/api/result/',
-        ...options
-    });
-};
+export const analysisApiResultDestroy = <ThrowOnError extends boolean = false>(options: Options<AnalysisApiResultDestroyData, ThrowOnError>) => (options.client ?? client).delete<AnalysisApiResultDestroyResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/analysis/api/result/{id}/',
+    ...options
+});
 
 /**
  * Retrieve status of analysis (GET) and renew analysis (PUT)
  */
-export const analysisApiResultDestroy = <ThrowOnError extends boolean = false>(options: Options<AnalysisApiResultDestroyData, ThrowOnError>) => {
-    return (options.client ?? client).delete<AnalysisApiResultDestroyResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/analysis/api/result/{id}/',
-        ...options
-    });
-};
-
-/**
- * Retrieve status of analysis (GET) and renew analysis (PUT)
- */
-export const analysisApiResultRetrieve = <ThrowOnError extends boolean = false>(options: Options<AnalysisApiResultRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<AnalysisApiResultRetrieveResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/analysis/api/result/{id}/',
-        ...options
-    });
-};
+export const analysisApiResultRetrieve = <ThrowOnError extends boolean = false>(options: Options<AnalysisApiResultRetrieveData, ThrowOnError>) => (options.client ?? client).get<AnalysisApiResultRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/analysis/api/result/{id}/',
+    ...options
+});
 
 /**
  * Renew existing analysis (PUT).
  */
-export const analysisApiResultUpdate = <ThrowOnError extends boolean = false>(options: Options<AnalysisApiResultUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).put<AnalysisApiResultUpdateResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/analysis/api/result/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
-
-export const analysisApiResultDependenciesRetrieve = <ThrowOnError extends boolean = false>(options: Options<AnalysisApiResultDependenciesRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<AnalysisApiResultDependenciesRetrieveResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/analysis/api/result/{workflow_id}/dependencies',
-        ...options
-    });
-};
-
-export const analysisApiResultSetNameCreate = <ThrowOnError extends boolean = false>(options: Options<AnalysisApiResultSetNameCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<AnalysisApiResultSetNameCreateResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/analysis/api/result/{workflow_id}/set-name',
-        ...options
-    });
-};
-
-export const analysisApiSetResultPermissionsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<AnalysisApiSetResultPermissionsPartialUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).patch<AnalysisApiSetResultPermissionsPartialUpdateResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/analysis/api/set-result-permissions/{workflow_id}',
-        ...options
-    });
-};
-
-export const analysisApiStatisticsRetrieve = <ThrowOnError extends boolean = false>(options?: Options<AnalysisApiStatisticsRetrieveData, ThrowOnError>) => {
-    return (options?.client ?? client).get<AnalysisApiStatisticsRetrieveResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/analysis/api/statistics/',
-        ...options
-    });
-};
+export const analysisApiResultUpdate = <ThrowOnError extends boolean = false>(options: Options<AnalysisApiResultUpdateData, ThrowOnError>) => (options.client ?? client).put<AnalysisApiResultUpdateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/analysis/api/result/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
- * Create, update, retrieve and delete workflow templates.
+ * Get dependencies for a workflow result
  */
-export const analysisApiTemplateList = <ThrowOnError extends boolean = false>(options?: Options<AnalysisApiTemplateListData, ThrowOnError>) => {
-    return (options?.client ?? client).get<AnalysisApiTemplateListResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/analysis/api/template/',
-        ...options
-    });
-};
+export const analysisApiResultDependenciesRetrieve = <ThrowOnError extends boolean = false>(options: Options<AnalysisApiResultDependenciesRetrieveData, ThrowOnError>) => (options.client ?? client).get<AnalysisApiResultDependenciesRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/analysis/api/result/{workflow_id}/dependencies',
+    ...options
+});
 
 /**
- * Create, update, retrieve and delete workflow templates.
+ * Set name and description for a workflow result
  */
-export const analysisApiTemplateCreate = <ThrowOnError extends boolean = false>(options: Options<AnalysisApiTemplateCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<AnalysisApiTemplateCreateResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/analysis/api/template/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const analysisApiResultSetNameCreate = <ThrowOnError extends boolean = false>(options: Options<AnalysisApiResultSetNameCreateData, ThrowOnError>) => (options.client ?? client).post<AnalysisApiResultSetNameCreateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/analysis/api/result/{workflow_id}/set-name',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
- * Create, update, retrieve and delete workflow templates.
+ * Set permissions for a workflow result
  */
-export const analysisApiTemplateDestroy = <ThrowOnError extends boolean = false>(options: Options<AnalysisApiTemplateDestroyData, ThrowOnError>) => {
-    return (options.client ?? client).delete<AnalysisApiTemplateDestroyResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/analysis/api/template/{id}/',
-        ...options
-    });
-};
+export const analysisApiSetResultPermissionsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<AnalysisApiSetResultPermissionsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<AnalysisApiSetResultPermissionsPartialUpdateResponses, AnalysisApiSetResultPermissionsPartialUpdateErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/analysis/api/set-result-permissions/{workflow_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
- * Retrieve a workflow template.
+ * Get statistics about workflow results
  */
-export const analysisApiTemplateRetrieve = <ThrowOnError extends boolean = false>(options: Options<AnalysisApiTemplateRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<AnalysisApiTemplateRetrieveResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/analysis/api/template/{id}/',
-        ...options
-    });
-};
+export const analysisApiStatisticsRetrieve = <ThrowOnError extends boolean = false>(options?: Options<AnalysisApiStatisticsRetrieveData, ThrowOnError>) => (options?.client ?? client).get<AnalysisApiStatisticsRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/analysis/api/statistics/',
+    ...options
+});
+
+export const analysisApiWorkflowList = <ThrowOnError extends boolean = false>(options?: Options<AnalysisApiWorkflowListData, ThrowOnError>) => (options?.client ?? client).get<AnalysisApiWorkflowListResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/analysis/api/workflow/',
+    ...options
+});
+
+export const analysisApiWorkflowRetrieve = <ThrowOnError extends boolean = false>(options: Options<AnalysisApiWorkflowRetrieveData, ThrowOnError>) => (options.client ?? client).get<AnalysisApiWorkflowRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/analysis/api/workflow/{name}/',
+    ...options
+});
 
 /**
- * Create, update, retrieve and delete workflow templates.
+ * Download analyses results in specified format
  */
-export const analysisApiTemplatePartialUpdate = <ThrowOnError extends boolean = false>(options: Options<AnalysisApiTemplatePartialUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).patch<AnalysisApiTemplatePartialUpdateResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/analysis/api/template/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const analysisDownloadRetrieve = <ThrowOnError extends boolean = false>(options: Options<AnalysisDownloadRetrieveData, ThrowOnError>) => (options.client ?? client).get<AnalysisDownloadRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'blob',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/analysis/download/{ids}/{file_format}',
+    ...options
+});
+
+export const analysisV2ConfigurationsRetrieve = <ThrowOnError extends boolean = false>(options: Options<AnalysisV2ConfigurationsRetrieveData, ThrowOnError>) => (options.client ?? client).get<AnalysisV2ConfigurationsRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/analysis/v2/configurations/{id}/',
+    ...options
+});
 
 /**
- * Create, update, retrieve and delete workflow templates.
+ * WorkflowResult ViewSet - Allows CRUD operations on Workflow Results.
+ * - Retrieve - Get details of a specific workflow result.
+ * - Destroy - Delete a specific workflow result.
+ * - List - List all workflow results accessible to the authenticated user.
+ * - Update - Update details of a specific workflow result.
+ * - Run - Start an existing workflow result (custom action).
  */
-export const analysisApiTemplateUpdate = <ThrowOnError extends boolean = false>(options: Options<AnalysisApiTemplateUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).put<AnalysisApiTemplateUpdateResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/analysis/api/template/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
-
-export const analysisApiWorkflowList = <ThrowOnError extends boolean = false>(options?: Options<AnalysisApiWorkflowListData, ThrowOnError>) => {
-    return (options?.client ?? client).get<AnalysisApiWorkflowListResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/analysis/api/workflow/',
-        ...options
-    });
-};
-
-export const analysisApiWorkflowRetrieve = <ThrowOnError extends boolean = false>(options: Options<AnalysisApiWorkflowRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<AnalysisApiWorkflowRetrieveResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/analysis/api/workflow/{name}/',
-        ...options
-    });
-};
+export const analysisV2ResultsList = <ThrowOnError extends boolean = false>(options?: Options<AnalysisV2ResultsListData, ThrowOnError>) => (options?.client ?? client).get<AnalysisV2ResultsListResponses, unknown, ThrowOnError>({
+    querySerializer: { parameters: { subject_ids: { array: { explode: false } } } },
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/analysis/v2/results/',
+    ...options
+});
 
 /**
- * View returning a file comprised from analyses results.
- *
- * Parameters
- * ----------
- * request: HttpRequest
- * The request object
- * ids: str
- * comma separated string with analyses ids
- * file_format: str
- * Requested file format, e.g. 'txt' or 'xlsx', depends on what was registerd.
- *
- * Returns
- * -------
- * HttpResponse downloading a file
+ * WorkflowResult ViewSet - Allows CRUD operations on Workflow Results.
+ * - Retrieve - Get details of a specific workflow result.
+ * - Destroy - Delete a specific workflow result.
+ * - List - List all workflow results accessible to the authenticated user.
+ * - Update - Update details of a specific workflow result.
+ * - Run - Start an existing workflow result (custom action).
  */
-export const analysisDownloadRetrieve = <ThrowOnError extends boolean = false>(options: Options<AnalysisDownloadRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<AnalysisDownloadRetrieveResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/analysis/download/{ids}/{file_format}',
-        ...options
-    });
-};
+export const analysisV2ResultsCreate = <ThrowOnError extends boolean = false>(options: Options<AnalysisV2ResultsCreateData, ThrowOnError>) => (options.client ?? client).post<AnalysisV2ResultsCreateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/analysis/v2/results/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * WorkflowResult ViewSet - Allows CRUD operations on Workflow Results.
+ * - Retrieve - Get details of a specific workflow result.
+ * - Destroy - Delete a specific workflow result.
+ * - List - List all workflow results accessible to the authenticated user.
+ * - Update - Update details of a specific workflow result.
+ * - Run - Start an existing workflow result (custom action).
+ */
+export const analysisV2ResultsDestroy = <ThrowOnError extends boolean = false>(options: Options<AnalysisV2ResultsDestroyData, ThrowOnError>) => (options.client ?? client).delete<AnalysisV2ResultsDestroyResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/analysis/v2/results/{id}/',
+    ...options
+});
+
+/**
+ * WorkflowResult ViewSet - Allows CRUD operations on Workflow Results.
+ * - Retrieve - Get details of a specific workflow result.
+ * - Destroy - Delete a specific workflow result.
+ * - List - List all workflow results accessible to the authenticated user.
+ * - Update - Update details of a specific workflow result.
+ * - Run - Start an existing workflow result (custom action).
+ */
+export const analysisV2ResultsRetrieve = <ThrowOnError extends boolean = false>(options: Options<AnalysisV2ResultsRetrieveData, ThrowOnError>) => (options.client ?? client).get<AnalysisV2ResultsRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/analysis/v2/results/{id}/',
+    ...options
+});
+
+/**
+ * WorkflowResult ViewSet - Allows CRUD operations on Workflow Results.
+ * - Retrieve - Get details of a specific workflow result.
+ * - Destroy - Delete a specific workflow result.
+ * - List - List all workflow results accessible to the authenticated user.
+ * - Update - Update details of a specific workflow result.
+ * - Run - Start an existing workflow result (custom action).
+ */
+export const analysisV2ResultsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<AnalysisV2ResultsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<AnalysisV2ResultsPartialUpdateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/analysis/v2/results/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * WorkflowResult ViewSet - Allows CRUD operations on Workflow Results.
+ * - Retrieve - Get details of a specific workflow result.
+ * - Destroy - Delete a specific workflow result.
+ * - List - List all workflow results accessible to the authenticated user.
+ * - Update - Update details of a specific workflow result.
+ * - Run - Start an existing workflow result (custom action).
+ */
+export const analysisV2ResultsUpdate = <ThrowOnError extends boolean = false>(options: Options<AnalysisV2ResultsUpdateData, ThrowOnError>) => (options.client ?? client).put<AnalysisV2ResultsUpdateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/analysis/v2/results/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Get dependencies for the WorkflowResult
+ */
+export const analysisV2ResultsDependenciesRetrieve = <ThrowOnError extends boolean = false>(options: Options<AnalysisV2ResultsDependenciesRetrieveData, ThrowOnError>) => (options.client ?? client).get<AnalysisV2ResultsDependenciesRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/analysis/v2/results/{id}/dependencies/',
+    ...options
+});
+
+/**
+ * Get the folder of the WorkflowResult
+ */
+export const analysisV2ResultsFilesRetrieve = <ThrowOnError extends boolean = false>(options: Options<AnalysisV2ResultsFilesRetrieveData, ThrowOnError>) => (options.client ?? client).get<AnalysisV2ResultsFilesRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/analysis/v2/results/{id}/files/',
+    ...options
+});
+
+/**
+ * Start the analysis task for the given WorkflowResult instance.
+ */
+export const analysisV2ResultsRunCreate = <ThrowOnError extends boolean = false>(options: Options<AnalysisV2ResultsRunCreateData, ThrowOnError>) => (options.client ?? client).post<AnalysisV2ResultsRunCreateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/analysis/v2/results/{id}/run/',
+    ...options
+});
+
+export const analysisV2WorkflowsList = <ThrowOnError extends boolean = false>(options?: Options<AnalysisV2WorkflowsListData, ThrowOnError>) => (options?.client ?? client).get<AnalysisV2WorkflowsListResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/analysis/v2/workflows/',
+    ...options
+});
+
+export const analysisV2WorkflowsRetrieve = <ThrowOnError extends boolean = false>(options: Options<AnalysisV2WorkflowsRetrieveData, ThrowOnError>) => (options.client ?? client).get<AnalysisV2WorkflowsRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/analysis/v2/workflows/{id}/',
+    ...options
+});
 
 /**
  * Grant organization access to a permission set. Requires 'full' permission on the permission set.
  */
-export const authorizationV2GrantOrganizationAccessCreate = <ThrowOnError extends boolean = false>(options: Options<AuthorizationV2GrantOrganizationAccessCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<AuthorizationV2GrantOrganizationAccessCreateResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/authorization/v2/grant-organization-access/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const authorizationV2GrantOrganizationAccessCreate = <ThrowOnError extends boolean = false>(options: Options<AuthorizationV2GrantOrganizationAccessCreateData, ThrowOnError>) => (options.client ?? client).post<AuthorizationV2GrantOrganizationAccessCreateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/authorization/v2/grant-organization-access/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * Grant user access to a permission set. Requires 'full' permission on the permission set.
  */
-export const authorizationV2GrantUserAccessCreate = <ThrowOnError extends boolean = false>(options: Options<AuthorizationV2GrantUserAccessCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<AuthorizationV2GrantUserAccessCreateResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/authorization/v2/grant-user-access/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const authorizationV2GrantUserAccessCreate = <ThrowOnError extends boolean = false>(options: Options<AuthorizationV2GrantUserAccessCreateData, ThrowOnError>) => (options.client ?? client).post<AuthorizationV2GrantUserAccessCreateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/authorization/v2/grant-user-access/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const authorizationV2PermissionSetRetrieve = <ThrowOnError extends boolean = false>(options: Options<AuthorizationV2PermissionSetRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<AuthorizationV2PermissionSetRetrieveResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/authorization/v2/permission-set/{id}/',
-        ...options
-    });
-};
+export const authorizationV2PermissionSetRetrieve = <ThrowOnError extends boolean = false>(options: Options<AuthorizationV2PermissionSetRetrieveData, ThrowOnError>) => (options.client ?? client).get<AuthorizationV2PermissionSetRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/authorization/v2/permission-set/{id}/',
+    ...options
+});
+
+/**
+ * Get user intersection across permission sets
+ *
+ * Find users that have access to ALL of the specified permission sets. Returns each user with their lowest permission level across those sets. For example, if a user has 'full' permission in set A and 'view' permission in set B, the returned permission will be 'view'. The 'is_unique' field indicates whether the permission level is the same across all sets.
+ */
+export const authorizationV2PermissionSetSharedRetrieve = <ThrowOnError extends boolean = false>(options: Options<AuthorizationV2PermissionSetSharedRetrieveData, ThrowOnError>) => (options.client ?? client).get<AuthorizationV2PermissionSetSharedRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/authorization/v2/permission-set/shared/',
+    ...options
+});
 
 /**
  * Revoke organization access from a permission set. Requires 'full' permission on the permission set.
  */
-export const authorizationV2RevokeOrganizationAccessCreate = <ThrowOnError extends boolean = false>(options: Options<AuthorizationV2RevokeOrganizationAccessCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<AuthorizationV2RevokeOrganizationAccessCreateResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/authorization/v2/revoke-organization-access/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const authorizationV2RevokeOrganizationAccessCreate = <ThrowOnError extends boolean = false>(options: Options<AuthorizationV2RevokeOrganizationAccessCreateData, ThrowOnError>) => (options.client ?? client).post<AuthorizationV2RevokeOrganizationAccessCreateResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/authorization/v2/revoke-organization-access/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * Revoke user access from a permission set. Requires 'full' permission on the permission set.
  */
-export const authorizationV2RevokeUserAccessCreate = <ThrowOnError extends boolean = false>(options: Options<AuthorizationV2RevokeUserAccessCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<AuthorizationV2RevokeUserAccessCreateResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/authorization/v2/revoke-user-access/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const authorizationV2RevokeUserAccessCreate = <ThrowOnError extends boolean = false>(options: Options<AuthorizationV2RevokeUserAccessCreateData, ThrowOnError>) => (options.client ?? client).post<AuthorizationV2RevokeUserAccessCreateResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/authorization/v2/revoke-user-access/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const entryPointsRetrieve = <ThrowOnError extends boolean = false>(options?: Options<EntryPointsRetrieveData, ThrowOnError>) => {
-    return (options?.client ?? client).get<EntryPointsRetrieveResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/entry-points/',
-        ...options
-    });
-};
+/**
+ * Get API entry points
+ */
+export const entryPointsRetrieve = <ThrowOnError extends boolean = false>(options?: Options<EntryPointsRetrieveData, ThrowOnError>) => (options?.client ?? client).get<EntryPointsRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/entry-points/',
+    ...options
+});
 
 /**
  * List all manifests in a folder
  */
-export const filesFolderRetrieve = <ThrowOnError extends boolean = false>(options: Options<FilesFolderRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<FilesFolderRetrieveResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/files/folder/{id}/',
-        ...options
-    });
-};
+export const filesFolderRetrieve = <ThrowOnError extends boolean = false>(options: Options<FilesFolderRetrieveData, ThrowOnError>) => (options.client ?? client).get<FilesFolderRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/files/folder/{id}/',
+    ...options
+});
 
-export const filesManifestCreate = <ThrowOnError extends boolean = false>(options: Options<FilesManifestCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<FilesManifestCreateResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/files/manifest/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const filesManifestCreate = <ThrowOnError extends boolean = false>(options: Options<FilesManifestCreateData, ThrowOnError>) => (options.client ?? client).post<FilesManifestCreateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/files/manifest/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const filesManifestDestroy = <ThrowOnError extends boolean = false>(options: Options<FilesManifestDestroyData, ThrowOnError>) => {
-    return (options.client ?? client).delete<FilesManifestDestroyResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/files/manifest/{id}/',
-        ...options
-    });
-};
+export const filesManifestDestroy = <ThrowOnError extends boolean = false>(options: Options<FilesManifestDestroyData, ThrowOnError>) => (options.client ?? client).delete<FilesManifestDestroyResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/files/manifest/{id}/',
+    ...options
+});
 
-export const filesManifestRetrieve = <ThrowOnError extends boolean = false>(options: Options<FilesManifestRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<FilesManifestRetrieveResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/files/manifest/{id}/',
-        ...options
-    });
-};
+export const filesManifestRetrieve = <ThrowOnError extends boolean = false>(options: Options<FilesManifestRetrieveData, ThrowOnError>) => (options.client ?? client).get<FilesManifestRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/files/manifest/{id}/',
+    ...options
+});
 
-export const filesManifestPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<FilesManifestPartialUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).patch<FilesManifestPartialUpdateResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/files/manifest/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const filesManifestPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<FilesManifestPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<FilesManifestPartialUpdateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/files/manifest/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const filesManifestUpdate = <ThrowOnError extends boolean = false>(options: Options<FilesManifestUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).put<FilesManifestUpdateResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/files/manifest/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const filesManifestUpdate = <ThrowOnError extends boolean = false>(options: Options<FilesManifestUpdateData, ThrowOnError>) => (options.client ?? client).put<FilesManifestUpdateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/files/manifest/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const goPublicationList = <ThrowOnError extends boolean = false>(options?: Options<GoPublicationListData, ThrowOnError>) => {
-    return (options?.client ?? client).get<GoPublicationListResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/go/publication/',
-        ...options
-    });
-};
+/**
+ * v2 ViewSet for Manifest model.
+ */
+export const filesV2ManifestList = <ThrowOnError extends boolean = false>(options?: Options<FilesV2ManifestListData, ThrowOnError>) => (options?.client ?? client).get<FilesV2ManifestListResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/files/v2/manifest/',
+    ...options
+});
 
-export const goPublicationRetrieve = <ThrowOnError extends boolean = false>(options: Options<GoPublicationRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<GoPublicationRetrieveResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/go/publication/{id}/',
-        ...options
-    });
-};
+/**
+ * v2 ViewSet for Manifest model.
+ */
+export const filesV2ManifestCreate = <ThrowOnError extends boolean = false>(options: Options<FilesV2ManifestCreateData, ThrowOnError>) => (options.client ?? client).post<FilesV2ManifestCreateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/files/v2/manifest/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * v2 ViewSet for Manifest model.
+ */
+export const filesV2ManifestDestroy = <ThrowOnError extends boolean = false>(options: Options<FilesV2ManifestDestroyData, ThrowOnError>) => (options.client ?? client).delete<FilesV2ManifestDestroyResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/files/v2/manifest/{id}/',
+    ...options
+});
+
+/**
+ * v2 ViewSet for Manifest model.
+ */
+export const filesV2ManifestRetrieve = <ThrowOnError extends boolean = false>(options: Options<FilesV2ManifestRetrieveData, ThrowOnError>) => (options.client ?? client).get<FilesV2ManifestRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/files/v2/manifest/{id}/',
+    ...options
+});
+
+/**
+ * v2 ViewSet for Manifest model.
+ */
+export const filesV2ManifestPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<FilesV2ManifestPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<FilesV2ManifestPartialUpdateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/files/v2/manifest/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * v2 ViewSet for Manifest model.
+ */
+export const filesV2ManifestUpdate = <ThrowOnError extends boolean = false>(options: Options<FilesV2ManifestUpdateData, ThrowOnError>) => (options.client ?? client).put<FilesV2ManifestUpdateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/files/v2/manifest/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const goPublicationList = <ThrowOnError extends boolean = false>(options?: Options<GoPublicationListData, ThrowOnError>) => (options?.client ?? client).get<GoPublicationListResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/go/publication/',
+    ...options
+});
+
+export const goPublicationCollectionList = <ThrowOnError extends boolean = false>(options?: Options<GoPublicationCollectionListData, ThrowOnError>) => (options?.client ?? client).get<GoPublicationCollectionListResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/go/publication-collection/',
+    ...options
+});
+
+export const goPublicationCollectionRetrieve = <ThrowOnError extends boolean = false>(options: Options<GoPublicationCollectionRetrieveData, ThrowOnError>) => (options.client ?? client).get<GoPublicationCollectionRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/go/publication-collection/{id}/',
+    ...options
+});
+
+export const goPublicationRetrieve = <ThrowOnError extends boolean = false>(options: Options<GoPublicationRetrieveData, ThrowOnError>) => (options.client ?? client).get<GoPublicationRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/go/publication/{id}/',
+    ...options
+});
 
 /**
  * This view is called when the user clicks "Publish".
  * It checks if the provided data is valid and creates the publication.
  */
-export const goPublishCreate = <ThrowOnError extends boolean = false>(options?: Options<GoPublishCreateData, ThrowOnError>) => {
-    return (options?.client ?? client).post<GoPublishCreateResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/go/publish/',
-        ...options
-    });
-};
+export const goPublishCreate = <ThrowOnError extends boolean = false>(options?: Options<GoPublishCreateData, ThrowOnError>) => (options?.client ?? client).post<GoPublishCreateResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/go/publish/',
+    ...options
+});
 
-export const managerApiDownloadTagRetrieve = <ThrowOnError extends boolean = false>(options: Options<ManagerApiDownloadTagRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<ManagerApiDownloadTagRetrieveResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/api/download-tag/{name}/',
-        ...options
-    });
-};
+export const goPublishCollectionCreate = <ThrowOnError extends boolean = false>(options?: Options<GoPublishCollectionCreateData, ThrowOnError>) => (options?.client ?? client).post<GoPublishCollectionCreateResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/go/publish-collection/',
+    ...options
+});
 
-export const managerApiImportSurfaceCreate = <ThrowOnError extends boolean = false>(options?: Options<ManagerApiImportSurfaceCreateData, ThrowOnError>) => {
-    return (options?.client ?? client).post<ManagerApiImportSurfaceCreateResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/api/import-surface/',
-        ...options
-    });
-};
+export const managerApiDownloadTagRetrieve = <ThrowOnError extends boolean = false>(options: Options<ManagerApiDownloadTagRetrieveData, ThrowOnError>) => (options.client ?? client).get<ManagerApiDownloadTagRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/api/download-tag/{name}/',
+    ...options
+});
 
-export const managerApiMemoryUsageRetrieve = <ThrowOnError extends boolean = false>(options?: Options<ManagerApiMemoryUsageRetrieveData, ThrowOnError>) => {
-    return (options?.client ?? client).get<ManagerApiMemoryUsageRetrieveResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/api/memory-usage/',
-        ...options
-    });
-};
+export const managerApiImportSurfaceCreate = <ThrowOnError extends boolean = false>(options?: Options<ManagerApiImportSurfaceCreateData, ThrowOnError>) => (options?.client ?? client).post<ManagerApiImportSurfaceCreateResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/api/import-surface/',
+    ...options
+});
 
-export const managerApiPropertiesInTagCategoricalRetrieve = <ThrowOnError extends boolean = false>(options: Options<ManagerApiPropertiesInTagCategoricalRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<ManagerApiPropertiesInTagCategoricalRetrieveResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/api/properties-in-tag/categorical/{name}',
-        ...options
-    });
-};
+export const managerApiMemoryUsageRetrieve = <ThrowOnError extends boolean = false>(options?: Options<ManagerApiMemoryUsageRetrieveData, ThrowOnError>) => (options?.client ?? client).get<ManagerApiMemoryUsageRetrieveResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/api/memory-usage/',
+    ...options
+});
 
-export const managerApiPropertiesInTagNumericalRetrieve = <ThrowOnError extends boolean = false>(options: Options<ManagerApiPropertiesInTagNumericalRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<ManagerApiPropertiesInTagNumericalRetrieveResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/api/properties-in-tag/numerical/{name}',
-        ...options
-    });
-};
+export const managerApiPropertiesInTagCategoricalRetrieve = <ThrowOnError extends boolean = false>(options: Options<ManagerApiPropertiesInTagCategoricalRetrieveData, ThrowOnError>) => (options.client ?? client).get<ManagerApiPropertiesInTagCategoricalRetrieveResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/api/properties-in-tag/categorical/{name}',
+    ...options
+});
 
-export const managerApiSetTagPermissionsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<ManagerApiSetTagPermissionsPartialUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).patch<ManagerApiSetTagPermissionsPartialUpdateResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/api/set-tag-permissions/{name}',
-        ...options
-    });
-};
+export const managerApiPropertiesInTagNumericalRetrieve = <ThrowOnError extends boolean = false>(options: Options<ManagerApiPropertiesInTagNumericalRetrieveData, ThrowOnError>) => (options.client ?? client).get<ManagerApiPropertiesInTagNumericalRetrieveResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/api/properties-in-tag/numerical/{name}',
+    ...options
+});
 
-export const managerApiStatisticsRetrieve = <ThrowOnError extends boolean = false>(options?: Options<ManagerApiStatisticsRetrieveData, ThrowOnError>) => {
-    return (options?.client ?? client).get<ManagerApiStatisticsRetrieveResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/api/statistics/',
-        ...options
-    });
-};
+export const managerApiSetTagPermissionsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<ManagerApiSetTagPermissionsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<ManagerApiSetTagPermissionsPartialUpdateResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/api/set-tag-permissions/{name}',
+    ...options
+});
 
-export const managerApiSurfaceList = <ThrowOnError extends boolean = false>(options?: Options<ManagerApiSurfaceListData, ThrowOnError>) => {
-    return (options?.client ?? client).get<ManagerApiSurfaceListResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/api/surface/',
-        ...options
-    });
-};
+export const managerApiStatisticsRetrieve = <ThrowOnError extends boolean = false>(options?: Options<ManagerApiStatisticsRetrieveData, ThrowOnError>) => (options?.client ?? client).get<ManagerApiStatisticsRetrieveResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/api/statistics/',
+    ...options
+});
 
-export const managerApiSurfaceCreate = <ThrowOnError extends boolean = false>(options?: Options<ManagerApiSurfaceCreateData, ThrowOnError>) => {
-    return (options?.client ?? client).post<ManagerApiSurfaceCreateResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/api/surface/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options?.headers
-        }
-    });
-};
+/**
+ * Mixin that tracks which user created and updated objects.
+ *
+ * Automatically sets created_by and updated_by fields based on the
+ * authenticated user making the request.
+ *
+ * Usage:
+ * class MyViewSet(UserUpdateMixin, viewsets.ModelViewSet):
+ * # Your view implementation
+ * pass
+ */
+export const managerApiSurfaceList = <ThrowOnError extends boolean = false>(options?: Options<ManagerApiSurfaceListData, ThrowOnError>) => (options?.client ?? client).get<ManagerApiSurfaceListResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/api/surface/',
+    ...options
+});
 
-export const managerApiSurfaceDestroy = <ThrowOnError extends boolean = false>(options: Options<ManagerApiSurfaceDestroyData, ThrowOnError>) => {
-    return (options.client ?? client).delete<ManagerApiSurfaceDestroyResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/api/surface/{id}/',
-        ...options
-    });
-};
+/**
+ * Mixin that tracks which user created and updated objects.
+ *
+ * Automatically sets created_by and updated_by fields based on the
+ * authenticated user making the request.
+ *
+ * Usage:
+ * class MyViewSet(UserUpdateMixin, viewsets.ModelViewSet):
+ * # Your view implementation
+ * pass
+ */
+export const managerApiSurfaceCreate = <ThrowOnError extends boolean = false>(options?: Options<ManagerApiSurfaceCreateData, ThrowOnError>) => (options?.client ?? client).post<ManagerApiSurfaceCreateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/api/surface/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers
+    }
+});
 
-export const managerApiSurfaceRetrieve = <ThrowOnError extends boolean = false>(options: Options<ManagerApiSurfaceRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<ManagerApiSurfaceRetrieveResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/api/surface/{id}/',
-        ...options
-    });
-};
+/**
+ * Mixin that tracks which user created and updated objects.
+ *
+ * Automatically sets created_by and updated_by fields based on the
+ * authenticated user making the request.
+ *
+ * Usage:
+ * class MyViewSet(UserUpdateMixin, viewsets.ModelViewSet):
+ * # Your view implementation
+ * pass
+ */
+export const managerApiSurfaceDestroy = <ThrowOnError extends boolean = false>(options: Options<ManagerApiSurfaceDestroyData, ThrowOnError>) => (options.client ?? client).delete<ManagerApiSurfaceDestroyResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/api/surface/{id}/',
+    ...options
+});
 
-export const managerApiSurfacePartialUpdate = <ThrowOnError extends boolean = false>(options: Options<ManagerApiSurfacePartialUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).patch<ManagerApiSurfacePartialUpdateResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/api/surface/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+/**
+ * Mixin that tracks which user created and updated objects.
+ *
+ * Automatically sets created_by and updated_by fields based on the
+ * authenticated user making the request.
+ *
+ * Usage:
+ * class MyViewSet(UserUpdateMixin, viewsets.ModelViewSet):
+ * # Your view implementation
+ * pass
+ */
+export const managerApiSurfaceRetrieve = <ThrowOnError extends boolean = false>(options: Options<ManagerApiSurfaceRetrieveData, ThrowOnError>) => (options.client ?? client).get<ManagerApiSurfaceRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/api/surface/{id}/',
+    ...options
+});
 
-export const managerApiSurfaceUpdate = <ThrowOnError extends boolean = false>(options: Options<ManagerApiSurfaceUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).put<ManagerApiSurfaceUpdateResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/api/surface/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+/**
+ * Mixin that tracks which user created and updated objects.
+ *
+ * Automatically sets created_by and updated_by fields based on the
+ * authenticated user making the request.
+ *
+ * Usage:
+ * class MyViewSet(UserUpdateMixin, viewsets.ModelViewSet):
+ * # Your view implementation
+ * pass
+ */
+export const managerApiSurfacePartialUpdate = <ThrowOnError extends boolean = false>(options: Options<ManagerApiSurfacePartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<ManagerApiSurfacePartialUpdateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/api/surface/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const managerApiSurfaceSetPermissionsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<ManagerApiSurfaceSetPermissionsPartialUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).patch<ManagerApiSurfaceSetPermissionsPartialUpdateResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/api/surface/{id}/set-permissions/',
-        ...options
-    });
-};
+/**
+ * Mixin that tracks which user created and updated objects.
+ *
+ * Automatically sets created_by and updated_by fields based on the
+ * authenticated user making the request.
+ *
+ * Usage:
+ * class MyViewSet(UserUpdateMixin, viewsets.ModelViewSet):
+ * # Your view implementation
+ * pass
+ */
+export const managerApiSurfaceUpdate = <ThrowOnError extends boolean = false>(options: Options<ManagerApiSurfaceUpdateData, ThrowOnError>) => (options.client ?? client).put<ManagerApiSurfaceUpdateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/api/surface/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const managerApiSurfaceDownloadRetrieve = <ThrowOnError extends boolean = false>(options: Options<ManagerApiSurfaceDownloadRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<ManagerApiSurfaceDownloadRetrieveResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/api/surface/{surface_ids}/download/',
-        ...options
-    });
-};
+/**
+ * Set permissions for a surface
+ */
+export const managerApiSurfaceSetPermissionsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<ManagerApiSurfaceSetPermissionsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<ManagerApiSurfaceSetPermissionsPartialUpdateResponses, ManagerApiSurfaceSetPermissionsPartialUpdateErrors, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/api/surface/{id}/set-permissions/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const managerApiTagList = <ThrowOnError extends boolean = false>(options?: Options<ManagerApiTagListData, ThrowOnError>) => {
-    return (options?.client ?? client).get<ManagerApiTagListResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/api/tag/',
-        ...options
-    });
-};
+export const managerApiSurfaceDownloadRetrieve = <ThrowOnError extends boolean = false>(options: Options<ManagerApiSurfaceDownloadRetrieveData, ThrowOnError>) => (options.client ?? client).get<ManagerApiSurfaceDownloadRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/api/surface/{surface_ids}/download/',
+    ...options
+});
 
-export const managerApiTagRetrieve = <ThrowOnError extends boolean = false>(options: Options<ManagerApiTagRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<ManagerApiTagRetrieveResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/api/tag/{name}/',
-        ...options
-    });
-};
+export const managerApiTagList = <ThrowOnError extends boolean = false>(options?: Options<ManagerApiTagListData, ThrowOnError>) => (options?.client ?? client).get<ManagerApiTagListResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/api/tag/',
+    ...options
+});
 
-export const managerApiTopographyList = <ThrowOnError extends boolean = false>(options?: Options<ManagerApiTopographyListData, ThrowOnError>) => {
-    return (options?.client ?? client).get<ManagerApiTopographyListResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/api/topography/',
-        ...options
-    });
-};
+export const managerApiTagRetrieve = <ThrowOnError extends boolean = false>(options: Options<ManagerApiTagRetrieveData, ThrowOnError>) => (options.client ?? client).get<ManagerApiTagRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/api/tag/{name}/',
+    ...options
+});
 
-export const managerApiTopographyCreate = <ThrowOnError extends boolean = false>(options: Options<ManagerApiTopographyCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<ManagerApiTopographyCreateResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/api/topography/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const managerApiTopographyList = <ThrowOnError extends boolean = false>(options?: Options<ManagerApiTopographyListData, ThrowOnError>) => (options?.client ?? client).get<ManagerApiTopographyListResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/api/topography/',
+    ...options
+});
 
-export const managerApiTopographyDestroy = <ThrowOnError extends boolean = false>(options: Options<ManagerApiTopographyDestroyData, ThrowOnError>) => {
-    return (options.client ?? client).delete<ManagerApiTopographyDestroyResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/api/topography/{id}/',
-        ...options
-    });
-};
+export const managerApiTopographyCreate = <ThrowOnError extends boolean = false>(options: Options<ManagerApiTopographyCreateData, ThrowOnError>) => (options.client ?? client).post<ManagerApiTopographyCreateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/api/topography/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const managerApiTopographyRetrieve = <ThrowOnError extends boolean = false>(options: Options<ManagerApiTopographyRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<ManagerApiTopographyRetrieveResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/api/topography/{id}/',
-        ...options
-    });
-};
+export const managerApiTopographyDestroy = <ThrowOnError extends boolean = false>(options: Options<ManagerApiTopographyDestroyData, ThrowOnError>) => (options.client ?? client).delete<ManagerApiTopographyDestroyResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/api/topography/{id}/',
+    ...options
+});
 
-export const managerApiTopographyPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<ManagerApiTopographyPartialUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).patch<ManagerApiTopographyPartialUpdateResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/api/topography/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const managerApiTopographyRetrieve = <ThrowOnError extends boolean = false>(options: Options<ManagerApiTopographyRetrieveData, ThrowOnError>) => (options.client ?? client).get<ManagerApiTopographyRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/api/topography/{id}/',
+    ...options
+});
 
-export const managerApiTopographyUpdate = <ThrowOnError extends boolean = false>(options: Options<ManagerApiTopographyUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).put<ManagerApiTopographyUpdateResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/api/topography/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const managerApiTopographyPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<ManagerApiTopographyPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<ManagerApiTopographyPartialUpdateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/api/topography/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const managerApiTopographyForceInspectCreate = <ThrowOnError extends boolean = false>(options: Options<ManagerApiTopographyForceInspectCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<ManagerApiTopographyForceInspectCreateResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/api/topography/{id}/force-inspect/',
-        ...options
-    });
-};
+export const managerApiTopographyUpdate = <ThrowOnError extends boolean = false>(options: Options<ManagerApiTopographyUpdateData, ThrowOnError>) => (options.client ?? client).put<ManagerApiTopographyUpdateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/api/topography/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const managerApiVersionsRetrieve = <ThrowOnError extends boolean = false>(options?: Options<ManagerApiVersionsRetrieveData, ThrowOnError>) => {
-    return (options?.client ?? client).get<ManagerApiVersionsRetrieveResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/api/versions/',
-        ...options
-    });
-};
+/**
+ * Force inspection of a topography
+ */
+export const managerApiTopographyForceInspectCreate = <ThrowOnError extends boolean = false>(options: Options<ManagerApiTopographyForceInspectCreateData, ThrowOnError>) => (options.client ?? client).post<ManagerApiTopographyForceInspectCreateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/api/topography/{id}/force-inspect/',
+    ...options
+});
 
-export const managerV2DownloadSurfaceCreate = <ThrowOnError extends boolean = false>(options: Options<ManagerV2DownloadSurfaceCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<ManagerV2DownloadSurfaceCreateResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/v2/download-surface/{surface_ids}/',
-        ...options
-    });
-};
+/**
+ * Get version information for all installed packages
+ */
+export const managerApiVersionsRetrieve = <ThrowOnError extends boolean = false>(options?: Options<ManagerApiVersionsRetrieveData, ThrowOnError>) => (options?.client ?? client).get<ManagerApiVersionsRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/api/versions/',
+    ...options
+});
 
-export const managerV2DownloadTagCreate = <ThrowOnError extends boolean = false>(options: Options<ManagerV2DownloadTagCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<ManagerV2DownloadTagCreateResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/v2/download-tag/{name}/',
-        ...options
-    });
-};
+export const managerV2DownloadSurfaceCreate = <ThrowOnError extends boolean = false>(options: Options<ManagerV2DownloadSurfaceCreateData, ThrowOnError>) => (options.client ?? client).post<ManagerV2DownloadSurfaceCreateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/v2/download-surface/{surface_ids}/',
+    ...options
+});
 
-export const managerV2SurfaceList = <ThrowOnError extends boolean = false>(options?: Options<ManagerV2SurfaceListData, ThrowOnError>) => {
-    return (options?.client ?? client).get<ManagerV2SurfaceListResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/v2/surface/',
-        ...options
-    });
-};
+export const managerV2DownloadTagCreate = <ThrowOnError extends boolean = false>(options: Options<ManagerV2DownloadTagCreateData, ThrowOnError>) => (options.client ?? client).post<ManagerV2DownloadTagCreateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/v2/download-tag/{name}/',
+    ...options
+});
 
-export const managerV2SurfaceCreate = <ThrowOnError extends boolean = false>(options?: Options<ManagerV2SurfaceCreateData, ThrowOnError>) => {
-    return (options?.client ?? client).post<ManagerV2SurfaceCreateResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/v2/surface/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options?.headers
-        }
-    });
-};
+/**
+ * Mixin that tracks which user created and updated objects.
+ *
+ * Automatically sets created_by and updated_by fields based on the
+ * authenticated user making the request.
+ *
+ * Usage:
+ * class MyViewSet(UserUpdateMixin, viewsets.ModelViewSet):
+ * # Your view implementation
+ * pass
+ */
+export const managerV2SurfaceList = <ThrowOnError extends boolean = false>(options?: Options<ManagerV2SurfaceListData, ThrowOnError>) => (options?.client ?? client).get<ManagerV2SurfaceListResponses, unknown, ThrowOnError>({
+    querySerializer: { parameters: { order: { array: { explode: false } }, topography: { array: { explode: false } } } },
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/v2/surface/',
+    ...options
+});
 
-export const managerV2SurfaceDestroy = <ThrowOnError extends boolean = false>(options: Options<ManagerV2SurfaceDestroyData, ThrowOnError>) => {
-    return (options.client ?? client).delete<ManagerV2SurfaceDestroyResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/v2/surface/{id}/',
-        ...options
-    });
-};
+/**
+ * Mixin that tracks which user created and updated objects.
+ *
+ * Automatically sets created_by and updated_by fields based on the
+ * authenticated user making the request.
+ *
+ * Usage:
+ * class MyViewSet(UserUpdateMixin, viewsets.ModelViewSet):
+ * # Your view implementation
+ * pass
+ */
+export const managerV2SurfaceCreate = <ThrowOnError extends boolean = false>(options?: Options<ManagerV2SurfaceCreateData, ThrowOnError>) => (options?.client ?? client).post<ManagerV2SurfaceCreateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/v2/surface/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers
+    }
+});
 
-export const managerV2SurfaceRetrieve = <ThrowOnError extends boolean = false>(options: Options<ManagerV2SurfaceRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<ManagerV2SurfaceRetrieveResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/v2/surface/{id}/',
-        ...options
-    });
-};
+/**
+ * Mixin that tracks which user created and updated objects.
+ *
+ * Automatically sets created_by and updated_by fields based on the
+ * authenticated user making the request.
+ *
+ * Usage:
+ * class MyViewSet(UserUpdateMixin, viewsets.ModelViewSet):
+ * # Your view implementation
+ * pass
+ */
+export const managerV2SurfaceDestroy = <ThrowOnError extends boolean = false>(options: Options<ManagerV2SurfaceDestroyData, ThrowOnError>) => (options.client ?? client).delete<ManagerV2SurfaceDestroyResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/v2/surface/{id}/',
+    ...options
+});
 
-export const managerV2SurfacePartialUpdate = <ThrowOnError extends boolean = false>(options: Options<ManagerV2SurfacePartialUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).patch<ManagerV2SurfacePartialUpdateResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/v2/surface/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+/**
+ * Mixin that tracks which user created and updated objects.
+ *
+ * Automatically sets created_by and updated_by fields based on the
+ * authenticated user making the request.
+ *
+ * Usage:
+ * class MyViewSet(UserUpdateMixin, viewsets.ModelViewSet):
+ * # Your view implementation
+ * pass
+ */
+export const managerV2SurfaceRetrieve = <ThrowOnError extends boolean = false>(options: Options<ManagerV2SurfaceRetrieveData, ThrowOnError>) => (options.client ?? client).get<ManagerV2SurfaceRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/v2/surface/{id}/',
+    ...options
+});
 
-export const managerV2SurfaceUpdate = <ThrowOnError extends boolean = false>(options: Options<ManagerV2SurfaceUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).put<ManagerV2SurfaceUpdateResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/v2/surface/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+/**
+ * Mixin that tracks which user created and updated objects.
+ *
+ * Automatically sets created_by and updated_by fields based on the
+ * authenticated user making the request.
+ *
+ * Usage:
+ * class MyViewSet(UserUpdateMixin, viewsets.ModelViewSet):
+ * # Your view implementation
+ * pass
+ */
+export const managerV2SurfacePartialUpdate = <ThrowOnError extends boolean = false>(options: Options<ManagerV2SurfacePartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<ManagerV2SurfacePartialUpdateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/v2/surface/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Mixin that tracks which user created and updated objects.
+ *
+ * Automatically sets created_by and updated_by fields based on the
+ * authenticated user making the request.
+ *
+ * Usage:
+ * class MyViewSet(UserUpdateMixin, viewsets.ModelViewSet):
+ * # Your view implementation
+ * pass
+ */
+export const managerV2SurfaceUpdate = <ThrowOnError extends boolean = false>(options: Options<ManagerV2SurfaceUpdateData, ThrowOnError>) => (options.client ?? client).put<ManagerV2SurfaceUpdateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/v2/surface/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Returns the complete hierarchical tag tree for all tags accessible to the user. Each node includes 'surface_count' (number of surfaces with this exact tag, not descendants) and 'children' (nested child tags). Optionally filter by a root tag using ?tag=tag_name
+ */
+export const managerV2TagTreeRetrieve = <ThrowOnError extends boolean = false>(options?: Options<ManagerV2TagTreeRetrieveData, ThrowOnError>) => (options?.client ?? client).get<ManagerV2TagTreeRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/v2/tag-tree/',
+    ...options
+});
 
 /**
  * List all topographies accessible to the authenticated user. Optionally filter by surface ID or tags.
  */
-export const managerV2TopographyList = <ThrowOnError extends boolean = false>(options?: Options<ManagerV2TopographyListData, ThrowOnError>) => {
-    return (options?.client ?? client).get<ManagerV2TopographyListResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/v2/topography/',
-        ...options
-    });
-};
+export const managerV2TopographyList = <ThrowOnError extends boolean = false>(options?: Options<ManagerV2TopographyListData, ThrowOnError>) => (options?.client ?? client).get<ManagerV2TopographyListResponses, unknown, ThrowOnError>({
+    querySerializer: { parameters: { order: { array: { explode: false } }, surface: { array: { explode: false } } } },
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/v2/topography/',
+    ...options
+});
 
-export const managerV2TopographyCreate = <ThrowOnError extends boolean = false>(options: Options<ManagerV2TopographyCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<ManagerV2TopographyCreateResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/v2/topography/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+/**
+ * Mixin that tracks which user created and updated objects.
+ *
+ * Automatically sets created_by and updated_by fields based on the
+ * authenticated user making the request.
+ *
+ * Usage:
+ * class MyViewSet(UserUpdateMixin, viewsets.ModelViewSet):
+ * # Your view implementation
+ * pass
+ */
+export const managerV2TopographyCreate = <ThrowOnError extends boolean = false>(options: Options<ManagerV2TopographyCreateData, ThrowOnError>) => (options.client ?? client).post<ManagerV2TopographyCreateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/v2/topography/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const managerV2TopographyDestroy = <ThrowOnError extends boolean = false>(options: Options<ManagerV2TopographyDestroyData, ThrowOnError>) => {
-    return (options.client ?? client).delete<ManagerV2TopographyDestroyResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/v2/topography/{id}/',
-        ...options
-    });
-};
+/**
+ * Mixin that tracks which user created and updated objects.
+ *
+ * Automatically sets created_by and updated_by fields based on the
+ * authenticated user making the request.
+ *
+ * Usage:
+ * class MyViewSet(UserUpdateMixin, viewsets.ModelViewSet):
+ * # Your view implementation
+ * pass
+ */
+export const managerV2TopographyDestroy = <ThrowOnError extends boolean = false>(options: Options<ManagerV2TopographyDestroyData, ThrowOnError>) => (options.client ?? client).delete<ManagerV2TopographyDestroyResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/v2/topography/{id}/',
+    ...options
+});
 
 /**
  * Retrieve a specific Topography by its ID.
  */
-export const managerV2TopographyRetrieve = <ThrowOnError extends boolean = false>(options: Options<ManagerV2TopographyRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<ManagerV2TopographyRetrieveResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/v2/topography/{id}/',
-        ...options
-    });
-};
+export const managerV2TopographyRetrieve = <ThrowOnError extends boolean = false>(options: Options<ManagerV2TopographyRetrieveData, ThrowOnError>) => (options.client ?? client).get<ManagerV2TopographyRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/v2/topography/{id}/',
+    ...options
+});
 
-export const managerV2TopographyPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<ManagerV2TopographyPartialUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).patch<ManagerV2TopographyPartialUpdateResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/v2/topography/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+/**
+ * Mixin that tracks which user created and updated objects.
+ *
+ * Automatically sets created_by and updated_by fields based on the
+ * authenticated user making the request.
+ *
+ * Usage:
+ * class MyViewSet(UserUpdateMixin, viewsets.ModelViewSet):
+ * # Your view implementation
+ * pass
+ */
+export const managerV2TopographyPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<ManagerV2TopographyPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<ManagerV2TopographyPartialUpdateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/v2/topography/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const managerV2TopographyUpdate = <ThrowOnError extends boolean = false>(options: Options<ManagerV2TopographyUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).put<ManagerV2TopographyUpdateResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/v2/topography/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+/**
+ * Mixin that tracks which user created and updated objects.
+ *
+ * Automatically sets created_by and updated_by fields based on the
+ * authenticated user making the request.
+ *
+ * Usage:
+ * class MyViewSet(UserUpdateMixin, viewsets.ModelViewSet):
+ * # Your view implementation
+ * pass
+ */
+export const managerV2TopographyUpdate = <ThrowOnError extends boolean = false>(options: Options<ManagerV2TopographyUpdateData, ThrowOnError>) => (options.client ?? client).put<ManagerV2TopographyUpdateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/v2/topography/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const managerV2UploadZipFinishCreate = <ThrowOnError extends boolean = false>(options: Options<ManagerV2UploadZipFinishCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<ManagerV2UploadZipFinishCreateResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/v2/upload-zip/finish/{id}/',
-        ...options
-    });
-};
+export const managerV2UploadZipFinishCreate = <ThrowOnError extends boolean = false>(options: Options<ManagerV2UploadZipFinishCreateData, ThrowOnError>) => (options.client ?? client).post<ManagerV2UploadZipFinishCreateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/v2/upload-zip/finish/{id}/',
+    ...options
+});
 
-export const managerV2UploadZipStartCreate = <ThrowOnError extends boolean = false>(options?: Options<ManagerV2UploadZipStartCreateData, ThrowOnError>) => {
-    return (options?.client ?? client).post<ManagerV2UploadZipStartCreateResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/v2/upload-zip/start/',
-        ...options
-    });
-};
+export const managerV2UploadZipStartCreate = <ThrowOnError extends boolean = false>(options?: Options<ManagerV2UploadZipStartCreateData, ThrowOnError>) => (options?.client ?? client).post<ManagerV2UploadZipStartCreateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/v2/upload-zip/start/',
+    ...options
+});
 
-export const managerV2ZipContainerRetrieve = <ThrowOnError extends boolean = false>(options: Options<ManagerV2ZipContainerRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<ManagerV2ZipContainerRetrieveResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/manager/v2/zip-container/{id}/',
-        ...options
-    });
-};
+export const managerV2ZipContainerRetrieve = <ThrowOnError extends boolean = false>(options: Options<ManagerV2ZipContainerRetrieveData, ThrowOnError>) => (options.client ?? client).get<ManagerV2ZipContainerRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/manager/v2/zip-container/{id}/',
+    ...options
+});
 
-export const organizationsV1AddUserCreate = <ThrowOnError extends boolean = false>(options: Options<OrganizationsV1AddUserCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<OrganizationsV1AddUserCreateResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/organizations/v1/add-user/{id}/',
-        ...options
-    });
-};
+/**
+ * Add a user to an organization
+ */
+export const organizationsV1AddUserCreate = <ThrowOnError extends boolean = false>(options: Options<OrganizationsV1AddUserCreateData, ThrowOnError>) => (options.client ?? client).post<OrganizationsV1AddUserCreateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/organizations/v1/add-user/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const organizationsV1OrganizationList = <ThrowOnError extends boolean = false>(options?: Options<OrganizationsV1OrganizationListData, ThrowOnError>) => {
-    return (options?.client ?? client).get<OrganizationsV1OrganizationListResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/organizations/v1/organization/',
-        ...options
-    });
-};
+export const organizationsV1OrganizationList = <ThrowOnError extends boolean = false>(options?: Options<OrganizationsV1OrganizationListData, ThrowOnError>) => (options?.client ?? client).get<OrganizationsV1OrganizationListResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/organizations/v1/organization/',
+    ...options
+});
 
-export const organizationsV1OrganizationCreate = <ThrowOnError extends boolean = false>(options: Options<OrganizationsV1OrganizationCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<OrganizationsV1OrganizationCreateResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/organizations/v1/organization/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const organizationsV1OrganizationCreate = <ThrowOnError extends boolean = false>(options: Options<OrganizationsV1OrganizationCreateData, ThrowOnError>) => (options.client ?? client).post<OrganizationsV1OrganizationCreateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/organizations/v1/organization/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const organizationsV1OrganizationDestroy = <ThrowOnError extends boolean = false>(options: Options<OrganizationsV1OrganizationDestroyData, ThrowOnError>) => {
-    return (options.client ?? client).delete<OrganizationsV1OrganizationDestroyResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/organizations/v1/organization/{id}/',
-        ...options
-    });
-};
+export const organizationsV1OrganizationDestroy = <ThrowOnError extends boolean = false>(options: Options<OrganizationsV1OrganizationDestroyData, ThrowOnError>) => (options.client ?? client).delete<OrganizationsV1OrganizationDestroyResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/organizations/v1/organization/{id}/',
+    ...options
+});
 
-export const organizationsV1OrganizationRetrieve = <ThrowOnError extends boolean = false>(options: Options<OrganizationsV1OrganizationRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<OrganizationsV1OrganizationRetrieveResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/organizations/v1/organization/{id}/',
-        ...options
-    });
-};
+export const organizationsV1OrganizationRetrieve = <ThrowOnError extends boolean = false>(options: Options<OrganizationsV1OrganizationRetrieveData, ThrowOnError>) => (options.client ?? client).get<OrganizationsV1OrganizationRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/organizations/v1/organization/{id}/',
+    ...options
+});
 
-export const organizationsV1OrganizationPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<OrganizationsV1OrganizationPartialUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).patch<OrganizationsV1OrganizationPartialUpdateResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/organizations/v1/organization/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const organizationsV1OrganizationPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<OrganizationsV1OrganizationPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<OrganizationsV1OrganizationPartialUpdateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/organizations/v1/organization/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const organizationsV1OrganizationUpdate = <ThrowOnError extends boolean = false>(options: Options<OrganizationsV1OrganizationUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).put<OrganizationsV1OrganizationUpdateResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/organizations/v1/organization/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const organizationsV1OrganizationUpdate = <ThrowOnError extends boolean = false>(options: Options<OrganizationsV1OrganizationUpdateData, ThrowOnError>) => (options.client ?? client).put<OrganizationsV1OrganizationUpdateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/organizations/v1/organization/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const organizationsV1RemoveUserCreate = <ThrowOnError extends boolean = false>(options: Options<OrganizationsV1RemoveUserCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<OrganizationsV1RemoveUserCreateResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/organizations/v1/remove-user/{id}/',
-        ...options
-    });
-};
+/**
+ * Remove a user from an organization
+ */
+export const organizationsV1RemoveUserCreate = <ThrowOnError extends boolean = false>(options: Options<OrganizationsV1RemoveUserCreateData, ThrowOnError>) => (options.client ?? client).post<OrganizationsV1RemoveUserCreateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/organizations/v1/remove-user/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const pluginsContactCardContactMechanicsRetrieve = <ThrowOnError extends boolean = false>(options: Options<PluginsContactCardContactMechanicsRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<PluginsContactCardContactMechanicsRetrieveResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/plugins/contact/card/contact-mechanics/{workflow}',
-        ...options
-    });
-};
+export const pluginsContactCardContactMechanicsRetrieve = <ThrowOnError extends boolean = false>(options: Options<PluginsContactCardContactMechanicsRetrieveData, ThrowOnError>) => (options.client ?? client).get<PluginsContactCardContactMechanicsRetrieveResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/plugins/contact/card/contact-mechanics/{workflow}',
+    ...options
+});
 
-export const pluginsStatisticsCardRoughnessParametersRetrieve = <ThrowOnError extends boolean = false>(options: Options<PluginsStatisticsCardRoughnessParametersRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<PluginsStatisticsCardRoughnessParametersRetrieveResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/plugins/statistics/card/roughness-parameters/{workflow}',
-        ...options
-    });
-};
+/**
+ * Get roughness parameters card view data
+ */
+export const pluginsStatisticsCardRoughnessParametersRetrieve = <ThrowOnError extends boolean = false>(options: Options<PluginsStatisticsCardRoughnessParametersRetrieveData, ThrowOnError>) => (options.client ?? client).get<PluginsStatisticsCardRoughnessParametersRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/plugins/statistics/card/roughness-parameters/{workflow}',
+    ...options
+});
 
-export const usersV1AddOrganizationCreate = <ThrowOnError extends boolean = false>(options: Options<UsersV1AddOrganizationCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<UsersV1AddOrganizationCreateResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/users/v1/add-organization/{id}/',
-        ...options
-    });
-};
+/**
+ * Add a user to an organization
+ */
+export const usersV1AddOrganizationCreate = <ThrowOnError extends boolean = false>(options: Options<UsersV1AddOrganizationCreateData, ThrowOnError>) => (options.client ?? client).post<UsersV1AddOrganizationCreateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/users/v1/add-organization/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const usersV1RemoveOrganizationCreate = <ThrowOnError extends boolean = false>(options: Options<UsersV1RemoveOrganizationCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<UsersV1RemoveOrganizationCreateResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/users/v1/remove-organization/{id}/',
-        ...options
-    });
-};
+/**
+ * Remove a user from an organization
+ */
+export const usersV1RemoveOrganizationCreate = <ThrowOnError extends boolean = false>(options: Options<UsersV1RemoveOrganizationCreateData, ThrowOnError>) => (options.client ?? client).post<UsersV1RemoveOrganizationCreateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/users/v1/remove-organization/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const usersV1UserList = <ThrowOnError extends boolean = false>(options?: Options<UsersV1UserListData, ThrowOnError>) => {
-    return (options?.client ?? client).get<UsersV1UserListResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/users/v1/user/',
-        ...options
-    });
-};
+export const usersV1UserList = <ThrowOnError extends boolean = false>(options?: Options<UsersV1UserListData, ThrowOnError>) => (options?.client ?? client).get<UsersV1UserListResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/users/v1/user/',
+    ...options
+});
 
-export const usersV1UserCreate = <ThrowOnError extends boolean = false>(options: Options<UsersV1UserCreateData, ThrowOnError>) => {
-    return (options.client ?? client).post<UsersV1UserCreateResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/users/v1/user/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const usersV1UserCreate = <ThrowOnError extends boolean = false>(options: Options<UsersV1UserCreateData, ThrowOnError>) => (options.client ?? client).post<UsersV1UserCreateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/users/v1/user/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const usersV1UserDestroy = <ThrowOnError extends boolean = false>(options: Options<UsersV1UserDestroyData, ThrowOnError>) => {
-    return (options.client ?? client).delete<UsersV1UserDestroyResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/users/v1/user/{id}/',
-        ...options
-    });
-};
+export const usersV1UserDestroy = <ThrowOnError extends boolean = false>(options: Options<UsersV1UserDestroyData, ThrowOnError>) => (options.client ?? client).delete<UsersV1UserDestroyResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/users/v1/user/{id}/',
+    ...options
+});
 
-export const usersV1UserRetrieve = <ThrowOnError extends boolean = false>(options: Options<UsersV1UserRetrieveData, ThrowOnError>) => {
-    return (options.client ?? client).get<UsersV1UserRetrieveResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/users/v1/user/{id}/',
-        ...options
-    });
-};
+export const usersV1UserRetrieve = <ThrowOnError extends boolean = false>(options: Options<UsersV1UserRetrieveData, ThrowOnError>) => (options.client ?? client).get<UsersV1UserRetrieveResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/users/v1/user/{id}/',
+    ...options
+});
 
-export const usersV1UserPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<UsersV1UserPartialUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).patch<UsersV1UserPartialUpdateResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/users/v1/user/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const usersV1UserPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<UsersV1UserPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<UsersV1UserPartialUpdateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/users/v1/user/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
-export const usersV1UserUpdate = <ThrowOnError extends boolean = false>(options: Options<UsersV1UserUpdateData, ThrowOnError>) => {
-    return (options.client ?? client).put<UsersV1UserUpdateResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        security: [
-            {
-                in: 'cookie',
-                name: 'sessionid',
-                type: 'apiKey'
-            }
-        ],
-        url: '/users/v1/user/{id}/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
+export const usersV1UserUpdate = <ThrowOnError extends boolean = false>(options: Options<UsersV1UserUpdateData, ThrowOnError>) => (options.client ?? client).put<UsersV1UserUpdateResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    security: [{
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/users/v1/user/{id}/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
