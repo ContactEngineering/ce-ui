@@ -469,11 +469,11 @@ const plotConfigs = computed(() => {
     return props.plots.map(plot => ({
         xAxis: {
             label: plot.xAxisLabel || 'x',
-            type: plot.xAxisType || 'linear'
+            scaleType: plot.xAxisType || 'linear'
         },
         yAxis: {
             label: plot.yAxisLabel || 'y',
-            type: plot.yAxisType || 'linear'
+            scaleType: plot.yAxisType || 'linear'
         }
     } as PlotConfig));
 });
@@ -516,12 +516,12 @@ defineExpose({ download });
                     <XAxis
                         :config="plotConfigs[0].xAxis"
                         :show-grid="true"
-                        :format-tick="plotConfigs[0].xAxis.type === 'linear' ? formatExponential : undefined"
+                        :format-tick="plotConfigs[0].xAxis.scaleType === 'linear' ? formatExponential : undefined"
                     />
                     <YAxis
                         :config="plotConfigs[0].yAxis"
                         :show-grid="true"
-                        :format-tick="plotConfigs[0].yAxis.type === 'linear' ? formatExponential : undefined"
+                        :format-tick="plotConfigs[0].yAxis.scaleType === 'linear' ? formatExponential : undefined"
                     />
                 </template>
 
@@ -568,12 +568,12 @@ defineExpose({ download });
                         <XAxis
                             :config="plotConfigs[plotIndex].xAxis"
                             :show-grid="true"
-                            :format-tick="plotConfigs[plotIndex].xAxis.type === 'linear' ? formatExponential : undefined"
+                            :format-tick="plotConfigs[plotIndex].xAxis.scaleType === 'linear' ? formatExponential : undefined"
                         />
                         <YAxis
                             :config="plotConfigs[plotIndex].yAxis"
                             :show-grid="true"
-                            :format-tick="plotConfigs[plotIndex].yAxis.type === 'linear' ? formatExponential : undefined"
+                            :format-tick="plotConfigs[plotIndex].yAxis.scaleType === 'linear' ? formatExponential : undefined"
                         />
                     </template>
 

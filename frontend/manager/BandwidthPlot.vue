@@ -45,11 +45,11 @@ const _hoverData = ref<{
 const plotConfig = computed<PlotConfig>(() => ({
     xAxis: {
         label: 'Bandwidth (m)',
-        type: 'log'
+        scaleType: 'log'
     },
     yAxis: {
         label: '',
-        type: 'linear'
+        scaleType: 'linear'
     }
 }));
 
