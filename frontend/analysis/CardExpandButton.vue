@@ -1,8 +1,8 @@
 <script setup lang="ts">
 
-import {BButton} from 'bootstrap-vue-next';
+import { QBtn } from 'quasar';
 
-import {subjectsToBase64} from "../utils/api";
+import { subjectsToBase64 } from "../utils/api";
 
 const props = defineProps({
     detailUrl: String,
@@ -13,11 +13,7 @@ const props = defineProps({
 </script>
 
 <template>
-    <BButton variant="light"
-             size="sm">
-        <a :href="`${detailUrl}${functionName}/?subjects=${subjectsToBase64(subjects)}`"
-           class="text-reset">
-            <i class="fa fa-expand"></i>
-        </a>
-    </BButton>
+    <QBtn flat size="sm" :href="`${detailUrl}${functionName}/?subjects=${subjectsToBase64(subjects)}`">
+        <i class="fa fa-expand"></i>
+    </QBtn>
 </template>

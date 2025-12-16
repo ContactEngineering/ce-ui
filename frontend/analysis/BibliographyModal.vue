@@ -1,8 +1,14 @@
 <script setup>
 
-import {BModal} from "bootstrap-vue-next";
+import {
+    QDialog,
+    QCard,
+    QCardSection,
+    QCardActions,
+    QBtn
+} from "quasar";
 
-const visible = defineModel('visible', {required: true});
+const visible = defineModel('visible', { required: true });
 
 const props = defineProps({
     dois: {
@@ -14,21 +20,27 @@ const props = defineProps({
 </script>
 
 <template>
-    <BModal v-model="visible"
-            size="xl"
-            title="Bibliography"
-            :ok-only="true"
-            ok-title="Close">
-        <div v-if="dois.length > 0" class="modal-body">
-            This analysis used methods and algorithms described in the following publications:
-            <ul>
-                <li v-for="doi in dois">
-                    <a :href="`https://doi.org/${doi}`" target="_blank">{{ doi }}</a>
-                </li>
-            </ul>
-        </div>
-        <div v-if="dois.length == 0" class="modal-body">
-            No bibliography related to these analyses was reported.
-        </div>
-    </BModal>
+    <QDialog v-model="visible">
+        <QCard style="min-width: 600px; max-width: 900px">
+            <QCardSection>
+                <div class="text-h6">Bibliography</div>
+            </QCardSection>
+            <QCardSection>
+                <div v-if="dois.length > 0">
+                    This analysis used methods and algorithms described in the following publications:
+                    <ul>
+                        <li v-for="doi in dois" :key="doi">
+                            <a :href="`https://doi.org/${doi}`" target="_blank">{{ doi }}</a>
+                        </li>
+                    </ul>
+                </div>
+                <div v-if="dois.length == 0">
+                    No bibliography related to these analyses was reported.
+                </div>
+            </QCardSection>
+            <QCardActions align="right">
+                <QBtn flat label="Close" v-close-popup />
+            </QCardActions>
+        </QCard>
+    </QDialog>
 </template>

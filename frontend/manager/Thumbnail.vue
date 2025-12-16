@@ -2,7 +2,7 @@
 
 import {computed, ref} from "vue";
 
-import {BOverlay} from "bootstrap-vue-next";
+import { QInnerLoading, QSpinner } from "quasar";
 
 const props = defineProps({
     dataSource: Object,
@@ -21,7 +21,7 @@ const hasThumbnail = computed(() => {
 </script>
 
 <template>
-    <BOverlay :show="hasThumbnail && _isLoading">
+    <div class="thumbnail-wrapper">
         <a :href="`/ui/topography/${dataSource.id}/`">
             <img v-if="hasThumbnail"
                  :class="imgClass"
@@ -30,5 +30,15 @@ const hasThumbnail = computed(() => {
             <i v-if="!hasThumbnail"
                :class="`fa fa-microscope fa-2x text-black ${imgClass}`"></i>
         </a>
-    </BOverlay>
+        <QInnerLoading :showing="hasThumbnail && _isLoading">
+            <QSpinner size="1rem" />
+        </QInnerLoading>
+    </div>
 </template>
+
+<style scoped>
+.thumbnail-wrapper {
+    position: relative;
+    display: inline-block;
+}
+</style>

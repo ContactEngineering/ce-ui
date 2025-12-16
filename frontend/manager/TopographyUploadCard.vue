@@ -4,18 +4,19 @@ import {cloneDeep} from "lodash";
 import {onMounted, ref} from "vue";
 
 import {
-    BButton,
-    BButtonGroup,
-    BCard,
-    BProgress,
-    useToastController
-} from 'bootstrap-vue-next';
+    QBtn,
+    QBtnGroup,
+    QCard,
+    QCardSection,
+    QLinearProgress
+} from 'quasar';
 
+import { useNotify } from "@/utils/notify";
 import {managerApiTopographyDestroy} from "@/api";
 import {getIdFromUrl} from "@/utils/api";
 import {uploadFile} from "topobank/utils/upload";
 
-const {show} = useToastController();
+const { show } = useNotify();
 
 const emit = defineEmits([
     'delete:topography',
@@ -75,26 +76,24 @@ async function deleteTopography() {
 </script>
 
 <template>
-    <BCard class="mb-1"
-           :class="{ 'text-white bg-danger': _error != null }">
-        <template #header>
-            <h5 class="float-start">{{ topography.name }}</h5>
-            <BButtonGroup v-if="_error != null"
-                          size="sm" class="float-end">
-                <BButton variant="outline-light"
-                         class="text-white float-end ms-2"
-                         @click="deleteTopography">
+    <QCard class="q-mb-xs"
+           :class="{ 'text-white bg-negative': _error != null }">
+        <QCardSection class="flex items-center">
+            <h5 class="col-grow q-ma-none">{{ topography.name }}</h5>
+            <QBtnGroup v-if="_error != null" flat>
+                <QBtn flat text-color="white"
+                      @click="deleteTopography">
                     <i class="fa fa-trash"></i>
-                </BButton>
-            </BButtonGroup>
-        </template>
-        <div v-if="_error != null">
+                </QBtn>
+            </QBtnGroup>
+        </QCardSection>
+        <QCardSection v-if="_error != null">
             <b>Upload failed:</b> {{ _error.message }}
-        </div>
-        <BProgress v-if="_error == null"
-                    show-progress animated
-                    :value="_loaded"
-                    :max="_total">
-        </BProgress>
-    </BCard>
+        </QCardSection>
+        <QCardSection v-if="_error == null">
+            <QLinearProgress :value="_loaded / _total"
+                             stripe
+                             :animation-speed="300" />
+        </QCardSection>
+    </QCard>
 </template>

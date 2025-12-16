@@ -1,7 +1,7 @@
 <script setup>
 
-import {ref} from "vue";
-import {BBadge, BNavbarNav, BNavItem} from "bootstrap-vue-next";
+import { ref } from "vue";
+import { QBtn, QBadge } from "quasar";
 
 import NotificationOffcanvas from "topobank/base/NotificationOffcanvas.vue";
 
@@ -15,15 +15,12 @@ const unreadCount = ref(0);
 </script>
 
 <template>
-    <BNavbarNav @click="offcanvasVisible = true" class="position-relative">
-        <BNavItem>
-            <i class="fa fa-bell fa-fw" aria-hidden="true"></i>
-        </BNavItem>
-        <BBadge v-if="unreadCount > 0" variant="danger" placement="top-end">
+    <QBtn flat round @click="offcanvasVisible = true" class="text-white">
+        <i class="fa fa-bell fa-fw" aria-hidden="true"></i>
+        <QBadge v-if="unreadCount > 0" color="negative" floating>
             {{ unreadCount }}
-            <span class="visually-hidden">unread messages</span>
-        </BBadge>
-    </BNavbarNav>
+        </QBadge>
+    </QBtn>
     <NotificationOffcanvas
         v-model:visible="offcanvasVisible"
         v-model:unread-count="unreadCount"

@@ -3,7 +3,7 @@ import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { Editor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
-import { BButton, BButtonGroup } from 'bootstrap-vue-next'
+import { QBtn, QBtnGroup } from 'quasar'
 
 // Props: modelValue for v-model, disabled for read-only
 const props = defineProps({
@@ -49,104 +49,101 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div v-if="editor" class="container">
+  <div v-if="editor" class="tiptap-container">
     <!-- Toolbar -->
-    <b-button-group class="toolbar mb-2" role="group">
-      <b-button
+    <QBtnGroup class="toolbar q-mb-sm" flat>
+      <QBtn
         size="sm"
-        variant="light"
+        flat
         class="btn-small"
-        :pressed="editor.isActive('bold')"
-        :disabled="disabled"
+        :color="editor.isActive('bold') ? 'primary' : undefined"
+        :disable="disabled"
         @click="editor.chain().focus().toggleBold().run()"
         title="Bold"
       >
         <i class="fa fa-bold"></i>
-      </b-button>
+      </QBtn>
 
-      <b-button
+      <QBtn
         size="sm"
-        variant="light"
+        flat
         class="btn-small"
-        :pressed="editor.isActive('italic')"
-        :disabled="disabled"
+        :color="editor.isActive('italic') ? 'primary' : undefined"
+        :disable="disabled"
         @click="editor.chain().focus().toggleItalic().run()"
         title="Italic"
       >
         <i class="fa fa-italic"></i>
-      </b-button>
+      </QBtn>
 
-      <b-button
+      <QBtn
         size="sm"
-        variant="light"
+        flat
         class="btn-small"
-        :pressed="editor.isActive('underline')"
-        :disabled="disabled"
+        :color="editor.isActive('underline') ? 'primary' : undefined"
+        :disable="disabled"
         @click="editor.chain().focus().toggleUnderline().run()"
         title="Underline"
       >
         <i class="fa fa-underline"></i>
-      </b-button>
+      </QBtn>
 
-      <b-button
+      <QBtn
         size="sm"
-        variant="light"
+        flat
         class="btn-small"
-        :pressed="editor.isActive('bulletList')"
-        :disabled="disabled"
+        :color="editor.isActive('bulletList') ? 'primary' : undefined"
+        :disable="disabled"
         @click="editor.chain().focus().toggleBulletList().run()"
         title="Bullet List"
       >
         <i class="fa fa-list-ul"></i>
-      </b-button>
+      </QBtn>
 
-      <b-button
+      <QBtn
         size="sm"
-        variant="light"
+        flat
         class="btn-small"
-        :pressed="editor.isActive('heading', { level: 1 })"
-        :disabled="disabled"
+        :color="editor.isActive('heading', { level: 1 }) ? 'primary' : undefined"
+        :disable="disabled"
         @click="editor.chain().focus().toggleHeading({ level: 1 }).run()"
         title="Heading 1"
-      >
-        H1
-      </b-button>
+        label="H1"
+      />
 
-      <b-button
+      <QBtn
         size="sm"
-        variant="light"
+        flat
         class="btn-small"
-        :pressed="editor.isActive('heading', { level: 2 })"
-        :disabled="disabled"
+        :color="editor.isActive('heading', { level: 2 }) ? 'primary' : undefined"
+        :disable="disabled"
         @click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
         title="Heading 2"
-      >
-        H2
-      </b-button>
+        label="H2"
+      />
 
-      <b-button
+      <QBtn
         size="sm"
-        variant="light"
+        flat
         class="btn-small"
-        :pressed="editor.isActive('heading', { level: 3 })"
-        :disabled="disabled"
+        :color="editor.isActive('heading', { level: 3 }) ? 'primary' : undefined"
+        :disable="disabled"
         @click="editor.chain().focus().toggleHeading({ level: 3 }).run()"
         title="Heading 3"
-      >
-        H3
-      </b-button>
+        label="H3"
+      />
 
-      <b-button
+      <QBtn
         size="sm"
-        variant="light"
+        flat
         class="btn-small"
-        :disabled="disabled"
+        :disable="disabled"
         @click="editor.chain().focus().clearNodes().unsetAllMarks().run()"
         title="Clear formatting"
       >
         <i class="fa fa-eraser"></i>
-      </b-button>
-    </b-button-group>
+      </QBtn>
+    </QBtnGroup>
 
     <!-- Editor -->
     <editor-content
@@ -158,7 +155,7 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-.container {
+.tiptap-container {
   border: 1px solid #ccc;
   padding: 1rem;
   min-height: 200px;

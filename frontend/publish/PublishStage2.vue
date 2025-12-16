@@ -1,7 +1,14 @@
 <script setup lang="ts">
 
 import { computed, inject, ref } from "vue";
-import { BCard, BButton, BButtonGroup, BFormInput, BAlert } from "bootstrap-vue-next";
+import {
+    QCard,
+    QCardSection,
+    QBtn,
+    QBtnGroup,
+    QInput,
+    QBanner
+} from "quasar";
 
 const props = defineProps({
     stage: Number
@@ -161,135 +168,151 @@ const authorsString = computed(() => {
 
 </script>
 <template>
-    <div v-if="props.stage == 1" class="mt-4">
+    <div v-if="props.stage == 1" class="q-mt-md">
         <h2 class="alert-heading">
             Please enter the authors
         </h2>
-        <BAlert :model-value="true">
+        <QBanner class="bg-info text-white q-mb-md">
             Authors will be listed like this: <strong> {{ authorsString }} </strong>
-        </BAlert>
-        <div class="p-2">
-            <BCard v-for="(author, index) in authors" class="mb-2" header-tag="header"
-                   footer-tag="footer">
-                <template #header>
-                    <h5 class="mb-0">{{ index + 1 }}. Author</h5>
-                </template>
-                <div class="d-flex flex-row justify-content-evenly align-items-end">
-                    <BButtonGroup aria-label="Basic example">
-                        <BButton v-if="authors.length == 1" disabled variant="danger"
+        </QBanner>
+        <div class="q-pa-sm">
+            <QCard v-for="(author, index) in authors" :key="index" class="q-mb-sm">
+                <QCardSection class="bg-grey-3">
+                    <h5 class="q-ma-none">{{ index + 1 }}. Author</h5>
+                </QCardSection>
+                <QCardSection>
+                    <div class="flex row justify-evenly items-end">
+                        <QBtnGroup flat>
+                            <QBtn v-if="authors.length == 1" disable color="negative"
                                  title="Delete this author">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </BButton>
-                        <BButton v-else @click="removeAuthor(index)" variant="danger"
+                                <i class="fa-solid fa-trash-can"></i>
+                            </QBtn>
+                            <QBtn v-else @click="removeAuthor(index)" color="negative"
                                  title="Delete this author">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </BButton>
-                        <BButton @click="fillAuthor(index)" variant="info"
+                                <i class="fa-solid fa-trash-can"></i>
+                            </QBtn>
+                            <QBtn @click="fillAuthor(index)" color="info"
                                  title="Insert your name and ORCID ID as author">
-                            <i class="fa-solid fa-id-card"></i>
-                        </BButton>
-                        <BButton v-if="index == 0" disabled>
-                            <i class="fa-solid fa-arrow-up"></i>
-                        </BButton>
-                        <BButton v-else @click="moveAuthorUp(index)" title="Move up">
-                            <i class="fa-solid fa-arrow-up"></i>
-                        </BButton>
-                        <BButton v-if="index == authors.length - 1" disabled>
-                            <i class="fa-solid fa-arrow-down"></i>
-                        </BButton>
-                        <BButton v-else @click="moveAuthorDown(index)"
+                                <i class="fa-solid fa-id-card"></i>
+                            </QBtn>
+                            <QBtn v-if="index == 0" disable flat>
+                                <i class="fa-solid fa-arrow-up"></i>
+                            </QBtn>
+                            <QBtn v-else @click="moveAuthorUp(index)" flat title="Move up">
+                                <i class="fa-solid fa-arrow-up"></i>
+                            </QBtn>
+                            <QBtn v-if="index == authors.length - 1" disable flat>
+                                <i class="fa-solid fa-arrow-down"></i>
+                            </QBtn>
+                            <QBtn v-else @click="moveAuthorDown(index)" flat
                                  title="Move down">
-                            <i class="fa-solid fa-arrow-down"></i>
-                        </BButton>
-                    </BButtonGroup>
-                    <div class="d-flex flex-column">
-                        <span>First name*</span>
-                        <BFormInput v-model="author.person.firstName"
-                                    :state="author.person.firstNameValid"
-                                    aria-describedby="input-live-help input-live-feedback"
-                                    placeholder="First name">
-                        </BFormInput>
+                                <i class="fa-solid fa-arrow-down"></i>
+                            </QBtn>
+                        </QBtnGroup>
+                        <div class="flex column">
+                            <span>First name*</span>
+                            <QInput v-model="author.person.firstName"
+                                    :error="author.person.firstNameValid === false"
+                                    error-message="First name is required"
+                                    placeholder="First name"
+                                    dense
+                                    outlined>
+                            </QInput>
+                        </div>
+                        <div class="flex column">
+                            <span>Last name*</span>
+                            <QInput v-model="author.person.lastName"
+                                    :error="author.person.lastNameValid === false"
+                                    error-message="Last name is required"
+                                    placeholder="Last name"
+                                    dense
+                                    outlined>
+                            </QInput>
+                        </div>
+                        <div class="flex column">
+                            <span>ORCID ID (optional)</span>
+                            <QInput v-model="author.person.orcidId"
+                                    :error="author.person.orcidIdValid === false"
+                                    error-message="Invalid ORCID ID format"
+                                    placeholder="xxxx-xxxx-xxxx-xxxx"
+                                    dense
+                                    outlined>
+                            </QInput>
+                        </div>
                     </div>
-                    <div class="d-flex flex-column">
-                        <span>Last name*</span>
-                        <BFormInput v-model="author.person.lastName"
-                                    :state="author.person.lastNameValid"
-                                    placeholder="Last name">
-                        </BFormInput>
-                    </div>
-                    <div class="d-flex flex-column">
-                        <span>ORCID ID (optional)</span>
-                        <BFormInput v-model="author.person.orcidId"
-                                    :state="author.person.orcidIdValid"
-                                    placeholder="xxxx-xxxx-xxxx-xxxx">
-                        </BFormInput>
-                    </div>
-                </div>
-                <template #footer>
-                    <h6 class="mb-0">{{ author.affiliations.length }} Affiliations</h6>
+                </QCardSection>
+                <QCardSection class="bg-grey-2">
+                    <h6 class="q-ma-none q-mb-sm">{{ author.affiliations.length }} Affiliations</h6>
                     <div v-for="(affiliation, affiliationIndex) in author.affiliations"
-                         class="d-flex flex-row justify-content-center align-items-end mt-2">
-                        <BButtonGroup class="me-2">
-                            <BButton
+                         :key="affiliationIndex"
+                         class="flex row justify-center items-end q-mt-sm">
+                        <QBtnGroup class="q-mr-sm" flat>
+                            <QBtn
                                 @click="removeAffiliation(index, affiliationIndex)"
-                                variant="danger"
+                                color="negative"
                                 title="Delete this affiliation">
                                 <i class="fa-solid fa-trash-can"></i>
-                            </BButton>
-                            <BButton v-if="affiliationIndex == 0" disabled>
+                            </QBtn>
+                            <QBtn v-if="affiliationIndex == 0" disable flat>
                                 <i class="fa-solid fa-arrow-up"></i>
-                            </BButton>
-                            <BButton v-else
-                                     @click="moveAffiliationUp(index, affiliationIndex)">
+                            </QBtn>
+                            <QBtn v-else
+                                 @click="moveAffiliationUp(index, affiliationIndex)" flat>
                                 <i class="fa-solid fa-arrow-up"></i>
-                            </BButton>
-                            <BButton
+                            </QBtn>
+                            <QBtn
                                 v-if="affiliationIndex == author.affiliations.length - 1"
-                                disabled>
+                                disable flat>
                                 <i class="fa-solid fa-arrow-down"></i>
-                            </BButton>
-                            <BButton v-else
-                                     @click="moveAffiliationDown(index, affiliationIndex)">
+                            </QBtn>
+                            <QBtn v-else
+                                 @click="moveAffiliationDown(index, affiliationIndex)" flat>
                                 <i class="fa-solid fa-arrow-down"></i>
-                            </BButton>
-                        </BButtonGroup>
-                        <div class="d-flex flex-column me-2">
+                            </QBtn>
+                        </QBtnGroup>
+                        <div class="flex column q-mr-sm">
                             <span>Affiliation name*</span>
-                            <BFormInput v-model="affiliation.name"
-                                        :state="affiliation.nameValid"
-                                        placeholder="Name">
-                            </BFormInput>
+                            <QInput v-model="affiliation.name"
+                                    :error="affiliation.nameValid === false"
+                                    error-message="Affiliation name is required"
+                                    placeholder="Name"
+                                    dense
+                                    outlined>
+                            </QInput>
                         </div>
-                        <div class="d-flex flex-column">
+                        <div class="flex column">
                             <span>ROR ID (optional)</span>
-                            <BFormInput v-model="affiliation.rorId"
-                                        :state="affiliation.rorIdValid"
-                                        placeholder="0xxxxxxxx">
-                            </BFormInput>
+                            <QInput v-model="affiliation.rorId"
+                                    :error="affiliation.rorIdValid === false"
+                                    error-message="Invalid ROR ID format"
+                                    placeholder="0xxxxxxxx"
+                                    dense
+                                    outlined>
+                            </QInput>
                         </div>
                     </div>
 
-                    <BButton @click="addAffiliation(index)" variant="success"
-                             class="mt-2">
-                        <i class="fa-solid fa-plus"></i>
+                    <QBtn @click="addAffiliation(index)" color="positive"
+                         class="q-mt-sm">
+                        <i class="fa-solid fa-plus q-mr-xs"></i>
                         One more affiliation
-                    </BButton>
-                </template>
-            </BCard>
+                    </QBtn>
+                </QCardSection>
+            </QCard>
 
-            <BButton @click="addAuthor()" variant="success">
-                <i class="fa-solid fa-plus"></i>
+            <QBtn @click="addAuthor()" color="positive">
+                <i class="fa-solid fa-plus q-mr-xs"></i>
                 One more author
-            </BButton>
+            </QBtn>
         </div>
 
-        <div class="d-flex flex-row justify-content-between">
-            <BButton @click="$emit('back')" variant="primary">
+        <div class="flex row justify-between q-mt-md">
+            <QBtn @click="$emit('back')" color="primary">
                 Back
-            </BButton>
-            <BButton @click="nextStage()" variant="primary">
+            </QBtn>
+            <QBtn @click="nextStage()" color="primary">
                 Continue
-            </BButton>
+            </QBtn>
         </div>
     </div>
 </template>

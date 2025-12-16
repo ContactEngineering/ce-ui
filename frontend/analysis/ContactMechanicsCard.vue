@@ -2,8 +2,20 @@
 
 import { computed, onMounted, ref } from "vue";
 
-import { BDropdownDivider, BDropdownItem, BSpinner, BTab, BTabs, useToastController } from "bootstrap-vue-next";
+import {
+    QItem,
+    QItemSection,
+    QSeparator,
+    QSpinner,
+    QTabs,
+    QTab,
+    QTabPanels,
+    QTabPanel,
+    QBtn,
+    QBanner
+} from "quasar";
 
+import { useNotify } from "@/utils/notify";
 import { pluginsContactCardContactMechanicsRetrieve, filesFolderRetrieve } from "@/api";
 import { subjectsToBase64, getIdFromUrl } from "@/utils/api";
 
@@ -35,7 +47,7 @@ const props = defineProps({
     }
 });
 
-const { show } = useToastController();
+const { show } = useNotify();
 
 const _analyses = ref(null);
 let _analysesById = {};
@@ -51,6 +63,7 @@ const _isLoading = ref(false);
 // GUI logic
 const _nbPendingAjaxRequests = ref(0);
 const _parametersVisible = ref(false);
+const _activeTab = ref('geometry');
 
 onMounted(() => {
     updateCard();
@@ -220,17 +233,17 @@ const analysisIds = computed(() => {
                   @refreshButtonClicked="updateCard"
                   @someTasksFinished="updateCard">
         <template #dropdowns>
-            <BDropdownDivider></BDropdownDivider>
-            <BDropdownItem @click="_parametersVisible = true">
-                Parameters...
-            </BDropdownItem>
-            <BDropdownDivider></BDropdownDivider>
-            <BDropdownItem :href="`/analysis/download/${analysisIds}/zip`">
-                Download ZIP
-            </BDropdownItem>
-            <BDropdownItem @click="$refs.plot.download()">
-                Download SVG
-            </BDropdownItem>
+            <QSeparator />
+            <QItem clickable v-close-popup @click="_parametersVisible = true">
+                <QItemSection>Parameters...</QItemSection>
+            </QItem>
+            <QSeparator />
+            <QItem clickable v-close-popup :href="`/analysis/download/${analysisIds}/zip`">
+                <QItemSection>Download ZIP</QItemSection>
+            </QItem>
+            <QItem clickable v-close-popup @click="$refs.plot.download()">
+                <QItemSection>Download SVG</QItemSection>
+            </QItem>
         </template>
         <div class="row">
             <div :class="{ 'col-6': enlarged, 'col-12': !enlarged }">
@@ -248,94 +261,96 @@ const analysisIds = computed(() => {
 
             <!-- Right with simulation details and actions -->
             <div v-if="enlarged" class="col-6">
-                <div v-if="_selection == null && !_isLoading" id="geometry" class="alert alert-info">Select a point
-                    in the graphs on the left for more details.
-                </div>
-                <div v-if="_isLoading"
-                     class="d-flex justify-content-center mt-5">
-                    <div class="flex-column text-center">
-                        <b-spinner />
-                        <p>Loading...</p>
+                <QBanner v-if="_selection == null && !_isLoading" class="bg-info text-white">
+                    Select a point in the graphs on the left for more details.
+                </QBanner>
+                <div v-if="_isLoading" class="flex justify-center q-mt-lg">
+                    <div class="column items-center">
+                        <QSpinner size="lg" />
+                        <p class="q-mt-sm">Loading...</p>
                     </div>
                 </div>
-                <BTabs v-if="_selection != null && !_isLoading">
-                    <BTab title="Contact geometry">
-                        <DeepZoomImage v-if="_selection != null"
-                                       ref="contactingPoints"
-                                       :folder-url="_selection.folder"
-                                       :prefix="`${_selection.dataPath}/dzi/contacting-points/`">
-                        </DeepZoomImage>
-                        <div v-if="_selection != null" class="pull-right">
-                            <a class="btn btn-default btn-block btn-lg mt-3"
-                               v-on:click="$refs.contactingPoints.download()">
-                                Download PNG
-                            </a>
-                        </div>
-                    </BTab>
-                    <BTab title="Contact pressure">
-                        <DeepZoomImage v-if="_selection != null"
-                                       ref="pressure"
-                                       :colorbar="true"
-                                       :folder-url="_selection.folder"
-                                       :prefix="`${_selection.dataPath}/dzi/pressure/`">
-                        </DeepZoomImage>
-                        <div v-if="_selection != null" class="pull-right">
-                            <a class="btn btn-default btn-block btn-lg" v-on:click="$refs.pressure.download()">
-                                Download PNG
-                            </a>
-                        </div>
-                    </BTab>
-                    <BTab title="Displacement">
-                        <DeepZoomImage v-if="_selection != null"
-                                       ref="displacement"
-                                       :colorbar="true"
-                                       :folder-url="_selection.folder"
-                                       :prefix="`${_selection.dataPath}/dzi/displacement/`">
-                        </DeepZoomImage>
-                        <div v-if="_selection != null" class="pull-right">
-                            <a class="btn btn-default btn-block btn-lg" v-on:click="$refs.displacement.download()">
-                                Download PNG
-                            </a>
-                        </div>
-                    </BTab>
-                    <BTab title="Gap">
-                        <DeepZoomImage v-if="_selection != null"
-                                       ref="gap"
-                                       :colorbar="true"
-                                       :folder-url="_selection.folder"
-                                       :prefix="`${_selection.dataPath}/dzi/gap/`">
-                        </DeepZoomImage>
-                        <div v-if="_selection != null" class="pull-right">
-                            <a class="btn btn-default btn-block btn-lg" v-on:click="$refs.gap.download()">
-                                Download PNG
-                            </a>
-                        </div>
-                    </BTab>
-                    <BTab title="Pressure distribution">
-                        <BokehPlot v-if="_selection != null"
-                                   :data-sources="distributionDataSources"
-                                   :options-widgets='["layout", "lineWidth", "symbolSize"]'
-                                   :output-backend="_outputBackend"
-                                   :plots="pressureDistributionPlot">
-                        </BokehPlot>
-                    </BTab>
-                    <BTab title="Gap distribution">
-                        <BokehPlot v-if="_selection != null"
-                                   :data-sources="distributionDataSources"
-                                   :options-widgets='["layout", "lineWidth", "symbolSize"]'
-                                   :output-backend="_outputBackend"
-                                   :plots="gapDistributionPlot">
-                        </BokehPlot>
-                    </BTab>
-                    <BTab title="Cluster area distribution">
-                        <BokehPlot v-if="_selection != null"
-                                   :data-sources="distributionDataSources"
-                                   :options-widgets='["layout", "lineWidth", "symbolSize"]'
-                                   :output-backend="_outputBackend"
-                                   :plots="clusterAreaDistributionPlot">
-                        </BokehPlot>
-                    </BTab>
-                </BTabs>
+                <div v-if="_selection != null && !_isLoading">
+                    <QTabs v-model="_activeTab" dense align="left" class="text-grey" active-color="primary" indicator-color="primary">
+                        <QTab name="geometry" label="Contact geometry" />
+                        <QTab name="pressure" label="Contact pressure" />
+                        <QTab name="displacement" label="Displacement" />
+                        <QTab name="gap" label="Gap" />
+                        <QTab name="pressure-dist" label="Pressure distribution" />
+                        <QTab name="gap-dist" label="Gap distribution" />
+                        <QTab name="cluster-dist" label="Cluster area distribution" />
+                    </QTabs>
+
+                    <QTabPanels v-model="_activeTab" animated>
+                        <QTabPanel name="geometry">
+                            <DeepZoomImage v-if="_selection != null"
+                                           ref="contactingPoints"
+                                           :folder-url="_selection.folder"
+                                           :prefix="`${_selection.dataPath}/dzi/contacting-points/`">
+                            </DeepZoomImage>
+                            <div v-if="_selection != null" class="text-right q-mt-md">
+                                <QBtn color="primary" label="Download PNG" @click="$refs.contactingPoints.download()" />
+                            </div>
+                        </QTabPanel>
+                        <QTabPanel name="pressure">
+                            <DeepZoomImage v-if="_selection != null"
+                                           ref="pressure"
+                                           :colorbar="true"
+                                           :folder-url="_selection.folder"
+                                           :prefix="`${_selection.dataPath}/dzi/pressure/`">
+                            </DeepZoomImage>
+                            <div v-if="_selection != null" class="text-right q-mt-md">
+                                <QBtn color="primary" label="Download PNG" @click="$refs.pressure.download()" />
+                            </div>
+                        </QTabPanel>
+                        <QTabPanel name="displacement">
+                            <DeepZoomImage v-if="_selection != null"
+                                           ref="displacement"
+                                           :colorbar="true"
+                                           :folder-url="_selection.folder"
+                                           :prefix="`${_selection.dataPath}/dzi/displacement/`">
+                            </DeepZoomImage>
+                            <div v-if="_selection != null" class="text-right q-mt-md">
+                                <QBtn color="primary" label="Download PNG" @click="$refs.displacement.download()" />
+                            </div>
+                        </QTabPanel>
+                        <QTabPanel name="gap">
+                            <DeepZoomImage v-if="_selection != null"
+                                           ref="gap"
+                                           :colorbar="true"
+                                           :folder-url="_selection.folder"
+                                           :prefix="`${_selection.dataPath}/dzi/gap/`">
+                            </DeepZoomImage>
+                            <div v-if="_selection != null" class="text-right q-mt-md">
+                                <QBtn color="primary" label="Download PNG" @click="$refs.gap.download()" />
+                            </div>
+                        </QTabPanel>
+                        <QTabPanel name="pressure-dist">
+                            <BokehPlot v-if="_selection != null"
+                                       :data-sources="distributionDataSources"
+                                       :options-widgets='["layout", "lineWidth", "symbolSize"]'
+                                       :output-backend="_outputBackend"
+                                       :plots="pressureDistributionPlot">
+                            </BokehPlot>
+                        </QTabPanel>
+                        <QTabPanel name="gap-dist">
+                            <BokehPlot v-if="_selection != null"
+                                       :data-sources="distributionDataSources"
+                                       :options-widgets='["layout", "lineWidth", "symbolSize"]'
+                                       :output-backend="_outputBackend"
+                                       :plots="gapDistributionPlot">
+                            </BokehPlot>
+                        </QTabPanel>
+                        <QTabPanel name="cluster-dist">
+                            <BokehPlot v-if="_selection != null"
+                                       :data-sources="distributionDataSources"
+                                       :options-widgets='["layout", "lineWidth", "symbolSize"]'
+                                       :output-backend="_outputBackend"
+                                       :plots="clusterAreaDistributionPlot">
+                            </BokehPlot>
+                        </QTabPanel>
+                    </QTabPanels>
+                </div>
             </div>
         </div>
     </AnalysisCard>

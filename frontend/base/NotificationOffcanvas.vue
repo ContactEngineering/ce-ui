@@ -4,16 +4,18 @@
 // (/inbox/notifications/api/unread_list/) is not in the OpenAPI schema.
 // Consider updating the backend OpenAPI schema to include this endpoint.
 import axios from "axios";
-import {onMounted, ref} from "vue";
+import { onMounted, ref } from "vue";
 
 import {
-    BAlert,
-    BListGroup,
-    BListGroupItem,
-    BNavbarNav,
-    BNavItem,
-    BOffcanvas
-} from "bootstrap-vue-next";
+    QDrawer,
+    QToolbar,
+    QToolbarTitle,
+    QBtn,
+    QList,
+    QItem,
+    QItemSection,
+    QBanner
+} from "quasar";
 
 const visible = defineModel("visible");
 const unreadCount = defineModel("unreadCount");
@@ -55,27 +57,34 @@ function clearNotifications() {
 </script>
 
 <template>
-    <BOffcanvas v-model="visible" placement="end" footer-class="offcanvas-header">
-        <template #title>
-            <i class="fa fa-bell fa-fw" aria-hidden="true"></i>
-            <span class="ms-2">Notifications</span>
-        </template>
-        <template #footer>
-            <BNavbarNav class="justify-content-end flex-grow-1">
-                <BNavItem class="btn btn-secondary" @click="clearNotifications"
-                          :disabled="unreadCount === 0">
-                    Clear notifications
-                </BNavItem>
-            </BNavbarNav>
-        </template>
+    <QDrawer v-model="visible" side="right" :width="300" bordered overlay>
+        <div class="column full-height">
+            <QToolbar class="bg-primary text-white">
+                <i class="fa fa-bell fa-fw q-mr-sm" aria-hidden="true"></i>
+                <QToolbarTitle>Notifications</QToolbarTitle>
+                <QBtn flat round icon="close" @click="visible = false" />
+            </QToolbar>
 
-        <BAlert :model-value="unreadCount === 0" variant="light">
-            You have no unread notifications.
-        </BAlert>
-        <BListGroup>
-            <BListGroupItem v-for="message in messages" :href="message.href">
-                {{ message.description }}
-            </BListGroupItem>
-        </BListGroup>
-    </BOffcanvas>
+            <div class="col q-pa-md">
+                <QBanner v-if="unreadCount === 0" class="bg-grey-2 q-mb-md">
+                    You have no unread notifications.
+                </QBanner>
+                <QList bordered separator v-if="messages.length > 0">
+                    <QItem v-for="message in messages" :key="message.href" clickable :href="message.href">
+                        <QItemSection>{{ message.description }}</QItemSection>
+                    </QItem>
+                </QList>
+            </div>
+
+            <QToolbar class="bg-grey-2">
+                <QBtn
+                    color="secondary"
+                    label="Clear notifications"
+                    @click="clearNotifications"
+                    :disable="unreadCount === 0"
+                    class="full-width"
+                />
+            </QToolbar>
+        </div>
+    </QDrawer>
 </template>

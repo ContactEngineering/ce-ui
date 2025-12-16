@@ -2,20 +2,21 @@
 
 import { computed, onMounted, ref } from "vue";
 
-import { BDropdownDivider, BDropdownItem, useToastController } from "bootstrap-vue-next";
+import { QItem, QItemSection, QSeparator } from "quasar";
 
 import DataTable from "datatables.net-vue3";
 import DataTablesLib from "datatables.net-bs5";
 
 DataTable.use(DataTablesLib);
 
+import { useNotify } from "@/utils/notify";
 import { pluginsStatisticsCardRoughnessParametersRetrieve } from "@/api";
 import { formatExponential } from "topobank/utils/formatting";
 import { subjectsToBase64 } from "topobank/utils/api";
 
 import AnalysisCard from "topobank/analysis/AnalysisCard.vue";
 
-const {show} = useToastController();
+const { show } = useNotify();
 
 const props = defineProps({
     apiUrl: {
@@ -131,16 +132,19 @@ async function updateCard() {
                   @refreshButtonClicked="updateCard"
                   @someTasksFinished="updateCard">
         <template #dropdowns>
-            <BDropdownDivider
-                v-if="_analyses != null && _analyses.length > 0"></BDropdownDivider>
-            <BDropdownItem v-for="analysis in _analyses"
-                           :href="`/analysis/download/${analysisIds}/csv`">
-                Download CSV
-            </BDropdownItem>
-            <BDropdownItem v-for="analysis in _analyses"
-                           :href="`/analysis/download/${analysisIds}/xlsx`">
-                Download XLSX
-            </BDropdownItem>
+            <QSeparator v-if="_analyses != null && _analyses.length > 0" />
+            <QItem v-for="analysis in _analyses"
+                   :key="`csv-${analysis.id}`"
+                   clickable v-close-popup
+                   :href="`/analysis/download/${analysisIds}/csv`">
+                <QItemSection>Download CSV</QItemSection>
+            </QItem>
+            <QItem v-for="analysis in _analyses"
+                   :key="`xlsx-${analysis.id}`"
+                   clickable v-close-popup
+                   :href="`/analysis/download/${analysisIds}/xlsx`">
+                <QItemSection>Download XLSX</QItemSection>
+            </QItem>
         </template>
         <DataTable :column-defs="_columnDefs"
                    :columns="_columns"

@@ -2,8 +2,7 @@
 
 import { inject, ref } from "vue";
 
-import { useToastController } from "bootstrap-vue-next";
-
+import { useNotify } from "@/utils/notify";
 import { goPublishCreate } from "@/api";
 
 import PublishStage1 from "@/publish/PublishStage1.vue";
@@ -18,7 +17,7 @@ const props = defineProps({
 
 const appProps = inject("appProps");
 
-const { show } = useToastController();
+const { show } = useNotify();
 
 const stage = ref(0);
 const pending_request = ref(false);

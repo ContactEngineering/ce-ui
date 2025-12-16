@@ -1,29 +1,30 @@
 <script setup lang="ts">
 
-import {computed, onMounted, ref} from "vue";
+import { computed, onMounted, ref } from "vue";
 
 import {
-    BButton,
-    BButtonToolbar,
-    BFormGroup,
-    BFormInput,
-    BFormSelect,
-    BInputGroup,
-    BListGroup,
-    BModal,
-    BOverlay,
-    BPagination,
-    useToastController
-} from "bootstrap-vue-next";
+    QBtn,
+    QInput,
+    QSelect,
+    QList,
+    QDialog,
+    QCard,
+    QCardSection,
+    QCardActions,
+    QInnerLoading,
+    QPagination,
+    QMarkupTable
+} from "quasar";
 
-import {managerApiSurfaceList, managerApiSurfaceCreate} from "@/api";
+import { useNotify } from "@/utils/notify";
+import { managerApiSurfaceList, managerApiSurfaceCreate } from "@/api";
 
-import {useDatasetSelectionStore} from "../stores/datasetSelection";
+import { useDatasetSelectionStore } from "../stores/datasetSelection";
 
 import DatasetListRow from '../manager/DatasetListRow.vue';
 import SelectionOffcanvas from "../base/SelectionOffcanvas.vue";
 
-const {show} = useToastController();
+const { show } = useNotify();
 const selection = useDatasetSelectionStore();
 
 const props = defineProps({
@@ -48,14 +49,20 @@ const props = defineProps({
 
 // Constants
 const orderByFilterChoices = [
-    {text: 'Date', value: 'date'},
-    {text: 'Name', value: 'name'},
+    { label: 'Date', value: 'date' },
+    { label: 'Name', value: 'name' },
 ];
 const sharingStatusFilterChoices = [
-    {text: 'All accessible datasets', value: 'all'},
-    {text: 'Unpublished datasets created by me', value: 'own'},
-    {text: 'Unpublished datasets created by others', value: 'others'},
-    {text: 'Published datasets', value: 'published'}
+    { label: 'All accessible datasets', value: 'all' },
+    { label: 'Unpublished datasets created by me', value: 'own' },
+    { label: 'Unpublished datasets created by others', value: 'others' },
+    { label: 'Published datasets', value: 'published' }
+];
+const pageSizeOptions = [
+    { label: '10', value: 10 },
+    { label: '25', value: 25 },
+    { label: '50', value: 50 },
+    { label: '100', value: 100 }
 ];
 
 
@@ -178,173 +185,157 @@ function sharingStatusChanged() {
 </script>
 
 <template>
-    <div class="row">
+    <div class="row q-mb-md">
         <div class="col-8">
-            <BFormGroup class="mb-2"
-                        description="Search for digital surface twins by name or tags">
-                <BInputGroup>
-                    <BFormInput v-model="searchTerm"
-                                placeholder="Type to start searching..."
-                                type="search"/>
-                    <BButton title="Tips for searching"
-                             variant="light"
-                             @click="_searchInfoModalVisible = true">
-                        <i aria-hidden="true" class="fa fa-info-circle"></i>
-                    </BButton>
-                </BInputGroup>
-            </BFormGroup>
+            <QInput v-model="searchTerm"
+                    placeholder="Type to start searching..."
+                    type="search"
+                    outlined
+                    dense
+                    hint="Search for digital surface twins by name or tags">
+                <template v-slot:append>
+                    <QBtn flat round icon="info" @click="_searchInfoModalVisible = true" />
+                </template>
+            </QInput>
         </div>
         <div class="col-4">
-            <BFormGroup description="Filter results by sharing status">
-                <BFormSelect v-model="_sharingStatus" :disabled="_isLoading"
-                             :options="sharingStatusFilterChoices" class="form-control"
-                             name="sharing_status"
-                             @change="sharingStatusChanged">
-                </BFormSelect>
-            </BFormGroup>
+            <QSelect v-model="_sharingStatus"
+                     :options="sharingStatusFilterChoices"
+                     :disable="_isLoading"
+                     emit-value
+                     map-options
+                     outlined
+                     dense
+                     hint="Filter results by sharing status"
+                     @update:model-value="sharingStatusChanged" />
         </div>
     </div>
-    <BOverlay :show="_isLoading">
-        <BButtonToolbar class="mb-2">
-            <BPagination v-model="currentPage"
-                         :disabled="_isLoading" :limit="9" :per-page="_pageSize"
-                         :total-rows="_nbDatasets"
-                         class="me-2 mb-0">
-            </BPagination>
-            <BInputGroup class="me-2" prepend="Page size">
-                <BFormSelect v-model="pageSize" :disabled="_isLoading"
-                             :options="[10, 25, 50, 100]">
-                </BFormSelect>
-            </BInputGroup>
-            <BInputGroup class="me-2" prepend="Sort by">
-                <BFormSelect v-model="orderBy" :disabled="_isLoading"
-                             :options="orderByFilterChoices">
-                </BFormSelect>
-            </BInputGroup>
-            <BButton v-if="selection.nbSelected === 0" class="me-2" variant="light"
-                     disabled>
-                No selected datasets
-            </BButton>
-            <BButton v-if="selection.nbSelected > 0" class="me-2" variant="warning"
-                     :disabled="_isLoading"
-                     @click="_selectionOffcanvasVisible = true">
-                {{ selection.nbSelected }} datasets selected
-            </BButton>
-            <BButton v-if="isAnonymous" disabled
-                     title="Please sign-in to use this feature"
-                     variant="primary">
-                Create new digital surface twin
-            </BButton>
-            <BButton v-if="!isAnonymous"
-                     class="float-end"
-                     :disabled="_isLoading"
-                     variant="primary"
-                     @click="createSurface">
-                Create new digital surface twin
-            </BButton>
-        </BButtonToolbar>
-        <BListGroup>
-            <div v-for="dataset in _datasets" :key="dataset.id">{{ dataset.selected }}
+    <div class="relative-position">
+        <QInnerLoading :showing="_isLoading" />
+        <div class="flex items-center q-gutter-sm q-mb-md flex-wrap">
+            <QPagination v-model="currentPage"
+                         :max="Math.ceil(_nbDatasets / _pageSize) || 1"
+                         :disable="_isLoading"
+                         :max-pages="9"
+                         boundary-links
+                         direction-links />
+            <div class="flex items-center q-gutter-xs">
+                <span class="text-caption">Page size:</span>
+                <QSelect v-model="pageSize"
+                         :options="pageSizeOptions"
+                         :disable="_isLoading"
+                         emit-value
+                         map-options
+                         outlined
+                         dense
+                         style="min-width: 80px" />
             </div>
-            <DatasetListRow v-for="dataset in _datasets" :key="dataset.id"
-                            :dataset="dataset"
-                            v-model:selected="selection.datasetIds">
-            </DatasetListRow>
-        </BListGroup>
-
-        <div v-if="!_isLoading" class="mt-2">
-            Showing {{ _nbDatasetsOnCurrentPage }} digital surface twins out of
-            {{ _nbDatasets }}.
+            <div class="flex items-center q-gutter-xs">
+                <span class="text-caption">Sort by:</span>
+                <QSelect v-model="orderBy"
+                         :options="orderByFilterChoices"
+                         :disable="_isLoading"
+                         emit-value
+                         map-options
+                         outlined
+                         dense
+                         style="min-width: 100px" />
+            </div>
+            <QBtn v-if="selection.nbSelected === 0"
+                  flat
+                  disable
+                  label="No selected datasets" />
+            <QBtn v-if="selection.nbSelected > 0"
+                  color="warning"
+                  :disable="_isLoading"
+                  :label="`${selection.nbSelected} datasets selected`"
+                  @click="_selectionOffcanvasVisible = true" />
+            <QBtn v-if="isAnonymous"
+                  disable
+                  color="primary"
+                  label="Create new digital surface twin"
+                  title="Please sign-in to use this feature" />
+            <QBtn v-if="!isAnonymous"
+                  color="primary"
+                  :disable="_isLoading"
+                  label="Create new digital surface twin"
+                  @click="createSurface" />
         </div>
-    </BOverlay>
+        <QList bordered separator>
+            <DatasetListRow v-for="dataset in _datasets"
+                            :key="dataset.id"
+                            :dataset="dataset"
+                            v-model:selected="selection.datasetIds" />
+        </QList>
+
+        <div v-if="!_isLoading" class="q-mt-md text-caption">
+            Showing {{ _nbDatasetsOnCurrentPage }} digital surface twins out of {{ _nbDatasets }}.
+        </div>
+    </div>
     <!-- Search Help Modal-->
-    <BModal v-model="_searchInfoModalVisible"
-            :ok-only="true"
-            size="xl"
-            title="Tips for searching">
-        <p>Searching is performed over these fields:</p>
-        <ul>
-            <li>Names of surface and measurements</li>
-            <li>Names of tags</li>
-            <li>Descriptions of digital surface twins and measurements</li>
-        </ul>
+    <QDialog v-model="_searchInfoModalVisible">
+        <QCard style="min-width: 700px; max-width: 900px">
+            <QCardSection>
+                <div class="text-h6">Tips for searching</div>
+            </QCardSection>
+            <QCardSection>
+                <p>Searching is performed over these fields:</p>
+                <ul>
+                    <li>Names of surface and measurements</li>
+                    <li>Names of tags</li>
+                    <li>Descriptions of digital surface twins and measurements</li>
+                </ul>
 
-        <p>All texts in the search field is split into a list of tokens.
-            Searching finds matches
-            of the search expression among these tokens. You can build
-            search
-            expression from search terms
-            as follows:</p>
+                <p>All texts in the search field is split into a list of tokens.
+                    Searching finds matches of the search expression among these tokens.
+                    You can build search expression from search terms as follows:</p>
 
-        <table class="table table-bordered table-condensed">
-            <thead class="thead-light">
-            <tr>
-                <th>Search result should list items with</th>
-                <th>Search expression</th>
-                <th>Comment</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>both <em>AFM</em> and <em>surface</em></td>
-                <td><input readonly size="40" type="text"
-                           value="AFM surface">
-                </td>
-                <td>text not inside quote marks will be interpreted as AND
-                </td>
-            </tr>
-            <tr>
-                <td>either <em>AFM</em> or <em>surface</em> or both</td>
-                <td><input readonly size="40" type="text"
-                           value="AFM OR surface"></td>
-                <td>logical OR, least precedence</td>
-            </tr>
-            <tr>
-                <td><em>AFM</em> but not <em>surface</em></td>
-                <td><input readonly size="40" type="text"
-                           value="AFM -surface">
-                </td>
-                <td>the logical not operator is written by using -, has
-                    highest
-                    precedence
-                </td>
-            </tr>
-            <tr>
-                <td>the phrase <em>AFM Surface</em></td>
-                <td><input readonly size="40" type="text"
-                           value='"AFM surface"'>
-                </td>
-                <td><em>AFM</em> and <em>surface</em> are found if next to
-                    each
-                    other
-                </td>
-            </tr>
-            <tr>
-                <td><em>AFM Surface</em> as a phrase and <em>imported</em>
-                    somewhere else
-                </td>
-                <td><input readonly size="40"
-                           type="text"
-                           value='"AFM surface" imported'></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td><em>AFM Surface</em> as a phrase and <em>imported</em>
-                    but
-                    not <em>material</em></td>
-                <td><input readonly
-                           size="40"
-                           type="text" value='"AFM surface" imported -material'></td>
-                <td>The above can also be combined. Parentheses are not
-                    allowed,
-                    all entries
-                    are valid search expressions.
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </BModal>
-    <SelectionOffcanvas
-        v-model:visible="_selectionOffcanvasVisible"
-    ></SelectionOffcanvas>
+                <QMarkupTable>
+                    <thead>
+                    <tr>
+                        <th class="text-left">Search result should list items with</th>
+                        <th class="text-left">Search expression</th>
+                        <th class="text-left">Comment</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>both <em>AFM</em> and <em>surface</em></td>
+                        <td><code>AFM surface</code></td>
+                        <td>text not inside quote marks will be interpreted as AND</td>
+                    </tr>
+                    <tr>
+                        <td>either <em>AFM</em> or <em>surface</em> or both</td>
+                        <td><code>AFM OR surface</code></td>
+                        <td>logical OR, least precedence</td>
+                    </tr>
+                    <tr>
+                        <td><em>AFM</em> but not <em>surface</em></td>
+                        <td><code>AFM -surface</code></td>
+                        <td>the logical not operator is written by using -, has highest precedence</td>
+                    </tr>
+                    <tr>
+                        <td>the phrase <em>AFM Surface</em></td>
+                        <td><code>"AFM surface"</code></td>
+                        <td><em>AFM</em> and <em>surface</em> are found if next to each other</td>
+                    </tr>
+                    <tr>
+                        <td><em>AFM Surface</em> as a phrase and <em>imported</em> somewhere else</td>
+                        <td><code>"AFM surface" imported</code></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td><em>AFM Surface</em> as a phrase and <em>imported</em> but not <em>material</em></td>
+                        <td><code>"AFM surface" imported -material</code></td>
+                        <td>The above can also be combined. Parentheses are not allowed, all entries are valid search expressions.</td>
+                    </tr>
+                    </tbody>
+                </QMarkupTable>
+            </QCardSection>
+            <QCardActions align="right">
+                <QBtn flat label="Close" v-close-popup />
+            </QCardActions>
+        </QCard>
+    </QDialog>
+    <SelectionOffcanvas v-model:visible="_selectionOffcanvasVisible" />
 </template>

@@ -2,7 +2,7 @@
 
 import {onMounted, ref} from "vue";
 
-import {BButton, BOverlay} from "bootstrap-vue-next";
+import { QBtn, QInnerLoading, QSpinner } from "quasar";
 
 import {managerApiTopographyList} from "@/api";
 import {getIdFromUrl} from "@/utils/api";
@@ -51,24 +51,28 @@ async function loadMoreThumbnails() {
 </script>
 
 <template>
-    <BOverlay class="thumbnail-row" :show="_isLoading">
+    <div class="thumbnail-row">
         <Thumbnail v-for="dataSource in _dataSources"
                    :key="dataSource.id"
-                   class="me-1"
+                   class="q-mr-xs"
                    img-class="mh-100"
                    :data-source="dataSource">
         </Thumbnail>
-        <BButton v-if="_nbDataSources > _dataSources.length"
-                 variant="light" size="sm" class="me-1"
-                 @click="loadMoreThumbnails">
+        <QBtn v-if="_nbDataSources > _dataSources.length"
+              flat size="sm" class="q-mr-xs"
+              @click="loadMoreThumbnails">
             <i class="fa fa-ellipsis align-self-center"></i>
-        </BButton>
-    </BOverlay>
+        </QBtn>
+        <QInnerLoading :showing="_isLoading">
+            <QSpinner size="1rem" />
+        </QInnerLoading>
+    </div>
 </template>
 
 <style scoped>
 
 .thumbnail-row {
+    position: relative;
     display: flex;
     justify-content: flex-start;
     align-items: center;

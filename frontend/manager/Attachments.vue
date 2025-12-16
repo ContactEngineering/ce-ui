@@ -10,15 +10,15 @@ import {formatDateTime} from "topobank/utils/formatting";
 import {uploadFile, createFileManifest} from "topobank/utils/upload";
 
 import {
-    BCard,
-    BCardBody,
-    BButton,
-    BAlert,
-    BProgress,
-    BModal,
-    useToastController
-} from 'bootstrap-vue-next';
+    QCard,
+    QCardSection,
+    QBtn,
+    QBanner,
+    QLinearProgress,
+    QDialog
+} from 'quasar';
 
+import { useNotify } from "@/utils/notify";
 
 const props = defineProps({
     attachmentsUrl: String,
@@ -31,7 +31,7 @@ const attachmentCount = defineModel("attachmentCount",{
 });
 
 
-const {show} = useToastController();
+const { show } = useNotify();
 
 const attachments = ref({});
 
@@ -162,111 +162,118 @@ const attachmentToShowInfo = computed(() => {
 
 </script>
 <template>
-    <BCard>
-        <template #header>
-            <div class="d-flex">
-                <h5 class="flex-grow-1">Attachments</h5>
-            </div>
-        </template>
-        <BCardBody>
-            <DropZone v-if="isEditable" @files-dropped="handleFileDrop" class="mb-5">
+    <QCard>
+        <QCardSection class="flex items-center">
+            <h5 class="col-grow q-ma-none">Attachments</h5>
+        </QCardSection>
+        <QCardSection>
+            <DropZone v-if="isEditable" @files-dropped="handleFileDrop" class="q-mb-lg">
                 Drop your attachments here or
             </DropZone>
             <div>
                 <div v-for="[key, value] in Object.entries(attachments)"
                      :key="value.id">
                     <div
-                        class="d-flex align-items-center my-1 border rounded px-2 py-1">
+                        class="flex items-center q-my-xs border rounded q-px-sm q-py-xs">
                         <a :href="value.file"><i
-                            class="fa-solid fa-paperclip me-3"></i>{{
+                            class="fa-solid fa-paperclip q-mr-md"></i>{{
                                 value.filename
                             }}
                         </a>
-                        <BButton size="sm" class="ms-auto" title="information"
-                                 variant="outline-info"
-                                 @click="infoAttachmentKey = key; infoModal = true;">
+                        <QBtn size="sm" class="q-ml-auto" title="information"
+                              flat color="info"
+                              @click="infoAttachmentKey = key; infoModal = true;">
                             <i class="fa-solid fa-circle-info"></i> Info
-                        </BButton>
-                        <BButton v-if="isEditable" size="sm" class="ms-2"
-                                 title="delete" variant="outline-danger"
-                                 @click="deleteAttachmentKey = key; deleteModal = true;">
+                        </QBtn>
+                        <QBtn v-if="isEditable" size="sm" class="q-ml-sm"
+                              title="delete" flat color="negative"
+                              @click="deleteAttachmentKey = key; deleteModal = true;">
                             <i class="fa-solid fa-trash"></i> Delete
-                        </BButton>
+                        </QBtn>
                     </div>
                 </div>
-                <div v-for="indicator in uploadIndicator">
+                <div v-for="indicator in uploadIndicator" :key="indicator.filename">
                     <div
-                        class="d-flex align-items-center my-1 border rounded px-2 py-1">
-                        <div class="text-muted">
-                            <i class="fa-solid fa-paperclip me-3"></i>
+                        class="flex items-center q-my-xs border rounded q-px-sm q-py-xs">
+                        <div class="text-grey">
+                            <i class="fa-solid fa-paperclip q-mr-md"></i>
                         </div>
-                        <b-progress class="flex-grow-1 ms-2" show-progress animated
-                                    :value="indicator.loaded"></b-progress>
+                        <QLinearProgress class="col-grow q-ml-sm"
+                                         :value="indicator.loaded / 100"
+                                         stripe
+                                         :animation-speed="300" />
                     </div>
                 </div>
                 <div v-if="attachmentCount == 0">
-                    <BAlert :model-value="true" variant="primary">
+                    <QBanner class="bg-primary text-white">
                         This digital surface twin does not have file attachments yet.
-                    </BAlert>
+                    </QBanner>
                 </div>
             </div>
-        </BCardBody>
-    </BCard>
+        </QCardSection>
+    </QCard>
 
-    <BModal v-model="deleteModal" v-if="attachmentToDelete" centered
-            title="Delete Attachment">
-        <div class="d-flex flex-column align-items-center">
-            <span class="fw-bold"> This operation will permanently delete the attachment:</span>
-            <span class="fst-italic"> "{{ attachmentToDelete.filename }}" </span>
-            <span>The operation cannot be undone!</span>
-        </div>
-        <template #footer>
-            <BButton size="xl" variant="outline-secondary"
-                     @click="deleteModal = false">
-                Cancel
-            </BButton>
-            <BButton size="xl" class="ms-2" variant="outline-danger"
-                     @click="deleteModal = false; deleteAttachment(deleteAttachmentKey)">
-                Delete
-            </BButton>
-        </template>
-    </BModal>
+    <QDialog v-model="deleteModal">
+        <QCard v-if="attachmentToDelete" style="min-width: 350px">
+            <QCardSection class="row items-center">
+                <div class="text-h6">Delete Attachment</div>
+            </QCardSection>
+            <QCardSection class="flex column items-center">
+                <span class="text-weight-bold"> This operation will permanently delete the attachment:</span>
+                <span class="text-italic"> "{{ attachmentToDelete.filename }}" </span>
+                <span>The operation cannot be undone!</span>
+            </QCardSection>
+            <QCardSection class="flex justify-end q-gutter-sm">
+                <QBtn flat label="Cancel"
+                      @click="deleteModal = false" />
+                <QBtn color="negative" label="Delete"
+                      @click="deleteModal = false; deleteAttachment(deleteAttachmentKey)" />
+            </QCardSection>
+        </QCard>
+    </QDialog>
 
-    <BModal v-model="infoModal" v-if="attachmentToShowInfo" centered ok-only
-            title="Attachment Info">
-        <div>
-            <div class="row">
-                <div class="col-3 fw-bold">
-                    Name:
+    <QDialog v-model="infoModal">
+        <QCard v-if="attachmentToShowInfo" style="min-width: 350px">
+            <QCardSection class="row items-center">
+                <div class="text-h6">Attachment Info</div>
+            </QCardSection>
+            <QCardSection>
+                <div class="row q-mb-sm">
+                    <div class="col-3 text-weight-bold">
+                        Name:
+                    </div>
+                    <div class="col">
+                        {{ attachmentToShowInfo.filename }}
+                    </div>
                 </div>
-                <div class="col">
-                    {{ attachmentToShowInfo.filename }}
+                <div class="row q-mb-sm">
+                    <div class="col-3 text-weight-bold">
+                        Uploaded by:
+                    </div>
+                    <div class="col">
+                        {{ attachmentToShowInfo.uploaded_by }}
+                    </div>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-3 fw-bold">
-                    Uploaded by:
+                <div class="row q-mb-sm">
+                    <div class="col-3 text-weight-bold">
+                        Created:
+                    </div>
+                    <div class="col">
+                        {{ formatDateTime(attachmentToShowInfo.created) }}
+                    </div>
                 </div>
-                <div class="col">
-                    {{ attachmentToShowInfo.uploaded_by }}
+                <div class="row q-mb-sm">
+                    <div class="col-3 text-weight-bold">
+                        Updated:
+                    </div>
+                    <div class="col">
+                        {{ formatDateTime(attachmentToShowInfo.updated) }}
+                    </div>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-3 fw-bold">
-                    Created:
-                </div>
-                <div class="col">
-                    {{ formatDateTime(attachmentToShowInfo.created) }}
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-3 fw-bold">
-                    Updated:
-                </div>
-                <div class="col">
-                    {{ formatDateTime(attachmentToShowInfo.updated) }}
-                </div>
-            </div>
-        </div>
-    </BModal>
+            </QCardSection>
+            <QCardSection class="flex justify-end">
+                <QBtn flat label="OK" v-close-popup />
+            </QCardSection>
+        </QCard>
+    </QDialog>
 </template>

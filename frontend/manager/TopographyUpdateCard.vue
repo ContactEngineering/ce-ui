@@ -4,18 +4,19 @@ import {cloneDeep} from "lodash";
 import {computed, ref} from "vue";
 
 import {
-    BAlert,
-    BButton,
-    BButtonGroup,
-    BCard,
-    BFormCheckbox,
-    BFormInput,
-    BFormSelect,
-    BFormTextarea,
-    BModal,
-    BSpinner,
-    useToastController
-} from 'bootstrap-vue-next';
+    QBanner,
+    QBtn,
+    QBtnGroup,
+    QCard,
+    QCardSection,
+    QCheckbox,
+    QInput,
+    QSelect,
+    QDialog,
+    QSpinner
+} from 'quasar';
+
+import { useNotify } from "@/utils/notify";
 
 import {
     managerApiTopographyPartialUpdate,
@@ -30,7 +31,7 @@ import Attachments from './Attachments.vue';
 import Thumbnail from "./Thumbnail.vue";
 import TipTapEditor from "./TipTapEditor.vue";
 
-const {show} = useToastController();
+const { show } = useNotify();
 
 const props = defineProps({
     batchEdit: {type: Boolean, default: false},
@@ -103,35 +104,35 @@ let _savedTopography = null;
 
 // Choices for select form components
 const _units = [
-    {value: "km", text: 'km'},
-    {value: "m", text: 'm'},
-    {value: "mm", text: 'mm'},
-    {value: "µm", text: 'µm'},
-    {value: "nm", text: 'nm'},
-    {value: "Å", text: 'Å'},
-    {value: "pm", text: 'pm'}
+    {value: "km", label: 'km'},
+    {value: "m", label: 'm'},
+    {value: "mm", label: 'mm'},
+    {value: "µm", label: 'µm'},
+    {value: "nm", label: 'nm'},
+    {value: "Å", label: 'Å'},
+    {value: "pm", label: 'pm'}
 ];
 const _instrumentChoices = [
     {
         value: 'undefined',
-        text: 'Instrument of unknown type - all data considered as reliable'
+        label: 'Instrument of unknown type - all data considered as reliable'
     },
     {
         value: 'microscope-based',
-        text: 'Microscope-based instrument with known resolution'
+        label: 'Microscope-based instrument with known resolution'
     },
-    {value: 'contact-based', text: 'Contact-based instrument with known tip radius'}
+    {value: 'contact-based', label: 'Contact-based instrument with known tip radius'}
 ];
 const _detrendChoices = [
-    {value: 'center', text: 'No detrending, but subtract mean height'},
-    {value: 'height', text: 'Remove tilt'},
-    {value: 'curvature', text: 'Remove curvature and tilt'}
+    {value: 'center', label: 'No detrending, but subtract mean height'},
+    {value: 'height', label: 'Remove tilt'},
+    {value: 'curvature', label: 'Remove curvature and tilt'}
 ];
 const _undefinedDataChoices = [
-    {value: 'do-not-fill', text: 'Do not fill undefined data points'},
+    {value: 'do-not-fill', label: 'Do not fill undefined data points'},
     {
         value: 'harmonic',
-        text: 'Interpolate undefined data points with harmonic functions'
+        label: 'Interpolate undefined data points with harmonic functions'
     }
 ];
 
@@ -216,7 +217,7 @@ const isMetadataIncomplete = computed(() => {
         const options = props.topography.channel_names.map(([name, unit], channelIndex) => {
             return {
                 value: channelIndex,
-                text: unit == null ? name : `${name} (${unit})`
+                label: unit == null ? name : `${name} (${unit})`
             };
         });
 
@@ -273,324 +274,322 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
 </script>
 
 <template>
-    <BCard class="mb-1"
-           :class="{ 'border-danger border-2': !batchEdit && isMetadataIncomplete, 'bg-secondary-subtle': selected, 'bg-warning-subtle': batchEdit }">
-        <template #header>
-            <div v-if="!batchEdit && topography != null" class="d-flex float-start">
-                <BFormCheckbox v-if="selectable" v-model="selectedModel"
-                               :disabled="_editing"
-                               size="sm">
-                </BFormCheckbox>
-                <BFormSelect
+    <QCard class="q-mb-xs"
+           :class="{ 'border-negative': !batchEdit && isMetadataIncomplete, 'bg-grey-3': selected, 'bg-warning-1': batchEdit }">
+        <QCardSection class="flex items-center q-pa-sm">
+            <div v-if="!batchEdit && topography != null" class="flex items-center">
+                <QCheckbox v-if="selectable" v-model="selectedModel"
+                           :disable="_editing"
+                           size="sm" />
+                <QSelect
                     v-if="topography.channel_names != null && topography.channel_names.length > 0"
                     :options="channelOptions"
                     v-model="topography.data_source"
-                    :disabled="!_editing"
-                    size="sm">
-                </BFormSelect>
+                    :disable="!_editing"
+                    dense
+                    emit-value
+                    map-options
+                    size="sm"
+                    style="min-width: 120px;" />
             </div>
-            <div v-if="batchEdit" class="float-start fs-5 fw-bold">
+            <div v-if="batchEdit" class="text-subtitle1 text-weight-bold">
                 Batch edit
             </div>
-            <BButtonGroup
-                v-if="!batchEdit && topography != null && !_editing && !_saving && !saving && !enlarged"
-                size="sm" class="float-end">
-                <BButton v-if="!selected"
-                         class="float-end ms-2"
-                         variant="light"
-                         :href="`/ui/topography/${topography.id}/`">
-                    <i class="fa fa-expand"></i>
-                </BButton>
-                <BButton v-if="selected"
-                         class="float-end ms-2"
-                         variant="outline-secondary"
-                         disabled>
-                    <i class="fa fa-expand"></i>
-                </BButton>
-            </BButtonGroup>
-            <BButtonGroup
-                v-if="!batchEdit && topography != null && !_editing && !_saving && !saving"
-                size="sm" class="float-end">
-                <BButton v-if="!disabled"
-                         variant="light"
-                         :disabled="selected"
-                         @click="_savedTopography = cloneDeep(topography); _editing = true">
-                    <i class="fa fa-pen"></i>
-                </BButton>
-                <BButton v-if="!enlarged && !selected"
-                         variant="light"
-                         :href="topography.datafile?.file">
-                    <i class="fa fa-download"></i>
-                </BButton>
-                <BButton v-if="!disabled && selected"
-                         variant="light"
-                         disabled>
-                    <i class="fa fa-download"></i>
-                </BButton>
-                <BButton v-if="!disabled"
-                         variant="light"
-                         :disabled="selected">
-                    <i class="fa fa-refresh"
-                       @click="forceInspect"></i>
-                </BButton>
-                <BButton v-if="!disabled && !enlarged"
-                         :disabled="selected"
-                         variant="light"
-                         @click="_showDeleteModal = true">
-                    <i class="fa fa-trash"></i>
-                </BButton>
-            </BButtonGroup>
-            <BButtonGroup v-if="_editing || _saving || saving" size="sm"
-                          class="float-end">
-                <BButton v-if="_editing"
-                         variant="danger"
-                         @click="discardEdits">
-                    Discard
-                </BButton>
-                <BButton variant="success"
-                         @click="saveEdits">
-                    <BSpinner small v-if="_saving || saving"></BSpinner>
+            <div class="col-grow"></div>
+            <QBtnGroup flat class="q-mr-sm">
+                <QBtn :flat="currentTab !== 'home'"
+                      :outline="currentTab === 'home'"
+                      @click="currentTab = 'home'"
+                      size="sm"
+                      label="Home" />
+
+                <QBtn :flat="currentTab !== 'description'"
+                      :outline="currentTab === 'description'"
+                      @click="currentTab = 'description'"
+                      size="sm"
+                      label="Description" />
+
+                <QBtn :flat="currentTab !== 'instrument'"
+                      :outline="currentTab === 'instrument'"
+                      @click="currentTab = 'instrument'"
+                      size="sm"
+                      label="Instrument" />
+
+                <QBtn :flat="currentTab !== 'filters'"
+                      :outline="currentTab === 'filters'"
+                      @click="currentTab = 'filters'"
+                      size="sm"
+                      label="Filters" />
+
+                <QBtn v-if="!enlarged && !batchEdit"
+                      :flat="currentTab !== 'attachments'"
+                      :outline="currentTab === 'attachments'"
+                      @click="currentTab = 'attachments'"
+                      size="sm"
+                      label="Attachments" />
+            </QBtnGroup>
+            <QBtnGroup v-if="!batchEdit" flat class="q-mr-sm">
+                <QBtn flat size="sm"
+                      :href="`/ui/analysis-list/?subjects=${subjectsToBase64({topography: [topography.id]})}`"
+                      label="Analyze" />
+            </QBtnGroup>
+            <QBtnGroup v-if="_editing || _saving || saving" flat>
+                <QBtn v-if="_editing"
+                      color="negative" size="sm"
+                      @click="discardEdits"
+                      label="Discard" />
+                <QBtn color="positive" size="sm"
+                      @click="saveEdits">
+                    <QSpinner v-if="_saving || saving" size="1rem" class="q-mr-sm" />
                     Save
-                </BButton>
-            </BButtonGroup>
-            <BButtonGroup v-if="!batchEdit" size="sm" class="float-end me-2">
-                <BButton variant="light"
-                         :href="`/ui/analysis-list/?subjects=${subjectsToBase64({topography: [topography.id]})}`">
-                    Analyze
-                </BButton>
-            </BButtonGroup>
-            <BButtonGroup size="sm" class="float-end me-2">
-                <BButton :active="currentTab === 'home'"
-                        @click="currentTab = 'home'"
-                        variant="outline-secondary">
-                    Home
-                </BButton>
-
-                <BButton :active="currentTab === 'description'"
-                        @click="currentTab = 'description'"
-                        variant="outline-secondary">
-                    Description
-                </BButton>
-
-                <BButton :active="currentTab === 'instrument'"
-                        @click="currentTab = 'instrument'"
-                        variant="outline-secondary">
-                    Instrument
-                </BButton>
-
-                <BButton :active="currentTab === 'filters'"
-                        @click="currentTab = 'filters'"
-                        variant="outline-secondary">
-                    Filters
-                </BButton>
-
-                <BButton v-if="!enlarged && !batchEdit"
-                        :active="currentTab === 'attachments'"
-                        @click="currentTab = 'attachments'"
-                        variant="outline-secondary">
-                    Attachments
-                </BButton>
-            </BButtonGroup>
-
-        </template>
-        <div v-if="topography == null" class="tab-content">
-            <BSpinner small></BSpinner>
+                </QBtn>
+            </QBtnGroup>
+            <QBtnGroup
+                v-if="!batchEdit && topography != null && !_editing && !_saving && !saving"
+                flat>
+                <QBtn v-if="!disabled"
+                      flat size="sm"
+                      :disable="selected"
+                      @click="_savedTopography = cloneDeep(topography); _editing = true">
+                    <i class="fa fa-pen"></i>
+                </QBtn>
+                <QBtn v-if="!enlarged && !selected"
+                      flat size="sm"
+                      :href="topography.datafile?.file">
+                    <i class="fa fa-download"></i>
+                </QBtn>
+                <QBtn v-if="!disabled && selected"
+                      flat size="sm"
+                      disable>
+                    <i class="fa fa-download"></i>
+                </QBtn>
+                <QBtn v-if="!disabled"
+                      flat size="sm"
+                      :disable="selected"
+                      @click="forceInspect">
+                    <i class="fa fa-refresh"></i>
+                </QBtn>
+                <QBtn v-if="!disabled && !enlarged"
+                      :disable="selected"
+                      flat size="sm"
+                      @click="_showDeleteModal = true">
+                    <i class="fa fa-trash"></i>
+                </QBtn>
+            </QBtnGroup>
+            <QBtnGroup
+                v-if="!batchEdit && topography != null && !_editing && !_saving && !saving && !enlarged"
+                flat class="q-ml-sm">
+                <QBtn v-if="!selected"
+                      flat size="sm"
+                      :href="`/ui/topography/${topography.id}/`">
+                    <i class="fa fa-expand"></i>
+                </QBtn>
+                <QBtn v-if="selected"
+                      flat size="sm"
+                      disable>
+                    <i class="fa fa-expand"></i>
+                </QBtn>
+            </QBtnGroup>
+        </QCardSection>
+        <QCardSection v-if="topography == null">
+            <QSpinner size="1rem" class="q-mr-sm" />
             Please wait...
-        </div>
-        <div v-if="topography != null" class="row">
+        </QCardSection>
+        <QCardSection v-if="topography != null" class="row">
             <div class="col-2">
                 <Thumbnail img-class="img-thumbnail"
                            :data-source="topography">
                 </Thumbnail>
             </div>
             <div v-if="currentTab === 'home'" class="col-10">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-6">
-                            <label for="input-name">Name</label>
-                            <BFormInput id="input-name"
-                                        v-model="topography.name"
-                                        :class="highlightInput('name')"
-                                        :disabled="!_editing || batchEdit">
-                            </BFormInput>
-                        </div>
-                        <div class="col-3">
-                            <label for="input-measurement-date">Date</label>
-                            <BFormInput id="input-measurement-date"
-                                        type="date"
-                                        v-model="topography.measurement_date"
-                                        :class="highlightInput('measurement_date')"
-                                        :disabled="!_editing">
-                            </BFormInput>
-                        </div>
-                        <div class="col-3">
-                            <label for="input-periodic">Flags</label>
-                            <BFormCheckbox id="input-periodic"
-                                            v-model="topography.is_periodic"
-                                            :class="highlightInput('is_periodic')"
-                                            :disabled="!_editing || !topography.is_periodic_editable">
-                                Data is periodic
-                            </BFormCheckbox>
-                        </div>
+                <div class="row">
+                    <div class="col-6">
+                        <label for="input-name">Name</label>
+                        <QInput id="input-name"
+                                v-model="topography.name"
+                                :class="highlightInput('name')"
+                                :disable="!_editing || batchEdit"
+                                dense outlined />
                     </div>
-                    <div class="row">
-                        <div class="col-8">
-                            <label for="input-physical-size">Physical size</label>
-                            <div class="input-group mb-1">
-                                <BFormInput id="input-physical-size"
-                                            type="number"
-                                            step="any"
-                                            :class="highlightInput('size_x')"
-                                            v-model="topography.size_x"
-                                            :disabled="!_editing || !topography.size_editable">
-                                </BFormInput>
-                                <span
-                                    v-if="batchEdit || topography.resolution_y != null"
-                                    class="input-group-text">
-                                            &times;
-                                        </span>
-                                <BFormInput
-                                    v-if="batchEdit || topography.resolution_y != null"
+                    <div class="col-3">
+                        <label for="input-measurement-date">Date</label>
+                        <QInput id="input-measurement-date"
+                                type="date"
+                                v-model="topography.measurement_date"
+                                :class="highlightInput('measurement_date')"
+                                :disable="!_editing"
+                                dense outlined />
+                    </div>
+                    <div class="col-3">
+                        <label for="input-periodic">Flags</label>
+                        <QCheckbox id="input-periodic"
+                                   v-model="topography.is_periodic"
+                                   :class="highlightInput('is_periodic')"
+                                   :disable="!_editing || !topography.is_periodic_editable"
+                                   label="Data is periodic" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-8">
+                        <label for="input-physical-size">Physical size</label>
+                        <div class="flex q-mb-xs">
+                            <QInput id="input-physical-size"
                                     type="number"
                                     step="any"
-                                    :class="highlightInput('size_y')"
-                                    v-model="topography.size_y"
-                                    :disabled="!_editing || !topography.size_editable">
-                                </BFormInput>
-                                <BFormSelect class="unit-select"
-                                                :options="_units"
-                                                v-model="topography.unit"
-                                                :class="highlightInput('unit')"
-                                                :disabled="!_editing || !topography.unit_editable">
-                                </BFormSelect>
-                            </div>
-                            <small v-if="batchEdit">
-                                When batch editing line scans, only the first entry of
-                                the physical size
-                                will be used to set the overall length of the line scan.
-                            </small>
+                                    :class="highlightInput('size_x')"
+                                    v-model="topography.size_x"
+                                    :disable="!_editing || !topography.size_editable"
+                                    dense outlined
+                                    class="col-grow" />
+                            <span
+                                v-if="batchEdit || topography.resolution_y != null"
+                                class="q-px-sm self-center">
+                                        &times;
+                                    </span>
+                            <QInput
+                                v-if="batchEdit || topography.resolution_y != null"
+                                type="number"
+                                step="any"
+                                :class="highlightInput('size_y')"
+                                v-model="topography.size_y"
+                                :disable="!_editing || !topography.size_editable"
+                                dense outlined
+                                class="col-grow" />
+                            <QSelect class="unit-select q-ml-sm"
+                                     :options="_units"
+                                     v-model="topography.unit"
+                                     :class="highlightInput('unit')"
+                                     :disable="!_editing || !topography.unit_editable"
+                                     emit-value
+                                     map-options
+                                     dense outlined
+                                     style="min-width: 80px;" />
                         </div>
-                        <div class="col-4">
-                            <label for="input-physical-size">Height scale</label>
-                            <BFormInput id="input-physical-size"
-                                        type="number"
-                                        step="any"
-                                        :class="highlightInput('height_scale')"
-                                        v-model="topography.height_scale"
-                                        :disabled="!_editing || !topography.height_scale_editable">
-                            </BFormInput>
-                        </div>
+                        <small v-if="batchEdit">
+                            When batch editing line scans, only the first entry of
+                            the physical size
+                            will be used to set the overall length of the line scan.
+                        </small>
+                    </div>
+                    <div class="col-4">
+                        <label for="input-height-scale">Height scale</label>
+                        <QInput id="input-height-scale"
+                                type="number"
+                                step="any"
+                                :class="highlightInput('height_scale')"
+                                v-model="topography.height_scale"
+                                :disable="!_editing || !topography.height_scale_editable"
+                                dense outlined />
                     </div>
                 </div>
             </div>
             <div v-if="currentTab === 'description'" class="col-10">
                 <label for="input-description">Description</label>
-                <!-- <BFormTextarea id="input-description"
-                            placeholder="Please provide a short description of this measurement"
-                            v-model="topography.description"
-                            :class="highlightInput('description')"
-                            :disabled="!_editing"
-                            rows="5">
-                </BFormTextarea> -->
                 <TipTapEditor :disabled="!_editing" v-model="topography.description" />
-
             </div>
             <div v-if="currentTab === 'instrument'" class="col-10">
                 <div class="row">
                     <div class="col-6">
                         <label for="input-instrument-name">Instrument name</label>
-                        <BFormInput id="input-instrument-name"
-                                    :class="highlightInput('instrument_name')"
-                                    v-model="topography.instrument_name"
-                                    :disabled="!_editing">
-                        </BFormInput>
+                        <QInput id="input-instrument-name"
+                                :class="highlightInput('instrument_name')"
+                                v-model="topography.instrument_name"
+                                :disable="!_editing"
+                                dense outlined />
                     </div>
                     <div class="col-6">
                         <label for="input-instrument-type">Instrument type</label>
-                        <BFormSelect id="input-instrument-type"
-                                    :options="_instrumentChoices"
-                                    :class="highlightInput('instrument_type')"
-                                    v-model="topography.instrument_type"
-                                    :disabled="!_editing">
-                        </BFormSelect>
+                        <QSelect id="input-instrument-type"
+                                 :options="_instrumentChoices"
+                                 :class="highlightInput('instrument_type')"
+                                 v-model="topography.instrument_type"
+                                 :disable="!_editing"
+                                 emit-value
+                                 map-options
+                                 dense outlined />
                     </div>
                 </div>
                 <div v-if="topography.instrument_type == 'microscope-based'" class="row">
-                    <div class="col-12 mt-1">
+                    <div class="col-12 q-mt-xs">
                         <label for="input-instrument-resolution">Lateral instrument
                             resolution</label>
-                        <div id="input-instrument-resolution" class="input-group mb-1">
-                            <BFormInput type="number"
-                                        step="any"
-                                        :placeholder="defaultResolutionValue"
-                                        :class="highlightInput('instrument_parameters')"
-                                        v-model="instrumentParametersResolutionValue"
-                                        :disabled="!_editing">
-                            </BFormInput>
-                            <BFormSelect style="width: 100px;"
-                                        :options="_units"
-                                        :placeholder="defaultResolutionUnit"
-                                        :class="highlightInput('instrument_parameters')"
-                                        v-model="instrumentParametersResolutionUnit"
-                                        :disabled="!_editing">
-                            </BFormSelect>
+                        <div class="flex q-mb-xs">
+                            <QInput type="number"
+                                    step="any"
+                                    :placeholder="String(defaultResolutionValue)"
+                                    :class="highlightInput('instrument_parameters')"
+                                    v-model="instrumentParametersResolutionValue"
+                                    :disable="!_editing"
+                                    dense outlined
+                                    class="col-grow" />
+                            <QSelect style="width: 100px;"
+                                     :options="_units"
+                                     :placeholder="defaultResolutionUnit"
+                                     :class="highlightInput('instrument_parameters')"
+                                     v-model="instrumentParametersResolutionUnit"
+                                     :disable="!_editing"
+                                     emit-value
+                                     map-options
+                                     dense outlined />
                         </div>
                     </div>
                 </div>
                 <div v-if="topography.instrument_type == 'contact-based'" class="row">
-                    <div class="col-12 mt-1">
+                    <div class="col-12 q-mt-xs">
                         <label for="input-instrument-tip-radius">Probe tip radius</label>
-                        <div id="input-instrument-tip-radius" class="input-group mb-1">
-                            <BFormInput type="number"
-                                        step="any"
-                                        :placeholder="defaultTipRadiusValue"
-                                        :class="highlightInput('instrument_parameters')"
-                                        v-model="instrumentParametersTipRadiusValue"
-                                        :disabled="!_editing">
-                            </BFormInput>
-                            <BFormSelect style="width: 100px;"
-                                        :options="_units"
-                                        :placeholder="defaultTipRadiusUnit"
-                                        :class="highlightInput('instrument_parameters')"
-                                        v-model="instrumentParametersTipRadiusUnit"
-                                        :disabled="!_editing">
-                            </BFormSelect>
+                        <div class="flex q-mb-xs">
+                            <QInput type="number"
+                                    step="any"
+                                    :placeholder="String(defaultTipRadiusValue)"
+                                    :class="highlightInput('instrument_parameters')"
+                                    v-model="instrumentParametersTipRadiusValue"
+                                    :disable="!_editing"
+                                    dense outlined
+                                    class="col-grow" />
+                            <QSelect style="width: 100px;"
+                                     :options="_units"
+                                     :placeholder="defaultTipRadiusUnit"
+                                     :class="highlightInput('instrument_parameters')"
+                                     v-model="instrumentParametersTipRadiusUnit"
+                                     :disable="!_editing"
+                                     emit-value
+                                     map-options
+                                     dense outlined />
                         </div>
                     </div>
                 </div>
             </div>
             <div v-if="currentTab === 'filters'" class="col-10">
                 <div class="row">
-                    <div class="col-6 mt-1">
+                    <div class="col-6 q-mt-xs">
                         <label for="input-detrending">Detrending</label>
-                        <div id="input-detrending" class="input-group mb-1">
-                            <BFormSelect :options="_detrendChoices"
-                                        v-model="topography.detrend_mode"
-                                        :class="highlightInput('detrend_mode')"
-                                        :disabled="!_editing">
-                            </BFormSelect>
-                        </div>
+                        <QSelect :options="_detrendChoices"
+                                 v-model="topography.detrend_mode"
+                                 :class="highlightInput('detrend_mode')"
+                                 :disable="!_editing"
+                                 emit-value
+                                 map-options
+                                 dense outlined />
                     </div>
-                    <div class="col-6 mt-1">
+                    <div class="col-6 q-mt-xs">
                         <label for="input-undefined-data">Undefined/missing data</label>
-                        <div id="input-undefined-data" class="input-group mb-1">
-                            <BFormSelect :options="_undefinedDataChoices"
-                                        v-model="topography.fill_undefined_data_mode"
-                                        :class="highlightInput('fill_undefined_data_mode')"
-                                        :disabled="!_editing">
-                            </BFormSelect>
-                        </div>
+                        <QSelect :options="_undefinedDataChoices"
+                                 v-model="topography.fill_undefined_data_mode"
+                                 :class="highlightInput('fill_undefined_data_mode')"
+                                 :disable="!_editing"
+                                 emit-value
+                                 map-options
+                                 dense outlined />
                     </div>
                 </div>
             </div>
-            <div v-if="!enlarged && currentTab === 'attachments'" class="container col-10" >
+            <div v-if="!enlarged && currentTab === 'attachments'" class="col-10">
                 <Attachments :attachments-url="topography.attachments"
                             :permission="topography.permissions.current_user.permission">
                 </Attachments>
             </div>
-            
-        </div>
-        <template #footer>
+        </QCardSection>
+        <QCardSection v-if="topography != null">
             <TopographyBadges v-if="!batchEdit && !enlarged"
                               :topography="topography"></TopographyBadges>
             <small v-if="batchEdit">You are about to change the metadata of multiple
@@ -601,13 +600,21 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                 includes physical sizes, unit or the height scale and may differ between
                 the measurements you are
                 updating.</small>
-        </template>
-    </BCard>
-    <BModal v-if="topography != null"
-            v-model="_showDeleteModal"
-            @ok="deleteTopography"
-            title="Delete measurement">
-        You are about to delete the measurement with name <b>{{ topography.name }}</b>.
-        Are you sure you want to proceed?
-    </BModal>
+        </QCardSection>
+    </QCard>
+    <QDialog v-model="_showDeleteModal">
+        <QCard v-if="topography != null" style="min-width: 350px">
+            <QCardSection class="row items-center">
+                <div class="text-h6">Delete measurement</div>
+            </QCardSection>
+            <QCardSection>
+                You are about to delete the measurement with name <b>{{ topography.name }}</b>.
+                Are you sure you want to proceed?
+            </QCardSection>
+            <QCardSection class="flex justify-end q-gutter-sm">
+                <QBtn flat label="Cancel" v-close-popup />
+                <QBtn color="negative" label="Delete" @click="deleteTopography" v-close-popup />
+            </QCardSection>
+        </QCard>
+    </QDialog>
 </template>

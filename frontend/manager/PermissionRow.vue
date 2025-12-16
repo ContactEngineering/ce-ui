@@ -1,12 +1,13 @@
 <script setup lang="ts">
 
 import {onMounted, ref} from "vue";
-import {BForm, BFormSelect, BPlaceholder, useToastController} from "bootstrap-vue-next";
+import { QSelect, QSkeleton } from "quasar";
 
+import { useNotify } from "@/utils/notify";
 import {usersV1UserRetrieve} from "@/api";
 import {getIdFromUrl} from "@/utils/api";
 
-const {show} = useToastController();
+const { show } = useNotify();
 
 const userPermission = defineModel('userPermission', {required: true});
 
@@ -17,10 +18,10 @@ const props = defineProps({
 const user = ref(null);
 
 const options = [
-    {value: 'no-access', text: 'Revoke access (unshare digital surface twin)'},
-    {value: 'view', text: 'Allowed to view this digital surface twin'},
-    {value: 'edit', text: 'Can edit (add, remove, modify measurements)'},
-    {value: 'full', text: 'Full access (including publishing and access control)'}
+    {value: 'no-access', label: 'Revoke access (unshare digital surface twin)'},
+    {value: 'view', label: 'Allowed to view this digital surface twin'},
+    {value: 'edit', label: 'Can edit (add, remove, modify measurements)'},
+    {value: 'full', label: 'Full access (including publishing and access control)'}
 ];
 
 onMounted(async () => {
@@ -44,20 +45,21 @@ onMounted(async () => {
 </script>
 
 <template>
-    <BPlaceholder v-if="user == null" animation="glow"></BPlaceholder>
-    <div v-if="user != null" class="row mb-2">
-        <div class="col-4 my-auto">
+    <QSkeleton v-if="user == null" type="rect" height="40px" />
+    <div v-if="user != null" class="row q-mb-sm">
+        <div class="col-4 self-center">
             <b>{{ user.name }}</b>
             <br>
             {{ user.orcid }}
         </div>
         <div class="col-8">
-            <BForm>
-                <BFormSelect v-model="userPermission.permission"
-                             :options="options"
-                             :disabled="disabled">
-                </BFormSelect>
-            </BForm>
+            <QSelect v-model="userPermission.permission"
+                     :options="options"
+                     :disable="disabled"
+                     emit-value
+                     map-options
+                     dense
+                     outlined />
         </div>
     </div>
 </template>

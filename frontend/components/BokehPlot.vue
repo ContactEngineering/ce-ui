@@ -20,16 +20,16 @@ import { v4 as uuid4 } from 'uuid';
 import { computed, onMounted, ref, watch, nextTick } from "vue";
 
 import {
-    BAccordion,
-    BAccordionItem,
-    BFormCheckbox,
-    BFormGroup,
-    BFormInput,
-    BFormSelect,
-    BFormSelectOption,
-    BTab,
-    BTabs
-} from "bootstrap-vue-next";
+    QTabs,
+    QTab,
+    QTabPanels,
+    QTabPanel,
+    QExpansionItem,
+    QCheckbox,
+    QInput,
+    QSelect,
+    QSlider
+} from "quasar";
 
 import {
     Plot,
@@ -135,7 +135,22 @@ const _legendLocation = ref("off");
 const _symbolSize = ref(10);
 const _opacity = ref(0.4);
 const _lineWidth = ref(1);
-const _activeTab = ref(0);
+const _activeTab = ref(props.plots[0]?.title || 'default');
+
+// Select options
+const layoutOptions = [
+    { label: 'Optimize plot for web (plot scales with window size)', value: 'web' },
+    { label: 'Optimize plot for print (single-column layout)', value: 'print-single' },
+    { label: 'Optimize plot for print (two-column layout)', value: 'print-double' }
+];
+
+const legendOptions = [
+    { label: 'Do not show legend', value: 'off' },
+    { label: 'Show legend top right', value: 'top_right' },
+    { label: 'Show legend top left', value: 'top_left' },
+    { label: 'Show legend bottom right', value: 'bottom_right' },
+    { label: 'Show legend bottom left', value: 'bottom_left' }
+];
 
 // Color palettes
 const _parentColorPalette = GREYS_256;
@@ -458,7 +473,8 @@ function handleClick(seriesId: string, pointIndex: number) {
 }
 
 function download() {
-    const plotRef = _plotRefs.value[_activeTab.value];
+    const plotIndex = props.plots.findIndex(p => p.title === _activeTab.value);
+    const plotRef = _plotRefs.value[plotIndex >= 0 ? plotIndex : 0];
     if (plotRef?.svgElement) {
         exportSvg(plotRef.svgElement);
     }
@@ -476,6 +492,12 @@ const plotConfigs = computed(() => {
             scaleType: plot.yAxisType || 'linear'
         }
     } as PlotConfig));
+});
+
+// Get active plot index
+const activeTabIndex = computed(() => {
+    const idx = props.plots.findIndex(p => p.title === _activeTab.value);
+    return idx >= 0 ? idx : 0;
 });
 
 // Get effective opacity for a series
@@ -550,62 +572,73 @@ defineExpose({ download });
         </div>
 
         <!-- Multiple plots in tabs -->
-        <BTabs v-if="plots.length > 1" v-model="_activeTab">
-            <BTab
-                v-for="(plot, plotIndex) in plots"
-                :key="plotIndex"
-                :title="plot.title"
-            >
-                <Plot
-                    v-if="_plotSeries[plotIndex]"
-                    :ref="el => _plotRefs[plotIndex] = el"
-                    :config="plotConfigs[plotIndex]"
-                    :series="_plotSeries[plotIndex]"
-                    :height="height"
-                    :aspect-ratio="aspectRatio"
-                >
-                    <template #axes>
-                        <XAxis
-                            :config="plotConfigs[plotIndex].xAxis"
-                            :show-grid="true"
-                            :format-tick="plotConfigs[plotIndex].xAxis.scaleType === 'linear' ? formatExponential : undefined"
-                        />
-                        <YAxis
-                            :config="plotConfigs[plotIndex].yAxis"
-                            :show-grid="true"
-                            :format-tick="plotConfigs[plotIndex].yAxis.scaleType === 'linear' ? formatExponential : undefined"
-                        />
-                    </template>
+        <template v-if="plots.length > 1">
+            <QTabs v-model="_activeTab" dense align="left" class="text-primary">
+                <QTab
+                    v-for="(plot, plotIndex) in plots"
+                    :key="plotIndex"
+                    :name="plot.title"
+                    :label="plot.title"
+                />
+            </QTabs>
 
-                    <template v-for="(series, idx) in _plotSeries[plotIndex]" :key="series.id">
-                        <Line
-                            v-if="series.visible"
-                            :series="series"
-                            :color="series.color"
-                            :dash="series.dash"
-                            :stroke-width="getSeriesLineWidth(parseInt(series.id.split('-')[1]))"
-                            :opacity="getSeriesOpacity(parseInt(series.id.split('-')[1]))"
-                        />
-                        <Scatter
-                            v-if="series.visible && showSymbols"
-                            :series="series"
-                            :color="series.color"
-                            :symbol="series.symbol || 'circle'"
-                            :size="_symbolSize"
-                            :opacity="getSeriesOpacity(parseInt(series.id.split('-')[1]))"
-                            :selectable="selectable"
-                            @hover="handleHover"
-                            @click="handleClick"
-                        />
-                    </template>
-                </Plot>
-            </BTab>
-        </BTabs>
+            <QTabPanels v-model="_activeTab" animated>
+                <QTabPanel
+                    v-for="(plot, plotIndex) in plots"
+                    :key="plotIndex"
+                    :name="plot.title"
+                >
+                    <Plot
+                        v-if="_plotSeries[plotIndex]"
+                        :ref="el => _plotRefs[plotIndex] = el"
+                        :config="plotConfigs[plotIndex]"
+                        :series="_plotSeries[plotIndex]"
+                        :height="height"
+                        :aspect-ratio="aspectRatio"
+                    >
+                        <template #axes>
+                            <XAxis
+                                :config="plotConfigs[plotIndex].xAxis"
+                                :show-grid="true"
+                                :format-tick="plotConfigs[plotIndex].xAxis.scaleType === 'linear' ? formatExponential : undefined"
+                            />
+                            <YAxis
+                                :config="plotConfigs[plotIndex].yAxis"
+                                :show-grid="true"
+                                :format-tick="plotConfigs[plotIndex].yAxis.scaleType === 'linear' ? formatExponential : undefined"
+                            />
+                        </template>
+
+                        <template v-for="(series, idx) in _plotSeries[plotIndex]" :key="series.id">
+                            <Line
+                                v-if="series.visible"
+                                :series="series"
+                                :color="series.color"
+                                :dash="series.dash"
+                                :stroke-width="getSeriesLineWidth(parseInt(series.id.split('-')[1]))"
+                                :opacity="getSeriesOpacity(parseInt(series.id.split('-')[1]))"
+                            />
+                            <Scatter
+                                v-if="series.visible && showSymbols"
+                                :series="series"
+                                :color="series.color"
+                                :symbol="series.symbol || 'circle'"
+                                :size="_symbolSize"
+                                :opacity="getSeriesOpacity(parseInt(series.id.split('-')[1]))"
+                                :selectable="selectable"
+                                @hover="handleHover"
+                                @click="handleClick"
+                            />
+                        </template>
+                    </Plot>
+                </QTabPanel>
+            </QTabPanels>
+        </template>
 
         <!-- Legend -->
-        <div v-if="showLegend && _plotSeries[_activeTab]?.length > 0" class="ce-plot-legend mt-2">
+        <div v-if="showLegend && _plotSeries[activeTabIndex]?.length > 0" class="ce-plot-legend q-mt-sm">
             <Legend
-                :series="_plotSeries[_activeTab]"
+                :series="_plotSeries[activeTabIndex]"
                 :position="_legendLocation"
                 :show-checkboxes="false"
                 orientation="vertical"
@@ -621,114 +654,109 @@ defineExpose({ download });
         />
 
         <!-- Category accordions and options -->
-        <BAccordion class="mt-3">
-            <BAccordionItem
+        <div class="q-mt-md">
+            <QExpansionItem
                 v-for="(category, categoryIndex) in _categoryElements"
                 :key="category.key"
-                :title="category.title"
+                :label="category.title"
+                dense
+                header-class="text-primary"
             >
-                <BFormCheckbox
-                    v-for="(element, elementIndex) in category.elements"
-                    :key="elementIndex"
-                    :model-value="element.selected"
-                    @update:model-value="val => toggleCategoryElement(categoryIndex, elementIndex, val)"
-                >
-                    <span
-                        v-if="element.color"
-                        class="color-dot"
-                        :style="{ backgroundColor: element.color }"
-                    ></span>
-                    <span v-if="element.hasParent">└─</span>
-                    {{ element.title }}
-                </BFormCheckbox>
-            </BAccordionItem>
+                <div class="q-pa-sm">
+                    <QCheckbox
+                        v-for="(element, elementIndex) in category.elements"
+                        :key="elementIndex"
+                        :model-value="element.selected"
+                        @update:model-value="val => toggleCategoryElement(categoryIndex, elementIndex, val)"
+                        class="q-mb-xs"
+                        dense
+                    >
+                        <span
+                            v-if="element.color"
+                            class="color-dot"
+                            :style="{ backgroundColor: element.color }"
+                        ></span>
+                        <span v-if="element.hasParent">└─</span>
+                        {{ element.title }}
+                    </QCheckbox>
+                </div>
+            </QExpansionItem>
 
-            <BAccordionItem title="Plot options">
-                <BFormGroup
-                    v-if="optionsWidgets.includes('layout')"
-                    class="mt-2"
-                    label="Plot layout"
-                    label-cols="4"
-                    content-cols="8"
-                >
-                    <BFormSelect v-model="_layout">
-                        <BFormSelectOption value="web">
-                            Optimize plot for web (plot scales with window size)
-                        </BFormSelectOption>
-                        <BFormSelectOption value="print-single">
-                            Optimize plot for print (single-column layout)
-                        </BFormSelectOption>
-                        <BFormSelectOption value="print-double">
-                            Optimize plot for print (two-column layout)
-                        </BFormSelectOption>
-                    </BFormSelect>
-                </BFormGroup>
+            <QExpansionItem
+                label="Plot options"
+                dense
+                header-class="text-primary"
+            >
+                <div class="q-pa-sm">
+                    <div v-if="optionsWidgets.includes('layout')" class="row items-center q-mb-sm">
+                        <div class="col-4 text-weight-medium">Plot layout</div>
+                        <div class="col-8">
+                            <QSelect
+                                v-model="_layout"
+                                :options="layoutOptions"
+                                emit-value
+                                map-options
+                                dense
+                                outlined
+                            />
+                        </div>
+                    </div>
 
-                <BFormGroup
-                    v-if="optionsWidgets.includes('legend')"
-                    class="mt-2"
-                    label="Legend"
-                    label-cols="4"
-                    content-cols="8"
-                >
-                    <BFormSelect v-model="_legendLocation">
-                        <BFormSelectOption value="off">Do not show legend</BFormSelectOption>
-                        <BFormSelectOption value="top_right">Show legend top right</BFormSelectOption>
-                        <BFormSelectOption value="top_left">Show legend top left</BFormSelectOption>
-                        <BFormSelectOption value="bottom_right">Show legend bottom right</BFormSelectOption>
-                        <BFormSelectOption value="bottom_left">Show legend bottom left</BFormSelectOption>
-                    </BFormSelect>
-                </BFormGroup>
+                    <div v-if="optionsWidgets.includes('legend')" class="row items-center q-mb-sm">
+                        <div class="col-4 text-weight-medium">Legend</div>
+                        <div class="col-8">
+                            <QSelect
+                                v-model="_legendLocation"
+                                :options="legendOptions"
+                                emit-value
+                                map-options
+                                dense
+                                outlined
+                            />
+                        </div>
+                    </div>
 
-                <BFormGroup
-                    v-if="optionsWidgets.includes('lineWidth')"
-                    class="mt-2"
-                    label="Line width"
-                    label-cols="4"
-                    content-cols="8"
-                >
-                    <BFormInput
-                        type="range"
-                        min="0.1"
-                        max="3.0"
-                        step="0.1"
-                        v-model="_lineWidth"
-                    />
-                </BFormGroup>
+                    <div v-if="optionsWidgets.includes('lineWidth')" class="row items-center q-mb-sm">
+                        <div class="col-4 text-weight-medium">Line width</div>
+                        <div class="col-8">
+                            <QSlider
+                                v-model="_lineWidth"
+                                :min="0.1"
+                                :max="3.0"
+                                :step="0.1"
+                                label
+                            />
+                        </div>
+                    </div>
 
-                <BFormGroup
-                    v-if="optionsWidgets.includes('symbolSize')"
-                    class="mt-2"
-                    label="Symbol size"
-                    label-cols="4"
-                    content-cols="8"
-                >
-                    <BFormInput
-                        type="range"
-                        min="1"
-                        max="20"
-                        step="1"
-                        v-model="_symbolSize"
-                    />
-                </BFormGroup>
+                    <div v-if="optionsWidgets.includes('symbolSize')" class="row items-center q-mb-sm">
+                        <div class="col-4 text-weight-medium">Symbol size</div>
+                        <div class="col-8">
+                            <QSlider
+                                v-model="_symbolSize"
+                                :min="1"
+                                :max="20"
+                                :step="1"
+                                label
+                            />
+                        </div>
+                    </div>
 
-                <BFormGroup
-                    v-if="optionsWidgets.includes('opacity')"
-                    class="mt-2"
-                    label="Opacity of lines/symbols (measurements only)"
-                    label-cols="4"
-                    content-cols="8"
-                >
-                    <BFormInput
-                        type="range"
-                        min="0"
-                        max="1"
-                        step="0.1"
-                        v-model="_opacity"
-                    />
-                </BFormGroup>
-            </BAccordionItem>
-        </BAccordion>
+                    <div v-if="optionsWidgets.includes('opacity')" class="row items-center q-mb-sm">
+                        <div class="col-4 text-weight-medium">Opacity (measurements)</div>
+                        <div class="col-8">
+                            <QSlider
+                                v-model="_opacity"
+                                :min="0"
+                                :max="1"
+                                :step="0.1"
+                                label
+                            />
+                        </div>
+                    </div>
+                </div>
+            </QExpansionItem>
+        </div>
     </div>
 </template>
 

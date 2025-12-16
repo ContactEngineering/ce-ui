@@ -6,12 +6,12 @@ import { getIdFromUrl, subjectsToBase64 } from "topobank/utils/api";
 import { usersV1UserRetrieve, goPublicationRetrieve } from "@/api";
 
 import {
-    BBadge,
-    BButton,
-    BButtonGroup,
-    BFormCheckbox,
-    BListGroupItem
-} from "bootstrap-vue-next";
+    QBadge,
+    QBtn,
+    QBtnGroup,
+    QCheckbox,
+    QItem
+} from "quasar";
 
 import ThumbnailRow from "./ThumbnailRow.vue";
 
@@ -60,53 +60,67 @@ const creationDatePretty = computed(() => {
     return new Date(props.dataset.creation_datetime).toISOString().substring(0, 10);
 });
 
+const isSelected = computed({
+    get() {
+        return selected.value?.includes(props.dataset.id) ?? false;
+    },
+    set(value) {
+        if (value) {
+            if (!selected.value.includes(props.dataset.id)) {
+                selected.value = [...selected.value, props.dataset.id];
+            }
+        } else {
+            selected.value = selected.value.filter(id => id !== props.dataset.id);
+        }
+    }
+});
+
 </script>
 
 <template>
-    <BListGroupItem>
-        <div class="d-flex">
+    <QItem class="dataset-list-row">
+        <div class="flex">
             <div>
-                <BFormCheckbox v-model="selected" :value="dataset.id"></BFormCheckbox>
+                <QCheckbox v-model="isSelected" />
             </div>
-            <div class="flex-grow-1 ms-2 me-2">
+            <div class="col-grow q-ml-sm q-mr-sm">
                 <img v-if="_publication != null"
-                     class="float-end ms-2 me-2"
-                     variant="dark"
+                     class="float-right q-ml-sm q-mr-sm"
                      :src="`/static/images/cc/${_publication.license}.svg`"
                      title="Dataset can be reused under the terms of a Creative Commons license.">
-                <BBadge v-if="_publication != null"
-                        class="float-end me-2"
-                        :href="`https://doi.org/${_publication.doi_name}`">
+                <QBadge v-if="_publication != null"
+                        class="float-right q-mr-sm cursor-pointer"
+                        @click="window.location.href = `https://doi.org/${_publication.doi_name}`">
                     https://doi.org/{{ _publication.doi_name }}
-                </BBadge>
+                </QBadge>
                 <a v-if="dataset.publication_doi != null"
-                   class="badge bg-dark me-1 text-decoration-none"
+                   class="badge bg-dark q-mr-xs text-decoration-none"
                    :href="dataset.publication_doi">{{ dataset.publication_doi }}</a>
                 <img v-if="dataset.publication_license != null"
                      :src="`/static/images/cc/${dataset.publication_license}.svg`"
                      title="Dataset can be reused under the terms of a Creative Commons license."
                      style="float:right">
-                <p v-if="dataset.sharing_status === 'own'" class='badge bg-info me-1'>
+                <QBadge v-if="dataset.sharing_status === 'own'" color="info" class="q-mr-xs">
                     Created by you
-                </p>
-                <p v-if="dataset.sharing_status === 'shared' && _creator == null"
-                   class='badge bg-info me-1'>
+                </QBadge>
+                <QBadge v-if="dataset.sharing_status === 'shared' && _creator == null"
+                        color="info" class="q-mr-xs">
                     Shared with you
-                </p>
-                <p v-if="dataset.sharing_status === 'shared' && _creator != null"
-                   class='badge bg-info me-1'>
+                </QBadge>
+                <QBadge v-if="dataset.sharing_status === 'shared' && _creator != null"
+                        color="info" class="q-mr-xs">
                     Created by {{ _creator }} and shared with you
-                </p>
-                <p v-for="tag of dataset.tags" class='badge bg-success me-1'>
+                </QBadge>
+                <QBadge v-for="tag of dataset.tags" :key="tag" color="positive" class="q-mr-xs">
                     {{ tag }}
-                </p>
+                </QBadge>
                 <p class="dataset-title">
                     <i class="fa fa-layer-group"></i> {{ dataset.name }}
                 </p>
                 <p v-if="_publication != null" class="dataset-authors">
                     This digital surface twin was published by {{ publicationAuthorsPretty }} on {{ publicationDatePretty }}
                 </p>
-                <ThumbnailRow class="mb-3"
+                <ThumbnailRow class="q-mb-md"
                               :data-source-list-url="dataset.topographies">
                 </ThumbnailRow>
                 <p v-if="_publication == null" class="dataset-authors">
@@ -137,24 +151,24 @@ const creationDatePretty = computed(() => {
                     measurements.
                 </p>
             </div>
-            <div class="d-block">
-                <BButtonGroup vertical size="sm">
-                    <BButton variant="light"
-                             :href="`/ui/dataset-detail/${ dataset.id }/`">
+            <div>
+                <QBtnGroup vertical flat>
+                    <QBtn flat size="sm"
+                          :href="`/ui/dataset-detail/${ dataset.id }/`">
                         View
-                    </BButton>
-                    <BButton variant="light"
-                             :href="`/ui/analysis-list/?subjects=${subjectsToBase64({surface: [dataset.id]})}`">
+                    </QBtn>
+                    <QBtn flat size="sm"
+                          :href="`/ui/analysis-list/?subjects=${subjectsToBase64({surface: [dataset.id]})}`">
                         Analyze
-                    </BButton>
-                    <BButton variant="light"
-                             :href="dataset.api.download">
+                    </QBtn>
+                    <QBtn flat size="sm"
+                          :href="dataset.api.download">
                         Download
-                    </BButton>
-                </BButtonGroup>
+                    </QBtn>
+                </QBtnGroup>
             </div>
         </div>
-    </BListGroupItem>
+    </QItem>
 </template>
 
 <style scoped>

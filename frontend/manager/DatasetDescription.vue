@@ -1,18 +1,15 @@
 <script lang="ts">
 
 import {
-    BAlert,
-    BButton,
-    BButtonGroup,
-    BCard,
-    BCardBody,
-    BForm,
-    BFormGroup,
-    BFormInput,
-    BFormSelect,
-    BFormTags,
-    BSpinner
-} from "bootstrap-vue-next";
+    QBanner,
+    QBtn,
+    QBtnGroup,
+    QCard,
+    QCardSection,
+    QInput,
+    QSelect,
+    QSpinner
+} from "quasar";
 
 import {managerApiSurfacePartialUpdate} from "@/api";
 import {getIdFromUrl} from "@/utils/api";
@@ -22,17 +19,14 @@ import TipTapEditor from "./TipTapEditor.vue";
 export default {
     name: "surface-description",
     components: {
-        BAlert,
-        BButton,
-        BButtonGroup,
-        BCard,
-        BCardBody,
-        BForm,
-        BFormGroup,
-        BFormInput,
-        BFormSelect,
-        BFormTags,
-        BSpinner,
+        QBanner,
+        QBtn,
+        QBtnGroup,
+        QCard,
+        QCardSection,
+        QInput,
+        QSelect,
+        QSpinner,
         TipTapEditor
     },
     props: {
@@ -51,20 +45,23 @@ export default {
             _error: null,
             _name: this.name,
             _options: [
-                { value: "exp", text: "Experimental data" },
-                { value: "sim", text: "Simulated data" },
-                { value: "dum", text: "Dummy data" }
+                { value: "exp", label: "Experimental data" },
+                { value: "sim", label: "Simulated data" },
+                { value: "dum", label: "Dummy data" }
             ],
             _savedDescription: this.description,
             _savedName: this.name,
             _saving: false,
-            _tags: this.tags
+            _tags: this.tags,
+            _tagsInput: Array.isArray(this.tags) ? this.tags.join(', ') : ''
         };
     },
     methods: {
         async saveCard() {
             this._editing = false;
             this._saving = true;
+            // Parse tags from comma-separated input
+            this._tags = this._tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
             try {
                 const surfaceId = getIdFromUrl(this.surfaceUrl);
                 const response = await managerApiSurfacePartialUpdate({
@@ -96,76 +93,64 @@ export default {
 </script>
 
 <template>
-    <BCard>
-        <template #header>
-            <h5 class="float-start">Description</h5>
-            <BButtonGroup v-if="!_editing && !_saving && isEditable"
-                          class="float-end"
-                          size="sm">
-                <BButton variant="outline-secondary"
-                         @click="_savedName = `${_name}`; _savedDescription = `${_description}`; _editing = true">
+    <QCard>
+        <QCardSection class="flex items-center">
+            <h5 class="col-grow q-ma-none">Description</h5>
+            <QBtnGroup v-if="!_editing && !_saving && isEditable" flat>
+                <QBtn flat size="sm"
+                      @click="_savedName = `${_name}`; _savedDescription = `${_description}`; _editing = true">
                     <i class="fa fa-pen"></i>
-                </BButton>
-            </BButtonGroup>
-            <BButtonGroup v-if="_editing || _saving"
-                          class="float-end"
-                          size="sm">
-                <BButton v-if="_editing"
-                         variant="danger"
-                         @click="_editing = false; _name = _savedName; _description = _savedDescription">
+                </QBtn>
+            </QBtnGroup>
+            <QBtnGroup v-if="_editing || _saving" flat>
+                <QBtn v-if="_editing"
+                      color="negative" size="sm"
+                      @click="_editing = false; _name = _savedName; _description = _savedDescription">
                     Discard
-                </BButton>
-                <BButton variant="success"
-                         @click="saveCard">
-                    <b-spinner small v-if="_saving"></b-spinner>
+                </QBtn>
+                <QBtn color="positive" size="sm"
+                      @click="saveCard">
+                    <QSpinner v-if="_saving" size="1rem" class="q-mr-sm" />
                     SAVE
-                </BButton>
-            </BButtonGroup>
-        </template>
-        <BCardBody>
-            <BAlert :model-value="_error !== null"
-                    variant="danger">
+                </QBtn>
+            </QBtnGroup>
+        </QCardSection>
+        <QCardSection>
+            <QBanner v-if="_error !== null" class="bg-negative text-white q-mb-md">
                 {{ _error?.message }}
-            </BAlert>
-            <BForm>
-                <BFormGroup id="input-group-name"
-                            label="Name"
-                            label-for="input-name"
-                            description="A short, descriptive name for this digital surface twin">
-                    <BFormInput id="input-name"
-                                v-model="_name"
-                                placeholder="Please enter a name here"
-                                :disabled="!_editing">
-                    </BFormInput>
-                </BFormGroup>
-                <BFormGroup id="input-group-description"
-                            label="Description"
-                            label-for="input-description"
-                            description="Arbitrary descriptive text, ideally including information on specimen preparation, measurement conditions, etc.">
-                    <TipTapEditor id="input-description"
-                                  v-model="_description"
-                                  :disabled="!_editing" />
-                </BFormGroup>
-                <BFormGroup id="input-group-category"
-                            label="Category"
-                            label-for="input-category"
-                            description="Please indicate the category of the data contained in this digital surface twin.">
-                    <BForm-select id="input-category"
-                                  v-model="_category"
-                                  :options="_options"
-                                  :disabled="!_editing">
-                    </BForm-select>
-                </BFormGroup>
-                <BFormGroup id="input-group-tags"
-                            label="Tags"
-                            label-for="input-tags"
-                            description="Attach arbitrary tags (labels) to this digital surface twin. Tags can be hierachical (like a directory structure); separate hierarchies with a /, e.g. 'bear/foot/nail' may indicate a set of topography scans on the nail of a bear foot.">
-                    <BForm-tags id="input-tags"
-                                v-model="_tags"
-                                :disabled="!_editing">
-                    </BForm-tags>
-                </BFormGroup>
-            </BForm>
-        </BCardBody>
-    </BCard>
+            </QBanner>
+            <div class="q-mb-md">
+                <label class="text-weight-medium">Name</label>
+                <QInput v-model="_name"
+                        placeholder="Please enter a name here"
+                        :disable="!_editing"
+                        dense outlined />
+                <div class="text-caption text-grey">A short, descriptive name for this digital surface twin</div>
+            </div>
+            <div class="q-mb-md">
+                <label class="text-weight-medium">Description</label>
+                <TipTapEditor v-model="_description"
+                              :disabled="!_editing" />
+                <div class="text-caption text-grey">Arbitrary descriptive text, ideally including information on specimen preparation, measurement conditions, etc.</div>
+            </div>
+            <div class="q-mb-md">
+                <label class="text-weight-medium">Category</label>
+                <QSelect v-model="_category"
+                         :options="_options"
+                         :disable="!_editing"
+                         emit-value
+                         map-options
+                         dense outlined />
+                <div class="text-caption text-grey">Please indicate the category of the data contained in this digital surface twin.</div>
+            </div>
+            <div class="q-mb-md">
+                <label class="text-weight-medium">Tags</label>
+                <QInput v-model="_tagsInput"
+                        :disable="!_editing"
+                        placeholder="Enter tags separated by commas"
+                        dense outlined />
+                <div class="text-caption text-grey">Attach arbitrary tags (labels) to this digital surface twin. Tags can be hierachical (like a directory structure); separate hierarchies with a /, e.g. 'bear/foot/nail' may indicate a set of topography scans on the nail of a bear foot.</div>
+            </div>
+        </QCardSection>
+    </QCard>
 </template>

@@ -3,21 +3,21 @@
 import {ref} from "vue";
 
 import {
-    BButton,
-    BButtonGroup,
-    BCard,
-    BCardBody,
-    BSpinner,
-    useToastController
-} from 'bootstrap-vue-next';
+    QBtn,
+    QBtnGroup,
+    QCard,
+    QCardSection,
+    QSpinner
+} from 'quasar';
 
+import { useNotify } from "@/utils/notify";
 import {managerApiSurfaceSetPermissionsPartialUpdate} from "@/api";
 import {getIdFromUrl} from "@/utils/api";
 
 import SearchUserModal from "../components/SearchUserModal.vue";
 import PermissionRow from "topobank/manager/PermissionRow.vue";
 
-const {show} = useToastController();
+const { show } = useNotify();
 
 const props = defineProps({
     setPermissionsUrl: String,
@@ -66,43 +66,38 @@ function addUser(user) {
 </script>
 
 <template>
-    <BCard>
-        <template #header>
-            <h5 class="float-start">Permissions</h5>
-            <BButtonGroup
+    <QCard>
+        <QCardSection class="flex items-center">
+            <h5 class="q-ma-none col-grow">Permissions</h5>
+            <QBtnGroup
                 v-if="!isEditing && !isSaving && selfPermissions.current_user.permission === 'full'"
-                class="float-end"
-                size="sm">
-                <BButton variant="outline-secondary"
-                         @click="savedPermissions = JSON.parse(JSON.stringify(selfPermissions)); isEditing = true">
+                flat>
+                <QBtn flat size="sm"
+                      @click="savedPermissions = JSON.parse(JSON.stringify(selfPermissions)); isEditing = true">
                     <i class="fa fa-pen"></i>
-                </BButton>
-            </BButtonGroup>
-            <BButtonGroup v-if="isEditing || isSaving"
-                          class="float-end"
-                          size="sm">
-                <BButton v-if="isEditing"
-                         variant="danger"
-                         @click="isEditing = false; selfPermissions = savedPermissions">
-                    Discard
-                </BButton>
-                <BButton variant="success"
-                         @click="saveCard">
-                    <BSpinner small v-if="isSaving"></BSpinner>
-                    Save
-                </BButton>
-            </BButtonGroup>
-            <BButtonGroup v-if="isEditing || isSaving"
-                          class="float-end me-2"
-                          size="sm">
-                <BButton v-if="isEditing"
-                         variant="outline-secondary"
-                         @click="searchUser = !searchUser">
+                </QBtn>
+            </QBtnGroup>
+            <QBtnGroup v-if="isEditing || isSaving" flat class="q-mr-sm">
+                <QBtn v-if="isEditing"
+                      flat size="sm"
+                      @click="searchUser = !searchUser">
                     Add user (share dataset)
-                </BButton>
-            </BButtonGroup>
-        </template>
-        <BCardBody>
+                </QBtn>
+            </QBtnGroup>
+            <QBtnGroup v-if="isEditing || isSaving" flat>
+                <QBtn v-if="isEditing"
+                      color="negative" size="sm"
+                      @click="isEditing = false; selfPermissions = savedPermissions">
+                    Discard
+                </QBtn>
+                <QBtn color="positive" size="sm"
+                      @click="saveCard">
+                    <QSpinner v-if="isSaving" size="1rem" class="q-mr-sm" />
+                    Save
+                </QBtn>
+            </QBtnGroup>
+        </QCardSection>
+        <QCardSection>
             <PermissionRow :user-permission="selfPermissions.current_user"
                            :disabled="true">
             </PermissionRow>
@@ -115,8 +110,8 @@ function addUser(user) {
                            v-model:user-permission="selfPermissions.other_users[index]"
                            :disabled="!isEditing">
             </PermissionRow>
-        </BCardBody>
-    </BCard>
+        </QCardSection>
+    </QCard>
     <SearchUserModal v-model="searchUser"
                      @user-selected="addUser">
     </SearchUserModal>

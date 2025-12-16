@@ -7,8 +7,9 @@
 
 import axios from "axios";
 import {onMounted, ref, watch} from "vue";
-import {BSpinner, useToastController} from "bootstrap-vue-next";
+import { QSpinner, QBanner } from "quasar";
 
+import { useNotify } from "@/utils/notify";
 import {filesFolderRetrieve} from "@/api";
 import {getIdFromUrl} from "@/utils/api";
 
@@ -34,7 +35,7 @@ const props = defineProps({
     }
 });
 
-const {show} = useToastController();
+const { show } = useNotify();
 
 // The OpenSeadragon instance
 let viewer = null;
@@ -258,15 +259,15 @@ defineExpose({
     <div class="dzi-container">
         <div ref="_openSeadragonElement" class="dzi-view">
             <div v-if="!_isLoaded && _errorMessage === null"
-                 class="d-flex justify-content-center mt-5">
-                <div class="flex-column text-center">
-                    <b-spinner/>
+                 class="flex justify-center q-mt-xl">
+                <div class="column text-center">
+                    <QSpinner size="2rem" />
                     <p>Loading...</p>
                 </div>
             </div>
-            <div v-if="_errorMessage !== null" class='alert alert-danger'>
+            <QBanner v-if="_errorMessage !== null" class="bg-negative text-white">
                 Could not load plot data. Error: {{ _errorMessage }}
-            </div>
+            </QBanner>
         </div>
         <div v-if="colorbar && _isLoaded" class="dzi-colorbar">
             <div class="dzi-colorbar-title">

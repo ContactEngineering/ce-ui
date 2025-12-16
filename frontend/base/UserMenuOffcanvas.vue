@@ -1,8 +1,22 @@
 <script setup>
 
-import {ref} from "vue";
+import { ref } from "vue";
 
-import {BModal, BNavbarNav, BNavItem, BOffcanvas} from "bootstrap-vue-next";
+import {
+    QDrawer,
+    QToolbar,
+    QToolbarTitle,
+    QBtn,
+    QList,
+    QItem,
+    QItemSection,
+    QSeparator,
+    QDialog,
+    QCard,
+    QCardSection,
+    QCardActions,
+    QSpace
+} from "quasar";
 
 import VersionInformation from "./VersionInformation.vue";
 
@@ -22,93 +36,102 @@ const contactModal = ref(false);
 </script>
 
 <template>
-    <BOffcanvas v-model="visible" placement="end" footer-class="offcanvas-header">
-        <template #title>
-            <i class="fa fa-user-circle fa-fw" aria-hidden="true"></i>
-            <span class="ms-2">{{ name }}</span>
-        </template>
+    <QDrawer v-model="visible" side="right" :width="300" bordered overlay>
+        <div class="column full-height">
+            <QToolbar class="bg-primary text-white">
+                <i class="fa fa-user-circle fa-fw q-mr-sm" aria-hidden="true"></i>
+                <QToolbarTitle>{{ name }}</QToolbarTitle>
+                <QBtn flat round icon="close" @click="visible = false" />
+            </QToolbar>
 
-        <template #footer>
-            <BNavbarNav class="justify-content-end flex-grow-1">
-                <BNavItem :href="`https://orcid.org/${orcid}`"
-                          class="align-self-center">
-                    <img src="/static/images/ORCID-iD_icon_vector.svg"
-                         alt="ORCID iD icon"/>
-                    {{ orcid }}
-                </BNavItem>
-                <BNavItem class="btn btn-secondary" @click="signoutModal = true">
-                    Sign out
-                </BNavItem>
-                <BNavItem>
-                    <VersionInformation></VersionInformation>
-                </BNavItem>
-            </BNavbarNav>
-        </template>
+            <div class="col">
+                <QList v-if="isStaff">
+                    <QItem clickable :href="adminUrl">
+                        <QItemSection>Admin interface</QItemSection>
+                    </QItem>
+                    <QItem clickable href="/watchman/dashboard/">
+                        <QItemSection>Watchman dashboard</QItemSection>
+                    </QItem>
+                    <QItem clickable href="/watchman/">
+                        <QItemSection>Watchman status (JSON)</QItemSection>
+                    </QItem>
+                </QList>
+                <QSeparator v-if="isStaff" />
+                <QList>
+                    <QItem clickable href="/termsandconditions/">
+                        <QItemSection>Terms &amp; conditions</QItemSection>
+                    </QItem>
+                    <QItem clickable href="https://github.com/ContactEngineering/TopoBank/discussions">
+                        <QItemSection>Feedback</QItemSection>
+                    </QItem>
+                    <QItem clickable @click="contactModal = true">
+                        <QItemSection>Contact</QItemSection>
+                    </QItem>
+                    <QItem clickable href="https://doi.org/10.1088/2051-672X/ac860a">
+                        <QItemSection>Read our paper!</QItemSection>
+                    </QItem>
+                </QList>
+            </div>
 
-        <BNavbarNav v-if="isStaff" class="justify-content-end flex-grow-1">
-            <BNavItem :href="adminUrl">Admin interface</BNavItem>
-            <BNavItem href="/watchman/dashboard/">Watchman dashboard</BNavItem>
-            <BNavItem href="/watchman/">Watchman status (JSON)</BNavItem>
-        </BNavbarNav>
-        <BNavbarNav class="justify-content-end flex-grow-1">
-            <BNavItem href="/termsandconditions/">Terms &amp; conditions</BNavItem>
-            <BNavItem href="https://github.com/ContactEngineering/TopoBank/discussions">
-                Feedback
-            </BNavItem>
-            <BNavItem @click="contactModal = true">Contact</BNavItem>
-            <BNavItem href="https://doi.org/10.1088/2051-672X/ac860a">Read our paper!
-            </BNavItem>
-        </BNavbarNav>
-    </BOffcanvas>
+            <QSeparator />
+            <div class="q-pa-md">
+                <div class="q-mb-sm">
+                    <a :href="`https://orcid.org/${orcid}`" class="flex items-center">
+                        <img src="/static/images/ORCID-iD_icon_vector.svg" alt="ORCID iD icon" class="q-mr-sm" />
+                        {{ orcid }}
+                    </a>
+                </div>
+                <QBtn color="secondary" label="Sign out" @click="signoutModal = true" class="full-width q-mb-sm" />
+                <VersionInformation />
+            </div>
+        </div>
+    </QDrawer>
 
     <!-- Sign out modal-->
-    <BModal v-model="signoutModal" title="Ready to leave?">
-        <template #ok>
-            <a class="btn btn-primary" href="/accounts/logout/">Sign out</a>
-        </template>
-
-        Select "Sign out" below if you are ready to end your current session.
-    </BModal>
+    <QDialog v-model="signoutModal">
+        <QCard style="min-width: 350px">
+            <QCardSection>
+                <div class="text-h6">Ready to leave?</div>
+            </QCardSection>
+            <QCardSection>
+                Select "Sign out" below if you are ready to end your current session.
+            </QCardSection>
+            <QCardActions align="right">
+                <QBtn flat label="Cancel" v-close-popup />
+                <QBtn color="primary" label="Sign out" href="/accounts/logout/" />
+            </QCardActions>
+        </QCard>
+    </QDialog>
 
     <!-- Contact modal-->
-    <BModal v-model="contactModal" title="Contact" :ok-only="true">
-        <p>Is <em>contact.engineering</em> helpful for your research?
-        </p>
-        <p>We would like to hear from you. Please contact us, if you
-            have
-            any
-            comments, suggestions, or bug
-            reports!</p>
-        <div>
-            <ul>
-                <li>Participate at <a
-                    href="https://github.com/ComputationalMechanics/TopoBank/discussions"
-                    target="_blank">discussions
-                    on GitHub</a>, or
-                </li>
-                <li>open an <a
-                    href="https://github.com/ComputationalMechanics/TopoBank/issues"
-                    target="_blank">issue
-                    on
-                    GitHub</a>, or
-                </li>
-                <li>drop us an <a
-                    href="mailto:support@contact.engineering">email</a>.
-                </li>
-            </ul>
-        </div>
-        <p>Thank you! The <em>contact.engineering</em> development team.
-        </p>
-        <p translate="no">
-            <em>
-                <a href="https://pastewka.org/" target="_blank">Simulation
-                    Group</a><br>
-                Department of Microsystems Engineering (IMTEK)<br>
-                University of Freiburg<br>
-                Georges-Köhler-Allee 103<br>
-                79110 Freiburg<br>
-                Germany<br>
-            </em>
-        </p>
-    </BModal>
+    <QDialog v-model="contactModal">
+        <QCard style="min-width: 400px">
+            <QCardSection>
+                <div class="text-h6">Contact</div>
+            </QCardSection>
+            <QCardSection>
+                <p>Is <em>contact.engineering</em> helpful for your research?</p>
+                <p>We would like to hear from you. Please contact us, if you have any comments, suggestions, or bug reports!</p>
+                <ul>
+                    <li>Participate at <a href="https://github.com/ComputationalMechanics/TopoBank/discussions" target="_blank">discussions on GitHub</a>, or</li>
+                    <li>open an <a href="https://github.com/ComputationalMechanics/TopoBank/issues" target="_blank">issue on GitHub</a>, or</li>
+                    <li>drop us an <a href="mailto:support@contact.engineering">email</a>.</li>
+                </ul>
+                <p>Thank you! The <em>contact.engineering</em> development team.</p>
+                <p translate="no">
+                    <em>
+                        <a href="https://pastewka.org/" target="_blank">Simulation Group</a><br>
+                        Department of Microsystems Engineering (IMTEK)<br>
+                        University of Freiburg<br>
+                        Georges-Köhler-Allee 103<br>
+                        79110 Freiburg<br>
+                        Germany<br>
+                    </em>
+                </p>
+            </QCardSection>
+            <QCardActions align="right">
+                <QBtn flat label="Close" v-close-popup />
+            </QCardActions>
+        </QCard>
+    </QDialog>
 </template>

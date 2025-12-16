@@ -1,20 +1,23 @@
 <script setup lang="ts">
 
 import {
-    BAlert,
-    BListGroup,
-    BListGroupItem,
-    BNavbarNav,
-    BNavItem,
-    BOffcanvas,
-    useToastController
-} from "bootstrap-vue-next";
+    QDrawer,
+    QToolbar,
+    QToolbarTitle,
+    QBtn,
+    QList,
+    QItem,
+    QItemSection,
+    QItemLabel,
+    QBanner
+} from "quasar";
 
-import {managerApiSurfaceRetrieve} from "@/api";
+import { useNotify } from "@/utils/notify";
+import { managerApiSurfaceRetrieve } from "@/api";
 import { useDatasetSelectionStore } from "@/stores/datasetSelection";
 import { onMounted, ref, computed } from "vue";
 
-const { show } = useToastController();
+const { show } = useNotify();
 
 const selection = useDatasetSelectionStore();
 
@@ -45,12 +48,12 @@ async function refreshDatasets() {
 }
 
 function showCollectionInfo() {
-    const issue = "";
+    let issue = "";
     if (!selectionIsPublished.value) {
-        issue = "Your selection contains unpublished datasets."
+        issue = " Your selection contains unpublished datasets."
     }
     else if (selection.nbSelected < 2) {
-        issue = "You selected less than 2 datasets."
+        issue = " You selected less than 2 datasets."
     }
     show?.({
         props: {
@@ -68,44 +71,65 @@ const selectionIsPublished = computed(() => {
 </script>
 
 <template>
-    <BOffcanvas v-model="visible" placement="end" footer-class="offcanvas-header">
-        <template #title>
-            <i class="fa fa-bell fa-fw" aria-hidden="true"></i>
-            <span class="ms-2">Selected datasets</span>
-        </template>
-        <template #footer>
-            <BNavbarNav class="justify-content-end flex-grow-1">
-                <BNavItem class="btn btn-success mb-2"
-                    :href="`${analysisListUrl}?subjects=${selection.selectedAsBase64}`"
-                    :disabled="selection.nbSelected === 0">
-                    Analyze
-                </BNavItem>
-                <BNavItem class="btn btn-light mb-2"
-                    :href="`/manager/api/surface/${selection.selectedAsString}/download/`"
-                    :disabled="selection.nbSelected === 0">
-                    Download
-                </BNavItem>
-                <BNavItem v-if="selection.nbSelected > 1 && selectionIsPublished" class="btn btn-light mb-2"
-                    :href="`/ui/dataset-collection-publish/?${datasets.map((surface) => `dataset=${surface.id}`).join('&')}`">
-                    Create collection
-                </BNavItem>
-                <BNavItem v-else class="btn btn-light mb-2" @click="showCollectionInfo()">
-                    Create collection
-                </BNavItem>
-                <BNavItem class="btn btn-secondary" @click="selection.clear()" :disabled="selection.nbSelected === 0">
-                    Clear selection
-                </BNavItem>
-            </BNavbarNav>
-        </template>
+    <QDrawer v-model="visible" side="right" :width="300" bordered overlay>
+        <div class="column full-height">
+            <QToolbar class="bg-primary text-white">
+                <i class="fa fa-check-square fa-fw q-mr-sm" aria-hidden="true"></i>
+                <QToolbarTitle>Selected datasets</QToolbarTitle>
+                <QBtn flat round icon="close" @click="visible = false" />
+            </QToolbar>
 
-        <BAlert :model-value="selection.nbSelected === 0" variant="light">
-            You have not selected any datasets.
-        </BAlert>
-        <BListGroup>
-            <BListGroupItem v-for="dataset in datasets">
-                <i class="fa fa-layer-group"></i>
-                {{ dataset.name }}
-            </BListGroupItem>
-        </BListGroup>
-    </BOffcanvas>
+            <div class="col q-pa-md">
+                <QBanner v-if="selection.nbSelected === 0" class="bg-grey-2 q-mb-md">
+                    You have not selected any datasets.
+                </QBanner>
+                <QList bordered separator v-if="datasets.length > 0">
+                    <QItem v-for="dataset in datasets" :key="dataset.id">
+                        <QItemSection avatar>
+                            <i class="fa fa-layer-group"></i>
+                        </QItemSection>
+                        <QItemSection>
+                            <QItemLabel>{{ dataset.name }}</QItemLabel>
+                        </QItemSection>
+                    </QItem>
+                </QList>
+            </div>
+
+            <div class="q-pa-md column q-gutter-sm">
+                <QBtn
+                    color="positive"
+                    label="Analyze"
+                    :href="`${analysisListUrl}?subjects=${selection.selectedAsBase64}`"
+                    :disable="selection.nbSelected === 0"
+                />
+                <QBtn
+                    color="grey-4"
+                    text-color="dark"
+                    label="Download"
+                    :href="`/manager/api/surface/${selection.selectedAsString}/download/`"
+                    :disable="selection.nbSelected === 0"
+                />
+                <QBtn
+                    v-if="selection.nbSelected > 1 && selectionIsPublished"
+                    color="grey-4"
+                    text-color="dark"
+                    label="Create collection"
+                    :href="`/ui/dataset-collection-publish/?${datasets.map((surface) => `dataset=${surface.id}`).join('&')}`"
+                />
+                <QBtn
+                    v-else
+                    color="grey-4"
+                    text-color="dark"
+                    label="Create collection"
+                    @click="showCollectionInfo()"
+                />
+                <QBtn
+                    color="secondary"
+                    label="Clear selection"
+                    @click="selection.clear()"
+                    :disable="selection.nbSelected === 0"
+                />
+            </div>
+        </div>
+    </QDrawer>
 </template>

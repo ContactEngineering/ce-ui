@@ -17,37 +17,98 @@ function iconClass(tab) {
 </script>
 
 <template>
-    <ul role="tablist"
-        class="nav nav-tabs lined-tabs align-items-center bg-light w-100 shadow">
-        <li v-for="(tab, index) in tabs"
-            class="nav-item d-flex"
-            :title="tab.tooltip">
-            <div :class="{ 'nav-link': true, 'active': tab.active }">
-                <a v-if="tab.href_previous != null"
-                   class="link-underline link-underline-opacity-0"
-                   :href="tab.href_previous">
-                    <i class="fa fa-caret-left"></i>
-                </a>
-                <a class="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-75-hover"
-                   :href="tab.href">
-                    <i :class="iconClass(tab)"></i>
-                    {{ tab.title }}
-                </a>
-                <a v-if="tab.href_next != null"
-                   class="link-underline link-underline-opacity-0"
-                   :href="tab.href_next">
-                    <i class="fa fa-caret-right"></i>
-                </a>
-            </div>
-            <div v-if="index !== 0 && index !== tabs.length - 1" class="nav-pad-y">
-                /
-            </div>
-        </li>
-    </ul>
+    <nav class="breadcrumb-bar">
+        <div class="breadcrumb-content">
+            <template v-for="(tab, index) in tabs" :key="index">
+                <div class="breadcrumb-item" :title="tab.tooltip">
+                    <a v-if="tab.href_previous != null"
+                       class="nav-arrow"
+                       :href="tab.href_previous"
+                       aria-label="Previous">
+                        <i class="fa fa-chevron-left"></i>
+                    </a>
+                    <a class="breadcrumb-link"
+                       :class="{ 'active': tab.active }"
+                       :href="tab.href">
+                        <i :class="iconClass(tab)"></i>
+                        <span>{{ tab.title }}</span>
+                    </a>
+                    <a v-if="tab.href_next != null"
+                       class="nav-arrow"
+                       :href="tab.href_next"
+                       aria-label="Next">
+                        <i class="fa fa-chevron-right"></i>
+                    </a>
+                </div>
+                <i v-if="index !== 0 && index !== tabs.length - 1"
+                   class="fa fa-chevron-right separator"></i>
+            </template>
+        </div>
+    </nav>
 </template>
 
 <style scoped>
-.nav-pad-y {
-    padding: var(--bs-nav-link-padding-y) 0;
+.breadcrumb-bar {
+    background-color: var(--md-sys-color-surface-container-low);
+    padding: 12px 24px;
+}
+
+.breadcrumb-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.breadcrumb-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.breadcrumb-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: var(--md-sys-shape-corner-small);
+    color: var(--md-sys-color-on-surface-variant);
+    text-decoration: none;
+    font-size: var(--md-sys-typescale-label-large-size);
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.breadcrumb-link:hover {
+    background-color: var(--md-sys-color-surface-container-high);
+    color: var(--md-sys-color-on-surface);
+}
+
+.breadcrumb-link.active {
+    background-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+}
+
+.nav-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--md-sys-shape-corner-full);
+    color: var(--md-sys-color-on-surface-variant);
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.nav-arrow:hover {
+    background-color: var(--md-sys-color-surface-container-high);
+    color: var(--md-sys-color-on-surface);
+}
+
+.separator {
+    color: var(--md-sys-color-outline);
+    font-size: 10px;
 }
 </style>

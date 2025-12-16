@@ -1,8 +1,6 @@
 <script lang="ts">
 
-import {
-    BSpinner
-} from 'bootstrap-vue-next';
+import { QSpinner, QBtn, QBtnGroup } from 'quasar';
 
 import {
     managerApiTopographyDestroy,
@@ -13,7 +11,7 @@ import {getIdFromUrl} from "@/utils/api";
 export default {
     name: 'topography-pending-card',
     components: {
-        BSpinner
+        QSpinner, QBtn, QBtnGroup
     },
     emits: [
         'delete:topography',
@@ -40,30 +38,30 @@ export default {
 </script>
 
 <template>
-    <div class="card mb-1">
-        <div class="card-header">
-            <div class="btn-group btn-group-sm float-end">
-                <button class="btn btn-outline-secondary">
-                    <i class="fa fa-refresh"
-                       @click="forceInspect"></i>
-                </button>
-                <button class="btn btn-outline-secondary float-end"
-                        @click="deleteTopography">
+    <div class="pending-card q-mb-xs border rounded-borders">
+        <div class="pending-card-header q-pa-sm flex items-center">
+            <QBtnGroup flat class="float-right">
+                <QBtn flat dense size="sm"
+                      @click="forceInspect">
+                    <i class="fa fa-refresh"></i>
+                </QBtn>
+                <QBtn flat dense size="sm"
+                      @click="deleteTopography">
                     <i class="fa fa-trash"></i>
-                </button>
-            </div>
-            <div>
-                <h5 class="d-inline">{{ name }}</h5>
+                </QBtn>
+            </QBtnGroup>
+            <div class="col-grow">
+                <h5 class="q-ma-none">{{ name }}</h5>
             </div>
         </div>
         <div v-if="taskState !== 'st'"
-             class="card-body">
-            <b-spinner small  type="grow"></b-spinner>
+             class="pending-card-body q-pa-sm">
+            <QSpinner size="1rem" class="q-mr-sm" />
             Waiting for data file inspection to start...
         </div>
         <div v-if="taskState === 'st'"
-             class="card-body">
-            <b-spinner small></b-spinner>
+             class="pending-card-body q-pa-sm">
+            <QSpinner size="1rem" class="q-mr-sm" />
             Inspecting data file and applying filters...
         </div>
     </div>

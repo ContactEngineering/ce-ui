@@ -1,9 +1,10 @@
 <script setup lang="ts">
 
-import {computed, onMounted, onBeforeUnmount, ref, watch} from "vue";
+import { computed, onMounted, onBeforeUnmount, ref, watch } from "vue";
 
-import {BButton, useToastController} from "bootstrap-vue-next";
+import { QBtn, QSpinner } from "quasar";
 
+import { useNotify } from "@/utils/notify";
 import {
     analysisApiWorkflowRetrieve,
     analysisApiResultRetrieve,
@@ -12,13 +13,13 @@ import {
     managerApiTopographyRetrieve,
     filesFolderRetrieve
 } from "@/api";
-import {getIdFromUrl, getNameFromUrl} from "@/utils/api";
+import { getIdFromUrl, getNameFromUrl } from "@/utils/api";
 
-import {prettyBytes} from "../utils/formatting";
+import { prettyBytes } from "../utils/formatting";
 
 import ProgressIndicator from "topobank/components/ProgressIndicator.vue";
 
-const {show} = useToastController();
+const { show } = useNotify();
 
 const analysis = defineModel('analysis', {required: true});
 
@@ -202,9 +203,7 @@ watch(() => analysis.value, () => {
             </div>
         </td>
         <td>
-            <BButton @click="renew">
-                Renew
-            </BButton>
+            <QBtn color="primary" label="Renew" @click="renew" />
         </td>
     </tr>
 </template>

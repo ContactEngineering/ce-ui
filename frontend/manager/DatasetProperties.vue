@@ -3,25 +3,20 @@
 import { computed, ref } from 'vue';
 
 import {
-    BButton,
-    BButtonGroup,
-    BCard,
-    BCardBody,
-    BFormInput,
-    BSpinner,
-    BTableSimple,
-    BTbody,
-    BTd,
-    BTh,
-    BThead,
-    BTr,
-    useToastController
-} from 'bootstrap-vue-next';
+    QBtn,
+    QBtnGroup,
+    QCard,
+    QCardSection,
+    QInput,
+    QSpinner,
+    QMarkupTable
+} from 'quasar';
 
+import { useNotify } from "@/utils/notify";
 import {managerApiSurfacePartialUpdate} from "@/api";
 import {getIdFromUrl} from "@/utils/api";
 
-const { show } = useToastController();
+const { show } = useNotify();
 
 const properties = defineModel('properties', {
     default: {}
@@ -173,95 +168,93 @@ propertyCount.value = Object.keys(properties.value).length // Update the propert
 </script>
 
 <template>
-    <BCard>
-        <template #header>
-            <div class="d-flex">
-                <h5 class="flex-grow-1">Properties</h5>
-                <BButton size="sm" v-if="!_isEditing && isEditable" @click="enterEditMode" variant="outline-secondary">
-                    <i class="fa fa-pen"></i>
-                </BButton>
-                <BButtonGroup v-else-if="isEditable" size="sm">
-                    <BButton v-if="_isEditing && !_isSaving" @click="discardChanges" variant="danger">
-                        Discard
-                    </BButton>
-                    <BButton :disabled="!formIsValid" @click="save" variant="success">
-                        <BSpinner v-if="_isSaving" small />
-                        SAVE
-                    </BButton>
-                </BButtonGroup>
-            </div>
-        </template>
-        <BCardBody>
+    <QCard>
+        <QCardSection class="flex items-center">
+            <h5 class="col-grow q-ma-none">Properties</h5>
+            <QBtn size="sm" v-if="!_isEditing && isEditable" @click="enterEditMode" flat>
+                <i class="fa fa-pen"></i>
+            </QBtn>
+            <QBtnGroup v-else-if="isEditable" flat>
+                <QBtn v-if="_isEditing && !_isSaving" @click="discardChanges" color="negative" size="sm">
+                    Discard
+                </QBtn>
+                <QBtn :disable="!formIsValid" @click="save" color="positive" size="sm">
+                    <QSpinner v-if="_isSaving" size="1rem" class="q-mr-sm" />
+                    SAVE
+                </QBtn>
+            </QBtnGroup>
+        </QCardSection>
+        <QCardSection>
             <div v-if="!isEditable && _properties.length === 0">
                 This digital surface twin does not have properties.
             </div>
-            <BTableSimple>
+            <QMarkupTable>
                 <colgroup>
                     <col />
                     <col />
                     <col />
                     <col />
                 </colgroup>
-                <BThead head-variant="dark">
-                    <BTr>
-                        <BTh>#</BTh>
-                        <BTh>Key</BTh>
-                        <BTh>Value</BTh>
-                        <BTh>Unit</BTh>
-                    </BTr>
-                </BThead>
-                <BTbody>
-                    <BTr v-for="(property, index) in _properties">
-                        <BTd>
-                            <BButton v-if="_isEditing" @click="deleteProperty(index)" size="sm" variant="danger"
-                                title="remove property">
+                <thead class="bg-dark text-white">
+                    <tr>
+                        <th>#</th>
+                        <th>Key</th>
+                        <th>Value</th>
+                        <th>Unit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(property, index) in _properties" :key="index">
+                        <td>
+                            <QBtn v-if="_isEditing" @click="deleteProperty(index)" size="sm" color="negative"
+                                title="remove property" dense>
                                 <i class="fa fa-minus"></i>
-                            </BButton>
+                            </QBtn>
                             <i v-else class="fa fa-bars"></i>
-                        </BTd>
-                        <BTd>
-                            <BFormInput v-if="_isEditing" placeholder="Property name" v-model="property.name">
-                            </BFormInput>
+                        </td>
+                        <td>
+                            <QInput v-if="_isEditing" placeholder="Property name" v-model="property.name"
+                                    dense outlined />
                             <div v-else>
-                                <span v-if="property.name === ''" class="fw-lighter">
+                                <span v-if="property.name === ''" class="text-grey">
                                     Property name
                                 </span>
                                 <span v-else>{{ property.name }}</span>
                             </div>
-                        </BTd>
-                        <BTd>
-                            <BFormInput v-if="_isEditing" placeholder="Property value" v-model="property.value">
-                            </BFormInput>
+                        </td>
+                        <td>
+                            <QInput v-if="_isEditing" placeholder="Property value" v-model="property.value"
+                                    dense outlined />
                             <div v-else>
-                                <span v-if="property.value === ''" class="fw-lighter">Property value</span>
+                                <span v-if="property.value === ''" class="text-grey">Property value</span>
                                 <span v-else>{{ property.value }}</span>
                             </div>
-                        </BTd>
-                        <BTd v-if="isNumeric(property.value)">
-                            <BFormInput v-if="_isEditing" placeholder="dimensionless" v-model="property.unit">
-                            </BFormInput>
+                        </td>
+                        <td v-if="isNumeric(property.value)">
+                            <QInput v-if="_isEditing" placeholder="dimensionless" v-model="property.unit"
+                                    dense outlined />
                             <div v-else>
                                 <span v-if="property.unit === '' || property.unit == null"
-                                    class="text-muted">(dimensionless)</span>
+                                    class="text-grey">(dimensionless)</span>
                                 <span v-else>{{ property.unit }}</span>
                             </div>
-                        </BTd>
-                        <BTd v-else>
-                            <span class="text-muted">(categorical)</span>
-                        </BTd>
-                    </BTr>
-                </BTBody>
-            </BTableSimple>
-            <div v-if="isEditable" @click="addProperty" class="d-flex highlight-on-hover rounded-3">
-                <div class="p-2 flex-shrink-1">
+                        </td>
+                        <td v-else>
+                            <span class="text-grey">(categorical)</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </QMarkupTable>
+            <div v-if="isEditable" @click="addProperty" class="flex highlight-on-hover rounded-borders">
+                <div class="q-pa-sm">
                     <i class="fa fa-plus"></i>
                 </div>
-                <div class="w-25 p-2">
+                <div class="q-pa-sm" style="width: 25%;">
                     Add property
                 </div>
             </div>
-        </BCardBody>
-    </BCard>
+        </QCardSection>
+    </QCard>
 </template>
 
 <style scoped>

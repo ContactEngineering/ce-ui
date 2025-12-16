@@ -1,6 +1,5 @@
 <script setup lang="ts">
-
-import { BToastOrchestrator } from "bootstrap-vue-next";
+// Quasar notifications are handled via the Notify plugin - no orchestrator needed
 
 import Breadcrumbs from "../base/Breadcrumbs.vue";
 import Topnav from "../base/Topnav.vue";
@@ -16,22 +15,37 @@ const props = defineProps({
 </script>
 
 <template>
-    <BToastOrchestrator></BToastOrchestrator>
-    <div class="fixed-top">
-        <Topnav></Topnav>
-        <Breadcrumbs :tabs="breadcrumbs"></Breadcrumbs>
-    </div>
+    <header class="app-header">
+        <Topnav />
+        <Breadcrumbs :tabs="breadcrumbs" />
+    </header>
 
-    <div v-if="vueComponent != null && vueComponent.length > 0" id="wrapper">
-        <div id="content-wrapper">
-            <div class="container-fluid mt-1">
-                <div class="tab-content mt-2">
-                    <div class="tab-pane active">
-                        <component :is="vueComponent">
-                        </component>
-                    </div>
-                </div>
-            </div>
+    <main v-if="vueComponent != null && vueComponent.length > 0" class="app-main">
+        <div class="app-content">
+            <component :is="vueComponent" />
         </div>
-    </div>
+    </main>
 </template>
+
+<style scoped>
+.app-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+.app-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.app-content {
+    max-width: 1400px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 24px;
+}
+</style>

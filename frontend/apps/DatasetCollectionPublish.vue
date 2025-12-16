@@ -3,14 +3,13 @@
 import { inject, ref, computed } from "vue";
 
 import {
-    BButton,
-    BAlert,
-    BFormInput,
-    BFormTextarea,
-    BSpinner,
-    useToastController
-} from 'bootstrap-vue-next';
+    QBtn,
+    QBanner,
+    QInput,
+    QSpinner
+} from 'quasar';
 
+import { useNotify } from "@/utils/notify";
 import {
     managerApiSurfaceRetrieve,
     goPublicationRetrieve,
@@ -26,7 +25,7 @@ const title = ref("");
 const validTitle = ref(null);
 const description = ref("");
 const pending_request = ref(false);
-const { show } = useToastController();
+const { show } = useNotify();
 
 const datasetIds = appProps.searchParams.getAll("dataset");
 const invalid_id = ref(false);
@@ -96,32 +95,41 @@ const validSelection = computed(() => {
     <div class="container">
         <h1>Publish a collection</h1>
         <div v-if="validSelection">
-
-            <BAlert :model-value="true" variant="info">
-                <h4 class="alert-heading">You are about to create a publication collection</h4>
+            <QBanner class="bg-info text-white q-mb-md">
+                <template v-slot:avatar>
+                    <i class="fa fa-info-circle"></i>
+                </template>
+                <h4>You are about to create a publication collection</h4>
                 <p>
                     A publication collection is a object that bundles already published datasets. <br>
-                    The Colection will be published under the <a
-                        href="https://creativecommons.org/publicdomain/zero/1.0/">
+                    The Collection will be published under the <a
+                        href="https://creativecommons.org/publicdomain/zero/1.0/"
+                        class="text-white text-underline">
                         CC0 1.0 Universal </a> license. <br>
                     You will be the author of the collection.
                 </p>
-                <hr />
-                <p class="mb-0">
+                <hr class="bg-white" />
+                <p class="q-ma-none">
                     Do you understand this and want to continue?
                 </p>
-            </BAlert>
+            </QBanner>
             <h3>Title*</h3>
-            <BFormInput id="collection-title" v-model="title" :state="validTitle"
-                placeholder="Enter the collection title" />
-            <h3 class="mt-2">Description</h3>
-            <BFormTextarea v-model="description" placeholder="Enter a description..." rows="3" />
-            <h3 class="mt-2">Publications:</h3>
-            <div class="d-flex flex-row mb-5">
+            <QInput v-model="title"
+                    :error="validTitle === false"
+                    error-message="Title is required"
+                    placeholder="Enter the collection title"
+                    outlined />
+            <h3 class="q-mt-md">Description</h3>
+            <QInput v-model="description"
+                    type="textarea"
+                    placeholder="Enter a description..."
+                    rows="3"
+                    outlined />
+            <h3 class="q-mt-md">Publications:</h3>
+            <div class="flex row q-gutter-md q-mb-xl">
                 <div v-for="(dataset, index) in datasets" :key="dataset.id">
-                    <a :href="`/ui/dataset-detail/${dataset.id}/`"
-                        class="publication-card border rounded ms-2 p-2 d-flex flex-column">
-                        <span class=" dataset-title">
+                    <a :href="`/ui/dataset-detail/${dataset.id}/`" class="publication-card">
+                        <span class="dataset-title">
                             <i class="fa fa-layer-group"></i> {{ dataset.name }}
                         </span>
                         <span>Published by: {{ publications[index].publisher.name }}</span>
@@ -129,26 +137,29 @@ const validSelection = computed(() => {
                     </a>
                 </div>
             </div>
-            <div class="d-flex flex-row justify-content-end">
-                <BButton v-if="pending_request" disabled variant="success" size="lg">
+            <div class="flex justify-end">
+                <QBtn v-if="pending_request" disable color="positive" size="lg">
                     Publish
-                    <BSpinner variant="primary" style="width: 1.2rem; height: 1.2rem;" />
-                </BButton>
-                <BButton v-else @click="publish()" variant="success" size="lg">
+                    <QSpinner color="white" size="1.2rem" class="q-ml-sm" />
+                </QBtn>
+                <QBtn v-else @click="publish()" color="positive" size="lg">
                     Publish 🚀
-                </BButton>
+                </QBtn>
             </div>
         </div>
-        <BAlert v-else :model-value="true" variant="danger">
-            <h4 class="alert-heading">This will not work!</h4>
+        <QBanner v-else class="bg-negative text-white">
+            <template v-slot:avatar>
+                <i class="fa fa-exclamation-triangle"></i>
+            </template>
+            <h4>This will not work!</h4>
             <p>
                 A publication collection, bundles 2 or more published datasets. <br>
             </p>
-            <hr />
-            <p class="mb-0">
+            <hr class="bg-white" />
+            <p class="q-ma-none">
                 Your selection does not meet that requirement.
             </p>
-        </BAlert>
+        </QBanner>
     </div>
 </template>
 
@@ -159,13 +170,18 @@ const validSelection = computed(() => {
 }
 
 .publication-card {
-    all: unset;
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
     color: inherit;
     text-decoration: none;
+}
 
-    &:hover {
-        color: #007BFF;
-        cursor: pointer;
-    }
+.publication-card:hover {
+    color: #007BFF;
+    cursor: pointer;
+    border-color: #007BFF;
 }
 </style>

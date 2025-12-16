@@ -1,24 +1,30 @@
 <script setup lang="ts">
 
-import {computed, inject, onMounted, ref, shallowRef} from "vue";
+import { computed, inject, onMounted, ref, shallowRef } from "vue";
 
 import {
-    BAccordion,
-    BAccordionItem,
-    BAlert,
-    BBadge,
-    BCard,
-    BCardText,
-    BDropdown,
-    BDropdownItem,
-    BFormCheckbox,
-    BModal,
-    BSpinner,
-    BTab,
-    BTabs,
-    useToastController
-} from 'bootstrap-vue-next';
+    QExpansionItem,
+    QBanner,
+    QBadge,
+    QCard,
+    QCardSection,
+    QBtnDropdown,
+    QList,
+    QItem,
+    QItemSection,
+    QCheckbox,
+    QDialog,
+    QCardActions,
+    QSpinner,
+    QTabs,
+    QTab,
+    QTabPanels,
+    QTabPanel,
+    QBtn,
+    QSeparator
+} from 'quasar';
 
+import { useNotify } from "@/utils/notify";
 import {
     goPublicationList,
     goPublicationRetrieve,
@@ -43,7 +49,7 @@ import DatasetProperties from '../manager/DatasetProperties.vue';
 import TopographyCard from "../manager/TopographyCard.vue";
 import TopographyUpdateCard from "../manager/TopographyUpdateCard.vue";
 
-const {show} = useToastController();
+const { show } = useNotify();
 
 const props = defineProps({
     categories: {
@@ -339,48 +345,96 @@ const measurementCount = computed(() => {
 
 const batchActiveTab = ref('home'); // shared active tab for batch mode
 
+const _activeTab = ref('measurements'); // main navigation tab
 
 </script>
 
 <template>
     <div class="container">
-        <div v-if="_surface == null" class="d-flex justify-content-center mt-5">
-            <div class="flex-column text-center">
-                <b-spinner/>
-                <p>Loading...</p>
+        <div v-if="_surface == null" class="flex justify-center q-mt-xl">
+            <div class="column items-center">
+                <QSpinner size="lg" />
+                <p class="q-mt-sm">Loading...</p>
             </div>
         </div>
         <div v-if="_surface != null" class="row">
-            <div class="col-12">
-                <BTabs class="nav-pills-custom"
-                       content-class="w-100"
-                       fill
-                       pills
-                       vertical>
-                    <BTab title="Measurements">
-                        <template #title>
-                            Measurements <BBadge>{{measurementCount}}</BBadge>
+            <div class="col-3">
+                <QTabs v-model="_activeTab" vertical class="text-grey" active-color="primary">
+                    <QTab name="measurements">
+                        <template v-slot:default>
+                            Measurements <QBadge>{{ measurementCount }}</QBadge>
                         </template>
-                        <DropZone v-if="isEditable && !anySelected" @files-dropped="filesDropped">
-                        </DropZone>
+                    </QTab>
+                    <QTab name="bandwidths" label="Bandwidths" />
+                    <QTab name="description" label="Description" />
+                    <QTab v-if="propertyCount !== 0 || isEditable" name="properties">
+                        <template v-slot:default>
+                            Properties <QBadge>{{ propertyCount }}</QBadge>
+                        </template>
+                    </QTab>
+                    <QTab v-if="attachmentCount === null || attachmentCount !== 0 || isEditable" name="attachments">
+                        <template v-slot:default>
+                            Attachments <QBadge>{{ attachmentCount }}</QBadge>
+                        </template>
+                    </QTab>
+                    <QTab name="permissions" label="Permissions" />
+                    <QTab v-if="isPublication" name="citation" label="How to cite" />
+                </QTabs>
+                <div class="q-mt-md column q-gutter-sm">
+                    <QBtn color="positive" :href="`/ui/analysis-list/?subjects=${base64Subjects}`" label="Analyze" />
+                    <QBtn color="grey-4" text-color="dark" :href="`${_surface.url}download/`" label="Download" />
+                    <QBtn v-if="!isPublication && hasFullAccess" color="grey-4" text-color="dark" :href="publishUrl" label="Publish" />
+                    <QBtn v-if="_versions == null || _versions.length === 0 && hasFullAccess" color="negative" @click="_showDeleteModal = true" label="Delete" />
+                </div>
+                <QSeparator v-if="_surface != null && (_publication != null || _surface.tags.length > 0 || _versions == null || _versions.length > 0)" class="q-my-md" />
+                <QCard v-if="_surface != null && (_publication != null || _surface.tags.length > 0 || _versions == null || _versions.length > 0)">
+                    <QCardSection>
+                        <div v-if="_publication != null">
+                            <QBadge color="info">Published by {{ _publication.publisher.name }}</QBadge>
+                        </div>
+                        <div v-if="_surface.tags.length > 0" class="q-mt-sm">
+                            <QBadge v-for="tag in _surface.tags" :key="tag.name" color="positive" class="q-mr-xs">{{ tag.name }}</QBadge>
+                        </div>
+                        <QBtnDropdown v-if="_versions == null || _versions.length > 0" :label="versionString" color="info" class="q-mt-sm">
+                            <QList>
+                                <QItem v-if="_publication == null || _publication.has_access_to_original_surface"
+                                       clickable v-close-popup
+                                       :disable="_publication == null"
+                                       :href="hrefOriginalSurface">
+                                    <QItemSection>Work in progress</QItemSection>
+                                </QItem>
+                                <QItem v-if="_versions == null">
+                                    <QItemSection><QSpinner size="xs" /> Loading versions...</QItemSection>
+                                </QItem>
+                                <QItem v-for="version in _versions"
+                                       :key="version.version"
+                                       clickable v-close-popup
+                                       :disable="_publication != null && _publication.version === version.version"
+                                       :href="surfaceHrefForVersion(version)">
+                                    <QItemSection>Version {{ version.version }}</QItemSection>
+                                </QItem>
+                            </QList>
+                        </QBtnDropdown>
+                    </QCardSection>
+                </QCard>
+            </div>
+            <div class="col-9">
+                <QTabPanels v-model="_activeTab" animated>
+                    <QTabPanel name="measurements">
+                        <DropZone v-if="isEditable && !anySelected" @files-dropped="filesDropped" />
                         <topography-update-card v-if="anySelected"
                                                 v-model:topography="_batchEditTopography"
                                                 v-model:active-tab="batchActiveTab"
                                                 :batch-edit="true"
                                                 :saving="_saving"
                                                 @save:edit="saveBatchEdit"
-                                                @discard:edit="discardBatchEdit">
-                        </topography-update-card>
-                        <div v-if="isEditable && _topographies.length > 0"
-                             class="d-flex mb-1">
-                            <BCard>
-                                <BFormCheckbox v-model="allSelected"
-                                               :indeterminate="someSelected" size="sm">
-                                    Select all
-                                </BFormCheckbox>
-                            </BCard>
-                        </div>
-                        <div v-for="(topography, index) in _topographies">
+                                                @discard:edit="discardBatchEdit" />
+                        <QCard v-if="isEditable && _topographies.length > 0" class="q-mb-sm">
+                            <QCardSection class="q-py-sm">
+                                <QCheckbox v-model="allSelected" :indeterminate-value="someSelected ? null : undefined" label="Select all" size="sm" />
+                            </QCardSection>
+                        </QCard>
+                        <div v-for="(topography, index) in _topographies" :key="topography?.url || index">
                             <TopographyCard v-if="topography != null"
                                             v-model:selected="_selected[index]"
                                             v-model:topography="_topographies[index]"
@@ -389,191 +443,121 @@ const batchActiveTab = ref('home'); // shared active tab for batch mode
                                             :selectable="isEditable"
                                             :topography-url="topography.url"
                                             :syncTab="anySelected"
-                                            @delete:topography="() => deleteTopography(index)">
-                            </TopographyCard>
+                                            @delete:topography="() => deleteTopography(index)" />
                         </div>
-                    </BTab>
-                    <BTab title="Bandwidths">
-                        <BCard class="w-100">
-                            <template #header>
-                                <h5 class="float-start">Bandwidths</h5>
-                            </template>
-                            <BAlert :model-value="_topographies.length == 0" info>
-                                This surface has no measurements.
-                            </BAlert>
-                            <BAlert :model-value="_topographies.length > 0"
-                                    secondary>
-                                This bandwidth plot shows the range of length scales
-                                that have been measured for
-                                this digital surface twin. Each of the blocks below
-                                represents one measurement.
-                                Part of the bandwidth shown may be unreliable due to
-                                the configured instrument's
-                                measurement capacities.
-                            </BAlert>
-                            <bandwidth-plot v-if="_topographies.length > 0"
-                                            :topographies="_topographies">
-                            </bandwidth-plot>
-                        </BCard>
-                    </BTab>
-                    <BTab title="Description">
+                    </QTabPanel>
+                    <QTabPanel name="bandwidths">
+                        <QCard>
+                            <QCardSection class="bg-grey-2">
+                                <h5 class="q-ma-none">Bandwidths</h5>
+                            </QCardSection>
+                            <QCardSection>
+                                <QBanner v-if="_topographies.length == 0" class="bg-info text-white q-mb-md">
+                                    This surface has no measurements.
+                                </QBanner>
+                                <QBanner v-if="_topographies.length > 0" class="bg-grey-2 q-mb-md">
+                                    This bandwidth plot shows the range of length scales that have been measured for
+                                    this digital surface twin. Each of the blocks below represents one measurement.
+                                    Part of the bandwidth shown may be unreliable due to the configured instrument's
+                                    measurement capacities.
+                                </QBanner>
+                                <bandwidth-plot v-if="_topographies.length > 0" :topographies="_topographies" />
+                            </QCardSection>
+                        </QCard>
+                    </QTabPanel>
+                    <QTabPanel name="description">
                         <DatasetDescription v-if="_surface != null"
                                             :description="_surface.description"
                                             :name="_surface.name"
                                             :permission="_permissions.current_user.permission"
                                             :surface-url="_surface.url"
-                                            :tags="_surface.tags">
-                        </DatasetDescription>
-                    </BTab>
-                    <BTab title="Properties" v-if ="propertyCount !== 0 || isEditable"> 
-                        <template #title>
-                            Properties <BBadge>{{ propertyCount }}</BBadge>
-                        </template>
+                                            :tags="_surface.tags" />
+                    </QTabPanel>
+                    <QTabPanel name="properties">
                         <DatasetProperties v-if="_surface != null"
                                            v-model:properties="_surface.properties"
                                            :permission="_permissions.current_user.permission"
                                            :surface-url="_surface.url"
-                                           v-model:propertyCount="propertyCount">
-                        </DatasetProperties>
-                    </BTab>
-                    <BTab title="Attachments" v-if ="attachmentCount === null || attachmentCount !== 0 || isEditable"> <!--here the tab will not be displayed when attachment count is 0 and is editable is false -->
-                        <template #title>
-                            Attachments <BBadge>{{ attachmentCount }}</BBadge>
-                        </template>
-                        <Attachments v-if="_surface != null" :attachments-url="_surface.attachments"
-                            :permission="_permissions.current_user.permission"
-                            v-model:attachmentCount="attachmentCount"
-                            >
-                        </Attachments>
-                    </BTab>
-                    <BTab v-if="_surface != null"
-                          title="Permissions">
+                                           v-model:propertyCount="propertyCount" />
+                    </QTabPanel>
+                    <QTabPanel name="attachments">
+                        <Attachments v-if="_surface != null"
+                                     :attachments-url="_surface.attachments"
+                                     :permission="_permissions.current_user.permission"
+                                     v-model:attachmentCount="attachmentCount" />
+                    </QTabPanel>
+                    <QTabPanel name="permissions">
                         <DatasetPermissions v-if="_surface.publication == null"
                                             v-model:permissions="_permissions"
-                                            :set-permissions-url="_surface.api.set_permissions">
-                        </DatasetPermissions>
-                        <BCard v-if="_surface.publication != null" class="w-100">
-                            <template #header>
-                                <h5 class="float-start">Permissions</h5>
-                            </template>
-                            <BCardText>
+                                            :set-permissions-url="_surface.api.set_permissions" />
+                        <QCard v-if="_surface.publication != null">
+                            <QCardSection class="bg-grey-2">
+                                <h5 class="q-ma-none">Permissions</h5>
+                            </QCardSection>
+                            <QCardSection>
                                 This dataset is published. It is visible to everyone
-                                (even without logging into the
-                                system) and can no longer be modified.
-                            </BCardText>
-                        </BCard>
-                    </BTab>
-                    <BTab v-if="isPublication"
-                          title="How to cite">
-                        <BCard class="w-100">
-                            <template #header>
-                                <h5 class="float-start">How to cite</h5>
-                            </template>
-                            <p class="mb-5">
-                                <a :href="ccLicenseInfo[_publication.license].descriptionUrl">
-                                    <img
-                                        :src="`/static/images/cc/${_publication.license}.svg`"
-                                        :title="`Dataset can be reused under the terms of the ${ccLicenseInfo[_publication.license].title}.`"
-                                        style="float:right; margin-left: 0.25rem;"/>
-                                </a>
-                                This dataset can be reused under the terms of the
-                                <a :href="ccLicenseInfo[_publication.license].descriptionUrl">
-                                    {{ ccLicenseInfo[_publication.license].title }}
-                                </a>.
-                                When reusing this dataset, please cite the original
-                                source.
-                            </p>
-                            <BAccordion>
-                                <BAccordionItem title="Citation" visible>
-                                    <div v-html="_publication.citation.html"/>
-                                </BAccordionItem>
-                                <BAccordionItem title="RIS">
-                                    <code>
-                                        <pre>{{ _publication.citation.ris }}</pre>
-                                    </code>
-                                </BAccordionItem>
-                                <BAccordionItem title="BibTeX">
-                                    <code>
-                                        <pre>{{ _publication.citation.bibtex }}</pre>
-                                    </code>
-                                </BAccordionItem>
-                                <BAccordionItem title="BibLaTeX">
-                                    <code>
-                                        <pre>{{ _publication.citation.biblatex }}</pre>
-                                    </code>
-                                </BAccordionItem>
-                            </BAccordion>
-                        </BCard>
-                    </BTab>
-                    <template #tabs-end>
-                        <hr/>
-                        <a :href="`/ui/analysis-list/?subjects=${base64Subjects}`"
-                           class="btn btn-success mb-2 mt-2">
-                            Analyze
-                        </a>
-
-                        <a :href="`${_surface.url}download/`"
-                           class="btn btn-light mb-2">
-                            Download
-                        </a>
-
-                        <a v-if="!isPublication && hasFullAccess" :href="publishUrl"
-                           class="btn btn-light mb-2">
-                            Publish
-                        </a>
-
-                        <a v-if="_versions == null || _versions.length === 0 && hasFullAccess"
-                           class="btn btn-danger mb-2"
-                           href="#" @click="_showDeleteModal = true">
-                            Delete
-                        </a>
-                        <hr v-if="_surface != null && (_publication != null || _surface.tags.length > 0 || _versions == null || _versions.length > 0)"/>
-                        <BCard
-                            v-if="_surface != null && (_publication != null || _surface.tags.length > 0 || _versions == null || _versions.length > 0)">
-                            <div v-if="_publication != null">
-                                <span class="badge bg-info">Published by {{
-                                        _publication.publisher.name
-                                    }}</span>
-                            </div>
-                            <div v-if="_surface.tags.length > 0">
-                                <span v-for="tag in _surface.tags"
-                                      class="badge bg-success">{{ tag.name }}</span>
-                            </div>
-                            <BDropdown
-                                v-if="_versions == null || _versions.length > 0"
-                                :text="versionString"
-                                class="mt-2"
-                                variant="info">
-                                <BDropdownItem
-                                    v-if="_publication == null || _publication.has_access_to_original_surface"
-                                    :disabled="_publication == null"
-                                    :href="hrefOriginalSurface">
-                                    Work in progress
-                                </BDropdownItem>
-                                <BDropdownItem v-if="_versions == null">
-                                    <b-spinner small/>
-                                    Loading versions...
-                                </BDropdownItem>
-                                <BDropdownItem v-for="version in _versions"
-                                               v-if="_versions != null"
-                                               :disabled="_publication != null && _publication.version === version.version"
-                                               :href="surfaceHrefForVersion(version)">
-                                    Version {{ version.version }}
-                                </BDropdownItem>
-                            </BDropdown>
-                        </BCard>
-                    </template>
-                </BTabs>
+                                (even without logging into the system) and can no longer be modified.
+                            </QCardSection>
+                        </QCard>
+                    </QTabPanel>
+                    <QTabPanel v-if="isPublication" name="citation">
+                        <QCard>
+                            <QCardSection class="bg-grey-2">
+                                <h5 class="q-ma-none">How to cite</h5>
+                            </QCardSection>
+                            <QCardSection>
+                                <p class="q-mb-lg">
+                                    <a :href="ccLicenseInfo[_publication.license].descriptionUrl">
+                                        <img :src="`/static/images/cc/${_publication.license}.svg`"
+                                             :title="`Dataset can be reused under the terms of the ${ccLicenseInfo[_publication.license].title}.`"
+                                             style="float:right; margin-left: 0.25rem;"/>
+                                    </a>
+                                    This dataset can be reused under the terms of the
+                                    <a :href="ccLicenseInfo[_publication.license].descriptionUrl">
+                                        {{ ccLicenseInfo[_publication.license].title }}
+                                    </a>.
+                                    When reusing this dataset, please cite the original source.
+                                </p>
+                                <QExpansionItem default-opened label="Citation" header-class="bg-grey-2">
+                                    <QCardSection>
+                                        <div v-html="_publication.citation.html" />
+                                    </QCardSection>
+                                </QExpansionItem>
+                                <QExpansionItem label="RIS" header-class="bg-grey-2">
+                                    <QCardSection>
+                                        <code><pre>{{ _publication.citation.ris }}</pre></code>
+                                    </QCardSection>
+                                </QExpansionItem>
+                                <QExpansionItem label="BibTeX" header-class="bg-grey-2">
+                                    <QCardSection>
+                                        <code><pre>{{ _publication.citation.bibtex }}</pre></code>
+                                    </QCardSection>
+                                </QExpansionItem>
+                                <QExpansionItem label="BibLaTeX" header-class="bg-grey-2">
+                                    <QCardSection>
+                                        <code><pre>{{ _publication.citation.biblatex }}</pre></code>
+                                    </QCardSection>
+                                </QExpansionItem>
+                            </QCardSection>
+                        </QCard>
+                    </QTabPanel>
+                </QTabPanels>
             </div>
         </div>
     </div>
-    <b-modal v-if="_surface != null"
-             v-model="_showDeleteModal"
-             title="Delete digital surface twin"
-             @ok="deleteSurface">
-        You are about to delete the digital surface twin with name <b>{{
-            _surface.name
-        }}</b> and all contained
-        measurements. Are you sure you want to proceed?
-    </b-modal>
+    <QDialog v-if="_surface != null" v-model="_showDeleteModal">
+        <QCard>
+            <QCardSection>
+                <div class="text-h6">Delete digital surface twin</div>
+            </QCardSection>
+            <QCardSection>
+                You are about to delete the digital surface twin with name <b>{{ _surface.name }}</b>
+                and all contained measurements. Are you sure you want to proceed?
+            </QCardSection>
+            <QCardActions align="right">
+                <QBtn flat label="Cancel" v-close-popup />
+                <QBtn color="negative" label="Delete" @click="deleteSurface" v-close-popup />
+            </QCardActions>
+        </QCard>
+    </QDialog>
 </template>

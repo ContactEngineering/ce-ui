@@ -1,6 +1,6 @@
 <script setup>
 
-import {BButton, BSpinner} from "bootstrap-vue-next";
+import { QBtn, QSpinner } from "quasar";
 
 const props = defineProps({
     value: {type: Number, default: 0},
@@ -11,16 +11,16 @@ const props = defineProps({
 </script>
 
 <template>
-    <BButton v-if="state === 'su'" variant="success" disabled>
+    <QBtn v-if="state === 'su'" color="positive" disable flat>
         <i class="fa fa-check text-white"></i>
-    </BButton>
-    <BButton v-if="state === 'fa'" variant="danger" disabled>
+    </QBtn>
+    <QBtn v-if="state === 'fa'" color="negative" disable flat>
         <i class="fa fa-circle text-white"></i>
-    </BButton>
-    <BButton v-if="state === 'pe'" variant="light" disabled>
-        <BSpinner small type="grow"></BSpinner>
-    </BButton>
-    <BButton v-if="!['su', 'fa', 'pe'].includes(state)" variant="light" disabled>
+    </QBtn>
+    <QBtn v-if="state === 'pe'" color="grey-3" disable flat>
+        <QSpinner size="sm" />
+    </QBtn>
+    <QBtn v-if="!['su', 'fa', 'pe'].includes(state)" color="grey-3" disable flat>
         {{ Math.round(value * 100 / max) }} %
-    </BButton>
+    </QBtn>
 </template>

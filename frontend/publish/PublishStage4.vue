@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import { ref } from 'vue';
-import { BFormCheckbox, BButton, BSpinner } from 'bootstrap-vue-next';
+import { QCheckbox, QBtn, QSpinner } from 'quasar';
 
 const props = defineProps({
     stage: Number,
@@ -27,7 +27,7 @@ function checkAndPublish() {
 <template>
     <div v-if="stage == 3">
         <h2>Implications of publishing</h2>
-        <div class="mt-4">
+        <div class="q-mt-md">
             <ul>
                 <li>The digital twin and all measurements will be <b>visible by
                         everyone</b>,
@@ -63,33 +63,39 @@ function checkAndPublish() {
                 later.
             </p>
         </div>
-        <div class="d-flex flex-row justify-content-center">
-            <div class="d-flex flex-column">
-                <BFormCheckbox v-model="check1" :state="valid1">
-                    I understand the implications of publishing this digital surface
-                    twin and I agree.*<br>
-                    <span class="text-muted"> Please read the implications of publishing listed above and check.</span>
-                </BFormCheckbox>
-                <BFormCheckbox v-model="check2" :state="valid2">
-                    I hold copyright of this data or have been authorized by the
-                    copyright holders.*<br>
-                    <span class="text-muted"> Please make sure you're not publishing data from others without their
-                        authorization.
+        <div class="flex row justify-center">
+            <div class="flex column">
+                <QCheckbox v-model="check1"
+                           :color="valid1 === false ? 'negative' : 'primary'">
+                    <span :class="{ 'text-negative': valid1 === false }">
+                        I understand the implications of publishing this digital surface
+                        twin and I agree.*<br>
+                        <span class="text-grey"> Please read the implications of publishing listed above and check.</span>
                     </span>
-                </BFormCheckbox>
+                </QCheckbox>
+                <QCheckbox v-model="check2"
+                           :color="valid2 === false ? 'negative' : 'primary'">
+                    <span :class="{ 'text-negative': valid2 === false }">
+                        I hold copyright of this data or have been authorized by the
+                        copyright holders.*<br>
+                        <span class="text-grey"> Please make sure you're not publishing data from others without their
+                            authorization.
+                        </span>
+                    </span>
+                </QCheckbox>
             </div>
         </div>
-        <div class="d-flex flex-row justify-content-between">
-            <BButton @click="$emit('back')" variant="primary">
+        <div class="flex row justify-between q-mt-md">
+            <QBtn @click="$emit('back')" color="primary">
                 Back
-            </BButton>
-            <BButton v-if="pending_request" disabled variant="success" size="lg">
+            </QBtn>
+            <QBtn v-if="pending_request" disable color="positive" size="lg">
                 Publish
-                <BSpinner variant="primary" style="width: 1.2rem; height: 1.2rem;" />
-            </BButton>
-            <BButton v-else @click="checkAndPublish()" variant="success" size="lg">
-                Publish 🚀
-            </BButton>
+                <QSpinner color="white" size="1.2rem" class="q-ml-sm" />
+            </QBtn>
+            <QBtn v-else @click="checkAndPublish()" color="positive" size="lg">
+                Publish
+            </QBtn>
         </div>
     </div>
 </template>

@@ -2,15 +2,16 @@
 
 import { computed, onMounted, ref } from "vue";
 
-import { BDropdownDivider, BDropdownItem, useToastController } from "bootstrap-vue-next";
+import { QItem, QItemSection, QSeparator } from "quasar";
 
+import { useNotify } from "@/utils/notify";
 import { analysisApiCardSeriesRetrieve } from "@/api";
 import { subjectsToBase64 } from "@/utils/api";
 
 import AnalysisCard from "./AnalysisCard.vue";
 import BokehPlot from "../components/BokehPlot.vue";
 
-const { show } = useToastController();
+const { show } = useNotify();
 
 const props = defineProps({
     apiUrl: {
@@ -118,19 +119,19 @@ async function updateCard() {
                   @refreshButtonClicked="updateCard"
                   @someTasksFinished="updateCard">
         <template #dropdowns>
-            <BDropdownDivider></BDropdownDivider>
-            <BDropdownItem :href="`/analysis/download/${analysisIds}/txt`">
-                Download TXT
-            </BDropdownItem>
-            <BDropdownItem :href="`/analysis/download/${analysisIds}/csv`">
-                Download CSV
-            </BDropdownItem>
-            <BDropdownItem :href="`/analysis/download/${analysisIds}/xlsx`">
-                Download XLSX
-            </BDropdownItem>
-            <BDropdownItem @click="$refs.plot.download()">
-                Download SVG
-            </BDropdownItem>
+            <QSeparator />
+            <QItem clickable v-close-popup :href="`/analysis/download/${analysisIds}/txt`">
+                <QItemSection>Download TXT</QItemSection>
+            </QItem>
+            <QItem clickable v-close-popup :href="`/analysis/download/${analysisIds}/csv`">
+                <QItemSection>Download CSV</QItemSection>
+            </QItem>
+            <QItem clickable v-close-popup :href="`/analysis/download/${analysisIds}/xlsx`">
+                <QItemSection>Download XLSX</QItemSection>
+            </QItem>
+            <QItem clickable v-close-popup @click="$refs.plot.download()">
+                <QItemSection>Download SVG</QItemSection>
+            </QItem>
         </template>
         <BokehPlot v-model:nbPendingAjaxRequests="_nbPendingAjaxRequests"
                    :categories="_categories"
