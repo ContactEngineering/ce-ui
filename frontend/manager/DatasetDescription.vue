@@ -97,10 +97,8 @@ export default {
         <QCardSection class="flex items-center">
             <h5 class="col-grow q-ma-none">Description</h5>
             <QBtnGroup v-if="!_editing && !_saving && isEditable" flat>
-                <QBtn flat size="sm"
-                      @click="_savedName = `${_name}`; _savedDescription = `${_description}`; _editing = true">
-                    <i class="fa fa-pen"></i>
-                </QBtn>
+                <QBtn flat size="sm" icon="edit"
+                      @click="_savedName = `${_name}`; _savedDescription = `${_description}`; _editing = true" />
             </QBtnGroup>
             <QBtnGroup v-if="_editing || _saving" flat>
                 <QBtn v-if="_editing"

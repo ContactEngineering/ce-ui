@@ -110,7 +110,7 @@ function doiUrl(doiName: string): string {
             <div v-for="(dataset, index) in datasets" :key="dataset.id">
                 <a :href="`/ui/dataset-detail/${dataset.id}/`" class="publication-card">
                     <span class="dataset-title">
-                        <i class="fa fa-layer-group"></i> {{ dataset.name }}
+                        <q-icon name="layers" /> {{ dataset.name }}
                     </span>
                     <span>Published by: {{ publications[index].publisher.name }}</span>
                     <span>Publish date: {{ datetimeToDateString(publications[index].datetime) }}</span>

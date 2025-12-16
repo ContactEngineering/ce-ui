@@ -97,7 +97,7 @@ const validSelection = computed(() => {
         <div v-if="validSelection">
             <QBanner class="bg-info text-white q-mb-md">
                 <template v-slot:avatar>
-                    <i class="fa fa-info-circle"></i>
+                    <q-icon name="info" />
                 </template>
                 <h4>You are about to create a publication collection</h4>
                 <p>
@@ -130,7 +130,7 @@ const validSelection = computed(() => {
                 <div v-for="(dataset, index) in datasets" :key="dataset.id">
                     <a :href="`/ui/dataset-detail/${dataset.id}/`" class="publication-card">
                         <span class="dataset-title">
-                            <i class="fa fa-layer-group"></i> {{ dataset.name }}
+                            <q-icon name="layers" /> {{ dataset.name }}
                         </span>
                         <span>Published by: {{ publications[index].publisher.name }}</span>
                         <span>Publish date: {{ datetimeToDateString(publications[index].datetime) }}</span>
@@ -149,7 +149,7 @@ const validSelection = computed(() => {
         </div>
         <QBanner v-else class="bg-negative text-white">
             <template v-slot:avatar>
-                <i class="fa fa-exclamation-triangle"></i>
+                <q-icon name="warning" />
             </template>
             <h4>This will not work!</h4>
             <p>

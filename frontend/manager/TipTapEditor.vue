@@ -56,49 +56,45 @@ onBeforeUnmount(() => {
         size="sm"
         flat
         class="btn-small"
+        icon="format_bold"
         :color="editor.isActive('bold') ? 'primary' : undefined"
         :disable="disabled"
         @click="editor.chain().focus().toggleBold().run()"
         title="Bold"
-      >
-        <i class="fa fa-bold"></i>
-      </QBtn>
+      />
 
       <QBtn
         size="sm"
         flat
         class="btn-small"
+        icon="format_italic"
         :color="editor.isActive('italic') ? 'primary' : undefined"
         :disable="disabled"
         @click="editor.chain().focus().toggleItalic().run()"
         title="Italic"
-      >
-        <i class="fa fa-italic"></i>
-      </QBtn>
+      />
 
       <QBtn
         size="sm"
         flat
         class="btn-small"
+        icon="format_underlined"
         :color="editor.isActive('underline') ? 'primary' : undefined"
         :disable="disabled"
         @click="editor.chain().focus().toggleUnderline().run()"
         title="Underline"
-      >
-        <i class="fa fa-underline"></i>
-      </QBtn>
+      />
 
       <QBtn
         size="sm"
         flat
         class="btn-small"
+        icon="format_list_bulleted"
         :color="editor.isActive('bulletList') ? 'primary' : undefined"
         :disable="disabled"
         @click="editor.chain().focus().toggleBulletList().run()"
         title="Bullet List"
-      >
-        <i class="fa fa-list-ul"></i>
-      </QBtn>
+      />
 
       <QBtn
         size="sm"
@@ -137,12 +133,11 @@ onBeforeUnmount(() => {
         size="sm"
         flat
         class="btn-small"
+        icon="format_clear"
         :disable="disabled"
         @click="editor.chain().focus().clearNodes().unsetAllMarks().run()"
         title="Clear formatting"
-      >
-        <i class="fa fa-eraser"></i>
-      </QBtn>
+      />
     </QBtnGroup>
 
     <!-- Editor -->

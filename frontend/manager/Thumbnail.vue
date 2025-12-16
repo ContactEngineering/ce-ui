@@ -27,8 +27,8 @@ const hasThumbnail = computed(() => {
                  :class="imgClass"
                  :src="dataSource.thumbnail.file"
                  @load="_isLoading = false">
-            <i v-if="!hasThumbnail"
-               :class="`fa fa-microscope fa-2x text-black ${imgClass}`"></i>
+            <q-icon v-if="!hasThumbnail"
+                    name="science" size="2rem" color="black" :class="imgClass" />
         </a>
         <QInnerLoading :showing="hasThumbnail && _isLoading">
             <QSpinner size="1rem" />

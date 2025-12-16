@@ -175,28 +175,24 @@ const attachmentToShowInfo = computed(() => {
                      :key="value.id">
                     <div
                         class="flex items-center q-my-xs border rounded q-px-sm q-py-xs">
-                        <a :href="value.file"><i
-                            class="fa-solid fa-paperclip q-mr-md"></i>{{
-                                value.filename
-                            }}
+                        <a :href="value.file">
+                            <q-icon name="attach_file" class="q-mr-md" />{{ value.filename }}
                         </a>
                         <QBtn size="sm" class="q-ml-auto" title="information"
-                              flat color="info"
-                              @click="infoAttachmentKey = key; infoModal = true;">
-                            <i class="fa-solid fa-circle-info"></i> Info
-                        </QBtn>
+                              flat color="info" icon="info"
+                              @click="infoAttachmentKey = key; infoModal = true;"
+                              label="Info" />
                         <QBtn v-if="isEditable" size="sm" class="q-ml-sm"
-                              title="delete" flat color="negative"
-                              @click="deleteAttachmentKey = key; deleteModal = true;">
-                            <i class="fa-solid fa-trash"></i> Delete
-                        </QBtn>
+                              title="delete" flat color="negative" icon="delete"
+                              @click="deleteAttachmentKey = key; deleteModal = true;"
+                              label="Delete" />
                     </div>
                 </div>
                 <div v-for="indicator in uploadIndicator" :key="indicator.filename">
                     <div
                         class="flex items-center q-my-xs border rounded q-px-sm q-py-xs">
                         <div class="text-grey">
-                            <i class="fa-solid fa-paperclip q-mr-md"></i>
+                            <q-icon name="attach_file" class="q-mr-md" />
                         </div>
                         <QLinearProgress class="col-grow q-ml-sm"
                                          :value="indicator.loaded / 100"

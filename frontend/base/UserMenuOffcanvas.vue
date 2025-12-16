@@ -3,9 +3,7 @@
 import { ref } from "vue";
 
 import {
-    QDrawer,
-    QToolbar,
-    QToolbarTitle,
+    QMenu,
     QBtn,
     QList,
     QItem,
@@ -15,7 +13,7 @@ import {
     QCard,
     QCardSection,
     QCardActions,
-    QSpace
+    ClosePopup
 } from "quasar";
 
 import VersionInformation from "./VersionInformation.vue";
@@ -33,59 +31,85 @@ const props = defineProps({
 const signoutModal = ref(false);
 const contactModal = ref(false);
 
+// Directive for v-close-popup
+const vClosePopup = ClosePopup;
+
 </script>
 
 <template>
-    <QDrawer v-model="visible" side="right" :width="300" bordered overlay>
-        <div class="column full-height">
-            <QToolbar class="bg-primary text-white">
-                <i class="fa fa-user-circle fa-fw q-mr-sm" aria-hidden="true"></i>
-                <QToolbarTitle>{{ name }}</QToolbarTitle>
-                <QBtn flat round icon="close" @click="visible = false" />
-            </QToolbar>
-
-            <div class="col">
-                <QList v-if="isStaff">
-                    <QItem clickable :href="adminUrl">
-                        <QItemSection>Admin interface</QItemSection>
-                    </QItem>
-                    <QItem clickable href="/watchman/dashboard/">
-                        <QItemSection>Watchman dashboard</QItemSection>
-                    </QItem>
-                    <QItem clickable href="/watchman/">
-                        <QItemSection>Watchman status (JSON)</QItemSection>
-                    </QItem>
-                </QList>
-                <QSeparator v-if="isStaff" />
-                <QList>
-                    <QItem clickable href="/termsandconditions/">
-                        <QItemSection>Terms &amp; conditions</QItemSection>
-                    </QItem>
-                    <QItem clickable href="https://github.com/ContactEngineering/TopoBank/discussions">
-                        <QItemSection>Feedback</QItemSection>
-                    </QItem>
-                    <QItem clickable @click="contactModal = true">
-                        <QItemSection>Contact</QItemSection>
-                    </QItem>
-                    <QItem clickable href="https://doi.org/10.1088/2051-672X/ac860a">
-                        <QItemSection>Read our paper!</QItemSection>
-                    </QItem>
-                </QList>
-            </div>
-
-            <QSeparator />
-            <div class="q-pa-md">
-                <div class="q-mb-sm">
-                    <a :href="`https://orcid.org/${orcid}`" class="flex items-center">
-                        <img src="/static/images/ORCID-iD_icon_vector.svg" alt="ORCID iD icon" class="q-mr-sm" />
+    <QMenu v-model="visible" anchor="bottom right" self="top right" :offset="[0, 8]">
+        <div class="user-menu">
+            <div class="user-menu-header">
+                <q-icon name="account_circle" size="2rem" />
+                <div class="user-info">
+                    <div class="user-name">{{ name }}</div>
+                    <a v-if="orcid" :href="`https://orcid.org/${orcid}`" class="user-orcid">
+                        <img src="/static/images/ORCID-iD_icon_vector.svg" alt="ORCID" height="16" />
                         {{ orcid }}
                     </a>
                 </div>
-                <QBtn color="secondary" label="Sign out" @click="signoutModal = true" class="full-width q-mb-sm" />
-                <VersionInformation />
+            </div>
+
+            <QSeparator />
+
+            <QList v-if="isStaff" dense>
+                <QItem clickable v-close-popup :href="adminUrl">
+                    <QItemSection avatar>
+                        <q-icon name="settings" />
+                    </QItemSection>
+                    <QItemSection>Admin interface</QItemSection>
+                </QItem>
+                <QItem clickable v-close-popup href="/watchman/dashboard/">
+                    <QItemSection avatar>
+                        <q-icon name="visibility" />
+                    </QItemSection>
+                    <QItemSection>Watchman dashboard</QItemSection>
+                </QItem>
+            </QList>
+
+            <QSeparator v-if="isStaff" />
+
+            <QList dense>
+                <QItem clickable v-close-popup href="/termsandconditions/">
+                    <QItemSection avatar>
+                        <q-icon name="description" />
+                    </QItemSection>
+                    <QItemSection>Terms &amp; conditions</QItemSection>
+                </QItem>
+                <QItem clickable v-close-popup href="https://github.com/ContactEngineering/TopoBank/discussions">
+                    <QItemSection avatar>
+                        <q-icon name="forum" />
+                    </QItemSection>
+                    <QItemSection>Feedback</QItemSection>
+                </QItem>
+                <QItem clickable v-close-popup @click="contactModal = true">
+                    <QItemSection avatar>
+                        <q-icon name="mail" />
+                    </QItemSection>
+                    <QItemSection>Contact</QItemSection>
+                </QItem>
+                <QItem clickable v-close-popup href="https://doi.org/10.1088/2051-672X/ac860a">
+                    <QItemSection avatar>
+                        <q-icon name="menu_book" />
+                    </QItemSection>
+                    <QItemSection>Read our paper!</QItemSection>
+                </QItem>
+            </QList>
+
+            <QSeparator />
+
+            <div class="user-menu-footer">
+                <QBtn
+                    color="primary"
+                    label="Sign out"
+                    @click="signoutModal = true"
+                    unelevated
+                    class="full-width"
+                />
+                <VersionInformation class="q-mt-sm" />
             </div>
         </div>
-    </QDrawer>
+    </QMenu>
 
     <!-- Sign out modal-->
     <QDialog v-model="signoutModal">
@@ -135,3 +159,47 @@ const contactModal = ref(false);
         </QCard>
     </QDialog>
 </template>
+
+<style scoped>
+.user-menu {
+    min-width: 280px;
+    background-color: var(--md-sys-color-surface);
+}
+
+.user-menu-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.user-name {
+    font-size: var(--md-sys-typescale-title-medium-size);
+    font-weight: 500;
+}
+
+.user-orcid {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--md-sys-typescale-body-small-size);
+    color: var(--md-sys-color-on-primary-container);
+    text-decoration: none;
+}
+
+.user-orcid:hover {
+    text-decoration: underline;
+}
+
+.user-menu-footer {
+    padding: 16px;
+}
+</style>

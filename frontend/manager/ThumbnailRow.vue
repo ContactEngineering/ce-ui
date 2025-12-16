@@ -60,9 +60,8 @@ async function loadMoreThumbnails() {
         </Thumbnail>
         <QBtn v-if="_nbDataSources > _dataSources.length"
               flat size="sm" class="q-mr-xs"
-              @click="loadMoreThumbnails">
-            <i class="fa fa-ellipsis align-self-center"></i>
-        </QBtn>
+              @click="loadMoreThumbnails"
+              icon="more_horiz" />
         <QInnerLoading :showing="_isLoading">
             <QSpinner size="1rem" />
         </QInnerLoading>

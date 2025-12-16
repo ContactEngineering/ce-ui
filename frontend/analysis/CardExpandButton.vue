@@ -13,7 +13,5 @@ const props = defineProps({
 </script>
 
 <template>
-    <QBtn flat size="sm" :href="`${detailUrl}${functionName}/?subjects=${subjectsToBase64(subjects)}`">
-        <i class="fa fa-expand"></i>
-    </QBtn>
+    <QBtn flat size="sm" icon="fullscreen" :href="`${detailUrl}${functionName}/?subjects=${subjectsToBase64(subjects)}`" />
 </template>

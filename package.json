@@ -15,10 +15,6 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^7.0.0",
-    "@fortawesome/fontawesome-svg-core": "^7.0.0",
-    "@fortawesome/free-regular-svg-icons": "^7.0.0",
-    "@fortawesome/free-solid-svg-icons": "^7.0.0",
     "@hey-api/openapi-ts": "^0.89.0",
     "@quasar/extras": "^1.17.0",
     "@tiptap/pm": "^3.11.1",

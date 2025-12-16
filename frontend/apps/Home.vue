@@ -1,7 +1,8 @@
 <script setup lang="ts">
 
-import {inject, onMounted, ref} from "vue";
-import {managerApiStatisticsRetrieve, analysisApiStatisticsRetrieve} from "@/api";
+import { inject, onMounted, ref } from "vue";
+import { QCard, QCardSection, QBtn, QIcon, QImg } from "quasar";
+import { managerApiStatisticsRetrieve, analysisApiStatisticsRetrieve } from "@/api";
 
 const appProps = inject("appProps");
 
@@ -13,14 +14,12 @@ onMounted(async () => {
         const managerResponse = await managerApiStatisticsRetrieve();
         managerStatistics.value = managerResponse.data;
     } catch (error) {
-        // Statistics may not be available (e.g., user not authenticated)
         console.warn("Failed to load manager statistics:", error);
     }
     try {
         const analysisResponse = await analysisApiStatisticsRetrieve();
         analysisStatistics.value = analysisResponse.data;
     } catch (error) {
-        // Statistics may not be available (e.g., user not authenticated)
         console.warn("Failed to load analysis statistics:", error);
     }
 });
@@ -28,220 +27,245 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="tab-content mt-1">
-        <div class="tab-pane active">
-            <div class="jumbotron">
-                <div class="container">
-                    <h1 class="display-5">Welcome to <b>contact.&#8203;engineering</b>
-                    </h1>
-                    <p class="lead">This is a web-based application that allows you to:
-                        Store and organize surface measurements,
-                        characterize surface topography,
-                        analyze contact properties and
-                        (if you wish) share your data with collaborators or even publish
-                        your datasets.
-                        For more information on this site
-                        <a class="alert-link" target="_blank"
-                           href="https://doi.org/10.1088/2051-672X/ac860a">
-                            please read the accompanying open access paper</a>.
-                    </p>
-                </div>
+    <div class="q-pa-md">
+        <!-- Hero Section -->
+        <div class="text-center q-mb-xl">
+            <div class="text-h3 q-mb-md">
+                Welcome to <span class="text-weight-bold">contact.&#8203;engineering</span>
             </div>
-            <div class="container">
-                <div v-if="appProps.userIsAnonymous"
-                     class="row">
-                    <div class="col-6">
-                        <div class="opacity-container">
-                            <a href="/ui/analysis-detail/topobank_statistics.power_spectral_density/?subjects=eyJzdXJmYWNlIjpbMTg4OV19">
-                                <img class="image"
-                                     src="/static/images/screenshot_psd.jpg"
-                                     width="100%"/>
-                            </a>
-                            <div class="middle">
-                                <a href="/ui/analysis-detail/topobank_statistics.power_spectral_density/?subjects=eyJzdXJmYWNlIjpbMTg4OV19"
-                                   class="btn btn-secondary">
-                                    Combine analyses on multiple measurements into a
-                                    complete
-                                    statistical representation of a surface.
-                                    <em>Click to see an example.</em>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="opacity-container">
-                            <a href="/ui/analysis-detail/topobank_contact.boundary_element_method/?subjects=eyJ0b3BvZ3JhcGh5IjpbMTk1OF19">
-                                <img class="image"
-                                     src="/static/images/screenshot_contact_mechanics.jpg"
-                                     width="100%"/>
-                            </a>
-                            <div class="middle">
-                                <a href="/ui/analysis-detail/topobank_contact.boundary_element_method/?subjects=eyJ0b3BvZ3JhcGh5IjpbMTk1OF19"
-                                   class="btn btn-secondary">
-                                    Carry out contact mechanical calculations with the
-                                    boundary element method.
-                                    <em>Click to see an example.</em>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div v-else class="row">
-                    <div class="col-xl-3 col-sm-6 mb-3">
-                        <a :href="appProps.datasetListUrl"
-                           class="card-link text-decoration-none">
-                            <div class="card text-white bg-primary o-hidden h-100">
-                                <div class="card-body">
-                                    <div class="card-body-icon">
-                                        <i class="fa fa-layer-group"></i>
-                                    </div>
-                                    <div class="me-2">
-                                        You have
-                                        <div class="welcome-page-statistics">
-                                            {{ managerStatistics?.nb_surfaces_of_user }}
-                                        </div>
-                                        digital surface twins.
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-xl-3 col-sm-6 mb-3">
-                        <a :href="appProps.datasetListUrl"
-                           class="card-link text-decoration-none">
-                            <div class="card text-white bg-danger o-hidden h-100">
-                                <div class="card-body">
-                                    <div class="card-body-icon">
-                                        <i class="fa fa-microscope"></i>
-                                    </div>
-                                    <div class="me-2">
-                                        You have
-                                        <div class="welcome-page-statistics">
-                                            {{ managerStatistics?.nb_topographies_of_user }}
-                                        </div>
-                                        individual measurements.
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-xl-3 col-sm-6 mb-3">
-                        <a :href="appProps.datasetListUrl"
-                           class="card-link text-decoration-none">
-                            <div class="card text-white bg-warning o-hidden h-100">
-                                <div class="card-body">
-                                    <div class="card-body-icon">
-                                        <i class="fa fa-chart-area"></i>
-                                    </div>
-                                    <div class="me-2">
-                                        You have
-                                        <div class="welcome-page-statistics">
-                                            {{ analysisStatistics?.nb_analyses_of_user }}
-                                        </div>
-                                        computed analyses.
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-xl-3 col-sm-6 mb-3">
-                        <a :href="appProps.datasetListUrl"
-                           class="card-link text-decoration-none">
-                            <div class="card text-white bg-success o-hidden h-100">
-                                <div class="card-body">
-                                    <div class="card-body-icon">
-                                        <i class="fa fa-fw fa-share-alt"></i>
-                                    </div>
-                                    <div class="me-2">
-                                        You have access to
-                                        <div class="welcome-page-statistics">
-                                            {{
-                                                managerStatistics?.nb_surfaces_shared_with_user
-                                            }}
-                                        </div>
-                                        digital twins of other users.
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
+            <div class="text-subtitle1 text-grey-7 q-mx-auto" style="max-width: 800px;">
+                A web-based application for storing and organizing surface measurements,
+                characterizing surface topography, analyzing contact properties, and
+                sharing or publishing your datasets.
+                <a href="https://doi.org/10.1088/2051-672X/ac860a" target="_blank" class="text-primary">
+                    Read the accompanying open access paper.
+                </a>
             </div>
-            <div class="container">
-                <div v-if="!appProps.userIsAnonymous" class="row">
-                    <div class="col-md-3">
-                        <h4>Digital surface twins</h4>
-                        <p>A <em>digital surface twin</em> represents the real-life
-                            surface you are measuring,
-                            together with its
-                            descriptive metadata. If you make multiple measurements on
-                            the same real-world surface
-                            (even using
-                            different techniques), you can collect all the <em>measurements</em>
-                            together in a
-                            single <em>digital
-                                surface twin</em>.
-                        </p>
-                    </div>
-                    <div class="col-md-3">
-                        <h4>Measurements</h4>
-                        <p>For each <em>digital surface twin</em>, you must upload one
-                            or more <em>measurements</em>.
-                            These represent each
-                            individual measurement you performed. You can save metadata
-                            for each one, and perform
-                            basic pre-analysis.
-                        </p>
-                    </div>
-                    <div class="col-md-3">
-                        <h4>Analysis workflows</h4>
-                        <p>A number of <em>analysis workflows</em>, such as computing
-                            the power-spectral density or
-                            the real area
-                            of contact, are performed on-demand on all uploaded <em>measurements</em>.
-                            Multiple analyses can be averaged to create, for example,
-                            the joint power-spectral
-                            density of a <em>digital surface twin</em>.
-                        </p>
-                    </div>
-                    <div class="col-md-3">
-                        <h4>Sharing & publishing</h4>
-                        <p><em>Digital surface twins</em> can be <em>shared</em> with
-                            others for collaboration. You
-                            decide whether
-                            your collaborators can modify them or not.</p>
-                        <p>Digital surface twins can also be <em>published</em> to make
-                            them citable and accessible
-                            for everyone.</p>
-                    </div>
-                </div>
-                <div v-else class="row">
-                    <div class="col-md-6">
-                        <h2>Browse published digital surface twins</h2>
-                        <p>A <em>digital surface twin</em> combines multiple
-                            measurements of a real-life surface,
-                            together with descriptive metadata.
-                            <a id="orcid-log-in-link" class="btn btn-secondary"
-                               :href="appProps.datasetListUrl">
-                                Browse public library of digital surface twins
-                            </a>
-                        </p>
-                    </div>
-                    <div class="col-md-6">
-                        <h2>Sign in to upload measurements</h2>
-                        <p>
-                            Please allow the ORCID site to authenticate yourself to
-                            contact.engineering.
-                            If you don't have an ORCID account yet, you will be able to
-                            register.
-                        </p>
-                        <a id="orcid-log-in-link" class="btn btn-secondary"
-                           :href="appProps.loginUrl">
-                            Sign in using your ORCID account
-                        </a>
-                    </div>
-                </div>
+        </div>
+
+        <!-- Anonymous User: Feature Showcase -->
+        <div v-if="appProps.userIsAnonymous" class="row q-col-gutter-lg q-mb-xl">
+            <div class="col-12 col-md-6">
+                <QCard>
+                    <QImg src="/static/images/screenshot_psd.jpg" :ratio="16/9" />
+                    <QCardSection>
+                        <div class="text-subtitle1 text-weight-medium">Statistical Analysis</div>
+                        <div class="text-body2 text-grey-7">
+                            Combine analyses on multiple measurements into a complete
+                            statistical representation of a surface.
+                        </div>
+                    </QCardSection>
+                    <QCardSection class="q-pt-none">
+                        <QBtn
+                            flat
+                            color="primary"
+                            label="See example"
+                            href="/ui/analysis-detail/topobank_statistics.power_spectral_density/?subjects=eyJzdXJmYWNlIjpbMTg4OV19"
+                        />
+                    </QCardSection>
+                </QCard>
+            </div>
+            <div class="col-12 col-md-6">
+                <QCard>
+                    <QImg src="/static/images/screenshot_contact_mechanics.jpg" :ratio="16/9" />
+                    <QCardSection>
+                        <div class="text-subtitle1 text-weight-medium">Contact Mechanics</div>
+                        <div class="text-body2 text-grey-7">
+                            Carry out contact mechanical calculations with the
+                            boundary element method.
+                        </div>
+                    </QCardSection>
+                    <QCardSection class="q-pt-none">
+                        <QBtn
+                            flat
+                            color="primary"
+                            label="See example"
+                            href="/ui/analysis-detail/topobank_contact.boundary_element_method/?subjects=eyJ0b3BvZ3JhcGh5IjpbMTk1OF19"
+                        />
+                    </QCardSection>
+                </QCard>
+            </div>
+        </div>
+
+        <!-- Authenticated User: Statistics Cards -->
+        <div v-else class="row q-col-gutter-md q-mb-xl">
+            <div class="col-12 col-sm-6 col-lg-3">
+                <a :href="appProps.datasetListUrl" class="text-decoration-none">
+                    <QCard flat bordered class="full-height">
+                        <QCardSection class="row items-center no-wrap">
+                            <QIcon name="layers" size="48px" color="primary" class="q-mr-md" />
+                            <div>
+                                <div class="text-h4 text-primary">{{ managerStatistics?.nb_surfaces_of_user ?? '-' }}</div>
+                                <div class="text-body2 text-grey-7">Digital surface twins</div>
+                            </div>
+                        </QCardSection>
+                    </QCard>
+                </a>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+                <a :href="appProps.datasetListUrl" class="text-decoration-none">
+                    <QCard flat bordered class="full-height">
+                        <QCardSection class="row items-center no-wrap">
+                            <QIcon name="science" size="48px" color="red" class="q-mr-md" />
+                            <div>
+                                <div class="text-h4 text-red">{{ managerStatistics?.nb_topographies_of_user ?? '-' }}</div>
+                                <div class="text-body2 text-grey-7">Individual measurements</div>
+                            </div>
+                        </QCardSection>
+                    </QCard>
+                </a>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+                <a :href="appProps.datasetListUrl" class="text-decoration-none">
+                    <QCard flat bordered class="full-height">
+                        <QCardSection class="row items-center no-wrap">
+                            <QIcon name="area_chart" size="48px" color="orange" class="q-mr-md" />
+                            <div>
+                                <div class="text-h4 text-orange">{{ analysisStatistics?.nb_analyses_of_user ?? '-' }}</div>
+                                <div class="text-body2 text-grey-7">Computed analyses</div>
+                            </div>
+                        </QCardSection>
+                    </QCard>
+                </a>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+                <a :href="appProps.datasetListUrl" class="text-decoration-none">
+                    <QCard flat bordered class="full-height">
+                        <QCardSection class="row items-center no-wrap">
+                            <QIcon name="share" size="48px" color="green" class="q-mr-md" />
+                            <div>
+                                <div class="text-h4 text-green">{{ managerStatistics?.nb_surfaces_shared_with_user ?? '-' }}</div>
+                                <div class="text-body2 text-grey-7">Shared with you</div>
+                            </div>
+                        </QCardSection>
+                    </QCard>
+                </a>
+            </div>
+        </div>
+
+        <!-- Authenticated User: Feature Explanation -->
+        <div v-if="!appProps.userIsAnonymous" class="row q-col-gutter-md">
+            <div class="col-12 col-md-6 col-lg-3">
+                <QCard flat bordered class="full-height">
+                    <QCardSection>
+                        <div class="row items-center q-mb-sm">
+                            <QIcon name="layers" color="primary" size="24px" class="q-mr-sm" />
+                            <div class="text-h6">Digital Surface Twins</div>
+                        </div>
+                        <div class="text-body2 text-grey-7">
+                            A digital surface twin represents the real-life surface you are measuring,
+                            together with its descriptive metadata. If you make multiple measurements on
+                            the same real-world surface (even using different techniques), you can collect
+                            all the measurements together in a single digital surface twin.
+                        </div>
+                    </QCardSection>
+                </QCard>
+            </div>
+            <div class="col-12 col-md-6 col-lg-3">
+                <QCard flat bordered class="full-height">
+                    <QCardSection>
+                        <div class="row items-center q-mb-sm">
+                            <QIcon name="science" color="red" size="24px" class="q-mr-sm" />
+                            <div class="text-h6">Measurements</div>
+                        </div>
+                        <div class="text-body2 text-grey-7">
+                            For each digital surface twin, you must upload one or more measurements.
+                            These represent each individual measurement you performed. You can save
+                            metadata for each one, and perform basic pre-analysis.
+                        </div>
+                    </QCardSection>
+                </QCard>
+            </div>
+            <div class="col-12 col-md-6 col-lg-3">
+                <QCard flat bordered class="full-height">
+                    <QCardSection>
+                        <div class="row items-center q-mb-sm">
+                            <QIcon name="area_chart" color="orange" size="24px" class="q-mr-sm" />
+                            <div class="text-h6">Analysis Workflows</div>
+                        </div>
+                        <div class="text-body2 text-grey-7">
+                            A number of analysis workflows, such as computing the power-spectral density
+                            or the real area of contact, are performed on-demand on all uploaded measurements.
+                            Multiple analyses can be averaged to create the joint power-spectral density
+                            of a digital surface twin.
+                        </div>
+                    </QCardSection>
+                </QCard>
+            </div>
+            <div class="col-12 col-md-6 col-lg-3">
+                <QCard flat bordered class="full-height">
+                    <QCardSection>
+                        <div class="row items-center q-mb-sm">
+                            <QIcon name="share" color="green" size="24px" class="q-mr-sm" />
+                            <div class="text-h6">Sharing & Publishing</div>
+                        </div>
+                        <div class="text-body2 text-grey-7">
+                            Digital surface twins can be shared with others for collaboration. You
+                            decide whether your collaborators can modify them or not. They can also
+                            be published to make them citable and accessible for everyone.
+                        </div>
+                    </QCardSection>
+                </QCard>
+            </div>
+        </div>
+
+        <!-- Anonymous User: Call to Action -->
+        <div v-else class="row q-col-gutter-lg">
+            <div class="col-12 col-md-6">
+                <QCard flat bordered class="full-height">
+                    <QCardSection>
+                        <div class="row items-center q-mb-md">
+                            <QIcon name="public" color="primary" size="32px" class="q-mr-sm" />
+                            <div class="text-h5">Browse Published Data</div>
+                        </div>
+                        <div class="text-body1 text-grey-7 q-mb-md">
+                            A digital surface twin combines multiple measurements of a real-life surface,
+                            together with descriptive metadata. Explore our public library of published datasets.
+                        </div>
+                    </QCardSection>
+                    <QCardSection class="q-pt-none">
+                        <QBtn
+                            unelevated
+                            color="primary"
+                            icon="search"
+                            label="Browse public library"
+                            :href="appProps.datasetListUrl"
+                        />
+                    </QCardSection>
+                </QCard>
+            </div>
+            <div class="col-12 col-md-6">
+                <QCard flat bordered class="full-height">
+                    <QCardSection>
+                        <div class="row items-center q-mb-md">
+                            <QIcon name="login" color="primary" size="32px" class="q-mr-sm" />
+                            <div class="text-h5">Sign In to Upload</div>
+                        </div>
+                        <div class="text-body1 text-grey-7 q-mb-md">
+                            Sign in with your ORCID account to upload measurements and create your own
+                            digital surface twins. If you don't have an ORCID account yet, you can register.
+                        </div>
+                    </QCardSection>
+                    <QCardSection class="q-pt-none">
+                        <QBtn
+                            unelevated
+                            color="primary"
+                            icon="login"
+                            label="Sign in with ORCID"
+                            :href="appProps.loginUrl"
+                        />
+                    </QCardSection>
+                </QCard>
             </div>
         </div>
     </div>
 </template>
+
+<style scoped>
+.full-height {
+    height: 100%;
+}
+.text-decoration-none {
+    text-decoration: none;
+}
+</style>

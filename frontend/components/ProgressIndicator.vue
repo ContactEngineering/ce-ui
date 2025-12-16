@@ -11,12 +11,8 @@ const props = defineProps({
 </script>
 
 <template>
-    <QBtn v-if="state === 'su'" color="positive" disable flat>
-        <i class="fa fa-check text-white"></i>
-    </QBtn>
-    <QBtn v-if="state === 'fa'" color="negative" disable flat>
-        <i class="fa fa-circle text-white"></i>
-    </QBtn>
+    <QBtn v-if="state === 'su'" color="positive" disable flat icon="check" />
+    <QBtn v-if="state === 'fa'" color="negative" disable flat icon="circle" />
     <QBtn v-if="state === 'pe'" color="grey-3" disable flat>
         <QSpinner size="sm" />
     </QBtn>

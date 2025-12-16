@@ -171,9 +171,7 @@ propertyCount.value = Object.keys(properties.value).length // Update the propert
     <QCard>
         <QCardSection class="flex items-center">
             <h5 class="col-grow q-ma-none">Properties</h5>
-            <QBtn size="sm" v-if="!_isEditing && isEditable" @click="enterEditMode" flat>
-                <i class="fa fa-pen"></i>
-            </QBtn>
+            <QBtn size="sm" v-if="!_isEditing && isEditable" @click="enterEditMode" flat icon="edit" />
             <QBtnGroup v-else-if="isEditable" flat>
                 <QBtn v-if="_isEditing && !_isSaving" @click="discardChanges" color="negative" size="sm">
                     Discard
@@ -207,10 +205,8 @@ propertyCount.value = Object.keys(properties.value).length // Update the propert
                     <tr v-for="(property, index) in _properties" :key="index">
                         <td>
                             <QBtn v-if="_isEditing" @click="deleteProperty(index)" size="sm" color="negative"
-                                title="remove property" dense>
-                                <i class="fa fa-minus"></i>
-                            </QBtn>
-                            <i v-else class="fa fa-bars"></i>
+                                title="remove property" dense icon="remove" />
+                            <q-icon v-else name="menu" />
                         </td>
                         <td>
                             <QInput v-if="_isEditing" placeholder="Property name" v-model="property.name"
@@ -247,7 +243,7 @@ propertyCount.value = Object.keys(properties.value).length // Update the propert
             </QMarkupTable>
             <div v-if="isEditable" @click="addProperty" class="flex highlight-on-hover rounded-borders">
                 <div class="q-pa-sm">
-                    <i class="fa fa-plus"></i>
+                    <q-icon name="add" />
                 </div>
                 <div class="q-pa-sm" style="width: 25%;">
                     Add property

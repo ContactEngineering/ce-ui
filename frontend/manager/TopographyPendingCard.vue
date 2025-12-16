@@ -41,14 +41,10 @@ export default {
     <div class="pending-card q-mb-xs border rounded-borders">
         <div class="pending-card-header q-pa-sm flex items-center">
             <QBtnGroup flat class="float-right">
-                <QBtn flat dense size="sm"
-                      @click="forceInspect">
-                    <i class="fa fa-refresh"></i>
-                </QBtn>
-                <QBtn flat dense size="sm"
-                      @click="deleteTopography">
-                    <i class="fa fa-trash"></i>
-                </QBtn>
+                <QBtn flat dense size="sm" icon="refresh"
+                      @click="forceInspect" />
+                <QBtn flat dense size="sm" icon="delete"
+                      @click="deleteTopography" />
             </QBtnGroup>
             <div class="col-grow">
                 <h5 class="q-ma-none">{{ name }}</h5>

@@ -20,8 +20,7 @@ const offcanvasVisible = ref(false);
 </script>
 
 <template>
-    <QBtn flat @click="offcanvasVisible = true" class="text-white">
-        <i class="fa fa-user-circle fa-fw" aria-hidden="true"></i>
+    <QBtn flat @click="offcanvasVisible = true" icon="account_circle">
         <span v-if="!isAnonymous" class="q-ml-xs">{{ name }}</span>
     </QBtn>
     <UserMenuOffcanvas

@@ -81,10 +81,8 @@ async function deleteTopography() {
         <QCardSection class="flex items-center">
             <h5 class="col-grow q-ma-none">{{ topography.name }}</h5>
             <QBtnGroup v-if="_error != null" flat>
-                <QBtn flat text-color="white"
-                      @click="deleteTopography">
-                    <i class="fa fa-trash"></i>
-                </QBtn>
+                <QBtn flat text-color="white" icon="delete"
+                      @click="deleteTopography" />
             </QBtnGroup>
         </QCardSection>
         <QCardSection v-if="_error != null">

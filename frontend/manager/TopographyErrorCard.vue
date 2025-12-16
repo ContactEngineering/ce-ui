@@ -70,13 +70,9 @@ export default {
         <div class="error-card-header q-pa-sm flex items-center">
             <QBtnGroup flat class="float-right">
                 <QBtn flat dense size="sm" text-color="white"
-                      @click="forceInspect">
-                    <i class="fa fa-refresh"></i>
-                </QBtn>
+                      @click="forceInspect" icon="refresh" />
                 <QBtn flat dense size="sm" text-color="white"
-                      @click="deleteTopography">
-                    <i class="fa fa-trash"></i>
-                </QBtn>
+                      @click="deleteTopography" icon="delete" />
             </QBtnGroup>
             <div v-if="topography !== null && topography.data_source !== null && topography.channel_names.length > 0"
                  class="q-mr-sm">

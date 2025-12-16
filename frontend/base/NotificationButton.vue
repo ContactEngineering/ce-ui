@@ -15,8 +15,7 @@ const unreadCount = ref(0);
 </script>
 
 <template>
-    <QBtn flat round @click="offcanvasVisible = true" class="text-white">
-        <i class="fa fa-bell fa-fw" aria-hidden="true"></i>
+    <QBtn flat round @click="offcanvasVisible = true" icon="notifications">
         <QBadge v-if="unreadCount > 0" color="negative" floating>
             {{ unreadCount }}
         </QBadge>

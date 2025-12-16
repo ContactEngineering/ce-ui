@@ -8,7 +8,6 @@ import { usersV1UserRetrieve, goPublicationRetrieve } from "@/api";
 import {
     QBadge,
     QBtn,
-    QBtnGroup,
     QCheckbox,
     QItem
 } from "quasar";
@@ -78,12 +77,12 @@ const isSelected = computed({
 </script>
 
 <template>
-    <QItem class="dataset-list-row">
-        <div class="flex">
-            <div>
+    <QItem class="dataset-list-row full-width">
+        <div class="row no-wrap full-width">
+            <div class="q-mr-sm">
                 <QCheckbox v-model="isSelected" />
             </div>
-            <div class="col-grow q-ml-sm q-mr-sm">
+            <div class="col">
                 <img v-if="_publication != null"
                      class="float-right q-ml-sm q-mr-sm"
                      :src="`/static/images/cc/${_publication.license}.svg`"
@@ -115,7 +114,7 @@ const isSelected = computed({
                     {{ tag }}
                 </QBadge>
                 <p class="dataset-title">
-                    <i class="fa fa-layer-group"></i> {{ dataset.name }}
+                    <q-icon name="layers" /> {{ dataset.name }}
                 </p>
                 <p v-if="_publication != null" class="dataset-authors">
                     This digital surface twin was published by {{ publicationAuthorsPretty }} on {{ publicationDatePretty }}
@@ -151,21 +150,16 @@ const isSelected = computed({
                     measurements.
                 </p>
             </div>
-            <div>
-                <QBtnGroup vertical flat>
-                    <QBtn flat size="sm"
-                          :href="`/ui/dataset-detail/${ dataset.id }/`">
-                        View
-                    </QBtn>
-                    <QBtn flat size="sm"
-                          :href="`/ui/analysis-list/?subjects=${subjectsToBase64({surface: [dataset.id]})}`">
-                        Analyze
-                    </QBtn>
-                    <QBtn flat size="sm"
-                          :href="dataset.api.download">
-                        Download
-                    </QBtn>
-                </QBtnGroup>
+            <div class="column justify-center q-ml-sm">
+                <QBtn flat dense icon="visibility"
+                      :href="`/ui/dataset-detail/${ dataset.id }/`"
+                      label="View" />
+                <QBtn flat dense icon="analytics"
+                      :href="`/ui/analysis-list/?subjects=${subjectsToBase64({surface: [dataset.id]})}`"
+                      label="Analyze" />
+                <QBtn flat dense icon="download"
+                      :href="dataset.api.download"
+                      label="Download" />
             </div>
         </div>
     </QItem>

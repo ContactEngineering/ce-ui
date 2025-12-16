@@ -4,9 +4,12 @@ import { computed, onMounted, ref } from "vue";
 
 import {
     QBtn,
+    QBtnDropdown,
     QInput,
-    QSelect,
     QList,
+    QItem,
+    QItemSection,
+    QItemLabel,
     QDialog,
     QCard,
     QCardSection,
@@ -170,14 +173,6 @@ async function createSurface() {
     window.location.href = `/ui/dataset-detail/${response.data.id}/`;
 }
 
-function select(dataset) {
-    selection.select(dataset);
-}
-
-function unselect(dataset) {
-    selection.unselect(dataset.id);
-}
-
 function sharingStatusChanged() {
     getDatasets();
 }
@@ -185,81 +180,110 @@ function sharingStatusChanged() {
 </script>
 
 <template>
-    <div class="row q-mb-md">
-        <div class="col-8">
+    <div class="row items-center q-col-gutter-sm q-mb-md">
+        <div class="col">
             <QInput v-model="searchTerm"
-                    placeholder="Type to start searching..."
+                    placeholder="Search digital surface twins..."
                     type="search"
                     outlined
-                    dense
-                    hint="Search for digital surface twins by name or tags">
+                    dense>
+                <template v-slot:prepend>
+                    <q-icon name="search" />
+                </template>
                 <template v-slot:append>
-                    <QBtn flat round icon="info" @click="_searchInfoModalVisible = true" />
+                    <QBtn flat round dense icon="info" size="sm" @click="_searchInfoModalVisible = true" />
                 </template>
             </QInput>
         </div>
-        <div class="col-4">
-            <QSelect v-model="_sharingStatus"
-                     :options="sharingStatusFilterChoices"
-                     :disable="_isLoading"
-                     emit-value
-                     map-options
-                     outlined
-                     dense
-                     hint="Filter results by sharing status"
-                     @update:model-value="sharingStatusChanged" />
+        <div>
+            <QBtnDropdown flat dense
+                          :disable="_isLoading"
+                          :label="sharingStatusFilterChoices.find(o => o.value === _sharingStatus)?.label"
+                          icon="filter_list">
+                <QList>
+                    <QItem v-for="option in sharingStatusFilterChoices"
+                           :key="option.value"
+                           clickable
+                           v-close-popup
+                           :active="_sharingStatus === option.value"
+                           @click="_sharingStatus = option.value; sharingStatusChanged()">
+                        <QItemSection>
+                            <QItemLabel>{{ option.label }}</QItemLabel>
+                        </QItemSection>
+                    </QItem>
+                </QList>
+            </QBtnDropdown>
+        </div>
+        <div>
+            <QBtn v-if="isAnonymous"
+                  disable
+                  color="primary"
+                  icon="add"
+                  label="New"
+                  title="Please sign-in to create a digital surface twin" />
+            <QBtn v-else
+                  color="primary"
+                  :disable="_isLoading"
+                  icon="add"
+                  label="New"
+                  @click="createSurface" />
         </div>
     </div>
     <div class="relative-position">
         <QInnerLoading :showing="_isLoading" />
-        <div class="flex items-center q-gutter-sm q-mb-md flex-wrap">
+        <div class="row items-center q-gutter-sm q-mb-md">
             <QPagination v-model="currentPage"
                          :max="Math.ceil(_nbDatasets / _pageSize) || 1"
                          :disable="_isLoading"
                          :max-pages="9"
                          boundary-links
                          direction-links />
-            <div class="flex items-center q-gutter-xs">
-                <span class="text-caption">Page size:</span>
-                <QSelect v-model="pageSize"
-                         :options="pageSizeOptions"
-                         :disable="_isLoading"
-                         emit-value
-                         map-options
-                         outlined
-                         dense
-                         style="min-width: 80px" />
-            </div>
-            <div class="flex items-center q-gutter-xs">
-                <span class="text-caption">Sort by:</span>
-                <QSelect v-model="orderBy"
-                         :options="orderByFilterChoices"
-                         :disable="_isLoading"
-                         emit-value
-                         map-options
-                         outlined
-                         dense
-                         style="min-width: 100px" />
-            </div>
+            <QBtnDropdown flat dense
+                          :disable="_isLoading"
+                          :label="`${_pageSize} per page`"
+                          icon="format_list_numbered">
+                <QList>
+                    <QItem v-for="option in pageSizeOptions"
+                           :key="option.value"
+                           clickable
+                           v-close-popup
+                           :active="pageSize === option.value"
+                           @click="pageSize = option.value">
+                        <QItemSection>
+                            <QItemLabel>{{ option.label }} per page</QItemLabel>
+                        </QItemSection>
+                    </QItem>
+                </QList>
+            </QBtnDropdown>
+            <QBtnDropdown flat dense
+                          :disable="_isLoading"
+                          :label="`Sort: ${orderByFilterChoices.find(o => o.value === _orderBy)?.label}`"
+                          icon="sort">
+                <QList>
+                    <QItem v-for="option in orderByFilterChoices"
+                           :key="option.value"
+                           clickable
+                           v-close-popup
+                           :active="orderBy === option.value"
+                           @click="orderBy = option.value">
+                        <QItemSection>
+                            <QItemLabel>{{ option.label }}</QItemLabel>
+                        </QItemSection>
+                    </QItem>
+                </QList>
+            </QBtnDropdown>
+            <div class="col-grow" />
             <QBtn v-if="selection.nbSelected === 0"
                   flat
                   disable
-                  label="No selected datasets" />
+                  icon="check_box_outline_blank"
+                  label="No selected" />
             <QBtn v-if="selection.nbSelected > 0"
                   color="warning"
                   :disable="_isLoading"
-                  :label="`${selection.nbSelected} datasets selected`"
+                  icon="check_box"
+                  :label="`${selection.nbSelected} selected`"
                   @click="_selectionOffcanvasVisible = true" />
-            <QBtn v-if="isAnonymous"
-                  disable
-                  color="primary"
-                  label="Create new digital surface twin"
-                  title="Please sign-in to use this feature" />
-            <QBtn v-if="!isAnonymous"
-                  color="primary"
-                  :disable="_isLoading"
-                  label="Create new digital surface twin"
-                  @click="createSurface" />
         </div>
         <QList bordered separator>
             <DatasetListRow v-for="dataset in _datasets"

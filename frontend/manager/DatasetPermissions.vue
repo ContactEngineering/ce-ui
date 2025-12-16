@@ -72,10 +72,8 @@ function addUser(user) {
             <QBtnGroup
                 v-if="!isEditing && !isSaving && selfPermissions.current_user.permission === 'full'"
                 flat>
-                <QBtn flat size="sm"
-                      @click="savedPermissions = JSON.parse(JSON.stringify(selfPermissions)); isEditing = true">
-                    <i class="fa fa-pen"></i>
-                </QBtn>
+                <QBtn flat size="sm" icon="edit"
+                      @click="savedPermissions = JSON.parse(JSON.stringify(selfPermissions)); isEditing = true" />
             </QBtnGroup>
             <QBtnGroup v-if="isEditing || isSaving" flat class="q-mr-sm">
                 <QBtn v-if="isEditing"

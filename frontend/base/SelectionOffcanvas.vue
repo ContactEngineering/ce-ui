@@ -1,15 +1,14 @@
 <script setup lang="ts">
 
 import {
-    QDrawer,
-    QToolbar,
-    QToolbarTitle,
+    QMenu,
     QBtn,
     QList,
     QItem,
     QItemSection,
     QItemLabel,
-    QBanner
+    QSeparator,
+    ClosePopup
 } from "quasar";
 
 import { useNotify } from "@/utils/notify";
@@ -22,6 +21,9 @@ const { show } = useNotify();
 const selection = useDatasetSelectionStore();
 
 const visible = defineModel("visible", { type: Boolean, required: true });
+
+// Directive for v-close-popup
+const vClosePopup = ClosePopup;
 
 const props = defineProps({
     analysisListUrl: {
@@ -71,22 +73,29 @@ const selectionIsPublished = computed(() => {
 </script>
 
 <template>
-    <QDrawer v-model="visible" side="right" :width="300" bordered overlay>
-        <div class="column full-height">
-            <QToolbar class="bg-primary text-white">
-                <i class="fa fa-check-square fa-fw q-mr-sm" aria-hidden="true"></i>
-                <QToolbarTitle>Selected datasets</QToolbarTitle>
-                <QBtn flat round icon="close" @click="visible = false" />
-            </QToolbar>
+    <QMenu v-model="visible" anchor="bottom right" self="top right" :offset="[0, 8]">
+        <div class="selection-menu">
+            <div class="selection-header">
+                <q-icon name="check_box" />
+                <span class="selection-title">Selected datasets</span>
+                <span v-if="selection.nbSelected > 0" class="selection-badge">
+                    {{ selection.nbSelected }}
+                </span>
+            </div>
 
-            <div class="col q-pa-md">
-                <QBanner v-if="selection.nbSelected === 0" class="bg-grey-2 q-mb-md">
-                    You have not selected any datasets.
-                </QBanner>
-                <QList bordered separator v-if="datasets.length > 0">
-                    <QItem v-for="dataset in datasets" :key="dataset.id">
+            <QSeparator />
+
+            <div class="selection-content">
+                <div v-if="selection.nbSelected === 0" class="selection-empty">
+                    <q-icon name="layers" size="2rem" />
+                    <span>No selection</span>
+                    <span class="text-caption">Select datasets from the list to analyze or download them.</span>
+                </div>
+
+                <QList v-if="datasets.length > 0" dense>
+                    <QItem v-for="dataset in datasets" :key="dataset.id" class="selection-item">
                         <QItemSection avatar>
-                            <i class="fa fa-layer-group"></i>
+                            <q-icon name="layers" />
                         </QItemSection>
                         <QItemSection>
                             <QItemLabel>{{ dataset.name }}</QItemLabel>
@@ -95,41 +104,114 @@ const selectionIsPublished = computed(() => {
                 </QList>
             </div>
 
-            <div class="q-pa-md column q-gutter-sm">
+            <QSeparator />
+
+            <div class="selection-actions">
                 <QBtn
-                    color="positive"
+                    color="primary"
                     label="Analyze"
                     :href="`${analysisListUrl}?subjects=${selection.selectedAsBase64}`"
                     :disable="selection.nbSelected === 0"
+                    unelevated
+                    class="full-width q-mb-sm"
                 />
                 <QBtn
-                    color="grey-4"
-                    text-color="dark"
+                    outline
+                    color="primary"
                     label="Download"
                     :href="`/manager/api/surface/${selection.selectedAsString}/download/`"
                     :disable="selection.nbSelected === 0"
+                    class="full-width q-mb-sm"
                 />
                 <QBtn
                     v-if="selection.nbSelected > 1 && selectionIsPublished"
-                    color="grey-4"
-                    text-color="dark"
+                    outline
+                    color="primary"
                     label="Create collection"
                     :href="`/ui/dataset-collection-publish/?${datasets.map((surface) => `dataset=${surface.id}`).join('&')}`"
+                    class="full-width q-mb-sm"
                 />
                 <QBtn
-                    v-else
-                    color="grey-4"
-                    text-color="dark"
+                    v-else-if="selection.nbSelected > 0"
+                    outline
+                    color="grey"
                     label="Create collection"
                     @click="showCollectionInfo()"
+                    class="full-width q-mb-sm"
                 />
                 <QBtn
-                    color="secondary"
+                    flat
+                    color="negative"
                     label="Clear selection"
                     @click="selection.clear()"
                     :disable="selection.nbSelected === 0"
+                    class="full-width"
                 />
             </div>
         </div>
-    </QDrawer>
+    </QMenu>
 </template>
+
+<style scoped>
+.selection-menu {
+    min-width: 300px;
+    max-width: 400px;
+    background-color: var(--md-sys-color-surface);
+}
+
+.selection-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background-color: var(--md-sys-color-surface-container);
+}
+
+.selection-title {
+    flex: 1;
+    font-size: var(--md-sys-typescale-title-medium-size);
+    font-weight: 500;
+}
+
+.selection-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 8px;
+    border-radius: var(--md-sys-shape-corner-full);
+    background-color: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    font-size: var(--md-sys-typescale-label-large-size);
+    font-weight: 500;
+}
+
+.selection-content {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.selection-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 32px 16px;
+    color: var(--md-sys-color-on-surface-variant);
+    text-align: center;
+}
+
+.selection-item {
+    border-left: 3px solid var(--md-sys-color-primary);
+}
+
+.selection-actions {
+    padding: 16px;
+}
+
+.text-caption {
+    font-size: var(--md-sys-typescale-body-small-size);
+    color: var(--md-sys-color-on-surface-variant);
+}
+</style>

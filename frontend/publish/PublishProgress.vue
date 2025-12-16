@@ -7,19 +7,19 @@ const props = defineProps({
 const stages = [
   {
     name: "Information",
-    icon: 'fa-info'
+    icon: 'info'
   },
   {
     name: "Authors",
-    icon: 'fa-users-rectangle'
+    icon: 'group'
   },
   {
     name: "License",
-    icon: 'fa-scale-balanced'
+    icon: 'balance'
   },
   {
     name: "Submit",
-    icon: 'fa-paper-plane'
+    icon: 'send'
   }
 ];
 </script>
@@ -27,13 +27,13 @@ const stages = [
 <template>
   <div id="progress" class="flex row justify-center">
     <div v-for="stage in [0, 1, 2, 3]" :key="stage" class="flex row items-center">
-      <div class="position-relative" style="transition-property: color; transition-delay: 1s;"
+      <div class="progress-step" style="transition-property: color; transition-delay: 1s;"
         :style="stage < props.stage ? 'color: oklch(0.627 0.194 149.214);' : (stage == props.stage ? 'color: oklch(0.546 0.245 262.881);' : 'color: oklch(0.872 0.01 258.338);')">
-        <span class="fa-stack fa-lg">
-          <i class="fa-regular fa-circle fa-stack-2x"></i>
-          <i class="fa-solid fa-stack-1x" :class="stages[stage].icon"></i>
-        </span>
-        <span class="position-absolute top-100 start-50 translate-middle text-nowrap pt-3">
+        <div class="progress-icon-wrapper">
+          <q-icon name="circle" size="3rem" class="progress-circle" />
+          <q-icon :name="stages[stage].icon" size="1.25rem" class="progress-inner-icon" />
+        </div>
+        <span class="progress-label">
           {{ stages[stage].name }}
         </span>
       </div>
@@ -47,3 +47,34 @@ const stages = [
     </div>
   </div>
 </template>
+
+<style scoped>
+.progress-step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.progress-icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progress-circle {
+  opacity: 0.3;
+}
+
+.progress-inner-icon {
+  position: absolute;
+}
+
+.progress-label {
+  position: absolute;
+  top: 100%;
+  white-space: nowrap;
+  padding-top: 0.75rem;
+}
+</style>

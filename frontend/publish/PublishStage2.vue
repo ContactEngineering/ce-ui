@@ -184,30 +184,16 @@ const authorsString = computed(() => {
                     <div class="flex row justify-evenly items-end">
                         <QBtnGroup flat>
                             <QBtn v-if="authors.length == 1" disable color="negative"
-                                 title="Delete this author">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </QBtn>
+                                 title="Delete this author" icon="delete" />
                             <QBtn v-else @click="removeAuthor(index)" color="negative"
-                                 title="Delete this author">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </QBtn>
+                                 title="Delete this author" icon="delete" />
                             <QBtn @click="fillAuthor(index)" color="info"
-                                 title="Insert your name and ORCID ID as author">
-                                <i class="fa-solid fa-id-card"></i>
-                            </QBtn>
-                            <QBtn v-if="index == 0" disable flat>
-                                <i class="fa-solid fa-arrow-up"></i>
-                            </QBtn>
-                            <QBtn v-else @click="moveAuthorUp(index)" flat title="Move up">
-                                <i class="fa-solid fa-arrow-up"></i>
-                            </QBtn>
-                            <QBtn v-if="index == authors.length - 1" disable flat>
-                                <i class="fa-solid fa-arrow-down"></i>
-                            </QBtn>
+                                 title="Insert your name and ORCID ID as author" icon="badge" />
+                            <QBtn v-if="index == 0" disable flat icon="arrow_upward" />
+                            <QBtn v-else @click="moveAuthorUp(index)" flat title="Move up" icon="arrow_upward" />
+                            <QBtn v-if="index == authors.length - 1" disable flat icon="arrow_downward" />
                             <QBtn v-else @click="moveAuthorDown(index)" flat
-                                 title="Move down">
-                                <i class="fa-solid fa-arrow-down"></i>
-                            </QBtn>
+                                 title="Move down" icon="arrow_downward" />
                         </QBtnGroup>
                         <div class="flex column">
                             <span>First name*</span>
@@ -250,25 +236,16 @@ const authorsString = computed(() => {
                             <QBtn
                                 @click="removeAffiliation(index, affiliationIndex)"
                                 color="negative"
-                                title="Delete this affiliation">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </QBtn>
-                            <QBtn v-if="affiliationIndex == 0" disable flat>
-                                <i class="fa-solid fa-arrow-up"></i>
-                            </QBtn>
+                                title="Delete this affiliation"
+                                icon="delete" />
+                            <QBtn v-if="affiliationIndex == 0" disable flat icon="arrow_upward" />
                             <QBtn v-else
-                                 @click="moveAffiliationUp(index, affiliationIndex)" flat>
-                                <i class="fa-solid fa-arrow-up"></i>
-                            </QBtn>
+                                 @click="moveAffiliationUp(index, affiliationIndex)" flat icon="arrow_upward" />
                             <QBtn
                                 v-if="affiliationIndex == author.affiliations.length - 1"
-                                disable flat>
-                                <i class="fa-solid fa-arrow-down"></i>
-                            </QBtn>
+                                disable flat icon="arrow_downward" />
                             <QBtn v-else
-                                 @click="moveAffiliationDown(index, affiliationIndex)" flat>
-                                <i class="fa-solid fa-arrow-down"></i>
-                            </QBtn>
+                                 @click="moveAffiliationDown(index, affiliationIndex)" flat icon="arrow_downward" />
                         </QBtnGroup>
                         <div class="flex column q-mr-sm">
                             <span>Affiliation name*</span>
@@ -293,17 +270,11 @@ const authorsString = computed(() => {
                     </div>
 
                     <QBtn @click="addAffiliation(index)" color="positive"
-                         class="q-mt-sm">
-                        <i class="fa-solid fa-plus q-mr-xs"></i>
-                        One more affiliation
-                    </QBtn>
+                         class="q-mt-sm" icon="add" label="One more affiliation" />
                 </QCardSection>
             </QCard>
 
-            <QBtn @click="addAuthor()" color="positive">
-                <i class="fa-solid fa-plus q-mr-xs"></i>
-                One more author
-            </QBtn>
+            <QBtn @click="addAuthor()" color="positive" icon="add" label="One more author" />
         </div>
 
         <div class="flex row justify-between q-mt-md">

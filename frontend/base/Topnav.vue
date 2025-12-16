@@ -1,7 +1,7 @@
 <script setup>
 
 import { inject, onMounted } from "vue";
-import { QToolbar, QToolbarTitle, QBtn, QSpace } from "quasar";
+import { QToolbar, QToolbarTitle, QBtn, QAvatar, QSpace } from "quasar";
 
 import { useNotify } from "@/utils/notify";
 
@@ -48,11 +48,15 @@ onMounted(() => {
 </script>
 
 <template>
-    <QToolbar class="topnav">
-        <a href="/" class="brand-link">
-            <img src="/static/images/ce_logo.svg" height="28px" alt="Logo">
-            <span class="brand-text">contact.engineering</span>
-        </a>
+    <QToolbar>
+        <QBtn flat dense :href="'/'">
+            <QAvatar square size="28px">
+                <img src="/static/images/ce_logo.svg" alt="Logo">
+            </QAvatar>
+        </QBtn>
+        <QToolbarTitle>
+            contact.engineering
+        </QToolbarTitle>
         <QSpace />
         <div v-if="appProps.userIsAnonymous">
             <QBtn
@@ -73,29 +77,3 @@ onMounted(() => {
         />
     </QToolbar>
 </template>
-
-<style scoped>
-.topnav {
-    background-color: var(--md-sys-color-surface);
-    box-shadow: var(--md-sys-elevation-level2);
-    padding: 8px 16px;
-}
-
-.brand-link {
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-    color: var(--md-sys-color-on-surface);
-    gap: 12px;
-}
-
-.brand-link:hover {
-    color: var(--md-sys-color-primary);
-}
-
-.brand-text {
-    font-size: var(--md-sys-typescale-title-medium-size);
-    font-weight: 500;
-    letter-spacing: 0.15px;
-}
-</style>

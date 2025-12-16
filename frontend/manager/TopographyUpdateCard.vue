@@ -348,47 +348,33 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                 v-if="!batchEdit && topography != null && !_editing && !_saving && !saving"
                 flat>
                 <QBtn v-if="!disabled"
-                      flat size="sm"
+                      flat size="sm" icon="edit"
                       :disable="selected"
-                      @click="_savedTopography = cloneDeep(topography); _editing = true">
-                    <i class="fa fa-pen"></i>
-                </QBtn>
+                      @click="_savedTopography = cloneDeep(topography); _editing = true" />
                 <QBtn v-if="!enlarged && !selected"
-                      flat size="sm"
-                      :href="topography.datafile?.file">
-                    <i class="fa fa-download"></i>
-                </QBtn>
+                      flat size="sm" icon="download"
+                      :href="topography.datafile?.file" />
                 <QBtn v-if="!disabled && selected"
-                      flat size="sm"
-                      disable>
-                    <i class="fa fa-download"></i>
-                </QBtn>
+                      flat size="sm" icon="download"
+                      disable />
                 <QBtn v-if="!disabled"
-                      flat size="sm"
+                      flat size="sm" icon="refresh"
                       :disable="selected"
-                      @click="forceInspect">
-                    <i class="fa fa-refresh"></i>
-                </QBtn>
+                      @click="forceInspect" />
                 <QBtn v-if="!disabled && !enlarged"
                       :disable="selected"
-                      flat size="sm"
-                      @click="_showDeleteModal = true">
-                    <i class="fa fa-trash"></i>
-                </QBtn>
+                      flat size="sm" icon="delete"
+                      @click="_showDeleteModal = true" />
             </QBtnGroup>
             <QBtnGroup
                 v-if="!batchEdit && topography != null && !_editing && !_saving && !saving && !enlarged"
                 flat class="q-ml-sm">
                 <QBtn v-if="!selected"
-                      flat size="sm"
-                      :href="`/ui/topography/${topography.id}/`">
-                    <i class="fa fa-expand"></i>
-                </QBtn>
+                      flat size="sm" icon="fullscreen"
+                      :href="`/ui/topography/${topography.id}/`" />
                 <QBtn v-if="selected"
-                      flat size="sm"
-                      disable>
-                    <i class="fa fa-expand"></i>
-                </QBtn>
+                      flat size="sm" icon="fullscreen"
+                      disable />
             </QBtnGroup>
         </QCardSection>
         <QCardSection v-if="topography == null">

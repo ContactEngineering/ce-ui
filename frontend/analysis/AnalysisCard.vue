@@ -73,10 +73,7 @@ const nbSuccess = computed(() => {
 <template>
     <QCard>
         <QCardSection class="bg-grey-2 flex items-center">
-            <QBtnDropdown flat size="sm" class="q-mr-sm">
-                <template #label>
-                    <i class="fa fa-bars"></i>
-                </template>
+            <QBtnDropdown flat size="sm" class="q-mr-sm" icon="menu">
                 <QList>
                     <QItem v-if="dois != null" clickable v-close-popup @click="_bibliographyVisible = true">
                         <QItemSection>Bibliography...</QItemSection>
@@ -97,9 +94,8 @@ const nbSuccess = computed(() => {
                 <QBtn v-if="analyses !== null"
                       flat
                       size="sm"
-                      @click="emit('refreshButtonClicked')">
-                    <i class="fa fa-redo"></i>
-                </QBtn>
+                      icon="replay"
+                      @click="emit('refreshButtonClicked')" />
                 <CardExpandButton v-if="!enlarged"
                                   :detail-url="detailUrl"
                                   :function-name="functionName"
