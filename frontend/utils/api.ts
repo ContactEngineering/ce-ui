@@ -11,6 +11,11 @@ export function getIdFromUrl(url: string): number {
     return Number(s[s.length - 2]);
 }
 
+export function getNameFromUrl(url: string): string {
+    const s = url.split('/');
+    return s[s.length - 2];
+}
+
 
 export function filterTopographyForPatchRequest(topography: any): any {
     // Copy writable entries

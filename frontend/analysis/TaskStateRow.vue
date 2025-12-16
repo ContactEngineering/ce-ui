@@ -12,7 +12,7 @@ import {
     managerApiTopographyRetrieve,
     filesFolderRetrieve
 } from "@/api";
-import {getIdFromUrl} from "@/utils/api";
+import {getIdFromUrl, getNameFromUrl} from "@/utils/api";
 
 import {prettyBytes} from "../utils/formatting";
 
@@ -51,8 +51,8 @@ async function scheduleStateCheck() {
     // Get function information if we don't have it yet
     if (_function.value == null) {
         try {
-            const workflowId = getIdFromUrl(analysis.value.function);
-            const response = await analysisApiWorkflowRetrieve({path: {id: workflowId}});
+            const workflowName = getNameFromUrl(analysis.value.function);
+            const response = await analysisApiWorkflowRetrieve({path: {name: workflowName}});
             _function.value = response.data;
         } catch (error: any) {
             show?.({props: {title: "Request failed", body: error.message, variant: 'danger'}});
