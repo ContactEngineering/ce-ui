@@ -59,7 +59,16 @@ function loadMoreThumbnails() {
 
 .thumbnail-row {
     display: flex;
+    justify-content: flex-start;
+    align-items: center;
     height: 2rem;
+    overflow: hidden;
+}
+
+.thumbnail-row :deep(img) {
+    height: 2rem;
+    width: 2rem;
+    object-fit: cover;
 }
 
 </style>
