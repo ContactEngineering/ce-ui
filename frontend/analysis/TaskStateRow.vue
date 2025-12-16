@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import axios from "axios";
-import {computed, onMounted, ref, watch} from "vue";
+import {computed, onMounted, onBeforeUnmount, ref, watch} from "vue";
 
 import {BButton, useToastController} from "bootstrap-vue-next";
 
@@ -29,6 +29,13 @@ onMounted(() => {
     scheduleStateCheck();
 });
 
+onBeforeUnmount(() => {
+    if (_timeoutID != null) {
+        clearTimeout(_timeoutID);
+        _timeoutID = null;
+    }
+});
+
 function scheduleStateCheck() {
     // Tasks are still pending or running if this state check is scheduled
 
@@ -49,7 +56,7 @@ function scheduleStateCheck() {
             subject.topography : subject.surface != null ?
                 subject.surface : subject.tag;
         if (subjectUrl == null) {
-            console.log('Something is wrong, no subject URL.');
+            show?.({props: {title: "Error", body: "Unable to determine subject for analysis", variant: 'danger'}});
         } else {
             axios.get(subjectUrl)
                 .then(response => {

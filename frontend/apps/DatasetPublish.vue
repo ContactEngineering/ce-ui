@@ -65,7 +65,6 @@ function publish() {
                     variant: "danger"
                 }
             });
-            console.log(error.response);
         }
         pending_request.value = false;
     });

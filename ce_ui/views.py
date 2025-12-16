@@ -14,7 +14,6 @@ from termsandconditions.models import TermsAndConditions
 from termsandconditions.views import (AcceptTermsView, GetTermsViewMixin,
                                       TermsView)
 from topobank.analysis.models import Workflow
-
 from topobank.analysis.registry import get_analysis_function_names
 from topobank.analysis.serializers import WorkflowSerializer
 from topobank.manager.models import Surface, Topography
@@ -23,6 +22,8 @@ from topobank.manager.v1.serializers import (SurfaceSerializer,
                                              TopographySerializer)
 from topobank.usage_stats.utils import increase_statistics_by_date
 from topobank.users.models import User
+from topobank_publication.models import PublicationCollection
+from topobank_publication.serializers import PublicationCollectionSerializer
 from trackstats.models import Metric, Period
 
 from ce_ui import breadcrumb
@@ -84,7 +85,6 @@ class AppDetailView(DetailView):
         context["serialized_object"] = self.get_serializer_class()(
             self.object, context={"request": self.request}
         ).data
-        print(context["serialized_object"])
 
         return context
 
@@ -121,6 +121,58 @@ class DatasetDetailView(AppDetailView):
         return context
 
 
+class DatasetCollectionPublishView(AppView):
+    vue_component = "DatasetCollectionPublish"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        #
+        # Breadcrumb navigation
+        #
+        breadcrumb.add_generic(
+            context,
+            {
+                "title": "Publish collection",
+                "icon": "paper-plane",
+                "icon_style_prefix": "far",
+                "active": True,
+                "login_required": True,
+            },
+        )
+
+        return context
+
+
+class DatasetCollectionView(AppDetailView):
+    model = PublicationCollection
+    vue_component = "DatasetCollection"
+    serializer_class = PublicationCollectionSerializer
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        #
+        # Breadcrumb navigation
+        #
+        breadcrumb.add_generic(
+            context,
+            {
+                "title": "Dataset collection",
+                "icon": "cubes",
+                "icon_style_prefix": "far",
+                "active": True,
+                "login_required": False,
+            },
+        )
+
+        return context
+
+
+class DatasetCollectionListView(AppView):
+    vue_component = "DatasetCollectionList"
+
+
 class DatasetPublishView(AppDetailView):
     model = Surface
     vue_component = "DatasetPublish"
@@ -147,7 +199,7 @@ class DatasetPublishView(AppDetailView):
                 "icon_style_prefix": "far",
                 "href": f"{reverse('ce_ui:dataset-publish', kwargs=dict(pk=self.object.id))}",
                 "active": True,
-                "login_required": False,
+                "login_required": True,
                 "tooltip": f"Publish '{self.object.label}'",
             },
         )

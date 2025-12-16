@@ -35,7 +35,7 @@ jobs:
         python-version: ['3.10']
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
       with:
         fetch-depth: 0
         submodules: recursive
@@ -50,9 +50,11 @@ jobs:
         pip install --upgrade pip pip-tools
         pushd /tmp
         git clone https://github.com/ContactEngineering/topobank.git
+        git clone https://github.com/ContactEngineering/topobank-publication.git
         popd
-        pip-compile --extra dev pyproject.toml /tmp/topobank/pyproject.toml
+        pip-compile --extra dev pyproject.toml /tmp/topobank/pyproject.toml /tmp/topobank-publication/pyproject.toml
         pip install -r requirements.txt
+        pip install /tmp/topobank-publication
         pushd /tmp/topobank
         USE_DOCKER=no python manage.py collectstatic
         popd

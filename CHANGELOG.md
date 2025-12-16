@@ -1,5 +1,12 @@
 # Changelog for plugin *ce-ui*
 
+## 1.32.0 (2025-12-16)
+
+- ENH: Dataset Collection view and publish UI
+- ENH: Integrated TipTap rich text editor for dataset descriptions
+- BUG: Re-enabled Description, Instrument and Filters tabs in topography detail view
+- BUG: Fixed thumbnail alignment and sizing in dataset list on Firefox
+
 ## 1.31.2 (2025-08-19)
 
 - BUG: Avoid error if _error is null

@@ -13,9 +13,10 @@ import {
     BFormInput,
     BFormSelect,
     BFormTags,
-    BFormTextarea,
     BSpinner
 } from "bootstrap-vue-next";
+
+import TipTapEditor from "./TipTapEditor.vue";
 
 export default {
     name: "surface-description",
@@ -30,8 +31,8 @@ export default {
         BFormInput,
         BFormSelect,
         BFormTags,
-        BFormTextarea,
-        BSpinner
+        BSpinner,
+        TipTapEditor
     },
     props: {
         category: String,
@@ -135,12 +136,9 @@ export default {
                             label="Description"
                             label-for="input-description"
                             description="Arbitrary descriptive text, ideally including information on specimen preparation, measurement conditions, etc.">
-                    <BForm-textarea id="input-description"
-                                    v-model="_description"
-                                    placeholder="Please enter a description here"
-                                    rows="10"
-                                    :disabled="!_editing">
-                    </BForm-textarea>
+                    <TipTapEditor id="input-description"
+                                  v-model="_description"
+                                  :disabled="!_editing" />
                 </BFormGroup>
                 <BFormGroup id="input-group-category"
                             label="Category"

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import axios from "axios";
-import {computed, onMounted} from "vue";
+import {computed, onMounted, onBeforeUnmount} from "vue";
 
 import TopographyErrorCard from "./TopographyErrorCard.vue";
 import TopographyPendingCard from "./TopographyPendingCard.vue";
@@ -36,6 +36,10 @@ const props = defineProps({
     topographyUrl: {
         type: String,
         default: null
+    },
+    syncTab: {
+    type: Boolean,
+    default: false
     }
 });
 
@@ -49,6 +53,13 @@ let _currentTimeout = null;
 
 onMounted(() => {
     scheduleStateCheck(props.topography);
+});
+
+onBeforeUnmount(() => {
+    if (_currentTimeout != null) {
+        clearTimeout(_currentTimeout);
+        _currentTimeout = null;
+    }
 });
 
 const isUploading = computed(() => {
@@ -97,6 +108,12 @@ const selectedModel = computed({
     }
 });
 
+const activeTab = defineModel('activeTab', {
+    type: String,
+    default: 'home'
+});
+
+
 </script>
 
 <template>
@@ -127,7 +144,9 @@ const selectedModel = computed({
         :disabled="disabled"
         :enlarged="enlarged"
         :selectable="selectable"
+        :syncTab="syncTab"
         @delete:topography="topographyDeleted"
+        v-model:active-tab="activeTab"
         v-model:topography="topographyModel"
         v-model:selected="selectedModel">
     </TopographyUpdateCard>

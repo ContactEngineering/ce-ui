@@ -175,7 +175,6 @@ function uploadNewTopography(file) {
         surface: _surface.value.url,
         name: file.name
     }).then(response => {
-        console.log(response);
         let upload = response.data;
         upload.file = file;  // need to know which file to upload
         _topographies.value.push(upload);  // this will trigger showing a topography-upload-card
@@ -316,6 +315,10 @@ const measurementCount = computed(() => {
   return _topographies.value.filter(t => t !== null).length;
 });
 
+
+const batchActiveTab = ref('home'); // shared active tab for batch mode
+
+
 </script>
 
 <template>
@@ -341,6 +344,7 @@ const measurementCount = computed(() => {
                         </DropZone>
                         <topography-update-card v-if="anySelected"
                                                 v-model:topography="_batchEditTopography"
+                                                v-model:active-tab="batchActiveTab"
                                                 :batch-edit="true"
                                                 :saving="_saving"
                                                 @save:edit="saveBatchEdit"
@@ -359,9 +363,11 @@ const measurementCount = computed(() => {
                             <TopographyCard v-if="topography != null"
                                             v-model:selected="_selected[index]"
                                             v-model:topography="_topographies[index]"
+                                            v-model:active-tab="batchActiveTab"
                                             :disabled="!isEditable"
                                             :selectable="isEditable"
                                             :topography-url="topography.url"
+                                            :syncTab="anySelected"
                                             @delete:topography="() => deleteTopography(index)">
                             </TopographyCard>
                         </div>

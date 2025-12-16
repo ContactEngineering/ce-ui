@@ -8,20 +8,26 @@ import DatasetDetail from './DatasetDetail.vue';
 import DatasetList from './DatasetList.vue';
 import DatasetPublish from './DatasetPublish.vue';
 import TopographyDetail from './TopographyDetail.vue';
+import DatasetCollectionPublish from './DatasetCollectionPublish.vue';
+import DatasetCollection from './DatasetCollection.vue';
+import DatasetCollectionList from './DatasetCollectionList.vue';
 
 interface ComponentIndex {
     name: string,
     implementation: any
 }
 
-const componentIndex: ComponentIndex = [
-    {name: "AnalysisDetail", implementation: AnalysisResultsDetail},
-    {name: "AnalysisList", implementation: AnalysisResultsList},
-    {name: "DatasetList", implementation: DatasetList},
-    {name: "DatasetDetail", implementation: DatasetDetail},
-    {name: "DatasetPublish", implementation: DatasetPublish},
-    {name: "Home", implementation: Home},
-    {name: "TopographyDetail", implementation: TopographyDetail}
+const componentIndex: ComponentIndex[] = [
+    { name: "AnalysisDetail", implementation: AnalysisResultsDetail },
+    { name: "AnalysisList", implementation: AnalysisResultsList },
+    { name: "DatasetList", implementation: DatasetList },
+    { name: "DatasetDetail", implementation: DatasetDetail },
+    { name: "DatasetPublish", implementation: DatasetPublish },
+    { name: "Home", implementation: Home },
+    { name: "TopographyDetail", implementation: TopographyDetail },
+    { name: "DatasetCollectionPublish", implementation: DatasetCollectionPublish },
+    { name: "DatasetCollection", implementation: DatasetCollection },
+    { name: "DatasetCollectionList", implementation: DatasetCollectionList },
 ];
 
 export function registerAppComponents(app) {

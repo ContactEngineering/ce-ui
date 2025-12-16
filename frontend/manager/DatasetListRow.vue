@@ -95,8 +95,7 @@ const creationDatePretty = computed(() => {
                     <i class="fa fa-layer-group"></i> {{ dataset.name }}
                 </p>
                 <p v-if="_publication != null" class="dataset-authors">
-                    {{ publicationAuthorsPretty }}
-                    (published {{ publicationDatePretty }})
+                    This digital surface twin was published by {{ publicationAuthorsPretty }} on {{ publicationDatePretty }}
                 </p>
                 <ThumbnailRow class="mb-3"
                               :data-source-list-url="dataset.topographies">
