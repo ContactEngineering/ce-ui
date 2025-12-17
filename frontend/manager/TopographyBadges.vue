@@ -1,7 +1,7 @@
 <script setup>
 
 import { computed } from "vue";
-import { QBadge } from "quasar";
+import { QChip, QIcon } from "quasar";
 
 import { formatExponential } from "topobank/utils/formatting";
 
@@ -27,16 +27,37 @@ const resolutionText = computed(() => {
     }
     return `${props.topography.resolution_x} pts`;
 });
+
+const dimensionText = computed(() => {
+    if (props.topography.resolution_y !== null) {
+        return '2D';
+    }
+    return '1D';
+});
 </script>
 
 <template>
     <div v-if="topography !== null" class="row items-center q-gutter-xs">
-        <QBadge color="warning" text-color="dark">{{ topography.datafile_format }}</QBadge>
-        <QBadge color="info">{{ resolutionText }}</QBadge>
-        <QBadge v-if="topography.has_undefined_data" color="negative">undefined data</QBadge>
-        <QBadge v-if="isMetadataIncomplete" color="negative">metadata incomplete</QBadge>
-        <QBadge v-if="topography.short_reliability_cutoff !== null" color="grey-8">
+        <QChip dense size="sm" color="grey-3" text-color="grey-8" icon="insert_drive_file">
+            {{ topography.datafile_format }}
+        </QChip>
+        <QChip dense size="sm" color="grey-3" text-color="grey-8" icon="grid_on">
+            {{ resolutionText }}
+        </QChip>
+        <QChip dense size="sm" color="grey-3" text-color="grey-8" icon="straighten">
+            {{ dimensionText }}
+        </QChip>
+        <QChip v-if="topography.has_undefined_data"
+               dense size="sm" color="orange-2" text-color="orange-9" icon="warning">
+            undefined data
+        </QChip>
+        <QChip v-if="isMetadataIncomplete"
+               dense size="sm" color="orange-2" text-color="orange-9" icon="edit_note">
+            metadata incomplete
+        </QChip>
+        <QChip v-if="topography.short_reliability_cutoff !== null"
+               dense size="sm" color="blue-grey-2" text-color="blue-grey-8" icon="content_cut">
             cutoff {{ shortReliabilityCutoff }}
-        </QBadge>
+        </QChip>
     </div>
 </template>

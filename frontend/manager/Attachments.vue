@@ -1,13 +1,11 @@
 <script setup lang="ts">
 
-import DropZone from '../components/DropZone.vue';
-import {ref, computed, onMounted} from 'vue';
+import { ref, computed, onMounted } from 'vue';
 
-import {filesFolderRetrieve, filesManifestRetrieve, filesManifestDestroy} from "@/api";
-import {getIdFromUrl} from "@/utils/api";
+import { filesFolderRetrieve, filesManifestDestroy } from "@/api";
+import { getIdFromUrl } from "@/utils/api";
 
-import {formatDateTime} from "topobank/utils/formatting";
-import {uploadFile, createFileManifest} from "topobank/utils/upload";
+import { formatDateTime } from "topobank/utils/formatting";
 
 import {
     QBtn,
@@ -16,27 +14,28 @@ import {
     QItem,
     QItemSection,
     QItemLabel,
-    QLinearProgress,
     QList,
     QDialog,
     QCard,
     QCardSection,
     QCardActions,
-    QSeparator
+    ClosePopup
 } from 'quasar';
 
+const vClosePopup = ClosePopup;
+
 import { useNotify } from "@/utils/notify";
+import UploadModal from '../components/UploadModal.vue';
 
 const props = defineProps({
     attachmentsUrl: String,
     permission: String
 });
 
-const attachmentCount = defineModel("attachmentCount",{
+const attachmentCount = defineModel("attachmentCount", {
     type: Number,
     default: 0
 });
-
 
 const { show } = useNotify();
 
@@ -45,10 +44,9 @@ const attachments = ref({});
 const deleteAttachmentKey = ref(null);
 const infoAttachmentKey = ref(null);
 
-const uploadIndicator = ref({});
-
 const deleteModal = ref(false);
 const infoModal = ref(false);
+const uploadModal = ref(false);
 
 onMounted(() => {
     refreshAttachments();
@@ -57,9 +55,9 @@ onMounted(() => {
 async function refreshAttachments() {
     try {
         const folderId = getIdFromUrl(props.attachmentsUrl);
-        const response = await filesFolderRetrieve({path: {id: folderId}});
+        const response = await filesFolderRetrieve({ path: { id: folderId } });
         attachments.value = response.data;
-        attachmentCount.value = Object.keys(attachments.value).length; // Update the attachment count
+        attachmentCount.value = Object.keys(attachments.value).length;
     } catch (error: any) {
         show?.({
             props: {
@@ -71,69 +69,20 @@ async function refreshAttachments() {
     }
 }
 
-function handleFileDrop(files) {
-    for (const file of files) {
-        createFileManifest({
-            folderUrl: props.attachmentsUrl, fileName: file.name
-        }).then(response => {
-            const manifest = response.data;
-            uploadIndicator.value[manifest.id] = {
-                filename: manifest.filename,
-                loaded: 0
-            };
-            uploadFile({
-                uploadInstructions: manifest.upload_instructions,
-                file: file,
-                onUploadProgress: e => uploadIndicator.value[manifest.id].loaded = e.loaded / e.total * 100
-            }).then(async response => {
-                attachments.value[manifest.filename] = manifest;
-                attachmentCount.value = Object.keys(attachments.value).length;
-                uploadIndicator.value = {};
-                // We need to fetch the manifest information again to have a link to
-                // the file
-                try {
-                    const manifestId = getIdFromUrl(manifest.url);
-                    const manifestResponse = await filesManifestRetrieve({path: {id: manifestId}});
-                    attachments.value[manifest.filename] = manifestResponse.data;
-                } catch (error: any) {
-                    show?.({
-                        props: {
-                            title: "Error while fetching attachment",
-                            body: error.message,
-                            variant: 'danger'
-                        }
-                    });
-                    console.error(error);
-                }
-            }).catch(error => {
-                show?.({
-                    props: {
-                        title: "Error while uploading",
-                        body: error.message,
-                        variant: 'danger'
-                    }
-                });
-                console.error(error);
-                delete uploadIndicator.value[fileId];
-            });
-        }).catch((error) => {
-            show?.({
-                props: {
-                    title: "Error while initiating upload",
-                    body: error.message,
-                    variant: 'danger'
-                }
-            });
-            console.error(error);
-        });
+function onAttachmentsUploaded(results: any[]) {
+    // Add uploaded attachments to the list
+    for (const result of results) {
+        const manifest = result.manifest;
+        attachments.value[manifest.filename] = manifest;
     }
+    attachmentCount.value = Object.keys(attachments.value).length;
 }
 
 async function deleteAttachment(key) {
     const attachment = attachments.value[key];
     try {
         const manifestId = getIdFromUrl(attachment.url);
-        await filesManifestDestroy({path: {id: manifestId}});
+        await filesManifestDestroy({ path: { id: manifestId } });
         delete attachments.value[key];
         attachmentCount.value = Object.keys(attachments.value).length;
         deleteAttachmentKey.value = null;
@@ -171,11 +120,15 @@ const attachmentToShowInfo = computed(() => {
 
 <template>
     <div>
-        <DropZone v-if="isEditable" @files-dropped="handleFileDrop" class="q-mb-md">
-            Drop your attachments here or
-        </DropZone>
+        <!-- Upload button -->
+        <div v-if="isEditable" class="q-mb-md">
+            <QBtn color="primary"
+                  icon="attach_file"
+                  label="Add attachment"
+                  @click="uploadModal = true" />
+        </div>
 
-        <QBanner v-if="attachmentCount === 0 && Object.keys(uploadIndicator).length === 0"
+        <QBanner v-if="attachmentCount === 0"
                  class="bg-grey-2 text-grey-8">
             <template #avatar>
                 <QIcon name="info" color="grey-6" />
@@ -183,7 +136,7 @@ const attachmentToShowInfo = computed(() => {
             No attachments yet.
         </QBanner>
 
-        <QList v-if="attachmentCount > 0 || Object.keys(uploadIndicator).length > 0" bordered separator class="rounded-borders">
+        <QList v-if="attachmentCount > 0" bordered separator class="rounded-borders">
             <!-- Existing attachments -->
             <QItem v-for="[key, value] in Object.entries(attachments)" :key="value.id">
                 <QItemSection avatar>
@@ -206,21 +159,14 @@ const attachmentToShowInfo = computed(() => {
                     </div>
                 </QItemSection>
             </QItem>
-
-            <!-- Upload progress indicators -->
-            <QItem v-for="indicator in uploadIndicator" :key="indicator.filename">
-                <QItemSection avatar>
-                    <QIcon name="upload_file" color="grey-5" />
-                </QItemSection>
-                <QItemSection>
-                    <QItemLabel class="text-grey">{{ indicator.filename }}</QItemLabel>
-                    <QLinearProgress :value="indicator.loaded / 100"
-                                     color="primary"
-                                     class="q-mt-xs" />
-                </QItemSection>
-            </QItem>
         </QList>
     </div>
+
+    <!-- Upload Modal -->
+    <UploadModal v-model="uploadModal"
+                 mode="attachment"
+                 :target-url="attachmentsUrl"
+                 @uploaded="onAttachmentsUploaded" />
 
     <!-- Delete confirmation dialog -->
     <QDialog v-model="deleteModal">

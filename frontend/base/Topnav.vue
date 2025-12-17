@@ -48,7 +48,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <QToolbar>
+    <QToolbar class="bg-grey-9">
         <QBtn flat dense :href="'/'">
             <QAvatar square size="28px">
                 <img src="/static/images/ce_logo.svg" alt="Logo">

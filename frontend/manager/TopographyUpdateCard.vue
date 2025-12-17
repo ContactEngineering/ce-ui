@@ -17,8 +17,11 @@ import {
     QDialog,
     QSpinner,
     QTabs,
-    QTab
+    QTab,
+    ClosePopup
 } from 'quasar';
+
+const vClosePopup = ClosePopup;
 
 import { useNotify } from "@/utils/notify";
 

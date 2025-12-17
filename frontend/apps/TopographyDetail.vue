@@ -3,13 +3,11 @@
 import { computed, inject, onMounted, ref } from "vue";
 import {
     QBanner,
-    QBadge,
     QBtn,
     QDialog,
     QCard,
     QCardSection,
     QCardActions,
-    QIcon,
     QSeparator,
     QSpinner,
     QTabs,
@@ -27,13 +25,14 @@ import {
 
 import { getIdFromUrl, subjectsToBase64 } from "topobank/utils/api";
 
+import ActionFab from '../components/ActionFab.vue';
+import type { FabAction } from '../components/ActionFab.vue';
 import Attachments from "../manager/Attachments.vue";
-
 import DeepZoomImage from "../components/DeepZoomImage.vue";
 import LineScanPlot from "../components/LineScanPlot.vue";
-
 import TopographyBadges from "../manager/TopographyBadges.vue";
 import TopographyCard from "../manager/TopographyCard.vue";
+import UploadModal from '../components/UploadModal.vue';
 
 const { show } = useNotify();
 
@@ -49,6 +48,7 @@ const appProps = inject("appProps");
 
 const _disabled = ref(false);
 const _showDeleteModal = ref(false);
+const _showAttachmentModal = ref(false);
 const _topography = ref(null);
 
 function getTopographyUrl() {
@@ -132,6 +132,59 @@ const surfaceUrl = computed(() => {
 
 const _activeTab = ref('visualization');
 
+// FAB actions
+const fabActions = computed<FabAction[]>(() => {
+    const actions: FabAction[] = [];
+
+    if (!_disabled.value) {
+        actions.push({
+            id: 'attach',
+            icon: 'attach_file',
+            label: 'Add attachment',
+            color: 'secondary',
+            tooltip: 'Attach supporting files'
+        });
+    }
+
+    actions.push({
+        id: 'download',
+        icon: 'download',
+        label: 'Download',
+        href: _topography.value?.datafile?.file
+    });
+
+    actions.push({
+        id: 'analyze',
+        icon: 'analytics',
+        label: 'Analyze',
+        color: 'accent',
+        href: `/ui/analysis-list/?subjects=${base64Subjects.value}`
+    });
+
+    if (!_disabled.value) {
+        actions.push({
+            id: 'delete',
+            icon: 'delete',
+            label: 'Delete',
+            color: 'negative'
+        });
+    }
+
+    return actions;
+});
+
+function handleFabAction(actionId: string) {
+    switch (actionId) {
+        case 'attach':
+            _activeTab.value = 'attachments';
+            _showAttachmentModal.value = true;
+            break;
+        case 'delete':
+            _showDeleteModal.value = true;
+            break;
+    }
+}
+
 </script>
 
 <template>
@@ -142,26 +195,10 @@ const _activeTab = ref('visualization');
         </div>
     </div>
     <div v-if="_topography !== null">
-        <!-- Page Header with Title and Actions -->
-        <div class="row items-center q-mb-md">
-            <div class="col">
-                <div class="row items-center q-gutter-sm">
-                    <QIcon name="insert_chart" size="md" color="primary" />
-                    <div class="text-h5">{{ _topography.name }}</div>
-                    <TopographyBadges :topography="_topography" />
-                </div>
-                <div class="text-caption text-grey-7 q-mt-xs q-ml-xl">
-                    <a :href="surfaceUrl">{{ _topography.surface_name }}</a>
-                </div>
-            </div>
-            <div class="row q-gutter-sm">
-                <QBtn flat dense icon="download" :href="_topography.datafile?.file" label="Download" />
-                <QBtn v-if="!_disabled" flat dense icon="delete" color="negative" @click="_showDeleteModal = true" />
-                <QBtn color="primary" icon="analytics" :href="`/ui/analysis-list/?subjects=${base64Subjects}`" label="Analyze" />
-            </div>
+        <!-- Topography Info Chips -->
+        <div class="q-mb-md">
+            <TopographyBadges :topography="_topography" />
         </div>
-
-        <QSeparator class="q-mb-md" />
 
         <!-- Navigation Tabs -->
         <QTabs v-model="_activeTab" dense align="left" class="text-grey" active-color="primary" indicator-color="primary" narrow-indicator>
@@ -196,6 +233,18 @@ const _activeTab = ref('visualization');
             </QTabPanel>
         </QTabPanels>
     </div>
+    <!-- Floating Action Button -->
+    <ActionFab v-if="_topography !== null"
+               :actions="fabActions"
+               @action="handleFabAction" />
+
+    <!-- Upload Modal for Attachments -->
+    <UploadModal v-if="_topography !== null"
+                 v-model="_showAttachmentModal"
+                 mode="attachment"
+                 :target-url="_topography.attachments" />
+
+    <!-- Delete Confirmation Dialog -->
     <QDialog v-if="_topography !== null" v-model="_showDeleteModal">
         <QCard>
             <QCardSection>

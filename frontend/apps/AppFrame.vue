@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { provide, ref } from "vue";
-import { QLayout, QHeader, QPageContainer, QPage, QFooter, QToolbar, QSpace, QDrawer } from "quasar";
+import { QLayout, QHeader, QPageContainer, QPage, QToolbar, QSpace, QDrawer, QSeparator } from "quasar";
 
 import Breadcrumbs from "../base/Breadcrumbs.vue";
 import Topnav from "../base/Topnav.vue";
@@ -51,34 +51,40 @@ provide('rightDrawer', {
         </QDrawer>
 
         <QPageContainer>
-            <QPage padding>
-                <component v-if="vueComponent != null && vueComponent.length > 0" :is="vueComponent" />
+            <QPage padding class="column">
+                <div class="col">
+                    <component v-if="vueComponent != null && vueComponent.length > 0" :is="vueComponent" />
+                </div>
+
+                <!-- Footer - scrolls with content -->
+                <footer class="page-footer q-mt-xl q-pt-md">
+                    <QSeparator class="q-mb-md" />
+                    <div class="row items-center justify-center q-gutter-md">
+                        <a href="https://pastewka.org/" target="_blank">
+                            <img src="/static/images/uni_freiburg_logo.png" height="48px" alt="University of Freiburg">
+                        </a>
+                        <a href="http://www.engineering.pitt.edu/TevisJacobs/" target="_blank">
+                            <img src="/static/images/pitt_logo.png" height="48px" alt="University of Pittsburgh">
+                        </a>
+                        <span class="text-caption text-grey-7">Funding by</span>
+                        <a href="https://erc.europa.eu/" target="_blank">
+                            <img src="/static/images/erc_logo.png" height="48px" alt="ERC">
+                        </a>
+                        <a href="https://www.livmats.uni-freiburg.de/" target="_blank">
+                            <img src="/static/images/logo_livmats_small.jpg" height="48px" alt="livMatS">
+                        </a>
+                        <a href="https://www.nsf.gov/" target="_blank">
+                            <img src="/static/images/nsf_logo.png" height="48px" alt="NSF">
+                        </a>
+                    </div>
+                </footer>
             </QPage>
         </QPageContainer>
-
-        <QFooter elevated class="bg-white text-dark q-pa-sm">
-            <QToolbar>
-                <QSpace />
-                <div class="row items-center q-gutter-md">
-                    <a href="https://pastewka.org/" target="_blank">
-                        <img src="/static/images/uni_freiburg_logo.png" height="48px" alt="University of Freiburg">
-                    </a>
-                    <a href="http://www.engineering.pitt.edu/TevisJacobs/" target="_blank">
-                        <img src="/static/images/pitt_logo.png" height="48px" alt="University of Pittsburgh">
-                    </a>
-                    <span class="text-caption">Funding by</span>
-                    <a href="https://erc.europa.eu/" target="_blank">
-                        <img src="/static/images/erc_logo.png" height="48px" alt="ERC">
-                    </a>
-                    <a href="https://www.livmats.uni-freiburg.de/" target="_blank">
-                        <img src="/static/images/logo_livmats_small.jpg" height="48px" alt="livMatS">
-                    </a>
-                    <a href="https://www.nsf.gov/" target="_blank">
-                        <img src="/static/images/nsf_logo.png" height="48px" alt="NSF">
-                    </a>
-                </div>
-                <QSpace />
-            </QToolbar>
-        </QFooter>
     </QLayout>
 </template>
+
+<style scoped>
+.page-footer {
+    flex-shrink: 0;
+}
+</style>

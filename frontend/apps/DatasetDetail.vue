@@ -18,13 +18,16 @@ import {
     QSpinner,
     QBtn,
     QSeparator,
-    QIcon,
     QTabs,
     QTab,
     QTabPanels,
     QTabPanel,
-    QSpace
+    QSpace,
+    QScrollArea,
+    ClosePopup
 } from 'quasar';
+
+const vClosePopup = ClosePopup;
 
 import { useNotify } from "@/utils/notify";
 import {
@@ -42,14 +45,16 @@ import {
 } from "../utils/api";
 import { ccLicenseInfo } from "../utils/data";
 
+import ActionFab from '../components/ActionFab.vue';
+import type { FabAction } from '../components/ActionFab.vue';
 import Attachments from '../manager/Attachments.vue';
 import BandwidthPlot from '../manager/BandwidthPlot.vue';
-import DropZone from '../components/DropZone.vue';
 import DatasetDescription from '../manager/DatasetDescription.vue';
 import DatasetPermissions from '../manager/DatasetPermissions.vue';
 import DatasetProperties from '../manager/DatasetProperties.vue';
-import TopographyCard from "../manager/TopographyCard.vue";
+import TopographyListRow from "../manager/TopographyListRow.vue";
 import TopographyUpdateCard from "../manager/TopographyUpdateCard.vue";
+import UploadModal from '../components/UploadModal.vue';
 
 const { show } = useNotify();
 
@@ -88,6 +93,10 @@ const _selected = ref([]);  // Selected topographies (for batch editing)
 
 // Batch edit data
 const _batchEditTopography = ref(emptyTopography());
+
+// Upload modal
+const _showUploadModal = ref(false);
+const _showAttachmentModal = ref(false);
 
 function emptyTopography() {
     return {
@@ -180,32 +189,16 @@ async function updateVersions() {
     }
 }
 
-function filesDropped(files) {
-    for (const file of files) {
-        uploadNewTopography(file);
-    }
-}
-
-async function uploadNewTopography(file) {
-    try {
-        const response = await managerApiTopographyCreate({
-            body: {
-                surface: _surface.value.url,
-                name: file.name
-            }
-        });
-        let upload = response.data;
-        upload.file = file;  // need to know which file to upload
-        _topographies.value.push(upload);  // this will trigger showing a topography-upload-card
+function onTopographiesUploaded(results: any[]) {
+    // Add uploaded topographies to the list
+    for (const result of results) {
+        // The topography object from the upload already has the file attached
+        // but we don't need the file reference anymore since it's uploaded
+        const topography = result.topography;
+        delete topography.file;
+        delete topography.datafile?.upload_instructions;
+        _topographies.value.push(topography);
         _selected.value.push(false);  // initially unselected
-    } catch (error) {
-        show?.({
-            props: {
-                title: "Failed to create a new measurement",
-                body: error,
-                variant: 'danger'
-            }
-        });
     }
 }
 
@@ -349,6 +342,83 @@ const batchActiveTab = ref('home'); // shared active tab for batch mode
 
 const _activeTab = ref('measurements'); // main navigation tab
 
+// FAB actions
+const fabActions = computed<FabAction[]>(() => {
+    const actions: FabAction[] = [];
+
+    if (isEditable.value) {
+        actions.push({
+            id: 'upload',
+            icon: 'upload_file',
+            label: 'Upload measurements',
+            color: 'primary',
+            tooltip: 'Upload new measurement files'
+        });
+        actions.push({
+            id: 'attach',
+            icon: 'attach_file',
+            label: 'Add attachment',
+            color: 'secondary',
+            tooltip: 'Attach supporting files'
+        });
+    }
+
+    actions.push({
+        id: 'download',
+        icon: 'download',
+        label: 'Download',
+        href: `${_surface.value?.url}download/`
+    });
+
+    actions.push({
+        id: 'analyze',
+        icon: 'analytics',
+        label: 'Analyze',
+        color: 'accent',
+        href: `/ui/analysis-list/?subjects=${base64Subjects.value}`
+    });
+
+    if (!isPublication.value && hasFullAccess.value) {
+        actions.push({
+            id: 'publish',
+            icon: 'publish',
+            label: 'Publish',
+            href: publishUrl.value
+        });
+    }
+
+    if ((_versions.value === null || _versions.value.length === 0) && hasFullAccess.value) {
+        actions.push({
+            id: 'delete',
+            icon: 'delete',
+            label: 'Delete',
+            color: 'negative'
+        });
+    }
+
+    return actions;
+});
+
+function handleFabAction(actionId: string) {
+    switch (actionId) {
+        case 'upload':
+            _showUploadModal.value = true;
+            break;
+        case 'attach':
+            _activeTab.value = 'attachments';
+            _showAttachmentModal.value = true;
+            break;
+        case 'delete':
+            _showDeleteModal.value = true;
+            break;
+    }
+}
+
+function navigateToTopography(topography: any) {
+    const id = getIdFromUrl(topography.url);
+    window.location.href = `/ui/topography/${id}/`;
+}
+
 </script>
 
 <template>
@@ -359,55 +429,43 @@ const _activeTab = ref('measurements'); // main navigation tab
         </div>
     </div>
     <div v-if="_surface != null">
-        <!-- Page Header with Title and Actions -->
+        <!-- Page Header with Badges and Version -->
         <div class="row items-center q-mb-md">
-            <div class="col">
-                <div class="row items-center q-gutter-sm">
-                    <QIcon name="layers" size="md" color="primary" />
-                    <div class="text-h5">{{ _surface.name }}</div>
-                    <QBadge v-if="_publication != null" color="info">
-                        Published
-                    </QBadge>
-                    <QBadge v-for="tag in _surface.tags" :key="tag.name" color="positive">
-                        {{ tag.name }}
-                    </QBadge>
-                </div>
-                <div v-if="_publication != null" class="text-caption text-grey-7 q-mt-xs q-ml-xl">
-                    Published by {{ _publication.publisher.name }} &middot; {{ versionString }}
-                </div>
+            <div class="col row items-center q-gutter-sm">
+                <QBadge v-if="_publication != null" color="info">
+                    Published
+                </QBadge>
+                <QBadge v-for="tag in _surface.tags" :key="tag.name" color="positive">
+                    {{ tag.name }}
+                </QBadge>
+                <span v-if="_publication != null" class="text-caption text-grey-7">
+                    Published by {{ _publication.publisher.name }}
+                </span>
             </div>
-            <div class="row q-gutter-sm">
-                <QBtnDropdown v-if="_versions == null || _versions.length > 0"
-                              :label="versionString"
-                              flat
-                              dense>
-                    <QList>
-                        <QItem v-if="_publication == null || _publication.has_access_to_original_surface"
-                               clickable v-close-popup
-                               :disable="_publication == null"
-                               :href="hrefOriginalSurface">
-                            <QItemSection>Work in progress</QItemSection>
-                        </QItem>
-                        <QItem v-if="_versions == null">
-                            <QItemSection><QSpinner size="xs" /> Loading...</QItemSection>
-                        </QItem>
-                        <QItem v-for="version in _versions"
-                               :key="version.version"
-                               clickable v-close-popup
-                               :disable="_publication != null && _publication.version === version.version"
-                               :href="surfaceHrefForVersion(version)">
-                            <QItemSection>Version {{ version.version }}</QItemSection>
-                        </QItem>
-                    </QList>
-                </QBtnDropdown>
-                <QBtn flat dense icon="download" :href="`${_surface.url}download/`" label="Download" />
-                <QBtn v-if="!isPublication && hasFullAccess" flat dense icon="publish" :href="publishUrl" label="Publish" />
-                <QBtn v-if="(_versions == null || _versions.length === 0) && hasFullAccess" flat dense icon="delete" color="negative" @click="_showDeleteModal = true" />
-                <QBtn color="primary" icon="analytics" :href="`/ui/analysis-list/?subjects=${base64Subjects}`" label="Analyze" />
-            </div>
+            <QBtnDropdown v-if="_versions == null || _versions.length > 0"
+                          :label="versionString"
+                          flat
+                          dense>
+                <QList>
+                    <QItem v-if="_publication == null || _publication.has_access_to_original_surface"
+                           clickable v-close-popup
+                           :disable="_publication == null"
+                           :href="hrefOriginalSurface">
+                        <QItemSection>Work in progress</QItemSection>
+                    </QItem>
+                    <QItem v-if="_versions == null">
+                        <QItemSection><QSpinner size="xs" /> Loading...</QItemSection>
+                    </QItem>
+                    <QItem v-for="version in _versions"
+                           :key="version.version"
+                           clickable v-close-popup
+                           :disable="_publication != null && _publication.version === version.version"
+                           :href="surfaceHrefForVersion(version)">
+                        <QItemSection>Version {{ version.version }}</QItemSection>
+                    </QItem>
+                </QList>
+            </QBtnDropdown>
         </div>
-
-        <QSeparator class="q-mb-md" />
 
         <!-- Navigation Tabs -->
         <QTabs v-model="_activeTab" dense align="left" class="text-grey" active-color="primary" indicator-color="primary" narrow-indicator>
@@ -441,28 +499,43 @@ const _activeTab = ref('measurements'); // main navigation tab
         <QTabPanels v-model="_activeTab" animated>
             <!-- Measurements -->
             <QTabPanel name="measurements" class="q-pa-none">
-                <DropZone v-if="isEditable && !anySelected" @files-dropped="filesDropped" />
-                <topography-update-card v-if="anySelected"
-                                        v-model:topography="_batchEditTopography"
-                                        v-model:active-tab="batchActiveTab"
-                                        :batch-edit="true"
-                                        :saving="_saving"
-                                        @save:edit="saveBatchEdit"
-                                        @discard:edit="discardBatchEdit" />
+                <!-- Batch edit panel -->
+                <TopographyUpdateCard v-if="anySelected"
+                                      v-model:topography="_batchEditTopography"
+                                      v-model:active-tab="batchActiveTab"
+                                      :batch-edit="true"
+                                      :saving="_saving"
+                                      @save:edit="saveBatchEdit"
+                                      @discard:edit="discardBatchEdit" />
+
+                <!-- Select all checkbox -->
                 <div v-if="isEditable && _topographies.length > 0" class="q-mb-sm q-pa-sm bg-grey-2 rounded-borders">
-                    <QCheckbox v-model="allSelected" :indeterminate-value="someSelected ? null : undefined" label="Select all" size="sm" />
+                    <QCheckbox v-model="allSelected"
+                               :indeterminate-value="someSelected ? null : undefined"
+                               label="Select all"
+                               size="sm" />
                 </div>
-                <div v-for="(topography, index) in _topographies" :key="topography?.url || index">
-                    <TopographyCard v-if="topography != null"
-                                    v-model:selected="_selected[index]"
-                                    v-model:topography="_topographies[index]"
-                                    v-model:active-tab="batchActiveTab"
-                                    :disabled="!isEditable"
-                                    :selectable="isEditable"
-                                    :topography-url="topography.url"
-                                    :syncTab="anySelected"
-                                    @delete:topography="() => deleteTopography(index)" />
-                </div>
+
+                <!-- Empty state -->
+                <QBanner v-if="_topographies.length === 0" class="bg-grey-2 text-grey-8">
+                    No measurements yet. Use the upload button to add measurement files.
+                </QBanner>
+
+                <!-- Measurements list -->
+                <QScrollArea v-if="_topographies.length > 0"
+                             style="height: calc(100vh - 350px); min-height: 300px;"
+                             class="rounded-borders">
+                    <QList bordered separator class="rounded-borders">
+                        <template v-for="(topography, index) in _topographies" :key="topography?.url || index">
+                            <TopographyListRow v-if="topography != null"
+                                               :topography="topography"
+                                               :selectable="isEditable"
+                                               :disabled="!isEditable"
+                                               v-model:selected="_selected[index]"
+                                               @click="navigateToTopography" />
+                        </template>
+                    </QList>
+                </QScrollArea>
             </QTabPanel>
 
             <!-- Bandwidths -->
@@ -555,6 +628,19 @@ const _activeTab = ref('measurements'); // main navigation tab
             </QTabPanel>
         </QTabPanels>
     </div>
+    <!-- Floating Action Button -->
+    <ActionFab v-if="_surface != null"
+               :actions="fabActions"
+               @action="handleFabAction" />
+
+    <!-- Upload Modal for Measurements -->
+    <UploadModal v-if="_surface != null"
+                 v-model="_showUploadModal"
+                 mode="topography"
+                 :target-url="_surface.url"
+                 @uploaded="onTopographiesUploaded" />
+
+    <!-- Delete Confirmation Dialog -->
     <QDialog v-if="_surface != null" v-model="_showDeleteModal">
         <QCard>
             <QCardSection>
