@@ -19,7 +19,7 @@ def add_surface(context, surface):
         context,
         {
             "title": f"{surface.label}",
-            "icon": "photo_library",
+            "icon": "layersPel",
             "icon_style_prefix": "fa",
             "href": f"{reverse('ce_ui:surface-detail', kwargs=dict(pk=surface.pk))}",
             "active": True,

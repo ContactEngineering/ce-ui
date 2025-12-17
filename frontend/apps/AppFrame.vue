@@ -1,13 +1,37 @@
 <script setup lang="ts">
-import { QLayout, QHeader, QPageContainer, QPage, QFooter, QToolbar, QSpace } from "quasar";
+import { provide, ref } from "vue";
+import { QLayout, QHeader, QPageContainer, QPage, QFooter, QToolbar, QSpace, QDrawer } from "quasar";
 
 import Breadcrumbs from "../base/Breadcrumbs.vue";
 import Topnav from "../base/Topnav.vue";
+import NotificationDrawer from "../base/NotificationDrawer.vue";
+import UserMenuDrawer from "../base/UserMenuDrawer.vue";
 
 const props = defineProps({
     vueComponent: { type: String, default: null },
     breadcrumbs: Object,
     messages: Array
+});
+
+// Right drawer state
+const rightDrawerOpen = ref(false);
+const rightDrawerContent = ref<'notifications' | 'user' | null>(null);
+
+function openDrawer(content: 'notifications' | 'user') {
+    rightDrawerContent.value = content;
+    rightDrawerOpen.value = true;
+}
+
+function closeDrawer() {
+    rightDrawerOpen.value = false;
+}
+
+// Provide drawer controls to child components
+provide('rightDrawer', {
+    open: openDrawer,
+    close: closeDrawer,
+    isOpen: rightDrawerOpen,
+    content: rightDrawerContent
 });
 
 </script>
@@ -20,6 +44,11 @@ const props = defineProps({
                 <Breadcrumbs :tabs="breadcrumbs" />
             </QToolbar>
         </QHeader>
+
+        <QDrawer v-model="rightDrawerOpen" side="right" overlay bordered :width="320">
+            <NotificationDrawer v-if="rightDrawerContent === 'notifications'" />
+            <UserMenuDrawer v-if="rightDrawerContent === 'user'" />
+        </QDrawer>
 
         <QPageContainer>
             <QPage padding>

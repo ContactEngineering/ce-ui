@@ -5,7 +5,9 @@ import { computed, onMounted, ref } from "vue";
 import {
     QBtn,
     QBtnDropdown,
+    QIcon,
     QInput,
+    QInfiniteScroll,
     QList,
     QItem,
     QItemSection,
@@ -14,10 +16,12 @@ import {
     QCard,
     QCardSection,
     QCardActions,
-    QInnerLoading,
-    QPagination,
-    QMarkupTable
+    QSpinner,
+    QMarkupTable,
+    ClosePopup
 } from "quasar";
+
+const vClosePopup = ClosePopup;
 
 import { useNotify } from "@/utils/notify";
 import { managerApiSurfaceList, managerApiSurfaceCreate } from "@/api";
@@ -31,15 +35,7 @@ const { show } = useNotify();
 const selection = useDatasetSelectionStore();
 
 const props = defineProps({
-    currentPage: {
-        Number,
-        default: 0
-    },
     isAnonymous: Boolean,
-    pageSize: {
-        type: Number,
-        default: 10
-    },
     searchTerm: {
         type: String,
         default: ""
@@ -51,63 +47,51 @@ const props = defineProps({
 });
 
 // Constants
+const BATCH_SIZE = 20;
+
 const orderByFilterChoices = [
     { label: 'Date', value: 'date' },
     { label: 'Name', value: 'name' },
 ];
 const sharingStatusFilterChoices = [
-    { label: 'All accessible datasets', value: 'all' },
-    { label: 'Unpublished datasets created by me', value: 'own' },
-    { label: 'Unpublished datasets created by others', value: 'others' },
-    { label: 'Published datasets', value: 'published' }
+    { label: 'All accessible', value: 'all' },
+    { label: 'Created by me', value: 'own' },
+    { label: 'Shared with me', value: 'others' },
+    { label: 'Published', value: 'published' }
 ];
-const pageSizeOptions = [
-    { label: '10', value: 10 },
-    { label: '25', value: 25 },
-    { label: '50', value: 50 },
-    { label: '100', value: 100 }
-];
-
 
 // UI logic
-const _currentPage = ref<number>(props.currentPage);
 const _isLoading = ref<boolean>(false);
 const _nbDatasets = ref<number>(null);
-const _nbDatasetsOnCurrentPage = ref<number>(null);
 const _orderBy = ref(orderByFilterChoices[0].value);
-const _pageSize = ref<number>(props.pageSize);
 const _searchTerm = ref<string>(props.searchTerm);
 const _searchInfoModalVisible = ref<boolean>(false);
 const _selectionOffcanvasVisible = ref<boolean>(false);
 const _sharingStatus = ref(sharingStatusFilterChoices[0].value);
 
 const _datasets = ref([]);
-const _nextUrl = ref(null);
-const _previousUrl = ref(null);
+const _hasMore = ref(true);
+const _infiniteScrollRef = ref(null);
 
 let searchDelayTimer = null;
 
-async function getDatasets(offset: number = 0) {
-    searchDelayTimer = null;
-    _isLoading.value = true;
-    _currentPage.value = offset / _pageSize.value + 1;
+async function loadMore(index: number, done: (stop?: boolean) => void) {
     try {
-        // Note: order_by, sharing_status, and search are not in the OpenAPI schema
-        // but are supported by the backend. Using type assertion to pass them.
         const response = await managerApiSurfaceList({
             query: {
-                offset,
-                limit: _pageSize.value,
+                offset: _datasets.value.length,
+                limit: BATCH_SIZE,
                 order_by: _orderBy.value,
                 sharing_status: _sharingStatus.value,
                 search: _searchTerm.value || undefined
             } as any
         });
+
         _nbDatasets.value = response.data.count;
-        _nbDatasetsOnCurrentPage.value = Math.min(response.data.results.length, _pageSize.value);
-        _nextUrl.value = response.data.next;
-        _previousUrl.value = response.data.previous;
-        _datasets.value = response.data.results;
+        _datasets.value = [..._datasets.value, ...response.data.results];
+        _hasMore.value = response.data.next !== null;
+
+        done(!_hasMore.value);
     } catch (error) {
         show?.({
             props: {
@@ -116,43 +100,18 @@ async function getDatasets(offset: number = 0) {
                 variant: 'danger'
             }
         });
-    } finally {
-        _isLoading.value = false;
+        done(true);
     }
 }
 
-onMounted(() => {
-    getDatasets();
-});
-
-const currentPage = computed({
-    get() {
-        return _currentPage.value;
-    },
-    set(value) {
-        getDatasets((value - 1) * _pageSize.value);
-    }
-});
-
-const orderBy = computed({
-    get() {
-        return _orderBy.value;
-    },
-    set(value) {
-        _orderBy.value = value;
-        getDatasets();
-    }
-});
-
-const pageSize = computed({
-    get() {
-        return _pageSize.value;
-    },
-    set(value) {
-        _pageSize.value = value;
-        getDatasets();
-    }
-});
+function resetAndReload() {
+    _datasets.value = [];
+    _hasMore.value = true;
+    _nbDatasets.value = null;
+    // Trigger infinite scroll to load first batch
+    _infiniteScrollRef.value?.resume();
+    _infiniteScrollRef.value?.trigger();
+}
 
 const searchTerm = computed({
     get() {
@@ -164,17 +123,23 @@ const searchTerm = computed({
     set(value) {
         _searchTerm.value = value;
         clearTimeout(searchDelayTimer);
-        searchDelayTimer = setTimeout(getDatasets, props.searchDelay);
+        searchDelayTimer = setTimeout(resetAndReload, props.searchDelay);
     }
 });
+
+function orderByChanged(value: string) {
+    _orderBy.value = value;
+    resetAndReload();
+}
+
+function sharingStatusChanged(value: string) {
+    _sharingStatus.value = value;
+    resetAndReload();
+}
 
 async function createSurface() {
     const response = await managerApiSurfaceCreate();
     window.location.href = `/ui/dataset-detail/${response.data.id}/`;
-}
-
-function sharingStatusChanged() {
-    getDatasets();
 }
 
 </script>
@@ -188,7 +153,7 @@ function sharingStatusChanged() {
                     outlined
                     dense>
                 <template v-slot:prepend>
-                    <q-icon name="search" />
+                    <QIcon name="search" />
                 </template>
                 <template v-slot:append>
                     <QBtn flat round dense icon="info" size="sm" @click="_searchInfoModalVisible = true" />
@@ -197,7 +162,6 @@ function sharingStatusChanged() {
         </div>
         <div>
             <QBtnDropdown flat dense
-                          :disable="_isLoading"
                           :label="sharingStatusFilterChoices.find(o => o.value === _sharingStatus)?.label"
                           icon="filter_list">
                 <QList>
@@ -206,7 +170,25 @@ function sharingStatusChanged() {
                            clickable
                            v-close-popup
                            :active="_sharingStatus === option.value"
-                           @click="_sharingStatus = option.value; sharingStatusChanged()">
+                           @click="sharingStatusChanged(option.value)">
+                        <QItemSection>
+                            <QItemLabel>{{ option.label }}</QItemLabel>
+                        </QItemSection>
+                    </QItem>
+                </QList>
+            </QBtnDropdown>
+        </div>
+        <div>
+            <QBtnDropdown flat dense
+                          :label="`Sort: ${orderByFilterChoices.find(o => o.value === _orderBy)?.label}`"
+                          icon="sort">
+                <QList>
+                    <QItem v-for="option in orderByFilterChoices"
+                           :key="option.value"
+                           clickable
+                           v-close-popup
+                           :active="_orderBy === option.value"
+                           @click="orderByChanged(option.value)">
                         <QItemSection>
                             <QItemLabel>{{ option.label }}</QItemLabel>
                         </QItemSection>
@@ -223,79 +205,55 @@ function sharingStatusChanged() {
                   title="Please sign-in to create a digital surface twin" />
             <QBtn v-else
                   color="primary"
-                  :disable="_isLoading"
                   icon="add"
                   label="New"
                   @click="createSurface" />
         </div>
     </div>
-    <div class="relative-position">
-        <QInnerLoading :showing="_isLoading" />
-        <div class="row items-center q-gutter-sm q-mb-md">
-            <QPagination v-model="currentPage"
-                         :max="Math.ceil(_nbDatasets / _pageSize) || 1"
-                         :disable="_isLoading"
-                         :max-pages="9"
-                         boundary-links
-                         direction-links />
-            <QBtnDropdown flat dense
-                          :disable="_isLoading"
-                          :label="`${_pageSize} per page`"
-                          icon="format_list_numbered">
-                <QList>
-                    <QItem v-for="option in pageSizeOptions"
-                           :key="option.value"
-                           clickable
-                           v-close-popup
-                           :active="pageSize === option.value"
-                           @click="pageSize = option.value">
-                        <QItemSection>
-                            <QItemLabel>{{ option.label }} per page</QItemLabel>
-                        </QItemSection>
-                    </QItem>
-                </QList>
-            </QBtnDropdown>
-            <QBtnDropdown flat dense
-                          :disable="_isLoading"
-                          :label="`Sort: ${orderByFilterChoices.find(o => o.value === _orderBy)?.label}`"
-                          icon="sort">
-                <QList>
-                    <QItem v-for="option in orderByFilterChoices"
-                           :key="option.value"
-                           clickable
-                           v-close-popup
-                           :active="orderBy === option.value"
-                           @click="orderBy = option.value">
-                        <QItemSection>
-                            <QItemLabel>{{ option.label }}</QItemLabel>
-                        </QItemSection>
-                    </QItem>
-                </QList>
-            </QBtnDropdown>
-            <div class="col-grow" />
-            <QBtn v-if="selection.nbSelected === 0"
-                  flat
-                  disable
-                  icon="check_box_outline_blank"
-                  label="No selected" />
-            <QBtn v-if="selection.nbSelected > 0"
-                  color="warning"
-                  :disable="_isLoading"
-                  icon="check_box"
-                  :label="`${selection.nbSelected} selected`"
-                  @click="_selectionOffcanvasVisible = true" />
+
+    <div class="row items-center q-mb-sm">
+        <div class="text-caption text-grey-7">
+            <span v-if="_nbDatasets !== null">{{ _nbDatasets }} digital surface twins</span>
         </div>
-        <QList bordered separator>
+        <div class="col-grow" />
+        <QBtn v-if="selection.nbSelected === 0"
+              flat dense
+              disable
+              icon="check_box_outline_blank"
+              :label="`${selection.nbSelected} selected`" />
+        <QBtn v-if="selection.nbSelected > 0"
+              flat dense
+              color="warning"
+              icon="check_box"
+              :label="`${selection.nbSelected} selected`"
+              @click="_selectionOffcanvasVisible = true" />
+    </div>
+
+    <QInfiniteScroll ref="_infiniteScrollRef" @load="loadMore" :offset="250">
+        <QList bordered separator class="rounded-borders">
             <DatasetListRow v-for="dataset in _datasets"
                             :key="dataset.id"
                             :dataset="dataset"
                             v-model:selected="selection.datasetIds" />
         </QList>
 
-        <div v-if="!_isLoading" class="q-mt-md text-caption">
-            Showing {{ _nbDatasetsOnCurrentPage }} digital surface twins out of {{ _nbDatasets }}.
-        </div>
+        <template v-slot:loading>
+            <div class="row justify-center q-my-md">
+                <QSpinner color="primary" size="2em" />
+            </div>
+        </template>
+    </QInfiniteScroll>
+
+    <div v-if="_datasets.length > 0 && !_hasMore" class="text-center text-caption text-grey-6 q-mt-md">
+        End of list
     </div>
+
+    <div v-if="_datasets.length === 0 && !_hasMore" class="text-center q-pa-xl">
+        <QIcon name="search_off" size="3rem" color="grey-5" />
+        <div class="text-h6 text-grey-7 q-mt-md">No datasets found</div>
+        <div class="text-caption text-grey-6">Try adjusting your search or filters</div>
+    </div>
+
     <!-- Search Help Modal-->
     <QDialog v-model="_searchInfoModalVisible">
         <QCard style="min-width: 700px; max-width: 900px">

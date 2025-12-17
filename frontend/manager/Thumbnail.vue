@@ -1,14 +1,14 @@
 <script setup>
 
-import {computed, ref} from "vue";
+import { computed, ref } from "vue";
 
-import { QInnerLoading, QSpinner } from "quasar";
+import { QInnerLoading, QSpinner, QIcon } from "quasar";
 
 const props = defineProps({
     dataSource: Object,
-    imgClass: {
+    size: {
         type: String,
-        default: ''
+        default: '64px'
     }
 });
 
@@ -21,14 +21,15 @@ const hasThumbnail = computed(() => {
 </script>
 
 <template>
-    <div class="thumbnail-wrapper">
+    <div class="thumbnail-wrapper" :style="{ width: size, height: size }">
         <a :href="`/ui/topography/${dataSource.id}/`">
             <img v-if="hasThumbnail"
-                 :class="imgClass"
+                 class="thumbnail-img"
                  :src="dataSource.thumbnail.file"
                  @load="_isLoading = false">
-            <q-icon v-if="!hasThumbnail"
-                    name="science" size="2rem" color="black" :class="imgClass" />
+            <div v-if="!hasThumbnail" class="thumbnail-placeholder">
+                <QIcon name="insert_chart" size="32px" color="grey-6" />
+            </div>
         </a>
         <QInnerLoading :showing="hasThumbnail && _isLoading">
             <QSpinner size="1rem" />
@@ -39,6 +40,23 @@ const hasThumbnail = computed(() => {
 <style scoped>
 .thumbnail-wrapper {
     position: relative;
-    display: inline-block;
+    flex-shrink: 0;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #f5f5f5;
+}
+
+.thumbnail-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.thumbnail-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 </style>

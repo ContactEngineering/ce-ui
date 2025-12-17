@@ -3,11 +3,14 @@
 import { computed, inject, onMounted, ref } from "vue";
 import {
     QBanner,
+    QBadge,
     QBtn,
     QDialog,
     QCard,
     QCardSection,
     QCardActions,
+    QIcon,
+    QSeparator,
     QSpinner,
     QTabs,
     QTab,
@@ -122,61 +125,76 @@ const base64Subjects = computed(() => {
     });
 });
 
+const surfaceUrl = computed(() => {
+    const surfaceId = getIdFromUrl(_topography.value.surface);
+    return `/ui/dataset-detail/${surfaceId}/`;
+});
+
 const _activeTab = ref('visualization');
 
 </script>
 
 <template>
-    <div class="container">
-        <div v-if="_topography == null" class="flex justify-center q-mt-xl">
-            <div class="column items-center">
-                <QSpinner size="lg" />
-                <p class="q-mt-sm">Loading...</p>
-            </div>
+    <div v-if="_topography == null" class="flex justify-center q-mt-xl">
+        <div class="column items-center">
+            <QSpinner size="lg" />
+            <p class="q-mt-sm">Loading...</p>
         </div>
-        <div v-if="_topography !== null" class="row">
-            <div class="col-3">
-                <QTabs v-model="_activeTab" vertical class="text-grey" active-color="primary">
-                    <QTab name="visualization" label="Visualization" />
-                    <QTab name="details" label="Details" />
-                    <QTab name="attachments" label="Attachments" />
-                </QTabs>
-                <div class="q-mt-md column q-gutter-sm">
-                    <QBtn color="positive" :href="`/ui/analysis-list/?subjects=${base64Subjects}`" label="Analyze" />
-                    <QBtn color="grey-4" text-color="dark" :href="_topography.datafile?.file" label="Download" />
-                    <QBtn color="negative" @click="_showDeleteModal = true" label="Delete" />
+    </div>
+    <div v-if="_topography !== null">
+        <!-- Page Header with Title and Actions -->
+        <div class="row items-center q-mb-md">
+            <div class="col">
+                <div class="row items-center q-gutter-sm">
+                    <QIcon name="insert_chart" size="md" color="primary" />
+                    <div class="text-h5">{{ _topography.name }}</div>
+                    <TopographyBadges :topography="_topography" />
                 </div>
-                <QCard class="q-mt-md">
-                    <QCardSection>
-                        <topography-badges :topography="_topography" />
-                    </QCardSection>
-                </QCard>
+                <div class="text-caption text-grey-7 q-mt-xs q-ml-xl">
+                    <a :href="surfaceUrl">{{ _topography.surface_name }}</a>
+                </div>
             </div>
-            <div class="col-9">
-                <QTabPanels v-model="_activeTab" animated>
-                    <QTabPanel name="visualization">
-                        <QBanner v-if="_topography.deepzoom === null && _topography.size_y !== null" class="bg-warning text-white q-mb-md">
-                            <p class="q-mb-sm">This measurement does not have a zoomable image.</p>
-                            <QBtn color="secondary" label="Retry creation of zoomable image" @click="forceInspect" />
-                        </QBanner>
-                        <LineScanPlot v-if="_topography.size_y === null" :topography="_topography" />
-                        <DeepZoomImage v-if="_topography.deepzoom !== null && _topography.size_y !== null"
-                                       :colorbar="true"
-                                       :folder-url="_topography.deepzoom" />
-                    </QTabPanel>
-                    <QTabPanel name="details">
-                        <TopographyCard :topography-url="_topography.url"
-                                        v-model:topography="_topography"
-                                        :enlarged="true"
-                                        :disabled="_disabled" />
-                    </QTabPanel>
-                    <QTabPanel name="attachments">
-                        <Attachments :attachments-url="_topography.attachments"
-                                     :permission="_topography.permissions.current_user.permission" />
-                    </QTabPanel>
-                </QTabPanels>
+            <div class="row q-gutter-sm">
+                <QBtn flat dense icon="download" :href="_topography.datafile?.file" label="Download" />
+                <QBtn v-if="!_disabled" flat dense icon="delete" color="negative" @click="_showDeleteModal = true" />
+                <QBtn color="primary" icon="analytics" :href="`/ui/analysis-list/?subjects=${base64Subjects}`" label="Analyze" />
             </div>
         </div>
+
+        <QSeparator class="q-mb-md" />
+
+        <!-- Navigation Tabs -->
+        <QTabs v-model="_activeTab" dense align="left" class="text-grey" active-color="primary" indicator-color="primary" narrow-indicator>
+            <QTab name="visualization" label="Visualization" />
+            <QTab name="details" label="Details" />
+            <QTab name="attachments" label="Attachments" />
+        </QTabs>
+
+        <QSeparator class="q-mb-md" />
+
+        <!-- Tab Panels -->
+        <QTabPanels v-model="_activeTab" animated>
+            <QTabPanel name="visualization" class="q-pa-none">
+                <QBanner v-if="_topography.deepzoom === null && _topography.size_y !== null" class="bg-warning text-white q-mb-md">
+                    <p class="q-mb-sm">This measurement does not have a zoomable image.</p>
+                    <QBtn color="secondary" label="Retry creation of zoomable image" @click="forceInspect" />
+                </QBanner>
+                <LineScanPlot v-if="_topography.size_y === null" :topography="_topography" />
+                <DeepZoomImage v-if="_topography.deepzoom !== null && _topography.size_y !== null"
+                               :colorbar="true"
+                               :folder-url="_topography.deepzoom" />
+            </QTabPanel>
+            <QTabPanel name="details" class="q-pa-none">
+                <TopographyCard :topography-url="_topography.url"
+                                v-model:topography="_topography"
+                                :enlarged="true"
+                                :disabled="_disabled" />
+            </QTabPanel>
+            <QTabPanel name="attachments" class="q-pa-none">
+                <Attachments :attachments-url="_topography.attachments"
+                             :permission="_topography.permissions.current_user.permission" />
+            </QTabPanel>
+        </QTabPanels>
     </div>
     <QDialog v-if="_topography !== null" v-model="_showDeleteModal">
         <QCard>

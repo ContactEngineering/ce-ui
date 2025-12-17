@@ -10,12 +10,19 @@ import {formatDateTime} from "topobank/utils/formatting";
 import {uploadFile, createFileManifest} from "topobank/utils/upload";
 
 import {
-    QCard,
-    QCardSection,
     QBtn,
     QBanner,
+    QIcon,
+    QItem,
+    QItemSection,
+    QItemLabel,
     QLinearProgress,
-    QDialog
+    QList,
+    QDialog,
+    QCard,
+    QCardSection,
+    QCardActions,
+    QSeparator
 } from 'quasar';
 
 import { useNotify } from "@/utils/notify";
@@ -161,115 +168,116 @@ const attachmentToShowInfo = computed(() => {
 });
 
 </script>
-<template>
-    <QCard>
-        <QCardSection class="flex items-center">
-            <h5 class="col-grow q-ma-none">Attachments</h5>
-        </QCardSection>
-        <QCardSection>
-            <DropZone v-if="isEditable" @files-dropped="handleFileDrop" class="q-mb-lg">
-                Drop your attachments here or
-            </DropZone>
-            <div>
-                <div v-for="[key, value] in Object.entries(attachments)"
-                     :key="value.id">
-                    <div
-                        class="flex items-center q-my-xs border rounded q-px-sm q-py-xs">
-                        <a :href="value.file">
-                            <q-icon name="attach_file" class="q-mr-md" />{{ value.filename }}
-                        </a>
-                        <QBtn size="sm" class="q-ml-auto" title="information"
-                              flat color="info" icon="info"
-                              @click="infoAttachmentKey = key; infoModal = true;"
-                              label="Info" />
-                        <QBtn v-if="isEditable" size="sm" class="q-ml-sm"
-                              title="delete" flat color="negative" icon="delete"
-                              @click="deleteAttachmentKey = key; deleteModal = true;"
-                              label="Delete" />
-                    </div>
-                </div>
-                <div v-for="indicator in uploadIndicator" :key="indicator.filename">
-                    <div
-                        class="flex items-center q-my-xs border rounded q-px-sm q-py-xs">
-                        <div class="text-grey">
-                            <q-icon name="attach_file" class="q-mr-md" />
-                        </div>
-                        <QLinearProgress class="col-grow q-ml-sm"
-                                         :value="indicator.loaded / 100"
-                                         stripe
-                                         :animation-speed="300" />
-                    </div>
-                </div>
-                <div v-if="attachmentCount == 0">
-                    <QBanner class="bg-primary text-white">
-                        This digital surface twin does not have file attachments yet.
-                    </QBanner>
-                </div>
-            </div>
-        </QCardSection>
-    </QCard>
 
+<template>
+    <div>
+        <DropZone v-if="isEditable" @files-dropped="handleFileDrop" class="q-mb-md">
+            Drop your attachments here or
+        </DropZone>
+
+        <QBanner v-if="attachmentCount === 0 && Object.keys(uploadIndicator).length === 0"
+                 class="bg-grey-2 text-grey-8">
+            <template #avatar>
+                <QIcon name="info" color="grey-6" />
+            </template>
+            No attachments yet.
+        </QBanner>
+
+        <QList v-if="attachmentCount > 0 || Object.keys(uploadIndicator).length > 0" bordered separator class="rounded-borders">
+            <!-- Existing attachments -->
+            <QItem v-for="[key, value] in Object.entries(attachments)" :key="value.id">
+                <QItemSection avatar>
+                    <QIcon name="attach_file" color="grey-7" />
+                </QItemSection>
+                <QItemSection>
+                    <QItemLabel>
+                        <a :href="value.file" class="text-primary">{{ value.filename }}</a>
+                    </QItemLabel>
+                    <QItemLabel caption>
+                        {{ formatDateTime(value.created) }}
+                    </QItemLabel>
+                </QItemSection>
+                <QItemSection side>
+                    <div class="row no-wrap q-gutter-xs">
+                        <QBtn flat dense round icon="info" color="grey-7"
+                              @click="infoAttachmentKey = key; infoModal = true;" />
+                        <QBtn v-if="isEditable" flat dense round icon="delete" color="negative"
+                              @click="deleteAttachmentKey = key; deleteModal = true;" />
+                    </div>
+                </QItemSection>
+            </QItem>
+
+            <!-- Upload progress indicators -->
+            <QItem v-for="indicator in uploadIndicator" :key="indicator.filename">
+                <QItemSection avatar>
+                    <QIcon name="upload_file" color="grey-5" />
+                </QItemSection>
+                <QItemSection>
+                    <QItemLabel class="text-grey">{{ indicator.filename }}</QItemLabel>
+                    <QLinearProgress :value="indicator.loaded / 100"
+                                     color="primary"
+                                     class="q-mt-xs" />
+                </QItemSection>
+            </QItem>
+        </QList>
+    </div>
+
+    <!-- Delete confirmation dialog -->
     <QDialog v-model="deleteModal">
         <QCard v-if="attachmentToDelete" style="min-width: 350px">
-            <QCardSection class="row items-center">
-                <div class="text-h6">Delete Attachment</div>
+            <QCardSection>
+                <div class="text-h6">Delete attachment</div>
             </QCardSection>
-            <QCardSection class="flex column items-center">
-                <span class="text-weight-bold"> This operation will permanently delete the attachment:</span>
-                <span class="text-italic"> "{{ attachmentToDelete.filename }}" </span>
-                <span>The operation cannot be undone!</span>
+            <QCardSection class="q-pt-none">
+                <p>This will permanently delete:</p>
+                <p class="text-weight-medium q-my-sm">"{{ attachmentToDelete.filename }}"</p>
+                <p class="text-caption text-negative">This cannot be undone.</p>
             </QCardSection>
-            <QCardSection class="flex justify-end q-gutter-sm">
-                <QBtn flat label="Cancel"
-                      @click="deleteModal = false" />
+            <QCardActions align="right">
+                <QBtn flat label="Cancel" v-close-popup />
                 <QBtn color="negative" label="Delete"
                       @click="deleteModal = false; deleteAttachment(deleteAttachmentKey)" />
-            </QCardSection>
+            </QCardActions>
         </QCard>
     </QDialog>
 
+    <!-- Info dialog -->
     <QDialog v-model="infoModal">
         <QCard v-if="attachmentToShowInfo" style="min-width: 350px">
-            <QCardSection class="row items-center">
-                <div class="text-h6">Attachment Info</div>
-            </QCardSection>
             <QCardSection>
-                <div class="row q-mb-sm">
-                    <div class="col-3 text-weight-bold">
-                        Name:
-                    </div>
-                    <div class="col">
-                        {{ attachmentToShowInfo.filename }}
-                    </div>
-                </div>
-                <div class="row q-mb-sm">
-                    <div class="col-3 text-weight-bold">
-                        Uploaded by:
-                    </div>
-                    <div class="col">
-                        {{ attachmentToShowInfo.uploaded_by }}
-                    </div>
-                </div>
-                <div class="row q-mb-sm">
-                    <div class="col-3 text-weight-bold">
-                        Created:
-                    </div>
-                    <div class="col">
-                        {{ formatDateTime(attachmentToShowInfo.created) }}
-                    </div>
-                </div>
-                <div class="row q-mb-sm">
-                    <div class="col-3 text-weight-bold">
-                        Updated:
-                    </div>
-                    <div class="col">
-                        {{ formatDateTime(attachmentToShowInfo.updated) }}
-                    </div>
-                </div>
+                <div class="text-h6">Attachment details</div>
             </QCardSection>
-            <QCardSection class="flex justify-end">
-                <QBtn flat label="OK" v-close-popup />
+            <QCardSection class="q-pt-none">
+                <QList dense>
+                    <QItem>
+                        <QItemSection>
+                            <QItemLabel caption>Filename</QItemLabel>
+                            <QItemLabel>{{ attachmentToShowInfo.filename }}</QItemLabel>
+                        </QItemSection>
+                    </QItem>
+                    <QItem>
+                        <QItemSection>
+                            <QItemLabel caption>Uploaded by</QItemLabel>
+                            <QItemLabel>{{ attachmentToShowInfo.uploaded_by }}</QItemLabel>
+                        </QItemSection>
+                    </QItem>
+                    <QItem>
+                        <QItemSection>
+                            <QItemLabel caption>Created</QItemLabel>
+                            <QItemLabel>{{ formatDateTime(attachmentToShowInfo.created) }}</QItemLabel>
+                        </QItemSection>
+                    </QItem>
+                    <QItem>
+                        <QItemSection>
+                            <QItemLabel caption>Updated</QItemLabel>
+                            <QItemLabel>{{ formatDateTime(attachmentToShowInfo.updated) }}</QItemLabel>
+                        </QItemSection>
+                    </QItem>
+                </QList>
             </QCardSection>
+            <QCardActions align="right">
+                <QBtn flat label="Close" v-close-popup />
+            </QCardActions>
         </QCard>
     </QDialog>
 </template>

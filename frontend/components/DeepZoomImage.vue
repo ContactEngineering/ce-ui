@@ -286,3 +286,77 @@ defineExpose({
         </div>
     </div>
 </template>
+
+<style scoped>
+.dzi-container {
+    display: flex;
+    width: 100%;
+    min-height: 400px;
+}
+
+.dzi-view {
+    flex: 1;
+    min-height: 400px;
+    position: relative;
+    background: #f5f5f5;
+}
+
+.dzi-colorbar {
+    display: flex;
+    flex-direction: row;
+    padding-left: 10px;
+    width: 80px;
+}
+
+.dzi-colorbar-title {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    text-align: center;
+    font-size: 12px;
+    padding-right: 5px;
+}
+
+.dzi-colorbar-column {
+    position: relative;
+    width: 20px;
+    height: 100%;
+}
+
+.dzi-colorbar-tick {
+    position: absolute;
+    width: 100%;
+    height: 1px;
+    background: black;
+    transform: translateY(-50%);
+}
+
+.dzi-colorbar-text {
+    position: absolute;
+    font-size: 10px;
+    transform: translateY(-50%);
+    padding-left: 5px;
+    white-space: nowrap;
+}
+
+/* Colormap backgrounds */
+.background-viridis {
+    background: linear-gradient(to bottom, #fde725, #5ec962, #21918c, #3b528b, #440154);
+}
+
+.background-plasma {
+    background: linear-gradient(to bottom, #f0f921, #fca636, #e16462, #b12a90, #0d0887);
+}
+
+.background-inferno {
+    background: linear-gradient(to bottom, #fcffa4, #f98e09, #bc3754, #57106e, #000004);
+}
+
+.background-magma {
+    background: linear-gradient(to bottom, #fcfdbf, #fe9f6d, #de4968, #8c2981, #000004);
+}
+
+.background-cividis {
+    background: linear-gradient(to bottom, #fee838, #a5a928, #6d7086, #4b4d81, #002051);
+}
+</style>

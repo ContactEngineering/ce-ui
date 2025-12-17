@@ -69,11 +69,7 @@ onMounted(() => {
         <NotificationButton v-if="!appProps.userIsAnonymous" />
         <UserMenuButton
             v-if="!appProps.userIsAnonymous"
-            :api-url="appProps.userApiUrl"
-            :admin-url="appProps.adminUrl"
             :name="appProps.userFullName"
-            :orcid="appProps.userOrcid"
-            :is-staff="appProps.userIsStaff"
         />
     </QToolbar>
 </template>

@@ -12,14 +12,18 @@ import {
     QList,
     QItem,
     QItemSection,
-    QItemLabel,
     QCheckbox,
     QDialog,
     QCardActions,
     QSpinner,
     QBtn,
     QSeparator,
-    QIcon
+    QIcon,
+    QTabs,
+    QTab,
+    QTabPanels,
+    QTabPanel,
+    QSpace
 } from 'quasar';
 
 import { useNotify } from "@/utils/notify";
@@ -354,125 +358,89 @@ const _activeTab = ref('measurements'); // main navigation tab
             <p class="q-mt-sm">Loading...</p>
         </div>
     </div>
-    <div v-if="_surface != null" class="row no-wrap">
-        <!-- Left Sidebar -->
-        <div class="sidebar q-pr-md" style="width: 240px; flex-shrink: 0;">
-            <!-- Navigation -->
-            <QList>
-                <QItem clickable :active="_activeTab === 'measurements'" @click="_activeTab = 'measurements'">
-                    <QItemSection avatar>
-                        <QIcon name="science" />
-                    </QItemSection>
-                    <QItemSection>
-                        <QItemLabel>Measurements</QItemLabel>
-                    </QItemSection>
-                    <QItemSection side>
-                        <QBadge>{{ measurementCount }}</QBadge>
-                    </QItemSection>
-                </QItem>
-                <QItem clickable :active="_activeTab === 'bandwidths'" @click="_activeTab = 'bandwidths'">
-                    <QItemSection avatar>
-                        <QIcon name="straighten" />
-                    </QItemSection>
-                    <QItemSection>
-                        <QItemLabel>Bandwidths</QItemLabel>
-                    </QItemSection>
-                </QItem>
-                <QItem clickable :active="_activeTab === 'description'" @click="_activeTab = 'description'">
-                    <QItemSection avatar>
-                        <QIcon name="description" />
-                    </QItemSection>
-                    <QItemSection>
-                        <QItemLabel>Description</QItemLabel>
-                    </QItemSection>
-                </QItem>
-                <QItem v-if="propertyCount !== 0 || isEditable" clickable :active="_activeTab === 'properties'" @click="_activeTab = 'properties'">
-                    <QItemSection avatar>
-                        <QIcon name="tune" />
-                    </QItemSection>
-                    <QItemSection>
-                        <QItemLabel>Properties</QItemLabel>
-                    </QItemSection>
-                    <QItemSection side>
-                        <QBadge>{{ propertyCount }}</QBadge>
-                    </QItemSection>
-                </QItem>
-                <QItem v-if="attachmentCount === null || attachmentCount !== 0 || isEditable" clickable :active="_activeTab === 'attachments'" @click="_activeTab = 'attachments'">
-                    <QItemSection avatar>
-                        <QIcon name="attach_file" />
-                    </QItemSection>
-                    <QItemSection>
-                        <QItemLabel>Attachments</QItemLabel>
-                    </QItemSection>
-                    <QItemSection side>
-                        <QBadge>{{ attachmentCount }}</QBadge>
-                    </QItemSection>
-                </QItem>
-                <QItem clickable :active="_activeTab === 'permissions'" @click="_activeTab = 'permissions'">
-                    <QItemSection avatar>
-                        <QIcon name="group" />
-                    </QItemSection>
-                    <QItemSection>
-                        <QItemLabel>Permissions</QItemLabel>
-                    </QItemSection>
-                </QItem>
-                <QItem v-if="isPublication" clickable :active="_activeTab === 'citation'" @click="_activeTab = 'citation'">
-                    <QItemSection avatar>
-                        <QIcon name="format_quote" />
-                    </QItemSection>
-                    <QItemSection>
-                        <QItemLabel>How to cite</QItemLabel>
-                    </QItemSection>
-                </QItem>
-            </QList>
-
-            <!-- Action Buttons -->
-            <QSeparator class="q-my-md" />
-            <div class="column q-gutter-sm q-px-sm">
-                <QBtn color="primary" icon="analytics" :href="`/ui/analysis-list/?subjects=${base64Subjects}`" label="Analyze" />
-                <QBtn flat icon="download" :href="`${_surface.url}download/`" label="Download" />
-                <QBtn v-if="!isPublication && hasFullAccess" flat icon="publish" :href="publishUrl" label="Publish" />
-                <QBtn v-if="(_versions == null || _versions.length === 0) && hasFullAccess" flat icon="delete" color="negative" @click="_showDeleteModal = true" label="Delete" />
-            </div>
-
-            <!-- Version/Publication Info -->
-            <template v-if="_publication != null || _surface.tags.length > 0 || _versions == null || _versions.length > 0">
-                <QSeparator class="q-my-md" />
-                <div class="q-px-sm">
-                    <div v-if="_publication != null" class="q-mb-sm">
-                        <QBadge color="info">Published by {{ _publication.publisher.name }}</QBadge>
-                    </div>
-                    <div v-if="_surface.tags.length > 0" class="q-mb-sm">
-                        <QBadge v-for="tag in _surface.tags" :key="tag.name" color="positive" class="q-mr-xs q-mb-xs">{{ tag.name }}</QBadge>
-                    </div>
-                    <QBtnDropdown v-if="_versions == null || _versions.length > 0" :label="versionString" color="info" dense class="full-width">
-                        <QList>
-                            <QItem v-if="_publication == null || _publication.has_access_to_original_surface"
-                                   clickable v-close-popup
-                                   :disable="_publication == null"
-                                   :href="hrefOriginalSurface">
-                                <QItemSection>Work in progress</QItemSection>
-                            </QItem>
-                            <QItem v-if="_versions == null">
-                                <QItemSection><QSpinner size="xs" /> Loading versions...</QItemSection>
-                            </QItem>
-                            <QItem v-for="version in _versions"
-                                   :key="version.version"
-                                   clickable v-close-popup
-                                   :disable="_publication != null && _publication.version === version.version"
-                                   :href="surfaceHrefForVersion(version)">
-                                <QItemSection>Version {{ version.version }}</QItemSection>
-                            </QItem>
-                        </QList>
-                    </QBtnDropdown>
+    <div v-if="_surface != null">
+        <!-- Page Header with Title and Actions -->
+        <div class="row items-center q-mb-md">
+            <div class="col">
+                <div class="row items-center q-gutter-sm">
+                    <QIcon name="layers" size="md" color="primary" />
+                    <div class="text-h5">{{ _surface.name }}</div>
+                    <QBadge v-if="_publication != null" color="info">
+                        Published
+                    </QBadge>
+                    <QBadge v-for="tag in _surface.tags" :key="tag.name" color="positive">
+                        {{ tag.name }}
+                    </QBadge>
                 </div>
-            </template>
+                <div v-if="_publication != null" class="text-caption text-grey-7 q-mt-xs q-ml-xl">
+                    Published by {{ _publication.publisher.name }} &middot; {{ versionString }}
+                </div>
+            </div>
+            <div class="row q-gutter-sm">
+                <QBtnDropdown v-if="_versions == null || _versions.length > 0"
+                              :label="versionString"
+                              flat
+                              dense>
+                    <QList>
+                        <QItem v-if="_publication == null || _publication.has_access_to_original_surface"
+                               clickable v-close-popup
+                               :disable="_publication == null"
+                               :href="hrefOriginalSurface">
+                            <QItemSection>Work in progress</QItemSection>
+                        </QItem>
+                        <QItem v-if="_versions == null">
+                            <QItemSection><QSpinner size="xs" /> Loading...</QItemSection>
+                        </QItem>
+                        <QItem v-for="version in _versions"
+                               :key="version.version"
+                               clickable v-close-popup
+                               :disable="_publication != null && _publication.version === version.version"
+                               :href="surfaceHrefForVersion(version)">
+                            <QItemSection>Version {{ version.version }}</QItemSection>
+                        </QItem>
+                    </QList>
+                </QBtnDropdown>
+                <QBtn flat dense icon="download" :href="`${_surface.url}download/`" label="Download" />
+                <QBtn v-if="!isPublication && hasFullAccess" flat dense icon="publish" :href="publishUrl" label="Publish" />
+                <QBtn v-if="(_versions == null || _versions.length === 0) && hasFullAccess" flat dense icon="delete" color="negative" @click="_showDeleteModal = true" />
+                <QBtn color="primary" icon="analytics" :href="`/ui/analysis-list/?subjects=${base64Subjects}`" label="Analyze" />
+            </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="col">
+        <QSeparator class="q-mb-md" />
+
+        <!-- Navigation Tabs -->
+        <QTabs v-model="_activeTab" dense align="left" class="text-grey" active-color="primary" indicator-color="primary" narrow-indicator>
+            <QTab name="measurements">
+                <span class="row items-center no-wrap">
+                    Measurements
+                    <QBadge color="grey-5" text-color="white" class="q-ml-xs">{{ measurementCount }}</QBadge>
+                </span>
+            </QTab>
+            <QTab name="bandwidths" label="Bandwidths" />
+            <QTab name="description" label="Description" />
+            <QTab v-if="propertyCount !== 0 || isEditable" name="properties">
+                <span class="row items-center no-wrap">
+                    Properties
+                    <QBadge color="grey-5" text-color="white" class="q-ml-xs">{{ propertyCount }}</QBadge>
+                </span>
+            </QTab>
+            <QTab v-if="attachmentCount === null || attachmentCount !== 0 || isEditable" name="attachments">
+                <span class="row items-center no-wrap">
+                    Attachments
+                    <QBadge color="grey-5" text-color="white" class="q-ml-xs">{{ attachmentCount }}</QBadge>
+                </span>
+            </QTab>
+            <QTab name="permissions" label="Permissions" />
+            <QTab v-if="isPublication" name="citation" label="Cite" />
+        </QTabs>
+
+        <QSeparator class="q-mb-md" />
+
+        <!-- Tab Panels -->
+        <QTabPanels v-model="_activeTab" animated>
             <!-- Measurements -->
-            <div v-show="_activeTab === 'measurements'">
+            <QTabPanel name="measurements" class="q-pa-none">
                 <DropZone v-if="isEditable && !anySelected" @files-dropped="filesDropped" />
                 <topography-update-card v-if="anySelected"
                                         v-model:topography="_batchEditTopography"
@@ -495,11 +463,10 @@ const _activeTab = ref('measurements'); // main navigation tab
                                     :syncTab="anySelected"
                                     @delete:topography="() => deleteTopography(index)" />
                 </div>
-            </div>
+            </QTabPanel>
 
             <!-- Bandwidths -->
-            <div v-show="_activeTab === 'bandwidths'">
-                <div class="text-h5 q-mb-md">Bandwidths</div>
+            <QTabPanel name="bandwidths" class="q-pa-none">
                 <QBanner v-if="_topographies.length == 0" class="bg-info text-white q-mb-md">
                     This surface has no measurements.
                 </QBanner>
@@ -510,52 +477,50 @@ const _activeTab = ref('measurements'); // main navigation tab
                     measurement capacities.
                 </QBanner>
                 <bandwidth-plot v-if="_topographies.length > 0" :topographies="_topographies" />
-            </div>
+            </QTabPanel>
 
             <!-- Description -->
-            <div v-show="_activeTab === 'description'">
+            <QTabPanel name="description" class="q-pa-none">
                 <DatasetDescription v-if="_surface != null"
                                     :description="_surface.description"
                                     :name="_surface.name"
                                     :permission="_permissions.current_user.permission"
                                     :surface-url="_surface.url"
                                     :tags="_surface.tags" />
-            </div>
+            </QTabPanel>
 
             <!-- Properties -->
-            <div v-show="_activeTab === 'properties'">
+            <QTabPanel name="properties" class="q-pa-none">
                 <DatasetProperties v-if="_surface != null"
                                    v-model:properties="_surface.properties"
                                    :permission="_permissions.current_user.permission"
                                    :surface-url="_surface.url"
                                    v-model:propertyCount="propertyCount" />
-            </div>
+            </QTabPanel>
 
             <!-- Attachments -->
-            <div v-show="_activeTab === 'attachments'">
+            <QTabPanel name="attachments" class="q-pa-none">
                 <Attachments v-if="_surface != null"
                              :attachments-url="_surface.attachments"
                              :permission="_permissions.current_user.permission"
                              v-model:attachmentCount="attachmentCount" />
-            </div>
+            </QTabPanel>
 
             <!-- Permissions -->
-            <div v-show="_activeTab === 'permissions'">
+            <QTabPanel name="permissions" class="q-pa-none">
                 <DatasetPermissions v-if="_surface.publication == null"
                                     v-model:permissions="_permissions"
                                     :set-permissions-url="_surface.api.set_permissions" />
                 <div v-if="_surface.publication != null">
-                    <div class="text-h5 q-mb-md">Permissions</div>
                     <p>
                         This dataset is published. It is visible to everyone
                         (even without logging into the system) and can no longer be modified.
                     </p>
                 </div>
-            </div>
+            </QTabPanel>
 
             <!-- Citation -->
-            <div v-if="isPublication" v-show="_activeTab === 'citation'">
-                <div class="text-h5 q-mb-md">How to cite</div>
+            <QTabPanel v-if="isPublication" name="citation" class="q-pa-none">
                 <p class="q-mb-lg">
                     <a :href="ccLicenseInfo[_publication.license].descriptionUrl">
                         <img :src="`/static/images/cc/${_publication.license}.svg`"
@@ -587,8 +552,8 @@ const _activeTab = ref('measurements'); // main navigation tab
                         <pre class="q-ma-none">{{ _publication.citation.biblatex }}</pre>
                     </div>
                 </QExpansionItem>
-            </div>
-        </div>
+            </QTabPanel>
+        </QTabPanels>
     </div>
     <QDialog v-if="_surface != null" v-model="_showDeleteModal">
         <QCard>

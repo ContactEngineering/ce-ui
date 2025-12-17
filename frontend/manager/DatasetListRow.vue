@@ -9,12 +9,15 @@ import {
     QBadge,
     QBtn,
     QCheckbox,
-    QItem
+    QIcon,
+    QItem,
+    QItemSection
 } from "quasar";
 
 import ThumbnailRow from "./ThumbnailRow.vue";
 
 const selected = defineModel<string[]>("selected");
+const _isHovered = ref(false);
 
 const props = defineProps({
     dataset: Object
@@ -77,112 +80,154 @@ const isSelected = computed({
 </script>
 
 <template>
-    <QItem class="dataset-list-row full-width">
-        <div class="row no-wrap full-width">
-            <div class="q-mr-sm">
-                <QCheckbox v-model="isSelected" />
-            </div>
-            <div class="col">
-                <img v-if="_publication != null"
-                     class="float-right q-ml-sm q-mr-sm"
-                     :src="`/static/images/cc/${_publication.license}.svg`"
-                     title="Dataset can be reused under the terms of a Creative Commons license.">
-                <QBadge v-if="_publication != null"
-                        class="float-right q-mr-sm cursor-pointer"
-                        @click="window.location.href = `https://doi.org/${_publication.doi_name}`">
-                    https://doi.org/{{ _publication.doi_name }}
-                </QBadge>
-                <a v-if="dataset.publication_doi != null"
-                   class="badge bg-dark q-mr-xs text-decoration-none"
-                   :href="dataset.publication_doi">{{ dataset.publication_doi }}</a>
-                <img v-if="dataset.publication_license != null"
-                     :src="`/static/images/cc/${dataset.publication_license}.svg`"
-                     title="Dataset can be reused under the terms of a Creative Commons license."
-                     style="float:right">
-                <QBadge v-if="dataset.sharing_status === 'own'" color="info" class="q-mr-xs">
+    <QItem class="dataset-list-row"
+           :class="{ 'dataset-list-row--hovered': _isHovered, 'dataset-list-row--selected': isSelected }"
+           @mouseenter="_isHovered = true"
+           @mouseleave="_isHovered = false">
+        <!-- Selection checkbox - fixed position on left, visible on hover or when selected -->
+        <QItemSection side class="selection-control" :class="{ 'selection-control--visible': _isHovered || isSelected }">
+            <QCheckbox v-model="isSelected" dense />
+        </QItemSection>
+
+        <QItemSection>
+            <!-- Badges row -->
+            <div class="row items-center q-gutter-xs q-mb-xs">
+                <QBadge v-if="dataset.sharing_status === 'own'" color="blue-2" text-color="blue-9">
                     Created by you
                 </QBadge>
                 <QBadge v-if="dataset.sharing_status === 'shared' && _creator == null"
-                        color="info" class="q-mr-xs">
+                        color="blue-2" text-color="blue-9">
                     Shared with you
                 </QBadge>
                 <QBadge v-if="dataset.sharing_status === 'shared' && _creator != null"
-                        color="info" class="q-mr-xs">
-                    Created by {{ _creator }} and shared with you
+                        color="blue-2" text-color="blue-9">
+                    Shared by {{ _creator }}
                 </QBadge>
-                <QBadge v-for="tag of dataset.tags" :key="tag" color="positive" class="q-mr-xs">
+                <QBadge v-for="tag of dataset.tags" :key="tag" color="green-2" text-color="green-9">
                     {{ tag }}
                 </QBadge>
-                <p class="dataset-title">
-                    <q-icon name="layers" /> {{ dataset.name }}
-                </p>
-                <p v-if="_publication != null" class="dataset-authors">
-                    This digital surface twin was published by {{ publicationAuthorsPretty }} on {{ publicationDatePretty }}
-                </p>
-                <ThumbnailRow class="q-mb-md"
-                              :data-source-list-url="dataset.topographies">
-                </ThumbnailRow>
-                <p v-if="_publication == null" class="dataset-authors">
-                    This digital surface twin is unpublished.
-                    It was created
-                    <span v-if="_creator != null">
-                        by {{ _creator }}
-                    </span>
-                    <span v-if="dataset.creation_datetime != null">
-                        on {{ creationDatePretty }}
-                    </span>.
-                </p>
-                <p v-if="dataset.description != null && dataset.description !== ''"
-                   class="dataset-description">
-                    {{ dataset.description }}</p>
-                <p v-if="dataset.topography_count != null && dataset.version != null"
-                   class="dataset-info">
-                    This is version {{ dataset.version }} of this digital surface twin
-                    and
-                    contains
-                    {{ dataset.topography_count }} measurements.
-                </p>
-                <p v-else-if="dataset.version != null" class="dataset-info">
-                    This is version {{ dataset.version }} of this digital surface twin.
-                </p>
-                <p v-else-if="dataset.topography_count != null" class="dataset-info">
-                    This digital surface twin contains {{ dataset.topography_count }}
-                    measurements.
-                </p>
+                <QBadge v-if="_publication != null"
+                        color="purple-2" text-color="purple-9"
+                        class="cursor-pointer"
+                        @click="window.location.href = `https://doi.org/${_publication.doi_name}`">
+                    <QIcon name="link" size="xs" class="q-mr-xs" />
+                    {{ _publication.doi_name }}
+                </QBadge>
+                <img v-if="_publication != null"
+                     height="16"
+                     :src="`/static/images/cc/${_publication.license}.svg`"
+                     title="Creative Commons license">
             </div>
-            <div class="column justify-center q-ml-sm">
-                <QBtn flat dense icon="visibility"
+
+            <!-- Title -->
+            <div class="row items-center q-mb-xs">
+                <QIcon name="layers" color="grey-7" class="q-mr-sm" />
+                <a :href="`/ui/dataset-detail/${dataset.id}/`" class="text-subtitle1 text-weight-medium dataset-title-link">
+                    {{ dataset.name }}
+                </a>
+            </div>
+
+            <!-- Thumbnails -->
+            <ThumbnailRow class="q-mb-sm" :data-source-list-url="dataset.topographies" />
+
+            <!-- Meta info -->
+            <div class="text-caption text-grey-7">
+                <span v-if="_publication != null">
+                    Published by {{ publicationAuthorsPretty }} on {{ publicationDatePretty }}
+                </span>
+                <span v-else>
+                    <span v-if="_creator != null">Created by {{ _creator }}</span>
+                    <span v-if="dataset.creation_datetime != null"> on {{ creationDatePretty }}</span>
+                </span>
+                <span v-if="dataset.topography_count != null">
+                     · {{ dataset.topography_count }} measurement<span v-if="dataset.topography_count !== 1">s</span>
+                </span>
+                <span v-if="dataset.version != null">
+                     · v{{ dataset.version }}
+                </span>
+            </div>
+
+            <!-- Description (truncated) -->
+            <div v-if="dataset.description != null && dataset.description !== ''"
+                 class="text-body2 text-grey-8 dataset-description q-mt-xs">
+                {{ dataset.description }}
+            </div>
+        </QItemSection>
+
+        <!-- Action buttons - visible on hover -->
+        <QItemSection side top class="action-buttons" :class="{ 'action-buttons--visible': _isHovered }">
+            <div class="column q-gutter-xs">
+                <QBtn flat dense round icon="visibility"
                       :href="`/ui/dataset-detail/${ dataset.id }/`"
-                      label="View" />
-                <QBtn flat dense icon="analytics"
+                      title="View" />
+                <QBtn flat dense round icon="analytics"
                       :href="`/ui/analysis-list/?subjects=${subjectsToBase64({surface: [dataset.id]})}`"
-                      label="Analyze" />
-                <QBtn flat dense icon="download"
+                      title="Analyze" />
+                <QBtn flat dense round icon="download"
                       :href="dataset.api.download"
-                      label="Download" />
+                      title="Download" />
             </div>
-        </div>
+        </QItemSection>
     </QItem>
 </template>
 
 <style scoped>
-
-.dataset-title {
-    font-size: medium;
-    font-weight: bold;
+/* MD3 list item states */
+.dataset-list-row {
+    transition: background-color 0.2s ease;
+    padding: 12px 16px;
 }
 
-.dataset-authors {
-    font-size: medium;
-    color: var(--secondary);
+.dataset-list-row--hovered {
+    background-color: rgba(0, 0, 0, 0.04);
 }
 
-/* The following cuts the description text after 3 display lines */
+.dataset-list-row--selected {
+    background-color: rgba(var(--q-primary-rgb, 25, 118, 210), 0.08);
+}
+
+.dataset-list-row--selected.dataset-list-row--hovered {
+    background-color: rgba(var(--q-primary-rgb, 25, 118, 210), 0.12);
+}
+
+/* Selection checkbox - fixed width on left, fades in on hover or when selected */
+.selection-control {
+    width: 40px;
+    min-width: 40px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.selection-control--visible {
+    opacity: 1;
+}
+
+/* Action buttons - hidden by default, shown on hover */
+.action-buttons {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.action-buttons--visible {
+    opacity: 1;
+}
+
+/* Title link styling */
+.dataset-title-link {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+.dataset-title-link:hover {
+    color: var(--q-primary);
+}
+
+/* The following cuts the description text after 2 display lines */
 .dataset-description {
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
-
 </style>

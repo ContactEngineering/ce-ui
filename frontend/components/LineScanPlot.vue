@@ -9,6 +9,7 @@
 import { onMounted, ref, computed } from "vue";
 import axios from "axios";
 import { NetCDFReader } from 'netcdfjs';
+import { QSpinner, QBanner } from "quasar";
 
 import {
     Plot,
@@ -80,15 +81,13 @@ onMounted(async () => {
 
 <template>
     <div class="line-scan-plot">
-        <div v-if="_loading" class="d-flex justify-content-center py-4">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
+        <div v-if="_loading" class="flex justify-center q-py-lg">
+            <QSpinner size="2rem" color="primary" />
         </div>
 
-        <div v-else-if="_error" class="alert alert-danger">
+        <QBanner v-else-if="_error" class="bg-negative text-white">
             {{ _error }}
-        </div>
+        </QBanner>
 
         <Plot
             v-else-if="_series.length > 0"

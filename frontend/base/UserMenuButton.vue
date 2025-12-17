@@ -1,34 +1,22 @@
 <script setup>
 
-import { ref } from "vue";
+import { inject } from "vue";
 import { QBtn } from "quasar";
 
-import UserMenuOffcanvas from "topobank/base/UserMenuOffcanvas.vue";
-
 const props = defineProps({
-    isAnonymous: Boolean,
-    apiUrl: String,
-    adminUrl: String,
-    userName: String,
-    name: String,
-    orcid: String,
-    isStaff: Boolean
+    name: String
 });
 
-const offcanvasVisible = ref(false);
+const rightDrawer = inject('rightDrawer');
+
+function openUserMenu() {
+    rightDrawer.open('user');
+}
 
 </script>
 
 <template>
-    <QBtn flat @click="offcanvasVisible = true" icon="account_circle">
-        <span v-if="!isAnonymous" class="q-ml-xs">{{ name }}</span>
+    <QBtn flat @click="openUserMenu" icon="account_circle">
+        <span class="q-ml-xs gt-xs">{{ name }}</span>
     </QBtn>
-    <UserMenuOffcanvas
-        v-model:visible="offcanvasVisible"
-        :api-url="apiUrl"
-        :admin-url="adminUrl"
-        :name="name"
-        :orcid="orcid"
-        :is-staff="isStaff"
-    ></UserMenuOffcanvas>
 </template>

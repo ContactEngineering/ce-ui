@@ -3,6 +3,7 @@
 import {
     QMenu,
     QBtn,
+    QIcon,
     QList,
     QItem,
     QItemSection,
@@ -76,7 +77,7 @@ const selectionIsPublished = computed(() => {
     <QMenu v-model="visible" anchor="bottom right" self="top right" :offset="[0, 8]">
         <div class="selection-menu">
             <div class="selection-header">
-                <q-icon name="check_box" />
+                <QIcon name="check_box" />
                 <span class="selection-title">Selected datasets</span>
                 <span v-if="selection.nbSelected > 0" class="selection-badge">
                     {{ selection.nbSelected }}
@@ -87,7 +88,7 @@ const selectionIsPublished = computed(() => {
 
             <div class="selection-content">
                 <div v-if="selection.nbSelected === 0" class="selection-empty">
-                    <q-icon name="layers" size="2rem" />
+                    <QIcon name="layers" size="2rem" />
                     <span>No selection</span>
                     <span class="text-caption">Select datasets from the list to analyze or download them.</span>
                 </div>
@@ -95,7 +96,7 @@ const selectionIsPublished = computed(() => {
                 <QList v-if="datasets.length > 0" dense>
                     <QItem v-for="dataset in datasets" :key="dataset.id" class="selection-item">
                         <QItemSection avatar>
-                            <q-icon name="layers" />
+                            <QIcon name="layers" />
                         </QItemSection>
                         <QItemSection>
                             <QItemLabel>{{ dataset.name }}</QItemLabel>
