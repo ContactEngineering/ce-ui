@@ -1,13 +1,18 @@
 <script lang="ts">
 
-import axios from "axios";
+import { QSelect, QBtn, QBtnGroup } from "quasar";
 
-import {BFormSelect} from "bootstrap-vue-next";
+import {
+    managerApiTopographyDestroy,
+    managerApiTopographyForceInspectCreate,
+    managerApiTopographyPartialUpdate
+} from "@/api";
+import {getIdFromUrl} from "@/utils/api";
 
 export default {
     name: 'topography-error-card',
     components: {
-        BFormSelect
+        QSelect, QBtn, QBtnGroup
     },
     emits: [
         'delete:topography',
@@ -20,19 +25,23 @@ export default {
         }
     },
     methods: {
-        deleteTopography() {
-            axios.delete(this.topography.url);
+        async deleteTopography() {
+            const topographyId = getIdFromUrl(this.topography.url);
+            await managerApiTopographyDestroy({path: {id: topographyId}});
             this.$emit('delete:topography', this.topography.url);
         },
-        forceInspect() {
-            axios.post(`${this.topography.url}force-inspect/`).then(response => {
-                this.$emit('update:topography', response.data);
-            });
+        async forceInspect() {
+            const topographyId = getIdFromUrl(this.topography.url);
+            const response = await managerApiTopographyForceInspectCreate({path: {id: topographyId}});
+            this.$emit('update:topography', response.data);
         },
-        dataSourceChanged(value) {
-            axios.patch(this.topography.url, {'data_source': this.topography.data_source}).then(response => {
-                this.$emit('update:topography', response.data);
+        async dataSourceChanged(value) {
+            const topographyId = getIdFromUrl(this.topography.url);
+            const response = await managerApiTopographyPartialUpdate({
+                path: {id: topographyId},
+                body: {'data_source': this.topography.data_source}
             });
+            this.$emit('update:topography', response.data);
         }
     },
     computed: {
@@ -45,9 +54,9 @@ export default {
             for (const [channelIndex, channelName] of this.topography.channel_names.entries()) {
                 const [name, unit] = channelName;
                 if (unit === null) {
-                    options.push({value: channelIndex, text: name});
+                    options.push({value: channelIndex, label: name});
                 } else {
-                    options.push({value: channelIndex, text: `${name} (${unit})`});
+                    options.push({value: channelIndex, label: `${name} (${unit})`});
                 }
             }
             return options;
@@ -57,30 +66,32 @@ export default {
 </script>
 
 <template>
-    <div class="card text-white bg-danger mb-1">
-        <div class="card-header">
-            <div class="btn-group btn-group-sm float-end">
-                <button class="btn btn-outline-light text-white"
-                        @click="forceInspect">
-                    <i class="fa fa-refresh"></i>
-                </button>
-                <button class="btn btn-outline-light text-white"
-                        @click="deleteTopography">
-                    <i class="fa fa-trash"></i>
-                </button>
-            </div>
+    <div class="error-card bg-negative text-white q-mb-xs rounded-borders">
+        <div class="error-card-header q-pa-sm flex items-center">
+            <QBtnGroup flat class="float-right">
+                <QBtn flat dense size="sm" text-color="white"
+                      @click="forceInspect" icon="refresh" />
+                <QBtn flat dense size="sm" text-color="white"
+                      @click="deleteTopography" icon="delete" />
+            </QBtnGroup>
             <div v-if="topography !== null && topography.data_source !== null && topography.channel_names.length > 0"
-                 class="input-group-sm float-start me-2">
-                <BFormSelect :options="channelOptions"
-                               v-model="topography.data_source"
-                               @change="dataSourceChanged">
-                </BFormSelect>
+                 class="q-mr-sm">
+                <QSelect :options="channelOptions"
+                         v-model="topography.data_source"
+                         @update:model-value="dataSourceChanged"
+                         emit-value
+                         map-options
+                         dense
+                         dark
+                         size="sm"
+                         style="min-width: 150px;">
+                </QSelect>
             </div>
-            <div>
-                <h5 class="d-inline">{{ topography.name }}</h5>
+            <div class="col-grow">
+                <h5 class="q-ma-none">{{ topography.name }}</h5>
             </div>
         </div>
-        <div class="card-body">
+        <div class="error-card-body q-pa-sm">
             {{ topography.error }}
         </div>
     </div>

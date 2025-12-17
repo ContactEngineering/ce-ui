@@ -1,24 +1,42 @@
 <script setup lang="ts">
 
-import axios from "axios";
-import {computed, inject, onMounted, ref, shallowRef} from "vue";
+import { computed, inject, onMounted, ref, shallowRef } from "vue";
 
 import {
-    BAccordion,
-    BAccordionItem,
-    BAlert,
-    BBadge,
-    BCard,
-    BCardText,
-    BDropdown,
-    BDropdownItem,
-    BFormCheckbox,
-    BModal,
-    BSpinner,
-    BTab,
-    BTabs,
-    useToastController
-} from 'bootstrap-vue-next';
+    QExpansionItem,
+    QBanner,
+    QBadge,
+    QCard,
+    QCardSection,
+    QBtnDropdown,
+    QList,
+    QItem,
+    QItemSection,
+    QCheckbox,
+    QDialog,
+    QCardActions,
+    QSpinner,
+    QBtn,
+    QSeparator,
+    QTabs,
+    QTab,
+    QTabPanels,
+    QTabPanel,
+    QSpace,
+    QScrollArea,
+    ClosePopup
+} from 'quasar';
+
+const vClosePopup = ClosePopup;
+
+import { useNotify } from "@/utils/notify";
+import {
+    goPublicationList,
+    goPublicationRetrieve,
+    managerApiSurfaceDestroy,
+    managerApiTopographyCreate,
+    managerApiTopographyPartialUpdate
+} from "@/api";
 
 import {
     filterTopographyForPatchRequest,
@@ -27,22 +45,20 @@ import {
 } from "../utils/api";
 import { ccLicenseInfo } from "../utils/data";
 
+import ActionFab from '../components/ActionFab.vue';
+import type { FabAction } from '../components/ActionFab.vue';
 import Attachments from '../manager/Attachments.vue';
 import BandwidthPlot from '../manager/BandwidthPlot.vue';
-import DropZone from '../components/DropZone.vue';
 import DatasetDescription from '../manager/DatasetDescription.vue';
 import DatasetPermissions from '../manager/DatasetPermissions.vue';
 import DatasetProperties from '../manager/DatasetProperties.vue';
-import TopographyCard from "../manager/TopographyCard.vue";
+import TopographyListRow from "../manager/TopographyListRow.vue";
 import TopographyUpdateCard from "../manager/TopographyUpdateCard.vue";
+import UploadModal from '../components/UploadModal.vue';
 
-const {show} = useToastController();
+const { show } = useNotify();
 
 const props = defineProps({
-    newTopographyUrl: {
-        type: String,
-        default: '/manager/api/topography/'
-    },
     categories: {
         type: Object,
         default: {
@@ -77,6 +93,10 @@ const _selected = ref([]);  // Selected topographies (for batch editing)
 
 // Batch edit data
 const _batchEditTopography = ref(emptyTopography());
+
+// Upload modal
+const _showUploadModal = ref(false);
+const _showAttachmentModal = ref(false);
 
 function emptyTopography() {
     return {
@@ -130,15 +150,17 @@ function updateCard() {
     updatePublication();
 }
 
-function updatePublication() {
+async function updatePublication() {
     if (_surface.value.publication == null) {
         _publication.value = null;
         updateVersions();
     } else {
-        axios.get(_surface.value.publication).then(response => {
+        try {
+            const publicationId = getIdFromUrl(_surface.value.publication);
+            const response = await goPublicationRetrieve({path: {id: publicationId}});
             _publication.value = response.data;
             updateVersions();
-        }).catch(error => {
+        } catch (error) {
             show?.({
                 props: {
                     title: "Failed to fetch publication information",
@@ -146,14 +168,17 @@ function updatePublication() {
                     variant: 'danger'
                 }
             });
-        });
+        }
     }
 }
 
-function updateVersions() {
-    axios.get(`/go/publication/?original_surface=${getOriginalSurfaceId()}`).then(response => {
+async function updateVersions() {
+    try {
+        const response = await goPublicationList({
+            query: {original_surface: getOriginalSurfaceId()} as any
+        });
         _versions.value = response.data;
-    }).catch(error => {
+    } catch (error) {
         show?.({
             props: {
                 title: "Failed to fetch published versions",
@@ -161,40 +186,27 @@ function updateVersions() {
                 variant: 'danger'
             }
         });
-    });
-}
-
-function filesDropped(files) {
-    for (const file of files) {
-        uploadNewTopography(file);
     }
 }
 
-function uploadNewTopography(file) {
-    axios.post(props.newTopographyUrl, {
-        surface: _surface.value.url,
-        name: file.name
-    }).then(response => {
-        let upload = response.data;
-        upload.file = file;  // need to know which file to upload
-        _topographies.value.push(upload);  // this will trigger showing a topography-upload-card
+function onTopographiesUploaded(results: any[]) {
+    // Add uploaded topographies to the list
+    for (const result of results) {
+        // The topography object from the upload already has the file attached
+        // but we don't need the file reference anymore since it's uploaded
+        const topography = result.topography;
+        delete topography.file;
+        delete topography.datafile?.upload_instructions;
+        _topographies.value.push(topography);
         _selected.value.push(false);  // initially unselected
-    });/*.catch(error => {
-        show?.({
-            props: {
-                title: "Failed to create a new measurement",
-                body: error,
-                variant: 'danger'
-            }
-        });
-    });*/
+    }
 }
 
 function deleteTopography(index) {
     _topographies.value[index] = null;
 }    
 
-function saveBatchEdit(topography) {
+async function saveBatchEdit(topography) {
     // Trigger saving spinner
     _saving.value = true;
 
@@ -202,14 +214,18 @@ function saveBatchEdit(topography) {
     const cleanedBatchEditTopography = filterTopographyForPatchRequest(topography);
 
     // Update all topographies and issue patch request
+    const updatePromises = [];
     for (const i in _topographies.value) {
         if (_selected.value[i]) {
             const t = {
                 ..._topographies.value[i],
                 ...cleanedBatchEditTopography
             }
-
-            axios.patch(t.url, filterTopographyForPatchRequest(t)).then(response => {
+            const topographyId = getIdFromUrl(t.url);
+            const updatePromise = managerApiTopographyPartialUpdate({
+                path: {id: topographyId},
+                body: filterTopographyForPatchRequest(t)
+            }).then(response => {
                 _topographies.value[i] = response.data;
             }).catch(error => {
                 show?.({
@@ -220,8 +236,12 @@ function saveBatchEdit(topography) {
                     }
                 });
             });
+            updatePromises.push(updatePromise);
         }
     }
+
+    // Wait for all updates to complete
+    await Promise.all(updatePromises);
 
     // Reset selection
     _selected.value.fill(false);
@@ -245,11 +265,13 @@ function surfaceHrefForVersion(version) {
     return `/ui/dataset-detail/${getIdFromUrl(version.surface)}/`;
 }
 
-function deleteSurface() {
-    axios.delete(_surface.value.url).then(response => {
+async function deleteSurface() {
+    try {
+        const surfaceId = getIdFromUrl(_surface.value.url);
+        await managerApiSurfaceDestroy({path: {id: surfaceId}});
         emit('delete:surface', _surface.value.url);
         window.location.href = `/ui/dataset-list/`;
-    }).catch(error => {
+    } catch (error) {
         show?.({
             props: {
                 title: "Failed to delete digital surface twin",
@@ -257,7 +279,7 @@ function deleteSurface() {
                 variant: 'danger'
             }
         });
-    });
+    }
 }
 
 const base64Subjects = computed(() => {
@@ -318,241 +340,320 @@ const measurementCount = computed(() => {
 
 const batchActiveTab = ref('home'); // shared active tab for batch mode
 
+const _activeTab = ref('measurements'); // main navigation tab
+
+// FAB actions
+const fabActions = computed<FabAction[]>(() => {
+    const actions: FabAction[] = [];
+
+    if (isEditable.value) {
+        actions.push({
+            id: 'upload',
+            icon: 'upload_file',
+            label: 'Upload measurements',
+            color: 'primary',
+            tooltip: 'Upload new measurement files'
+        });
+        actions.push({
+            id: 'attach',
+            icon: 'attach_file',
+            label: 'Add attachment',
+            color: 'secondary',
+            tooltip: 'Attach supporting files'
+        });
+    }
+
+    actions.push({
+        id: 'download',
+        icon: 'download',
+        label: 'Download',
+        href: `${_surface.value?.url}download/`
+    });
+
+    actions.push({
+        id: 'analyze',
+        icon: 'analytics',
+        label: 'Analyze',
+        color: 'accent',
+        href: `/ui/analysis-list/?subjects=${base64Subjects.value}`
+    });
+
+    if (!isPublication.value && hasFullAccess.value) {
+        actions.push({
+            id: 'publish',
+            icon: 'publish',
+            label: 'Publish',
+            href: publishUrl.value
+        });
+    }
+
+    if ((_versions.value === null || _versions.value.length === 0) && hasFullAccess.value) {
+        actions.push({
+            id: 'delete',
+            icon: 'delete',
+            label: 'Delete',
+            color: 'negative'
+        });
+    }
+
+    return actions;
+});
+
+function handleFabAction(actionId: string) {
+    switch (actionId) {
+        case 'upload':
+            _showUploadModal.value = true;
+            break;
+        case 'attach':
+            _activeTab.value = 'attachments';
+            _showAttachmentModal.value = true;
+            break;
+        case 'delete':
+            _showDeleteModal.value = true;
+            break;
+    }
+}
+
+function navigateToTopography(topography: any) {
+    const id = getIdFromUrl(topography.url);
+    window.location.href = `/ui/topography/${id}/`;
+}
 
 </script>
 
 <template>
-    <div class="container">
-        <div v-if="_surface == null" class="d-flex justify-content-center mt-5">
-            <div class="flex-column text-center">
-                <b-spinner/>
-                <p>Loading...</p>
-            </div>
-        </div>
-        <div v-if="_surface != null" class="row">
-            <div class="col-12">
-                <BTabs class="nav-pills-custom"
-                       content-class="w-100"
-                       fill
-                       pills
-                       vertical>
-                    <BTab title="Measurements">
-                        <template #title>
-                            Measurements <BBadge>{{measurementCount}}</BBadge>
-                        </template>
-                        <DropZone v-if="isEditable && !anySelected" @files-dropped="filesDropped">
-                        </DropZone>
-                        <topography-update-card v-if="anySelected"
-                                                v-model:topography="_batchEditTopography"
-                                                v-model:active-tab="batchActiveTab"
-                                                :batch-edit="true"
-                                                :saving="_saving"
-                                                @save:edit="saveBatchEdit"
-                                                @discard:edit="discardBatchEdit">
-                        </topography-update-card>
-                        <div v-if="isEditable && _topographies.length > 0"
-                             class="d-flex mb-1">
-                            <BCard>
-                                <BFormCheckbox v-model="allSelected"
-                                               :indeterminate="someSelected" size="sm">
-                                    Select all
-                                </BFormCheckbox>
-                            </BCard>
-                        </div>
-                        <div v-for="(topography, index) in _topographies">
-                            <TopographyCard v-if="topography != null"
-                                            v-model:selected="_selected[index]"
-                                            v-model:topography="_topographies[index]"
-                                            v-model:active-tab="batchActiveTab"
-                                            :disabled="!isEditable"
-                                            :selectable="isEditable"
-                                            :topography-url="topography.url"
-                                            :syncTab="anySelected"
-                                            @delete:topography="() => deleteTopography(index)">
-                            </TopographyCard>
-                        </div>
-                    </BTab>
-                    <BTab title="Bandwidths">
-                        <BCard class="w-100">
-                            <template #header>
-                                <h5 class="float-start">Bandwidths</h5>
-                            </template>
-                            <BAlert :model-value="_topographies.length == 0" info>
-                                This surface has no measurements.
-                            </BAlert>
-                            <BAlert :model-value="_topographies.length > 0"
-                                    secondary>
-                                This bandwidth plot shows the range of length scales
-                                that have been measured for
-                                this digital surface twin. Each of the blocks below
-                                represents one measurement.
-                                Part of the bandwidth shown may be unreliable due to
-                                the configured instrument's
-                                measurement capacities.
-                            </BAlert>
-                            <bandwidth-plot v-if="_topographies.length > 0"
-                                            :topographies="_topographies">
-                            </bandwidth-plot>
-                        </BCard>
-                    </BTab>
-                    <BTab title="Description">
-                        <DatasetDescription v-if="_surface != null"
-                                            :description="_surface.description"
-                                            :name="_surface.name"
-                                            :permission="_permissions.current_user.permission"
-                                            :surface-url="_surface.url"
-                                            :tags="_surface.tags">
-                        </DatasetDescription>
-                    </BTab>
-                    <BTab title="Properties" v-if ="propertyCount !== 0 || isEditable"> 
-                        <template #title>
-                            Properties <BBadge>{{ propertyCount }}</BBadge>
-                        </template>
-                        <DatasetProperties v-if="_surface != null"
-                                           v-model:properties="_surface.properties"
-                                           :permission="_permissions.current_user.permission"
-                                           :surface-url="_surface.url"
-                                           v-model:propertyCount="propertyCount">
-                        </DatasetProperties>
-                    </BTab>
-                    <BTab title="Attachments" v-if ="attachmentCount === null || attachmentCount !== 0 || isEditable"> <!--here the tab will not be displayed when attachment count is 0 and is editable is false -->
-                        <template #title>
-                            Attachments <BBadge>{{ attachmentCount }}</BBadge>
-                        </template>
-                        <Attachments v-if="_surface != null" :attachments-url="_surface.attachments"
-                            :permission="_permissions.current_user.permission"
-                            v-model:attachmentCount="attachmentCount"
-                            >
-                        </Attachments>
-                    </BTab>
-                    <BTab v-if="_surface != null"
-                          title="Permissions">
-                        <DatasetPermissions v-if="_surface.publication == null"
-                                            v-model:permissions="_permissions"
-                                            :set-permissions-url="_surface.api.set_permissions">
-                        </DatasetPermissions>
-                        <BCard v-if="_surface.publication != null" class="w-100">
-                            <template #header>
-                                <h5 class="float-start">Permissions</h5>
-                            </template>
-                            <BCardText>
-                                This dataset is published. It is visible to everyone
-                                (even without logging into the
-                                system) and can no longer be modified.
-                            </BCardText>
-                        </BCard>
-                    </BTab>
-                    <BTab v-if="isPublication"
-                          title="How to cite">
-                        <BCard class="w-100">
-                            <template #header>
-                                <h5 class="float-start">How to cite</h5>
-                            </template>
-                            <p class="mb-5">
-                                <a :href="ccLicenseInfo[_publication.license].descriptionUrl">
-                                    <img
-                                        :src="`/static/images/cc/${_publication.license}.svg`"
-                                        :title="`Dataset can be reused under the terms of the ${ccLicenseInfo[_publication.license].title}.`"
-                                        style="float:right; margin-left: 0.25rem;"/>
-                                </a>
-                                This dataset can be reused under the terms of the
-                                <a :href="ccLicenseInfo[_publication.license].descriptionUrl">
-                                    {{ ccLicenseInfo[_publication.license].title }}
-                                </a>.
-                                When reusing this dataset, please cite the original
-                                source.
-                            </p>
-                            <BAccordion>
-                                <BAccordionItem title="Citation" visible>
-                                    <div v-html="_publication.citation.html"/>
-                                </BAccordionItem>
-                                <BAccordionItem title="RIS">
-                                    <code>
-                                        <pre>{{ _publication.citation.ris }}</pre>
-                                    </code>
-                                </BAccordionItem>
-                                <BAccordionItem title="BibTeX">
-                                    <code>
-                                        <pre>{{ _publication.citation.bibtex }}</pre>
-                                    </code>
-                                </BAccordionItem>
-                                <BAccordionItem title="BibLaTeX">
-                                    <code>
-                                        <pre>{{ _publication.citation.biblatex }}</pre>
-                                    </code>
-                                </BAccordionItem>
-                            </BAccordion>
-                        </BCard>
-                    </BTab>
-                    <template #tabs-end>
-                        <hr/>
-                        <a :href="`/ui/analysis-list/?subjects=${base64Subjects}`"
-                           class="btn btn-success mb-2 mt-2">
-                            Analyze
-                        </a>
-
-                        <a :href="`${_surface.url}download/`"
-                           class="btn btn-light mb-2">
-                            Download
-                        </a>
-
-                        <a v-if="!isPublication && hasFullAccess" :href="publishUrl"
-                           class="btn btn-light mb-2">
-                            Publish
-                        </a>
-
-                        <a v-if="_versions == null || _versions.length === 0 && hasFullAccess"
-                           class="btn btn-danger mb-2"
-                           href="#" @click="_showDeleteModal = true">
-                            Delete
-                        </a>
-                        <hr v-if="_surface != null && (_publication != null || _surface.tags.length > 0 || _versions == null || _versions.length > 0)"/>
-                        <BCard
-                            v-if="_surface != null && (_publication != null || _surface.tags.length > 0 || _versions == null || _versions.length > 0)">
-                            <div v-if="_publication != null">
-                                <span class="badge bg-info">Published by {{
-                                        _publication.publisher.name
-                                    }}</span>
-                            </div>
-                            <div v-if="_surface.tags.length > 0">
-                                <span v-for="tag in _surface.tags"
-                                      class="badge bg-success">{{ tag.name }}</span>
-                            </div>
-                            <BDropdown
-                                v-if="_versions == null || _versions.length > 0"
-                                :text="versionString"
-                                class="mt-2"
-                                variant="info">
-                                <BDropdownItem
-                                    v-if="_publication == null || _publication.has_access_to_original_surface"
-                                    :disabled="_publication == null"
-                                    :href="hrefOriginalSurface">
-                                    Work in progress
-                                </BDropdownItem>
-                                <BDropdownItem v-if="_versions == null">
-                                    <b-spinner small/>
-                                    Loading versions...
-                                </BDropdownItem>
-                                <BDropdownItem v-for="version in _versions"
-                                               v-if="_versions != null"
-                                               :disabled="_publication != null && _publication.version === version.version"
-                                               :href="surfaceHrefForVersion(version)">
-                                    Version {{ version.version }}
-                                </BDropdownItem>
-                            </BDropdown>
-                        </BCard>
-                    </template>
-                </BTabs>
-            </div>
+    <div v-if="_surface == null" class="flex justify-center q-mt-xl">
+        <div class="column items-center">
+            <QSpinner size="lg" />
+            <p class="q-mt-sm">Loading...</p>
         </div>
     </div>
-    <b-modal v-if="_surface != null"
-             v-model="_showDeleteModal"
-             title="Delete digital surface twin"
-             @ok="deleteSurface">
-        You are about to delete the digital surface twin with name <b>{{
-            _surface.name
-        }}</b> and all contained
-        measurements. Are you sure you want to proceed?
-    </b-modal>
+    <div v-if="_surface != null">
+        <!-- Page Header with Badges and Version -->
+        <div class="row items-center q-mb-md">
+            <div class="col row items-center q-gutter-sm">
+                <QBadge v-if="_publication != null" color="info">
+                    Published
+                </QBadge>
+                <QBadge v-for="tag in _surface.tags" :key="tag.name" color="positive">
+                    {{ tag.name }}
+                </QBadge>
+                <span v-if="_publication != null" class="text-caption text-grey-7">
+                    Published by {{ _publication.publisher.name }}
+                </span>
+            </div>
+            <QBtnDropdown v-if="_versions == null || _versions.length > 0"
+                          :label="versionString"
+                          flat
+                          dense>
+                <QList>
+                    <QItem v-if="_publication == null || _publication.has_access_to_original_surface"
+                           clickable v-close-popup
+                           :disable="_publication == null"
+                           :href="hrefOriginalSurface">
+                        <QItemSection>Work in progress</QItemSection>
+                    </QItem>
+                    <QItem v-if="_versions == null">
+                        <QItemSection><QSpinner size="xs" /> Loading...</QItemSection>
+                    </QItem>
+                    <QItem v-for="version in _versions"
+                           :key="version.version"
+                           clickable v-close-popup
+                           :disable="_publication != null && _publication.version === version.version"
+                           :href="surfaceHrefForVersion(version)">
+                        <QItemSection>Version {{ version.version }}</QItemSection>
+                    </QItem>
+                </QList>
+            </QBtnDropdown>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <QTabs v-model="_activeTab" dense align="left" class="text-grey" active-color="primary" indicator-color="primary" narrow-indicator>
+            <QTab name="measurements">
+                <span class="row items-center no-wrap">
+                    Measurements
+                    <QBadge color="grey-5" text-color="white" class="q-ml-xs">{{ measurementCount }}</QBadge>
+                </span>
+            </QTab>
+            <QTab name="bandwidths" label="Bandwidths" />
+            <QTab name="description" label="Description" />
+            <QTab v-if="propertyCount !== 0 || isEditable" name="properties">
+                <span class="row items-center no-wrap">
+                    Properties
+                    <QBadge color="grey-5" text-color="white" class="q-ml-xs">{{ propertyCount }}</QBadge>
+                </span>
+            </QTab>
+            <QTab v-if="attachmentCount === null || attachmentCount !== 0 || isEditable" name="attachments">
+                <span class="row items-center no-wrap">
+                    Attachments
+                    <QBadge color="grey-5" text-color="white" class="q-ml-xs">{{ attachmentCount }}</QBadge>
+                </span>
+            </QTab>
+            <QTab name="permissions" label="Permissions" />
+            <QTab v-if="isPublication" name="citation" label="Cite" />
+        </QTabs>
+
+        <QSeparator class="q-mb-md" />
+
+        <!-- Tab Panels -->
+        <QTabPanels v-model="_activeTab" animated>
+            <!-- Measurements -->
+            <QTabPanel name="measurements" class="q-pa-none">
+                <!-- Batch edit panel -->
+                <TopographyUpdateCard v-if="anySelected"
+                                      v-model:topography="_batchEditTopography"
+                                      v-model:active-tab="batchActiveTab"
+                                      :batch-edit="true"
+                                      :saving="_saving"
+                                      @save:edit="saveBatchEdit"
+                                      @discard:edit="discardBatchEdit" />
+
+                <!-- Select all checkbox -->
+                <div v-if="isEditable && _topographies.length > 0" class="q-mb-sm q-pa-sm bg-grey-2 rounded-borders">
+                    <QCheckbox v-model="allSelected"
+                               :indeterminate-value="someSelected ? null : undefined"
+                               label="Select all"
+                               size="sm" />
+                </div>
+
+                <!-- Empty state -->
+                <QBanner v-if="_topographies.length === 0" class="bg-grey-2 text-grey-8">
+                    No measurements yet. Use the upload button to add measurement files.
+                </QBanner>
+
+                <!-- Measurements list -->
+                <QScrollArea v-if="_topographies.length > 0"
+                             style="height: calc(100vh - 350px); min-height: 300px;"
+                             class="rounded-borders">
+                    <QList bordered separator class="rounded-borders">
+                        <template v-for="(topography, index) in _topographies" :key="topography?.url || index">
+                            <TopographyListRow v-if="topography != null"
+                                               :topography="topography"
+                                               :selectable="isEditable"
+                                               :disabled="!isEditable"
+                                               v-model:selected="_selected[index]"
+                                               @click="navigateToTopography" />
+                        </template>
+                    </QList>
+                </QScrollArea>
+            </QTabPanel>
+
+            <!-- Bandwidths -->
+            <QTabPanel name="bandwidths" class="q-pa-none">
+                <QBanner v-if="_topographies.length == 0" class="bg-info text-white q-mb-md">
+                    This surface has no measurements.
+                </QBanner>
+                <QBanner v-if="_topographies.length > 0" class="bg-grey-2 q-mb-md">
+                    This bandwidth plot shows the range of length scales that have been measured for
+                    this digital surface twin. Each of the blocks below represents one measurement.
+                    Part of the bandwidth shown may be unreliable due to the configured instrument's
+                    measurement capacities.
+                </QBanner>
+                <bandwidth-plot v-if="_topographies.length > 0" :topographies="_topographies" />
+            </QTabPanel>
+
+            <!-- Description -->
+            <QTabPanel name="description" class="q-pa-none">
+                <DatasetDescription v-if="_surface != null"
+                                    :description="_surface.description"
+                                    :name="_surface.name"
+                                    :permission="_permissions.current_user.permission"
+                                    :surface-url="_surface.url"
+                                    :tags="_surface.tags" />
+            </QTabPanel>
+
+            <!-- Properties -->
+            <QTabPanel name="properties" class="q-pa-none">
+                <DatasetProperties v-if="_surface != null"
+                                   v-model:properties="_surface.properties"
+                                   :permission="_permissions.current_user.permission"
+                                   :surface-url="_surface.url"
+                                   v-model:propertyCount="propertyCount" />
+            </QTabPanel>
+
+            <!-- Attachments -->
+            <QTabPanel name="attachments" class="q-pa-none">
+                <Attachments v-if="_surface != null"
+                             :attachments-url="_surface.attachments"
+                             :permission="_permissions.current_user.permission"
+                             v-model:attachmentCount="attachmentCount" />
+            </QTabPanel>
+
+            <!-- Permissions -->
+            <QTabPanel name="permissions" class="q-pa-none">
+                <DatasetPermissions v-if="_surface.publication == null"
+                                    v-model:permissions="_permissions"
+                                    :set-permissions-url="_surface.api.set_permissions" />
+                <div v-if="_surface.publication != null">
+                    <p>
+                        This dataset is published. It is visible to everyone
+                        (even without logging into the system) and can no longer be modified.
+                    </p>
+                </div>
+            </QTabPanel>
+
+            <!-- Citation -->
+            <QTabPanel v-if="isPublication" name="citation" class="q-pa-none">
+                <p class="q-mb-lg">
+                    <a :href="ccLicenseInfo[_publication.license].descriptionUrl">
+                        <img :src="`/static/images/cc/${_publication.license}.svg`"
+                             :alt="ccLicenseInfo[_publication.license].title"
+                             :title="`Dataset can be reused under the terms of the ${ccLicenseInfo[_publication.license].title}.`"
+                             style="float:right; margin-left: 0.25rem;"/>
+                    </a>
+                    This dataset can be reused under the terms of the
+                    <a :href="ccLicenseInfo[_publication.license].descriptionUrl">
+                        {{ ccLicenseInfo[_publication.license].title }}
+                    </a>.
+                    When reusing this dataset, please cite the original source.
+                </p>
+                <QExpansionItem default-opened label="Citation" header-class="bg-grey-2">
+                    <div class="q-pa-md" v-html="_publication.citation.html" />
+                </QExpansionItem>
+                <QExpansionItem label="RIS" header-class="bg-grey-2">
+                    <div class="q-pa-md">
+                        <pre class="q-ma-none">{{ _publication.citation.ris }}</pre>
+                    </div>
+                </QExpansionItem>
+                <QExpansionItem label="BibTeX" header-class="bg-grey-2">
+                    <div class="q-pa-md">
+                        <pre class="q-ma-none">{{ _publication.citation.bibtex }}</pre>
+                    </div>
+                </QExpansionItem>
+                <QExpansionItem label="BibLaTeX" header-class="bg-grey-2">
+                    <div class="q-pa-md">
+                        <pre class="q-ma-none">{{ _publication.citation.biblatex }}</pre>
+                    </div>
+                </QExpansionItem>
+            </QTabPanel>
+        </QTabPanels>
+    </div>
+    <!-- Floating Action Button -->
+    <ActionFab v-if="_surface != null"
+               :actions="fabActions"
+               @action="handleFabAction" />
+
+    <!-- Upload Modal for Measurements -->
+    <UploadModal v-if="_surface != null"
+                 v-model="_showUploadModal"
+                 mode="topography"
+                 :target-url="_surface.url"
+                 @uploaded="onTopographiesUploaded" />
+
+    <!-- Delete Confirmation Dialog -->
+    <QDialog v-if="_surface != null" v-model="_showDeleteModal">
+        <QCard>
+            <QCardSection>
+                <div class="text-h6">Delete digital surface twin</div>
+            </QCardSection>
+            <QCardSection>
+                You are about to delete the digital surface twin with name <b>{{ _surface.name }}</b>
+                and all contained measurements. Are you sure you want to proceed?
+            </QCardSection>
+            <QCardActions align="right">
+                <QBtn flat label="Cancel" v-close-popup />
+                <QBtn color="negative" label="Delete" @click="deleteSurface" v-close-popup />
+            </QCardActions>
+        </QCard>
+    </QDialog>
 </template>

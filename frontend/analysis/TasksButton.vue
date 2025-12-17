@@ -1,15 +1,15 @@
 <script setup>
 
-import {computed, ref} from "vue";
+import { computed, ref } from "vue";
 
-import {BButton} from 'bootstrap-vue-next';
+import { QBtn, QBadge, QSpinner } from 'quasar';
 
-import {countTaskStates} from 'topobank/utils/tasks.ts';
+import { countTaskStates } from 'topobank/utils/tasks.ts';
 
 import TaskStatesModal from './TaskStatesModal.vue';
 
 // List of analyses
-const analyses = defineModel('analyses', {required: true});
+const analyses = defineModel('analyses', { required: true });
 
 // Event when all tasks are finished
 const emit = defineEmits(['allTasksFinished', 'someTasksFinished']);
@@ -46,15 +46,13 @@ const nbFailed = computed(() => {
 </script>
 
 <template>
-    <BButton variant="light"
-             size="sm"
-             @click="_modalVisible = !_modalVisible">
-        <span v-if="nbRunningOrPending > 0" class="spinner"></span>
+    <QBtn flat size="sm" @click="_modalVisible = !_modalVisible">
+        <QSpinner v-if="nbRunningOrPending > 0" size="xs" class="q-mr-xs" />
         Tasks
-        <span v-if="nbRunningOrPending > 0" class="badge bg-secondary ms-1">{{ nbRunningOrPending }}</span>
-        <span v-if="nbSuccess > 0" class="badge bg-success ms-1">{{ nbSuccess }}</span>
-        <span v-if="nbFailed > 0" class="badge bg-danger ms-1">{{ nbFailed }}</span>
-    </BButton>
+        <QBadge v-if="nbRunningOrPending > 0" color="grey" class="q-ml-xs">{{ nbRunningOrPending }}</QBadge>
+        <QBadge v-if="nbSuccess > 0" color="positive" class="q-ml-xs">{{ nbSuccess }}</QBadge>
+        <QBadge v-if="nbFailed > 0" color="negative" class="q-ml-xs">{{ nbFailed }}</QBadge>
+    </QBtn>
     <TaskStatesModal v-model:visible="_modalVisible"
                      v-model:analyses="analyses">
     </TaskStatesModal>

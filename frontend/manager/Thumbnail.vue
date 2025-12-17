@@ -1,14 +1,14 @@
 <script setup>
 
-import {computed, ref} from "vue";
+import { computed, ref } from "vue";
 
-import {BOverlay} from "bootstrap-vue-next";
+import { QInnerLoading, QSpinner, QIcon } from "quasar";
 
 const props = defineProps({
     dataSource: Object,
-    imgClass: {
+    size: {
         type: String,
-        default: ''
+        default: '64px'
     }
 });
 
@@ -21,14 +21,42 @@ const hasThumbnail = computed(() => {
 </script>
 
 <template>
-    <BOverlay :show="hasThumbnail && _isLoading">
+    <div class="thumbnail-wrapper" :style="{ width: size, height: size }">
         <a :href="`/ui/topography/${dataSource.id}/`">
             <img v-if="hasThumbnail"
-                 :class="imgClass"
+                 class="thumbnail-img"
                  :src="dataSource.thumbnail.file"
                  @load="_isLoading = false">
-            <i v-if="!hasThumbnail"
-               :class="`fa fa-microscope fa-2x text-black ${imgClass}`"></i>
+            <div v-if="!hasThumbnail" class="thumbnail-placeholder">
+                <QIcon name="insert_chart" size="32px" color="grey-6" />
+            </div>
         </a>
-    </BOverlay>
+        <QInnerLoading :showing="hasThumbnail && _isLoading">
+            <QSpinner size="1rem" />
+        </QInnerLoading>
+    </div>
 </template>
+
+<style scoped>
+.thumbnail-wrapper {
+    position: relative;
+    flex-shrink: 0;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #f5f5f5;
+}
+
+.thumbnail-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.thumbnail-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+</style>

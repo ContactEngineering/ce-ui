@@ -1,12 +1,18 @@
-// Vue, Pinia and Boostrap
+// Vue, Pinia and Quasar
 import {createApp} from 'vue';
-import {createBootstrap} from 'bootstrap-vue-next'
+import {Quasar, Notify, Dialog, Loading} from 'quasar';
 import {createPinia} from "pinia";
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 
+// Quasar styles
+import '@quasar/extras/material-icons/material-icons.css';
+import 'quasar/dist/quasar.css';
 
 // Axios
 import axios from "axios";
+
+// Generated API client
+import {client} from "@/api/client.gen";
 
 // Import the app components
 import {registerAppComponents} from './apps/index';
@@ -23,8 +29,18 @@ export function createAppFrame(element, csrfToken, appProps, componentProps) {
     const pinia = createPinia();
     pinia.use(piniaPluginPersistedstate);
     app.use(pinia);
-    app.use(createBootstrap());
+    app.use(Quasar, {
+        plugins: {Notify, Dialog, Loading},
+    });
     axios.defaults.headers.common['X-CSRFToken'] = csrfToken;
+    axios.defaults.withCredentials = true;
+    // Configure the generated API client to use the global axios instance
+    // This ensures it inherits all defaults (CSRF token, withCredentials, etc.)
+    client.setConfig({
+        axios: axios,
+        baseURL: '',
+        headers: {'X-CSRFToken': csrfToken}
+    });
     app.provide('csrfToken', csrfToken);
     app.provide('appProps', appProps);
     // Register all single-page components from the index

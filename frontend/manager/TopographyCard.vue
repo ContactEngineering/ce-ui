@@ -1,7 +1,9 @@
 <script setup lang="ts">
 
-import axios from "axios";
 import {computed, onMounted, onBeforeUnmount} from "vue";
+
+import {managerApiTopographyRetrieve} from "@/api";
+import {getIdFromUrl} from "@/utils/api";
 
 import TopographyErrorCard from "./TopographyErrorCard.vue";
 import TopographyPendingCard from "./TopographyPendingCard.vue";
@@ -77,11 +79,11 @@ function scheduleStateCheck(topography) {
     }
 }
 
-function checkState() {
-    axios.get(props.topographyUrl).then(response => {
-        emit('update:topography', response.data);
-        scheduleStateCheck(response.data);
-    });
+async function checkState() {
+    const topographyId = getIdFromUrl(props.topographyUrl);
+    const response = await managerApiTopographyRetrieve({path: {id: topographyId}});
+    emit('update:topography', response.data);
+    scheduleStateCheck(response.data);
 }
 
 function topographyDeleted(url) {

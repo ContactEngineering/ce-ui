@@ -1,29 +1,40 @@
 <script setup lang="ts">
 
-import axios from "axios";
-
 import { computed, inject, onMounted, ref } from "vue";
 import {
-    BAlert,
-    BButton,
-    BModal,
-    BSpinner,
-    BTab,
-    BTabs,
-    useToastController
-} from "bootstrap-vue-next";
+    QBanner,
+    QBtn,
+    QDialog,
+    QCard,
+    QCardSection,
+    QCardActions,
+    QSeparator,
+    QSpinner,
+    QTabs,
+    QTab,
+    QTabPanels,
+    QTabPanel
+} from "quasar";
+
+import { useNotify } from "@/utils/notify";
+import {
+    managerApiTopographyRetrieve,
+    managerApiTopographyDestroy,
+    managerApiTopographyForceInspectCreate
+} from "@/api";
 
 import { getIdFromUrl, subjectsToBase64 } from "topobank/utils/api";
 
+import ActionFab from '../components/ActionFab.vue';
+import type { FabAction } from '../components/ActionFab.vue';
 import Attachments from "../manager/Attachments.vue";
-
 import DeepZoomImage from "../components/DeepZoomImage.vue";
 import LineScanPlot from "../components/LineScanPlot.vue";
-
 import TopographyBadges from "../manager/TopographyBadges.vue";
 import TopographyCard from "../manager/TopographyCard.vue";
+import UploadModal from '../components/UploadModal.vue';
 
-const { show } = useToastController();
+const { show } = useNotify();
 
 const props = defineProps({
     topographyUrl: String,
@@ -37,6 +48,7 @@ const appProps = inject("appProps");
 
 const _disabled = ref(false);
 const _showDeleteModal = ref(false);
+const _showAttachmentModal = ref(false);
 const _topography = ref(null);
 
 function getTopographyUrl() {
@@ -60,7 +72,8 @@ async function updateCard(topography = null) {
     /* Fetch topography info from API endpoint if status is pending */
     if (["pe", "st"].includes(topography.task_state)) {
         try {
-            const response = await axios.get(_topography.value.url);
+            const topographyId = getIdFromUrl(_topography.value.url);
+            await managerApiTopographyRetrieve({path: {id: topographyId}});
         } catch (error) {
             show?.({
                 props: {
@@ -73,12 +86,13 @@ async function updateCard(topography = null) {
     }
 }
 
-function deleteTopography() {
-    axios.delete(_topography.value.url).then(response => {
-        this.$emit("topography-deleted", _topography.value.url);
+async function deleteTopography() {
+    try {
+        const topographyId = getIdFromUrl(_topography.value.url);
+        await managerApiTopographyDestroy({path: {id: topographyId}});
         const id = getIdFromUrl(_topography.value.surface);
         window.location.href = `/ui/dataset-detail/${id}/`;
-    }).catch(error => {
+    } catch (error) {
         show?.({
             props: {
                 title: "Failed to delete measurement",
@@ -86,12 +100,13 @@ function deleteTopography() {
                 variant: "danger"
             }
         });
-    });
+    }
 }
 
 async function forceInspect() {
     try {
-        const response = await axios.post(_topography.value.api.force_inspect);
+        const topographyId = getIdFromUrl(_topography.value.url);
+        const response = await managerApiTopographyForceInspectCreate({path: {id: topographyId}});
         await updateCard(response.data);
     } catch (error) {
         show?.({
@@ -110,91 +125,139 @@ const base64Subjects = computed(() => {
     });
 });
 
+const surfaceUrl = computed(() => {
+    const surfaceId = getIdFromUrl(_topography.value.surface);
+    return `/ui/dataset-detail/${surfaceId}/`;
+});
+
+const _activeTab = ref('visualization');
+
+// FAB actions
+const fabActions = computed<FabAction[]>(() => {
+    const actions: FabAction[] = [];
+
+    if (!_disabled.value) {
+        actions.push({
+            id: 'attach',
+            icon: 'attach_file',
+            label: 'Add attachment',
+            color: 'secondary',
+            tooltip: 'Attach supporting files'
+        });
+    }
+
+    actions.push({
+        id: 'download',
+        icon: 'download',
+        label: 'Download',
+        href: _topography.value?.datafile?.file
+    });
+
+    actions.push({
+        id: 'analyze',
+        icon: 'analytics',
+        label: 'Analyze',
+        color: 'accent',
+        href: `/ui/analysis-list/?subjects=${base64Subjects.value}`
+    });
+
+    if (!_disabled.value) {
+        actions.push({
+            id: 'delete',
+            icon: 'delete',
+            label: 'Delete',
+            color: 'negative'
+        });
+    }
+
+    return actions;
+});
+
+function handleFabAction(actionId: string) {
+    switch (actionId) {
+        case 'attach':
+            _activeTab.value = 'attachments';
+            _showAttachmentModal.value = true;
+            break;
+        case 'delete':
+            _showDeleteModal.value = true;
+            break;
+    }
+}
+
 </script>
 
 <template>
-    <div class="container">
-        <div v-if="_topography == null"
-             class="d-flex justify-content-center mt-5">
-            <div class="flex-column text-center">
-                <b-spinner />
-                <p>Loading...</p>
-            </div>
-        </div>
-        <div v-if="_topography !== null"
-             class="row">
-            <div class="col-12">
-                <BTabs class="nav-pills-custom"
-                       content-class="w-100"
-                       fill
-                       pills
-                       vertical>
-                    <BTab title="Visualization">
-                        <BAlert variant="warning"
-                                :show="_topography.deepzoom === null && _topography.size_y !== null">
-                            <p class="mb-2">
-                                This measurement does not have a zoomable image.
-                            </p>
-                            <BButton variant="secondary"
-                                     @click="forceInspect">
-                                Retry creation of zoomable image
-                            </BButton>
-                        </BAlert>
-                        <LineScanPlot v-if="_topography.size_y === null"
-                                      :topography="_topography">
-                        </LineScanPlot>
-                        <DeepZoomImage
-                            v-if="_topography.deepzoom !== null && _topography.size_y !== null"
-                            :colorbar="true"
-                            :folder-url="_topography.deepzoom">
-                        </DeepZoomImage>
-                    </BTab>
-                    <BTab title="Details">
-                        <TopographyCard :topography-url="_topography.url"
-                                        v-model:topography="_topography"
-                                        :enlarged="true"
-                                        :disabled="_disabled">
-                        </TopographyCard>
-                    </BTab>
-                    <BTab title="Attachments">
-                        <Attachments :attachments-url="_topography.attachments"
-                                     :permission="_topography.permissions.current_user.permission">
-                        </Attachments>
-                    </BTab>
-                    <template #tabs-end>
-                        <hr />
-                        <a :href="`/ui/analysis-list/?subjects=${base64Subjects}`"
-                           class="btn btn-success mb-2 mt-2">
-                            Analyze
-                        </a>
-
-                        <a :href="_topography.datafile?.file"
-                           class="btn btn-light mb-2">
-                            Download
-                        </a>
-
-                        <a href="#"
-                           class="btn btn-danger mb-2"
-                           @click="_showDeleteModal = true">
-                            Delete
-                        </a>
-                        <hr />
-                        <div class="card mt-2">
-                            <div class="card-body">
-                                <topography-badges
-                                    :topography="_topography"></topography-badges>
-                            </div>
-                        </div>
-                    </template>
-                </BTabs>
-            </div>
+    <div v-if="_topography == null" class="flex justify-center q-mt-xl">
+        <div class="column items-center">
+            <QSpinner size="lg" />
+            <p class="q-mt-sm">Loading...</p>
         </div>
     </div>
-    <BModal v-if="_topography !== null"
-            v-model="_showDeleteModal"
-            @ok="deleteTopography"
-            title="Delete measurement">
-        You are about to delete the measurement with name <b>{{ _topography.name }}</b>.
-        Are you sure you want to proceed?
-    </BModal>
+    <div v-if="_topography !== null">
+        <!-- Topography Info Chips -->
+        <div class="q-mb-md">
+            <TopographyBadges :topography="_topography" />
+        </div>
+
+        <!-- Navigation Tabs -->
+        <QTabs v-model="_activeTab" dense align="left" class="text-grey" active-color="primary" indicator-color="primary" narrow-indicator>
+            <QTab name="visualization" label="Visualization" />
+            <QTab name="details" label="Details" />
+            <QTab name="attachments" label="Attachments" />
+        </QTabs>
+
+        <QSeparator class="q-mb-md" />
+
+        <!-- Tab Panels -->
+        <QTabPanels v-model="_activeTab" animated>
+            <QTabPanel name="visualization" class="q-pa-none">
+                <QBanner v-if="_topography.deepzoom === null && _topography.size_y !== null" class="bg-warning text-white q-mb-md">
+                    <p class="q-mb-sm">This measurement does not have a zoomable image.</p>
+                    <QBtn color="secondary" label="Retry creation of zoomable image" @click="forceInspect" />
+                </QBanner>
+                <LineScanPlot v-if="_topography.size_y === null" :topography="_topography" />
+                <DeepZoomImage v-if="_topography.deepzoom !== null && _topography.size_y !== null"
+                               :colorbar="true"
+                               :folder-url="_topography.deepzoom" />
+            </QTabPanel>
+            <QTabPanel name="details" class="q-pa-none">
+                <TopographyCard :topography-url="_topography.url"
+                                v-model:topography="_topography"
+                                :enlarged="true"
+                                :disabled="_disabled" />
+            </QTabPanel>
+            <QTabPanel name="attachments" class="q-pa-none">
+                <Attachments :attachments-url="_topography.attachments"
+                             :permission="_topography.permissions.current_user.permission" />
+            </QTabPanel>
+        </QTabPanels>
+    </div>
+    <!-- Floating Action Button -->
+    <ActionFab v-if="_topography !== null"
+               :actions="fabActions"
+               @action="handleFabAction" />
+
+    <!-- Upload Modal for Attachments -->
+    <UploadModal v-if="_topography !== null"
+                 v-model="_showAttachmentModal"
+                 mode="attachment"
+                 :target-url="_topography.attachments" />
+
+    <!-- Delete Confirmation Dialog -->
+    <QDialog v-if="_topography !== null" v-model="_showDeleteModal">
+        <QCard>
+            <QCardSection>
+                <div class="text-h6">Delete measurement</div>
+            </QCardSection>
+            <QCardSection>
+                You are about to delete the measurement with name <b>{{ _topography.name }}</b>.
+                Are you sure you want to proceed?
+            </QCardSection>
+            <QCardActions align="right">
+                <QBtn flat label="Cancel" v-close-popup />
+                <QBtn color="negative" label="Delete" @click="deleteTopography" v-close-popup />
+            </QCardActions>
+        </QCard>
+    </QDialog>
 </template>

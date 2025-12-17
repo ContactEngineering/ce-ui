@@ -28,43 +28,6 @@
 {% block body %}
 {% endblock body %}
 
-<footer class="sticky-footer">
-    <div class="container my-auto">
-        <div class="copyright text-center my-auto">
-            <a href="https://pastewka.org/" target="_blank"
-               class="text-decoration-none">
-                <img src="{% static 'images/uni_freiburg_logo.png' %}"
-                     height="64px"></img>
-            </a>
-            <a href="http://www.engineering.pitt.edu/TevisJacobs/" target="_blank"
-               class="text-decoration-none">
-                <img src="{% static 'images/pitt_logo.png' %}" height="64px"></img>
-            </a>
-            &nbsp&nbsp&nbsp&#8213;&nbsp&nbsp&nbsp
-            Funding by
-            &nbsp&nbsp&nbsp
-            <a href="https://erc.europa.eu/" target="_blank"
-               class="text-decoration-none">
-                <img src="{% static 'images/erc_logo.png' %}" height="64px"></img>
-            </a>
-            <a href="https://www.livmats.uni-freiburg.de/" target="_blank"
-               class="text-decoration-none">
-                <img src="{% static 'images/logo_livmats_small.jpg' %}"
-                     height="64px"></img>
-            </a>
-            <a href="https://www.nsf.gov/" target="_blank" class="text-decoration-none">
-                <img src="{% static 'images/nsf_logo.png' %}" height="64px"></img>
-            </a>
-        </div>
-    </div>
-</footer>
-
-<!-- /#page-wrapper -->
-<!-- Scroll to Top Button-->
-<a class="scroll-to-top rounded" href="#page-top" style="display: inline;">
-    <i class="fa fa-angle-up"></i>
-</a>
-
 <!-- OpenSeadragon -->
 <!-- This cannot be installed via NPM because scalebar and FileSaver is not available as a package -->
 <script src={% static "vendor/openseadragon/openseadragon.min.js" %}></script>

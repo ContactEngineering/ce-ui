@@ -1,55 +1,64 @@
 <script setup lang="ts">
 
-import axios from "axios";
-import DropZone from '../components/DropZone.vue';
-import {ref, computed, onMounted} from 'vue';
+import { ref, computed, onMounted } from 'vue';
 
-import {formatDateTime} from "topobank/utils/formatting";
-import {uploadFile, createFileManifest} from "topobank/utils/upload";
+import { filesFolderRetrieve, filesManifestDestroy } from "@/api";
+import { getIdFromUrl } from "@/utils/api";
+
+import { formatDateTime } from "topobank/utils/formatting";
 
 import {
-    BCard,
-    BCardBody,
-    BButton,
-    BAlert,
-    BProgress,
-    BModal,
-    useToastController
-} from 'bootstrap-vue-next';
+    QBtn,
+    QBanner,
+    QIcon,
+    QItem,
+    QItemSection,
+    QItemLabel,
+    QList,
+    QDialog,
+    QCard,
+    QCardSection,
+    QCardActions,
+    ClosePopup
+} from 'quasar';
 
+const vClosePopup = ClosePopup;
+
+import { useNotify } from "@/utils/notify";
+import UploadModal from '../components/UploadModal.vue';
 
 const props = defineProps({
     attachmentsUrl: String,
     permission: String
 });
 
-const attachmentCount = defineModel("attachmentCount",{
+const attachmentCount = defineModel("attachmentCount", {
     type: Number,
     default: 0
 });
 
-
-const {show} = useToastController();
+const { show } = useNotify();
 
 const attachments = ref({});
 
 const deleteAttachmentKey = ref(null);
 const infoAttachmentKey = ref(null);
 
-const uploadIndicator = ref({});
-
 const deleteModal = ref(false);
 const infoModal = ref(false);
+const uploadModal = ref(false);
 
 onMounted(() => {
     refreshAttachments();
 });
 
-function refreshAttachments() {
-    axios.get(props.attachmentsUrl).then(response => {
+async function refreshAttachments() {
+    try {
+        const folderId = getIdFromUrl(props.attachmentsUrl);
+        const response = await filesFolderRetrieve({ path: { id: folderId } });
         attachments.value = response.data;
-        attachmentCount.value = Object.keys(attachments.value).length; // Update the attachment count
-    }).catch(error => {
+        attachmentCount.value = Object.keys(attachments.value).length;
+    } catch (error: any) {
         show?.({
             props: {
                 title: "Error while listing attachments",
@@ -57,83 +66,36 @@ function refreshAttachments() {
                 variant: "danger"
             }
         });
-    });
-}
-
-function handleFileDrop(files) {
-    for (const file of files) {
-        createFileManifest({
-            folderUrl: props.attachmentsUrl, fileName: file.name
-        }).then(response => {
-            const manifest = response.data;
-            uploadIndicator.value[manifest.id] = {
-                filename: manifest.filename,
-                loaded: 0
-            };
-            uploadFile({
-                uploadInstructions: manifest.upload_instructions,
-                file: file,
-                onUploadProgress: e => uploadIndicator.value[manifest.id].loaded = e.loaded / e.total * 100
-            }).then(response => {
-                attachments.value[manifest.filename] = manifest;
-                attachmentCount.value = Object.keys(attachments.value).length;
-                uploadIndicator.value = {};
-                // We need to fetch the manifest information again to have a link to
-                // the file
-                axios.get(manifest.url).then(response => {
-                    attachments.value[manifest.filename] = response.data;
-                }).catch(error => {
-                    show?.({
-                        props: {
-                            title: "Error while fetching attachment",
-                            body: error.message,
-                            variant: 'danger'
-                        }
-                    });
-                    console.error(error);
-                });
-            }).catch(error => {
-                show?.({
-                    props: {
-                        title: "Error while uploading",
-                        body: error.message,
-                        variant: 'danger'
-                    }
-                });
-                console.error(error);
-                delete uploadIndicator.value[fileId];
-            });
-        }).catch((error) => {
-            show?.({
-                props: {
-                    title: "Error while initiating upload",
-                    body: error.message,
-                    variant: 'danger'
-                }
-            });
-            console.error(error);
-        });
     }
 }
 
-function deleteAttachment(key) {
+function onAttachmentsUploaded(results: any[]) {
+    // Add uploaded attachments to the list
+    for (const result of results) {
+        const manifest = result.manifest;
+        attachments.value[manifest.filename] = manifest;
+    }
+    attachmentCount.value = Object.keys(attachments.value).length;
+}
+
+async function deleteAttachment(key) {
     const attachment = attachments.value[key];
-    axios.delete(attachment.url)
-        .then(() => {
-            delete attachments.value[key];
-            attachmentCount.value = Object.keys(attachments.value).length;
-            deleteAttachmentKey.value = null;
-        })
-        .catch((error) => {
-            show?.({
-                props: {
-                    title: "Error while deleting",
-                    body: error.message,
-                    variant: 'danger'
-                }
-            });
-            console.error(error);
+    try {
+        const manifestId = getIdFromUrl(attachment.url);
+        await filesManifestDestroy({ path: { id: manifestId } });
+        delete attachments.value[key];
+        attachmentCount.value = Object.keys(attachments.value).length;
+        deleteAttachmentKey.value = null;
+    } catch (error: any) {
+        show?.({
+            props: {
+                title: "Error while deleting",
+                body: error.message,
+                variant: 'danger'
+            }
         });
+        console.error(error);
+    }
 }
 
 const isEditable = computed(() => {
@@ -155,112 +117,113 @@ const attachmentToShowInfo = computed(() => {
 });
 
 </script>
+
 <template>
-    <BCard>
-        <template #header>
-            <div class="d-flex">
-                <h5 class="flex-grow-1">Attachments</h5>
-            </div>
-        </template>
-        <BCardBody>
-            <DropZone v-if="isEditable" @files-dropped="handleFileDrop" class="mb-5">
-                Drop your attachments here or
-            </DropZone>
-            <div>
-                <div v-for="[key, value] in Object.entries(attachments)"
-                     :key="value.id">
-                    <div
-                        class="d-flex align-items-center my-1 border rounded px-2 py-1">
-                        <a :href="value.file"><i
-                            class="fa-solid fa-paperclip me-3"></i>{{
-                                value.filename
-                            }}
-                        </a>
-                        <BButton size="sm" class="ms-auto" title="information"
-                                 variant="outline-info"
-                                 @click="infoAttachmentKey = key; infoModal = true;">
-                            <i class="fa-solid fa-circle-info"></i> Info
-                        </BButton>
-                        <BButton v-if="isEditable" size="sm" class="ms-2"
-                                 title="delete" variant="outline-danger"
-                                 @click="deleteAttachmentKey = key; deleteModal = true;">
-                            <i class="fa-solid fa-trash"></i> Delete
-                        </BButton>
-                    </div>
-                </div>
-                <div v-for="indicator in uploadIndicator">
-                    <div
-                        class="d-flex align-items-center my-1 border rounded px-2 py-1">
-                        <div class="text-muted">
-                            <i class="fa-solid fa-paperclip me-3"></i>
-                        </div>
-                        <b-progress class="flex-grow-1 ms-2" show-progress animated
-                                    :value="indicator.loaded"></b-progress>
-                    </div>
-                </div>
-                <div v-if="attachmentCount == 0">
-                    <BAlert :model-value="true" variant="primary">
-                        This digital surface twin does not have file attachments yet.
-                    </BAlert>
-                </div>
-            </div>
-        </BCardBody>
-    </BCard>
-
-    <BModal v-model="deleteModal" v-if="attachmentToDelete" centered
-            title="Delete Attachment">
-        <div class="d-flex flex-column align-items-center">
-            <span class="fw-bold"> This operation will permanently delete the attachment:</span>
-            <span class="fst-italic"> "{{ attachmentToDelete.filename }}" </span>
-            <span>The operation cannot be undone!</span>
+    <div>
+        <!-- Upload button -->
+        <div v-if="isEditable" class="q-mb-md">
+            <QBtn color="primary"
+                  icon="attach_file"
+                  label="Add attachment"
+                  @click="uploadModal = true" />
         </div>
-        <template #footer>
-            <BButton size="xl" variant="outline-secondary"
-                     @click="deleteModal = false">
-                Cancel
-            </BButton>
-            <BButton size="xl" class="ms-2" variant="outline-danger"
-                     @click="deleteModal = false; deleteAttachment(deleteAttachmentKey)">
-                Delete
-            </BButton>
-        </template>
-    </BModal>
 
-    <BModal v-model="infoModal" v-if="attachmentToShowInfo" centered ok-only
-            title="Attachment Info">
-        <div>
-            <div class="row">
-                <div class="col-3 fw-bold">
-                    Name:
-                </div>
-                <div class="col">
-                    {{ attachmentToShowInfo.filename }}
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-3 fw-bold">
-                    Uploaded by:
-                </div>
-                <div class="col">
-                    {{ attachmentToShowInfo.uploaded_by }}
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-3 fw-bold">
-                    Created:
-                </div>
-                <div class="col">
-                    {{ formatDateTime(attachmentToShowInfo.created) }}
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-3 fw-bold">
-                    Updated:
-                </div>
-                <div class="col">
-                    {{ formatDateTime(attachmentToShowInfo.updated) }}
-                </div>
-            </div>
-        </div>
-    </BModal>
+        <QBanner v-if="attachmentCount === 0"
+                 class="bg-grey-2 text-grey-8">
+            <template #avatar>
+                <QIcon name="info" color="grey-6" />
+            </template>
+            No attachments yet.
+        </QBanner>
+
+        <QList v-if="attachmentCount > 0" bordered separator class="rounded-borders">
+            <!-- Existing attachments -->
+            <QItem v-for="[key, value] in Object.entries(attachments)" :key="value.id">
+                <QItemSection avatar>
+                    <QIcon name="attach_file" color="grey-7" />
+                </QItemSection>
+                <QItemSection>
+                    <QItemLabel>
+                        <a :href="value.file" class="text-primary">{{ value.filename }}</a>
+                    </QItemLabel>
+                    <QItemLabel caption>
+                        {{ formatDateTime(value.created) }}
+                    </QItemLabel>
+                </QItemSection>
+                <QItemSection side>
+                    <div class="row no-wrap q-gutter-xs">
+                        <QBtn flat dense round icon="info" color="grey-7"
+                              @click="infoAttachmentKey = key; infoModal = true;" />
+                        <QBtn v-if="isEditable" flat dense round icon="delete" color="negative"
+                              @click="deleteAttachmentKey = key; deleteModal = true;" />
+                    </div>
+                </QItemSection>
+            </QItem>
+        </QList>
+    </div>
+
+    <!-- Upload Modal -->
+    <UploadModal v-model="uploadModal"
+                 mode="attachment"
+                 :target-url="attachmentsUrl"
+                 @uploaded="onAttachmentsUploaded" />
+
+    <!-- Delete confirmation dialog -->
+    <QDialog v-model="deleteModal">
+        <QCard v-if="attachmentToDelete" style="min-width: 350px">
+            <QCardSection>
+                <div class="text-h6">Delete attachment</div>
+            </QCardSection>
+            <QCardSection class="q-pt-none">
+                <p>This will permanently delete:</p>
+                <p class="text-weight-medium q-my-sm">"{{ attachmentToDelete.filename }}"</p>
+                <p class="text-caption text-negative">This cannot be undone.</p>
+            </QCardSection>
+            <QCardActions align="right">
+                <QBtn flat label="Cancel" v-close-popup />
+                <QBtn color="negative" label="Delete"
+                      @click="deleteModal = false; deleteAttachment(deleteAttachmentKey)" />
+            </QCardActions>
+        </QCard>
+    </QDialog>
+
+    <!-- Info dialog -->
+    <QDialog v-model="infoModal">
+        <QCard v-if="attachmentToShowInfo" style="min-width: 350px">
+            <QCardSection>
+                <div class="text-h6">Attachment details</div>
+            </QCardSection>
+            <QCardSection class="q-pt-none">
+                <QList dense>
+                    <QItem>
+                        <QItemSection>
+                            <QItemLabel caption>Filename</QItemLabel>
+                            <QItemLabel>{{ attachmentToShowInfo.filename }}</QItemLabel>
+                        </QItemSection>
+                    </QItem>
+                    <QItem>
+                        <QItemSection>
+                            <QItemLabel caption>Uploaded by</QItemLabel>
+                            <QItemLabel>{{ attachmentToShowInfo.uploaded_by }}</QItemLabel>
+                        </QItemSection>
+                    </QItem>
+                    <QItem>
+                        <QItemSection>
+                            <QItemLabel caption>Created</QItemLabel>
+                            <QItemLabel>{{ formatDateTime(attachmentToShowInfo.created) }}</QItemLabel>
+                        </QItemSection>
+                    </QItem>
+                    <QItem>
+                        <QItemSection>
+                            <QItemLabel caption>Updated</QItemLabel>
+                            <QItemLabel>{{ formatDateTime(attachmentToShowInfo.updated) }}</QItemLabel>
+                        </QItemSection>
+                    </QItem>
+                </QList>
+            </QCardSection>
+            <QCardActions align="right">
+                <QBtn flat label="Close" v-close-popup />
+            </QCardActions>
+        </QCard>
+    </QDialog>
 </template>

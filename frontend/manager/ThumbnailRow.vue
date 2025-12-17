@@ -1,9 +1,11 @@
 <script setup lang="ts">
 
-import axios from "axios";
 import {onMounted, ref} from "vue";
 
-import {BButton, BOverlay} from "bootstrap-vue-next";
+import { QBtn, QInnerLoading, QSpinner } from "quasar";
+
+import {managerApiTopographyList} from "@/api";
+import {getIdFromUrl} from "@/utils/api";
 
 import Thumbnail from "./Thumbnail.vue";
 
@@ -24,51 +26,53 @@ onMounted(() => {
     loadMoreThumbnails();
 });
 
-function loadMoreThumbnails() {
+async function loadMoreThumbnails() {
     _isLoading.value = true;
-    axios.get(`${props.dataSourceListUrl}&offset=${_nbThumbnails.value}&limit=${_nbThumbnails.value + props.nbThumbnailsIncrement}`)
-        .then(response => {
-            _dataSources.value.push(...response.data.results);
-            _nbDataSources.value = response.data.count;
-            _nbThumbnails.value += props.nbThumbnailsIncrement;
-        })
-        .finally(() => {
-            _isLoading.value = false;
+    try {
+        // The dataSourceListUrl is formatted as: /manager/api/topography/?surface=<id>
+        // We need to extract the surface ID and pass it with pagination params
+        const url = new URL(props.dataSourceListUrl, window.location.origin);
+        const surfaceId = url.searchParams.get('surface');
+        const response = await managerApiTopographyList({
+            query: {
+                surface: surfaceId ? parseInt(surfaceId) : undefined,
+                offset: _nbThumbnails.value,
+                limit: _nbThumbnails.value + props.nbThumbnailsIncrement
+            } as any
         });
+        _dataSources.value.push(...response.data.results);
+        _nbDataSources.value = response.data.count;
+        _nbThumbnails.value += props.nbThumbnailsIncrement;
+    } finally {
+        _isLoading.value = false;
+    }
 }
 
 </script>
 
 <template>
-    <BOverlay class="thumbnail-row" :show="_isLoading">
+    <div class="thumbnail-row">
         <Thumbnail v-for="dataSource in _dataSources"
                    :key="dataSource.id"
-                   class="me-1"
-                   img-class="mh-100"
-                   :data-source="dataSource">
-        </Thumbnail>
-        <BButton v-if="_nbDataSources > _dataSources.length"
-                 variant="light" size="sm" class="me-1"
-                 @click="loadMoreThumbnails">
-            <i class="fa fa-ellipsis align-self-center"></i>
-        </BButton>
-    </BOverlay>
+                   class="q-mr-xs"
+                   size="32px"
+                   :data-source="dataSource" />
+        <QBtn v-if="_nbDataSources > _dataSources.length"
+              flat dense
+              @click="loadMoreThumbnails"
+              icon="more_horiz" />
+        <QInnerLoading :showing="_isLoading">
+            <QSpinner size="1rem" />
+        </QInnerLoading>
+    </div>
 </template>
 
 <style scoped>
-
 .thumbnail-row {
+    position: relative;
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    height: 2rem;
-    overflow: hidden;
+    min-height: 32px;
 }
-
-.thumbnail-row :deep(img) {
-    height: 2rem;
-    width: 2rem;
-    object-fit: cover;
-}
-
 </style>

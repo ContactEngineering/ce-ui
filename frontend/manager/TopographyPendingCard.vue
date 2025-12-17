@@ -1,15 +1,17 @@
 <script lang="ts">
 
-import axios from "axios";
+import { QSpinner, QBtn, QBtnGroup } from 'quasar';
 
 import {
-    BSpinner
-} from 'bootstrap-vue-next';
+    managerApiTopographyDestroy,
+    managerApiTopographyForceInspectCreate
+} from "@/api";
+import {getIdFromUrl} from "@/utils/api";
 
 export default {
     name: 'topography-pending-card',
     components: {
-        BSpinner
+        QSpinner, QBtn, QBtnGroup
     },
     emits: [
         'delete:topography',
@@ -21,44 +23,41 @@ export default {
         taskState: String  // State of task, 'pe', 'st', etc
     },
     methods: {
-        deleteTopography() {
-            axios.delete(this.url);
+        async deleteTopography() {
+            const topographyId = getIdFromUrl(this.url);
+            await managerApiTopographyDestroy({path: {id: topographyId}});
             this.$emit('delete:topography', this.url);
         },
-        forceInspect() {
-            axios.post(`${this.url}force-inspect/`).then(response => {
-                this.$emit('update:topography', response.data);
-            });
+        async forceInspect() {
+            const topographyId = getIdFromUrl(this.url);
+            const response = await managerApiTopographyForceInspectCreate({path: {id: topographyId}});
+            this.$emit('update:topography', response.data);
         }
     }
 };
 </script>
 
 <template>
-    <div class="card mb-1">
-        <div class="card-header">
-            <div class="btn-group btn-group-sm float-end">
-                <button class="btn btn-outline-secondary">
-                    <i class="fa fa-refresh"
-                       @click="forceInspect"></i>
-                </button>
-                <button class="btn btn-outline-secondary float-end"
-                        @click="deleteTopography">
-                    <i class="fa fa-trash"></i>
-                </button>
-            </div>
-            <div>
-                <h5 class="d-inline">{{ name }}</h5>
+    <div class="pending-card q-mb-xs border rounded-borders">
+        <div class="pending-card-header q-pa-sm flex items-center">
+            <QBtnGroup flat class="float-right">
+                <QBtn flat dense size="sm" icon="refresh"
+                      @click="forceInspect" />
+                <QBtn flat dense size="sm" icon="delete"
+                      @click="deleteTopography" />
+            </QBtnGroup>
+            <div class="col-grow">
+                <h5 class="q-ma-none">{{ name }}</h5>
             </div>
         </div>
         <div v-if="taskState !== 'st'"
-             class="card-body">
-            <b-spinner small  type="grow"></b-spinner>
+             class="pending-card-body q-pa-sm">
+            <QSpinner size="1rem" class="q-mr-sm" />
             Waiting for data file inspection to start...
         </div>
         <div v-if="taskState === 'st'"
-             class="card-body">
-            <b-spinner small></b-spinner>
+             class="pending-card-body q-pa-sm">
+            <QSpinner size="1rem" class="q-mr-sm" />
             Inspecting data file and applying filters...
         </div>
     </div>

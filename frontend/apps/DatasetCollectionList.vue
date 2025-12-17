@@ -2,9 +2,11 @@
 import { ref, watchEffect } from "vue";
 import axios from "axios";
 
-import { BBadge, BPagination, useToastController } from "bootstrap-vue-next";
+import { QBadge, QPagination } from "quasar";
 
-const { show } = useToastController();
+import { useNotify } from "@/utils/notify";
+
+const { show } = useNotify();
 const props = defineProps({
     apiUrl: {
         type: String,
@@ -71,45 +73,56 @@ function copyToClipboard(text) {
     <div class="container">
         <div
             v-for="collection in collections"
-            class="border rounded mb-2 p-3 highlight-on-hover"
+            :key="collection.id"
+            class="collection-card q-pa-md q-mb-md"
             @click="openDetailView(collection.id)"
         >
-            <div class="d-flex align-items-center">
-                <h3>{{ collection.title }}</h3>
-                <BBadge
+            <div class="flex items-center">
+                <h3 class="q-ma-none">{{ collection.title }}</h3>
+                <QBadge
                     v-if="collection.doi_name"
-                    class="ms-auto highlight-on-hover"
+                    class="q-ml-auto highlight-on-hover"
                     @click.stop="copyToClipboard(doiUrl(collection.doi_name))"
                 >
                     {{ doiUrl(collection.doi_name) }}
-                </BBadge>
+                </QBadge>
             </div>
-            <p v-if="collection.description != ''">
+            <p v-if="collection.description != ''" class="q-mt-sm">
                 {{ collection.description }}
             </p>
             <span>
-                This collection was published by
-                {{ collection.publisher.name }}.</span
-            ><br />
+                This collection was published by {{ collection.publisher.name }}.
+            </span><br />
             <span>
-                It contains {{ collection.publications.length }} datasets.</span
-            >
+                It contains {{ collection.publications.length }} datasets.
+            </span>
         </div>
-        <div class="d-flex justify-content-center">
-            <BPagination
+        <div class="flex justify-center">
+            <QPagination
                 v-if="collectionsCount > itemsPerPage"
                 v-model="page"
-                :limit="9"
-                :per-page="itemsPerPage"
-                :total-rows="collectionsCount"
-                class="me-2 mb-0"
-            >
-            </BPagination>
+                :max="Math.ceil(collectionsCount / itemsPerPage)"
+                :max-pages="9"
+                boundary-links
+                direction-links
+            />
         </div>
     </div>
 </template>
 
 <style scoped>
+.collection-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    transition: background-color 0.3s, border-color 0.3s;
+    cursor: pointer;
+}
+
+.collection-card:hover {
+    border-color: #000000;
+    background: #f5f5f5;
+}
+
 .highlight-on-hover {
     border: 1px solid rgba(0, 0, 0, 0);
     transition: background-color 0.3s;
@@ -117,7 +130,7 @@ function copyToClipboard(text) {
 
 .highlight-on-hover:hover {
     border: 1px solid #000000;
-    background: var(--bs-secondary-bg-subtle);
+    background: #e0e0e0;
     cursor: pointer;
 }
 </style>

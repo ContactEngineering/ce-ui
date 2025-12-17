@@ -1,19 +1,14 @@
 <script setup>
 
-import {inject, onMounted} from "vue";
-import {
-    BButton,
-    BNavbar,
-    BNavbarBrand,
-    BNavbarNav,
-    BNavItem,
-    useToastController
-} from "bootstrap-vue-next";
+import { inject, onMounted } from "vue";
+import { QToolbar, QToolbarTitle, QBtn, QAvatar, QSpace } from "quasar";
+
+import { useNotify } from "@/utils/notify";
 
 import NotificationButton from "./NotificationButton.vue";
 import UserMenuButton from "./UserMenuButton.vue";
 
-const {show} = useToastController();
+const { show } = useNotify();
 
 const props = defineProps({
     messages: {
@@ -53,26 +48,28 @@ onMounted(() => {
 </script>
 
 <template>
-    <BNavbar variant="dark" class="navbar-dark">
-        <BNavbarBrand href="/" class="d-flex flex-grow-1">
-            <img src="/static/images/ce_logo.svg" height="25px">
-            &nbsp contact.engineering
-        </BNavbarBrand>
-        <BNavbarNav v-if="appProps.userIsAnonymous">
-            <BNavItem>
-                <BButton :href="appProps.loginUrl" variant="secondary">
-                    Sign in
-                </BButton>
-            </BNavItem>
-        </BNavbarNav>
-        <NotificationButton v-if="!appProps.userIsAnonymous"></NotificationButton>
+    <QToolbar class="bg-grey-9">
+        <QBtn flat dense :href="'/'">
+            <QAvatar square size="28px">
+                <img src="/static/images/ce_logo.svg" alt="Logo">
+            </QAvatar>
+        </QBtn>
+        <QToolbarTitle>
+            contact.engineering
+        </QToolbarTitle>
+        <QSpace />
+        <div v-if="appProps.userIsAnonymous">
+            <QBtn
+                :href="appProps.loginUrl"
+                color="primary"
+                unelevated
+                label="Sign in"
+            />
+        </div>
+        <NotificationButton v-if="!appProps.userIsAnonymous" />
         <UserMenuButton
             v-if="!appProps.userIsAnonymous"
-            :api-url="appProps.userApiUrl"
-            :admin-url="appProps.adminUrl"
             :name="appProps.userFullName"
-            :orcid="appProps.userOrcid"
-            :is-staff="appProps.userIsStaff"
-        ></UserMenuButton>
-    </BNavbar>
+        />
+    </QToolbar>
 </template>

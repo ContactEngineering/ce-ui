@@ -1,8 +1,9 @@
 <script setup>
 
-import {computed} from "vue";
+import { computed } from "vue";
+import { QChip, QIcon } from "quasar";
 
-import {formatExponential} from "topobank/utils/formatting";
+import { formatExponential } from "topobank/utils/formatting";
 
 const props = defineProps({
     topography: Object
@@ -19,27 +20,44 @@ const isMetadataIncomplete = computed(() => {
 const shortReliabilityCutoff = computed(() => {
     return formatExponential(props.topography.short_reliability_cutoff, 2) + ` m`;
 });
+
+const resolutionText = computed(() => {
+    if (props.topography.resolution_y !== null) {
+        return `${props.topography.resolution_x} × ${props.topography.resolution_y} pts`;
+    }
+    return `${props.topography.resolution_x} pts`;
+});
+
+const dimensionText = computed(() => {
+    if (props.topography.resolution_y !== null) {
+        return '2D';
+    }
+    return '1D';
+});
 </script>
 
 <template>
-    <div v-if="topography !== null && topography.resolution_y !== null">
-        <span class="badge bg-warning ms-1">{{ topography.datafile_format }}</span>
-        <span class="badge bg-info ms-2">{{ topography.resolution_x }} &times; {{
-                topography.resolution_y
-            }} data points</span>
-        <span v-if="topography.has_undefined_data" class="badge bg-danger ms-2">undefined data</span>
-        <span v-if="isMetadataIncomplete" class="badge bg-danger ms-2">metadata incomplete</span>
-        <span v-if="topography.short_reliability_cutoff !== null" class="badge bg-dark ms-2">
-                    reliability cutoff {{ shortReliabilityCutoff }}
-                </span>
-    </div>
-    <div v-if="topography !== null && topography.resolution_y === null">
-        <div class="badge bg-warning ms-1">{{ topography.datafile_format }}</div>
-        <div class="badge bg-info ms-2">{{ topography.resolution_x }} data points</div>
-        <span v-if="topography.has_undefined_data" class="badge bg-danger ms-2">undefined data</span>
-        <span v-if="isMetadataIncomplete" class="badge bg-danger ms-2">metadata incomplete</span>
-        <span v-if="topography.short_reliability_cutoff !== null" class="badge bg-dark ms-2">
-                    reliability cutoff {{ shortReliabilityCutoff }}
-                </span>
+    <div v-if="topography !== null" class="row items-center q-gutter-xs">
+        <QChip dense size="sm" color="grey-3" text-color="grey-8" icon="insert_drive_file">
+            {{ topography.datafile_format }}
+        </QChip>
+        <QChip dense size="sm" color="grey-3" text-color="grey-8" icon="grid_on">
+            {{ resolutionText }}
+        </QChip>
+        <QChip dense size="sm" color="grey-3" text-color="grey-8" icon="straighten">
+            {{ dimensionText }}
+        </QChip>
+        <QChip v-if="topography.has_undefined_data"
+               dense size="sm" color="orange-2" text-color="orange-9" icon="warning">
+            undefined data
+        </QChip>
+        <QChip v-if="isMetadataIncomplete"
+               dense size="sm" color="orange-2" text-color="orange-9" icon="edit_note">
+            metadata incomplete
+        </QChip>
+        <QChip v-if="topography.short_reliability_cutoff !== null"
+               dense size="sm" color="blue-grey-2" text-color="blue-grey-8" icon="content_cut">
+            cutoff {{ shortReliabilityCutoff }}
+        </QChip>
     </div>
 </template>

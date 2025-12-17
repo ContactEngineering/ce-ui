@@ -7,7 +7,11 @@
 
 import axios from "axios";
 import {onMounted, ref, watch} from "vue";
-import {BSpinner, useToastController} from "bootstrap-vue-next";
+import { QSpinner, QBanner } from "quasar";
+
+import { useNotify } from "@/utils/notify";
+import {filesFolderRetrieve} from "@/api";
+import {getIdFromUrl} from "@/utils/api";
 
 const props = defineProps({
     folderUrl: String,
@@ -31,7 +35,7 @@ const props = defineProps({
     }
 });
 
-const {show} = useToastController();
+const { show } = useNotify();
 
 // The OpenSeadragon instance
 let viewer = null;
@@ -78,22 +82,24 @@ function getTileSource(meta) {
 }
 
 
-function refreshDzi() {
+async function refreshDzi() {
     // We are loading a new image
     _isLoaded.value = false;
 
-    // Request new image and replace current one
-    axios.get(props.folderUrl).then(response => {
-        inventory = response.data;
-        axios.get(inventory[`${props.prefix}dzi.json`].file).then(response => {
-            viewer.addTiledImage({
-                tileSource: getTileSource(response.data),
-                success: () => {
-                    _isLoaded.value = true;
-                }
-            });
+    try {
+        // Request new image and replace current one
+        const folderId = getIdFromUrl(props.folderUrl);
+        const folderResponse = await filesFolderRetrieve({path: {id: folderId}});
+        inventory = folderResponse.data;
+        // Fetch dzi.json from external storage URL (keep as axios)
+        const metaResponse = await axios.get(inventory[`${props.prefix}dzi.json`].file);
+        viewer.addTiledImage({
+            tileSource: getTileSource(metaResponse.data),
+            success: () => {
+                _isLoaded.value = true;
+            }
         });
-    }).catch(error => {
+    } catch (error: any) {
         show?.({
             props: {
                 title: "Error fetching zoomable image",
@@ -101,100 +107,96 @@ function refreshDzi() {
                 variant: 'danger'
             }
         });
-    });
+    }
 }
 
 
-function requestDzi() {
+async function requestDzi() {
     _isLoaded.value = false;
 
-    axios.get(props.folderUrl).then(response => {
+    try {
+        // Fetch folder inventory using API client
+        const folderId = getIdFromUrl(props.folderUrl);
+        const folderResponse = await filesFolderRetrieve({path: {id: folderId}});
+        inventory = folderResponse.data;
+
         const dziJson = `${props.prefix}dzi.json`;
-        inventory = response.data;
         if (!(dziJson in inventory)) {
             _errorMessage.value = `DZI metadata file ${dziJson} not found.`;
             return;
         }
-        axios.get(inventory[dziJson].file).then(response => {
-            // DZI metadata
-            const meta = response.data;
 
-            // Create OpenSeadragon viewer
-            viewer = new OpenSeadragon.Viewer({
-                element: _openSeadragonElement.value,
-                tileSources: getTileSource(meta),
-                showNavigator: true,
-                navigatorPosition: 'TOP_LEFT',
-                navigatorSizeRatio: 0.1,
-                wrapHorizontal: false,
-                wrapVertical: false,
-                minZoomImageRatio: 0.5,
-                maxZoomPixelRatio: 5.0,
-                crossOriginPolicy: "Anonymous",
-                showNavigationControl: false,
-            });
+        // Fetch dzi.json from external storage URL (keep as axios)
+        const metaResponse = await axios.get(inventory[dziJson].file);
+        const meta = metaResponse.data;
 
-            // Add a scale bar
-            if (meta.Image.PixelsPerMeter) {
-                viewer.scalebar({
-                    type: OpenSeadragon.ScalebarType.MICROSCOPY,
-                    pixelsPerMeter: (meta.Image.PixelsPerMeter.Width + meta.Image.PixelsPerMeter.Height) / 2,
-                    minWidth: "75px",
-                    location: OpenSeadragon.ScalebarLocation.BOTTOM_LEFT,
-                    xOffset: 10,
-                    yOffset: 10,
-                    stayInsideImage: true,
-                    color: "black",
-                    fontColor: "black",
-                    backgroundColor: "rgba(255, 255, 255, 0.5)",
-                    fontSize: "medium",
-                    barThickness: 2
-                });
-            }
-
-            // Configure color bar
-            if (props.colorbar && meta.Image.ColorbarRange && meta.Image.ColorbarTitle && meta.Image.Colormap) {
-                // Set title and colormap
-                _colorbarTitle.value = meta.Image.ColorbarTitle;
-                _colormap.value = meta.Image.Colormap;
-
-                // Generate tick positions and labels
-                const mn = meta.Image.ColorbarRange.Minimum;
-                const mx = meta.Image.ColorbarRange.Maximum;
-
-                const log10_tick_dist = (Math.round(Math.log10(mx - mn)) - 1);
-                const fraction_digits = log10_tick_dist > 0 ? 0 : -log10_tick_dist;
-                let tick_dist = 10 ** log10_tick_dist;
-                let nb_ticks = Math.trunc((mx - mn) / tick_dist) + 1;
-
-                while (nb_ticks > 15) {
-                    tick_dist *= 2;
-                    nb_ticks = Math.trunc((mx - mn) / tick_dist) + 1;
-                }
-
-                for (let i = 0; i < nb_ticks; i++) {
-                    const v = Math.trunc(mn / tick_dist) * tick_dist + tick_dist * i;
-                    const relpos = (mx - v) * 100 / (mx - mn);
-                    if (relpos > 0 && relpos < 100) {
-                        _colorbarTicks.value.push({
-                            relpos: relpos,
-                            label: v.toFixed(fraction_digits)
-                        });
-                    }
-                }
-            }
-
-            _isLoaded.value = true;
-        }).catch(error => {
-            show?.({
-                props: {
-                    title: "Error rendering zoomable image",
-                    body: error.message,
-                    variant: 'danger'
-                }
-            });
+        // Create OpenSeadragon viewer
+        viewer = new OpenSeadragon.Viewer({
+            element: _openSeadragonElement.value,
+            tileSources: getTileSource(meta),
+            showNavigator: true,
+            navigatorPosition: 'TOP_LEFT',
+            navigatorSizeRatio: 0.1,
+            wrapHorizontal: false,
+            wrapVertical: false,
+            minZoomImageRatio: 0.5,
+            maxZoomPixelRatio: 5.0,
+            crossOriginPolicy: "Anonymous",
+            showNavigationControl: false,
         });
-    }).catch(error => {
+
+        // Add a scale bar
+        if (meta.Image.PixelsPerMeter) {
+            viewer.scalebar({
+                type: OpenSeadragon.ScalebarType.MICROSCOPY,
+                pixelsPerMeter: (meta.Image.PixelsPerMeter.Width + meta.Image.PixelsPerMeter.Height) / 2,
+                minWidth: "75px",
+                location: OpenSeadragon.ScalebarLocation.BOTTOM_LEFT,
+                xOffset: 10,
+                yOffset: 10,
+                stayInsideImage: true,
+                color: "black",
+                fontColor: "black",
+                backgroundColor: "rgba(255, 255, 255, 0.5)",
+                fontSize: "medium",
+                barThickness: 2
+            });
+        }
+
+        // Configure color bar
+        if (props.colorbar && meta.Image.ColorbarRange && meta.Image.ColorbarTitle && meta.Image.Colormap) {
+            // Set title and colormap
+            _colorbarTitle.value = meta.Image.ColorbarTitle;
+            _colormap.value = meta.Image.Colormap;
+
+            // Generate tick positions and labels
+            const mn = meta.Image.ColorbarRange.Minimum;
+            const mx = meta.Image.ColorbarRange.Maximum;
+
+            const log10_tick_dist = (Math.round(Math.log10(mx - mn)) - 1);
+            const fraction_digits = log10_tick_dist > 0 ? 0 : -log10_tick_dist;
+            let tick_dist = 10 ** log10_tick_dist;
+            let nb_ticks = Math.trunc((mx - mn) / tick_dist) + 1;
+
+            while (nb_ticks > 15) {
+                tick_dist *= 2;
+                nb_ticks = Math.trunc((mx - mn) / tick_dist) + 1;
+            }
+
+            for (let i = 0; i < nb_ticks; i++) {
+                const v = Math.trunc(mn / tick_dist) * tick_dist + tick_dist * i;
+                const relpos = (mx - v) * 100 / (mx - mn);
+                if (relpos > 0 && relpos < 100) {
+                    _colorbarTicks.value.push({
+                        relpos: relpos,
+                        label: v.toFixed(fraction_digits)
+                    });
+                }
+            }
+        }
+
+        _isLoaded.value = true;
+    } catch (error: any) {
         let error_has_response = "response" in error;
         /**
          * If an error occurs *not* because of XMLHttpRequest.abort(), show an
@@ -203,9 +205,9 @@ function requestDzi() {
          * */
         console.log(error);
 
-        if (error_has_response && (error.response.status == 0)) {
+        if (error_has_response && (error.response?.status == 0)) {
             _errorMessage.value = "Canceled loading of plot.";
-        } else if (error_has_response && (error.response.status == 404)) {
+        } else if (error_has_response && (error.response?.status == 404)) {
             /* 404 indicates the resource is not yet available, retry */
             console.log("Resource not yet available, retrying...")
             setTimeout(requestDzi, props.retryDelay);
@@ -213,7 +215,7 @@ function requestDzi() {
             /* Treat any other code as an actual error */
             _errorMessage.value = error.message;
         }
-    });
+    }
 }
 
 
@@ -257,15 +259,15 @@ defineExpose({
     <div class="dzi-container">
         <div ref="_openSeadragonElement" class="dzi-view">
             <div v-if="!_isLoaded && _errorMessage === null"
-                 class="d-flex justify-content-center mt-5">
-                <div class="flex-column text-center">
-                    <b-spinner/>
+                 class="flex justify-center q-mt-xl">
+                <div class="column text-center">
+                    <QSpinner size="2rem" />
                     <p>Loading...</p>
                 </div>
             </div>
-            <div v-if="_errorMessage !== null" class='alert alert-danger'>
+            <QBanner v-if="_errorMessage !== null" class="bg-negative text-white">
                 Could not load plot data. Error: {{ _errorMessage }}
-            </div>
+            </QBanner>
         </div>
         <div v-if="colorbar && _isLoaded" class="dzi-colorbar">
             <div class="dzi-colorbar-title">
@@ -284,3 +286,77 @@ defineExpose({
         </div>
     </div>
 </template>
+
+<style scoped>
+.dzi-container {
+    display: flex;
+    width: 100%;
+    min-height: 400px;
+}
+
+.dzi-view {
+    flex: 1;
+    min-height: 400px;
+    position: relative;
+    background: #f5f5f5;
+}
+
+.dzi-colorbar {
+    display: flex;
+    flex-direction: row;
+    padding-left: 10px;
+    width: 80px;
+}
+
+.dzi-colorbar-title {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    text-align: center;
+    font-size: 12px;
+    padding-right: 5px;
+}
+
+.dzi-colorbar-column {
+    position: relative;
+    width: 20px;
+    height: 100%;
+}
+
+.dzi-colorbar-tick {
+    position: absolute;
+    width: 100%;
+    height: 1px;
+    background: black;
+    transform: translateY(-50%);
+}
+
+.dzi-colorbar-text {
+    position: absolute;
+    font-size: 10px;
+    transform: translateY(-50%);
+    padding-left: 5px;
+    white-space: nowrap;
+}
+
+/* Colormap backgrounds */
+.background-viridis {
+    background: linear-gradient(to bottom, #fde725, #5ec962, #21918c, #3b528b, #440154);
+}
+
+.background-plasma {
+    background: linear-gradient(to bottom, #f0f921, #fca636, #e16462, #b12a90, #0d0887);
+}
+
+.background-inferno {
+    background: linear-gradient(to bottom, #fcffa4, #f98e09, #bc3754, #57106e, #000004);
+}
+
+.background-magma {
+    background: linear-gradient(to bottom, #fcfdbf, #fe9f6d, #de4968, #8c2981, #000004);
+}
+
+.background-cividis {
+    background: linear-gradient(to bottom, #fee838, #a5a928, #6d7086, #4b4d81, #002051);
+}
+</style>

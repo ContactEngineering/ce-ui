@@ -1,53 +1,48 @@
-<script setup>
+<script setup lang="ts">
 
-const props = defineProps({
-    tabs: {
-        type: Array,
-        default: []
-    }
-});
+import { QBreadcrumbs, QBreadcrumbsEl, QBtn, QIcon } from "quasar";
+import { computed } from "vue";
 
-function iconClass(tab) {
-    const c = {};
-    c['fa'] = true;
-    c[`fa-${tab.icon}`] = true;
-    return c;
+interface Tab {
+    title: string;
+    icon?: string;
+    href: string;
+    href_previous?: string;
+    href_next?: string;
+    active?: boolean;
+    tooltip?: string;
 }
+
+const props = defineProps<{
+    tabs: Tab[]
+}>();
+
+// Get the last tab for prev/next navigation
+const lastTab = computed(() => props.tabs?.[props.tabs.length - 1]);
 
 </script>
 
 <template>
-    <ul role="tablist"
-        class="nav nav-tabs lined-tabs align-items-center bg-light w-100 shadow">
-        <li v-for="(tab, index) in tabs"
-            class="nav-item d-flex"
-            :title="tab.tooltip">
-            <div :class="{ 'nav-link': true, 'active': tab.active }">
-                <a v-if="tab.href_previous != null"
-                   class="link-underline link-underline-opacity-0"
-                   :href="tab.href_previous">
-                    <i class="fa fa-caret-left"></i>
-                </a>
-                <a class="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-75-hover"
-                   :href="tab.href">
-                    <i :class="iconClass(tab)"></i>
-                    {{ tab.title }}
-                </a>
-                <a v-if="tab.href_next != null"
-                   class="link-underline link-underline-opacity-0"
-                   :href="tab.href_next">
-                    <i class="fa fa-caret-right"></i>
-                </a>
-            </div>
-            <div v-if="index !== 0 && index !== tabs.length - 1" class="nav-pad-y">
-                /
-            </div>
-        </li>
-    </ul>
+    <div v-if="tabs && tabs.length > 0" class="row items-center no-wrap">
+        <QBtn v-if="lastTab?.href_previous"
+              flat round dense
+              color="white"
+              :href="lastTab.href_previous"
+              icon="chevron_left"
+              class="q-mr-sm" />
+        <QBreadcrumbs active-color="white" separator-color="grey-5" class="text-grey-4">
+            <QBreadcrumbsEl v-for="(tab, index) in tabs"
+                            :key="index"
+                            :label="tab.title"
+                            :icon="tab.icon"
+                            :href="tab.href"
+                            :class="{ 'text-white text-weight-medium': tab.active }" />
+        </QBreadcrumbs>
+        <QBtn v-if="lastTab?.href_next"
+              flat round dense
+              color="white"
+              :href="lastTab.href_next"
+              icon="chevron_right"
+              class="q-ml-sm" />
+    </div>
 </template>
-
-<style scoped>
-.nav-pad-y {
-    padding: var(--bs-nav-link-padding-y) 0;
-}
-</style>
