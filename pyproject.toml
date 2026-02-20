@@ -36,7 +36,7 @@ dependencies = [
     'DiscoverVersion',
     'django-termsandconditions>=2.0.8',
     'celery[redis]',
-    'boto3==1.42.30',
+    'boto3==1.42.54',
 ]
 
 [project.urls]
