@@ -15,16 +15,14 @@ from termsandconditions.views import (AcceptTermsView, GetTermsViewMixin,
                                       TermsView)
 from topobank.analysis.models import Workflow
 from topobank.analysis.registry import get_analysis_function_names
-from topobank.analysis.serializers import WorkflowSerializer
+from topobank.analysis.serializers import WorkflowDetailSerializer
 from topobank.manager.models import Surface, Topography
 from topobank.manager.utils import subjects_from_base64, subjects_to_base64
 from topobank.manager.v1.serializers import (SurfaceSerializer,
                                              TopographySerializer)
-from topobank.usage_stats.utils import increase_statistics_by_date
 from topobank.users.models import User
 from topobank_publication.models import PublicationCollection
 from topobank_publication.serializers import PublicationCollectionSerializer
-from trackstats.models import Metric, Period
 
 from ce_ui import breadcrumb
 
@@ -91,12 +89,6 @@ class AppDetailView(DetailView):
 
 class DataSetListView(AppView):
     vue_component = "DatasetList"
-
-    def dispatch(self, request, *args, **kwargs):
-        # count this view event for statistics
-        metric = Metric.objects.SEARCH_VIEW_COUNT
-        increase_statistics_by_date(metric, period=Period.DAY)
-        return super().dispatch(request, *args, **kwargs)
 
 
 class DatasetDetailView(AppDetailView):
@@ -296,7 +288,7 @@ class AnalysisDetailView(AppDetailView):
     model = Workflow
     slug_field = "name"
     vue_component = "AnalysisDetail"
-    serializer_class = WorkflowSerializer
+    serializer_class = WorkflowDetailSerializer
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

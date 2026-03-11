@@ -5,7 +5,6 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.timezone import now
 from topobank.users.models import User
-from trackstats.models import Metric, Period, StatisticByDate
 
 from .utils import get_default_group
 from .views import DEFAULT_SELECT_TAB_STATE
