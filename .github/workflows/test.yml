@@ -54,7 +54,7 @@ jobs:
         popd
         pip-compile --extra dev pyproject.toml /tmp/topobank/pyproject.toml /tmp/topobank-publication/pyproject.toml
         pip install -r requirements.txt
-        pip install /tmp/topobank-publication
+        # pip install /tmp/topobank-publication
         pushd /tmp/topobank
         USE_DOCKER=no python manage.py collectstatic
         popd
