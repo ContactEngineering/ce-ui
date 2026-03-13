@@ -10,7 +10,7 @@ from django.views.generic import RedirectView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 from topobank.organizations.models import Organization
-from topobank.views import entry_points
+from topobank_rest_api.views import entry_points
 
 from . import views
 
