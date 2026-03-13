@@ -680,7 +680,7 @@ CONTACT_MECHANICS_KWARGS_LIMITS = {
 
 # Configure watchman checks
 WATCHMAN_CHECKS = watchman_constants.DEFAULT_CHECKS + (
-    "topobank.taskapp.utils.celery_worker_check",
+    "ce_ui.utils.celery_worker_check",
 )
 
 #

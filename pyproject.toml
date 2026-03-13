@@ -37,6 +37,17 @@ dependencies = [
     'django-termsandconditions>=2.0.8',
     'celery[redis]',
     'boto3==1.42.30',
+    'argon2-cffi',
+    'servestatic',
+    'psycopg[binary]',
+    'django-environ',
+    'django-crispy-forms',
+    'crispy-bootstrap5',
+    'django-redis',
+    'django-watchman',
+    'django-request-profiler',
+    'gunicorn[gevent]>=20.1.0',
+    'uvicorn[standard]',
 ]
 
 [project.urls]
