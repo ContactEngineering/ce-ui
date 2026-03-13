@@ -15,10 +15,10 @@ from termsandconditions.views import (AcceptTermsView, GetTermsViewMixin,
                                       TermsView)
 from topobank.analysis.models import Workflow
 from topobank.analysis.registry import get_analysis_function_names
-from topobank.analysis.serializers import WorkflowDetailSerializer
+from topobank_rest_api.analysis.serializers import WorkflowDetailSerializer
 from topobank.manager.models import Surface, Topography
 from topobank.manager.utils import subjects_from_base64, subjects_to_base64
-from topobank.manager.v1.serializers import (SurfaceSerializer,
+from topobank_rest_api.manager.v1.serializers import (SurfaceSerializer,
                                              TopographySerializer)
 from topobank.users.models import User
 from topobank_publication.models import PublicationCollection

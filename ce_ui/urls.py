@@ -82,44 +82,57 @@ urlpatterns = plugin_patterns + [
         name="search",
     ),
     #
-    # User management
-    #
-    path(
-        "users/",
-        include("topobank_rest_api.users.urls", namespace="users"),
-    ),
-    #
-    # Organization management
-    #
-    path(
-        "organizations/",
-        include("topobank_rest_api.organizations.urls", namespace="organizations"),
-    ),
-    #
-    # Permission management
-    #
-    path(
-        "authorization/",
-        include("topobank_rest_api.authorization.urls", namespace="authorization"),
-    ),
-    #
     # Core topobank applications
     #
     path(
-        "files/",
-        include("topobank_rest_api.files.urls", namespace="files"),
-    ),
-    path(
-        "manager/",
-        include("topobank_rest_api.manager.urls", namespace="manager"),
-    ),
-    path(
-        "analysis/",
-        include("topobank_rest_api.analysis.urls", namespace="analysis"),
+        "",
+        include(
+            [
+                path(
+                    "users/",
+                    include("topobank_rest_api.users.urls", namespace="users"),
+                ),
+                path(
+                    "organizations/",
+                    include("topobank_rest_api.organizations.urls", namespace="organizations"),
+                ),
+                path(
+                    "authorization/",
+                    include("topobank_rest_api.authorization.urls", namespace="authorization"),
+                ),
+                path(
+                    "files/",
+                    include("topobank_rest_api.files.urls", namespace="files"),
+                ),
+                path(
+                    "manager/",
+                    include("topobank_rest_api.manager.urls", namespace="manager"),
+                ),
+                path(
+                    "analysis/",
+                    include("topobank_rest_api.analysis.urls", namespace="analysis"),
+                ),
+            ]
+        ),
     ),
     path(
         "plugins/",
-        include("topobank.plugins.urls", namespace="plugins"),
+        include(
+            [
+                path(
+                    topobank_contact.urls.urlprefix,
+                    include((plugin_urls(topobank_contact.urls.urlpatterns, "topobank_contact", True), "topobank_contact")),
+                ),
+                path(
+                    topobank_publication.urls.urlprefix,
+                    include((plugin_urls(topobank_publication.urls.urlpatterns, "topobank_publication", False), "publication")),
+                ),
+                path(
+                    topobank_statistics.urls.urlprefix,
+                    include((plugin_urls(topobank_statistics.urls.urlpatterns, "topobank_statistics", False), "topobank_statistics")),
+                ),
+            ]
+        ),
     ),
     #
     # Allauth
