@@ -1,4 +1,9 @@
+import logging
+
 from django.contrib.auth.models import Group
+from watchman.decorators import check as watchman_check
+
+_log = logging.getLogger(__name__)
 
 DEFAULT_GROUP_NAME = "all"
 
@@ -7,22 +12,12 @@ def get_default_group():
     group, created = Group.objects.get_or_create(name=DEFAULT_GROUP_NAME)
     return group
 
-import logging
-from django.conf import settings
-from django.core.files.storage import default_storage
-from django.core.exceptions import SuspiciousFileOperation
-from django.urls import reverse
-
-_log = logging.getLogger(__name__)
-
-
-
-from watchman.decorators import check as watchman_check
 
 def celery_worker_check():
     return {
         "celery": _celery_worker_check(),
     }
+
 
 @watchman_check
 def _celery_worker_check():

@@ -47,15 +47,21 @@ def plugin_urls(urllist, app_label, restricted):
 plugin_patterns = [
     path(
         topobank_contact.urls.urlprefix,
-        include((plugin_urls(topobank_contact.urls.urlpatterns, "topobank_contact", True), "topobank_contact")),
+        include(
+            (plugin_urls(topobank_contact.urls.urlpatterns, "topobank_contact", True), "topobank_contact")
+        ),
     ),
     path(
         topobank_publication.urls.urlprefix,
-        include((plugin_urls(topobank_publication.urls.urlpatterns, "topobank_publication", False), "topobank_publication")),
+        include(
+            (plugin_urls(topobank_publication.urls.urlpatterns, "topobank_publication", False), "topobank_publication")
+        ),
     ),
     path(
         topobank_statistics.urls.urlprefix,
-        include((plugin_urls(topobank_statistics.urls.urlpatterns, "topobank_statistics", False), "topobank_statistics")),
+        include(
+            (plugin_urls(topobank_statistics.urls.urlpatterns, "topobank_statistics", False), "topobank_statistics")
+        ),
     ),
 ]
 
@@ -121,15 +127,27 @@ urlpatterns = plugin_patterns + [
             [
                 path(
                     topobank_contact.urls.urlprefix,
-                    include((plugin_urls(topobank_contact.urls.urlpatterns, "topobank_contact", True), "topobank_contact")),
+                    include(
+                        (plugin_urls(topobank_contact.urls.urlpatterns, "topobank_contact", True), "topobank_contact")
+                    ),
                 ),
                 path(
                     topobank_publication.urls.urlprefix,
-                    include((plugin_urls(topobank_publication.urls.urlpatterns, "topobank_publication", False), "publication")),
+                    include(
+                        (
+                            plugin_urls(topobank_publication.urls.urlpatterns, "topobank_publication", False),
+                            "publication"
+                        )
+                    ),
                 ),
                 path(
                     topobank_statistics.urls.urlprefix,
-                    include((plugin_urls(topobank_statistics.urls.urlpatterns, "topobank_statistics", False), "topobank_statistics")),
+                    include(
+                        (
+                            plugin_urls(topobank_statistics.urls.urlpatterns, "topobank_statistics", False),
+                            "topobank_statistics"
+                        )
+                    ),
                 ),
             ]
         ),
