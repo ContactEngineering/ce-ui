@@ -1,12 +1,12 @@
 [build-system]
-requires = ["flit_core>=3.2", "DiscoverVersion"]
-build-backend = "flit_core.buildapi"
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
 
 [project]
+dynamic = ["version"]
 name = 'ce-ui'
 description = 'The user-facing interface of contact.engineering.'
-requires-python = '>=3.9.0'
-dynamic = ['version']
+requires-python = ">=3.10.0"
 readme = 'README.rst'
 license = { file = 'LICENSE' }
 authors = [
@@ -17,7 +17,6 @@ classifiers = [
     'Development Status :: 5 - Production/Stable',
     'Environment :: Web Environment',
     'Framework :: Django',
-    'Framework :: Django :: 3.2',
     'Framework :: Celery',
     'Intended Audience :: Developers',
     'License :: OSI Approved :: MIT License',
@@ -25,7 +24,6 @@ classifiers = [
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
     'Programming Language :: Python :: 3 :: Only',
-    'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3.12',
@@ -33,24 +31,41 @@ classifiers = [
     'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
 ]
 dependencies = [
-    'DiscoverVersion',
     'django-termsandconditions>=2.0.8',
     'celery[redis]',
-    'boto3==1.42.30',
+    'boto3',
+    'argon2-cffi',
+    'servestatic',
+    'psycopg[binary]',
+    'django-environ',
+    'django-crispy-forms',
+    'crispy-bootstrap5',
+    'django-redis',
+    'django-watchman',
+    'django-request-profiler',
+    'django-filter',
+    'djangorestframework',
+    'drf-spectacular>=0.27.2',
+    'gunicorn[gevent]>=20.1.0',
+    'uvicorn[standard]',
+]
+
+[project.optional-dependencies]
+dev = [
+    'pytest',
+    'pytest-django>=4.4.0',
+    # https://github.com/pytest-dev/pytest-django
+    'pytest-mock',
+    'pytest-cov',
+    'django-celery-results',
+    'factory-boy',
+    'django-test-plus',
+    'dj-inmemorystorage',
 ]
 
 [project.urls]
 homepage = 'https://contact.engineering'
 repository = 'https://github.com/ContactEngineering/ce-ui'
 
-[project.entry-points.'topobank.plugins']
-ce_ui = 'ce_ui.apps.CEUIPluginConfig'
-
-[project.entry-points.'topobank.third_party_apps']
-termsandconditions = 'termsandconditions'
-
-[project.entry-points.'topobank.middleware']
-termsandconditions = 'termsandconditions.middleware.TermsAndConditionsRedirectMiddleware'
-
-[project.entry-points.'topobank.context_processors']
-fixed_tabs = 'ce_ui.context_processors.fixed_tabs_processor'
+[tool.hatch.version]
+source = "vcs"
