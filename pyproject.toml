@@ -60,6 +60,7 @@ dev = [
     'django-celery-results',
     'factory-boy',
     'django-test-plus',
+    'dj-inmemorystorage',
 ]
 
 [project.urls]
