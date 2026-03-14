@@ -52,8 +52,10 @@ jobs:
         git clone -b 26_split_topobank https://github.com/ContactEngineering/topobank.git
         git clone -b 26_split_topobank https://github.com/ContactEngineering/topobank-publication.git
         popd
-        pip-compile --extra dev pyproject.toml /tmp/topobank/pyproject.toml /tmp/topobank-publication/pyproject.toml
+        pip-compile --extra dev pyproject.toml /tmp/topobank/pyproject.toml /tmp/topobank-statistics/pyproject.toml /tmp/topobank-contact/pyproject.toml /tmp/topobank-publication/pyproject.toml
         pip install -r requirements.txt
+        pip install /tmp/topobank-statistics
+        pip install /tmp/topobank-contact
         pip install /tmp/topobank-publication
         pip install -e .[dev]
 
