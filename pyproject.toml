@@ -57,6 +57,7 @@ dev = [
     # https://github.com/pytest-dev/pytest-django
     'pytest-mock',
     'pytest-cov',
+    'django-celery-results'
 ]
 
 [project.urls]
