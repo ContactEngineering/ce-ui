@@ -136,9 +136,11 @@ THIRD_PARTY_APPS = [
     "watchman",  # system status report
     "request_profiler",  # keep track of response times for selected routes
     "drf_spectacular",  # API documentation
+    "termsandconditions",
 ]
 LOCAL_APPS = [
     # Your stuff: custom apps go here
+    "ce_ui.apps.CEUIAppConfig",
     "topobank.users.apps.UsersAppConfig",
     "topobank.authorization.apps.AuthorizationAppConfig",
     "topobank.files.apps.FilesAppConfig",
@@ -147,33 +149,14 @@ LOCAL_APPS = [
     "topobank.organizations.apps.OrganizationsAppConfig",
     "topobank.properties.apps.PropertiesAppConfig",
     # Former plugins now integrated manually
-    "topobank_contact.apps.ContactPluginConfig",
-    "topobank_statistics.apps.StatisticsPluginConfig",
-    "topobank_publication.apps.PublicationPluginConfig",
+    "topobank_contact.apps.ContactAppConfig",
+    "topobank_statistics.apps.StatisticsAppConfig",
+    "topobank_publication.apps.PublicationAppConfig",
 ]
-
-PLUGIN_MODULES = [
-    entry_point.name for entry_point in entry_points(group="topobank.plugins")
-]
-PLUGIN_APPS = [
-    entry_point.value for entry_point in entry_points(group="topobank.plugins")
-]
-print(f"PLUGIN_MODULES: {PLUGIN_MODULES}")
-for mod in PLUGIN_MODULES:
-    version = importlib.metadata.version(mod)
-    file = importlib.util.find_spec(mod).origin
-    print(f"{mod}: {version}, {file}")
-print(f"PLUGIN_APPS: {PLUGIN_APPS}")
-
-PLUGIN_THIRD_PARTY_APPS = [
-    entry_point.value for entry_point in entry_points(group="topobank.third_party_apps")
-]
-print(f"PLUGIN_THIRD_PARTY_APPS: {PLUGIN_THIRD_PARTY_APPS}")
-THIRD_PARTY_APPS += PLUGIN_THIRD_PARTY_APPS
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 # Remove duplicate entries
-INSTALLED_APPS = list(set(DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS + PLUGIN_APPS))
+INSTALLED_APPS = list(set(DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS))
 
 # MIGRATIONS
 # ------------------------------------------------------------------------------
@@ -241,18 +224,7 @@ MIDDLEWARE = [
     "request_profiler.middleware.ProfilingMiddleware",
     # Allauth
     "allauth.account.middleware.AccountMiddleware",
-]
-
-PLUGIN_MIDDLEWARE = [
-    entry_point.value for entry_point in entry_points(group="topobank.middleware")
-]
-print(f"PLUGIN_MIDDLEWARE: {PLUGIN_MIDDLEWARE}")
-
-# Plugin middleware must be called before anonymous user replacement, because the UI plugin registers Terms & Conditions
-# middleware. If plugin middleware comes last, then anonymous users will always be asked to accept terms and conditions.
-MIDDLEWARE += PLUGIN_MIDDLEWARE
-
-MIDDLEWARE += [
+    "termsandconditions.middleware.TermsAndConditionsRedirectMiddleware",
     # we need an anonymous user with a user id for API calls
     "topobank.middleware.anonymous_user_middleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -262,12 +234,6 @@ MIDDLEWARE += [
 # TEMPLATES
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#templates
-
-PLUGIN_CONTEXT_PROCESSORS = [
-    entry_point.value
-    for entry_point in entry_points(group="topobank.context_processors")
-]
-print(f"PLUGIN_CONTEXT_PROCESSORS: {PLUGIN_CONTEXT_PROCESSORS}")
 
 TEMPLATES = [
     {
@@ -297,8 +263,8 @@ TEMPLATES = [
                 "django.template.context_processors.static",
                 "django.template.context_processors.tz",
                 "django.contrib.messages.context_processors.messages",
-            ]
-            + PLUGIN_CONTEXT_PROCESSORS,
+                "ce_ui.context_processors.fixed_tabs_processor",
+            ],
         },
     },
 ]
@@ -501,19 +467,26 @@ TRACKED_DEPENDENCIES = [
         "topobank.__version__",
         "MIT",
         "https://github.com/ContactEngineering/topobank",
-    )
+    ),
+    (
+        "topobank_statistics",
+        "topobank_statistics.__version__",
+        "MIT",
+        "https://github.com/ContactEngineering/topobank_statistics",
+    ),
+    (
+        "topobank_contact",
+        "topobank_contact.__version__",
+        "MIT",
+        "https://github.com/ContactEngineering/topobank_contact",
+    ),
+    (
+        "topobank_publication",
+        "topobank_publication.__version__",
+        "MIT",
+        "https://github.com/ContactEngineering/topobank_publication",
+    ),
 ]
-
-# Extend tracked dependencies by Plugin apps
-for plugin_module, plugin_app in zip(PLUGIN_MODULES, PLUGIN_APPS):
-    TRACKED_DEPENDENCIES.append(
-        (
-            plugin_module,
-            plugin_app + ".TopobankPluginMeta.version",
-            "MIT",
-            f"https://github.com/ContactEngineering/{plugin_module}",
-        )
-    )
 
 TRACKED_DEPENDENCIES += [
     (
