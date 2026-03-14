@@ -1,7 +1,5 @@
 from django.apps import AppConfig
 
-from .version import __version__
-
 
 class CEUIAppConfig(AppConfig):
     name = 'ce_ui'

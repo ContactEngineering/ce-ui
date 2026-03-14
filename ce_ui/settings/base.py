@@ -2,18 +2,16 @@
 Base settings to build other settings files upon.
 """
 
-import importlib.metadata
 import random
 import string
 from datetime import timedelta
 
 import environ
-from backports.entry_points_selectable import entry_points
+import topobank
 from django.core.exceptions import ImproperlyConfigured
 from watchman import constants as watchman_constants
 
 import ce_ui
-import topobank
 
 
 def random_string(L=16):
