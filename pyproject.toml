@@ -50,6 +50,15 @@ dependencies = [
     'uvicorn[standard]',
 ]
 
+[project.optional-dependencies]
+dev = [
+    'pytest',
+    'pytest-django>=4.4.0',
+    # https://github.com/pytest-dev/pytest-django
+    'pytest-mock',
+    'pytest-cov',
+]
+
 [project.urls]
 homepage = 'https://contact.engineering'
 repository = 'https://github.com/ContactEngineering/ce-ui'
