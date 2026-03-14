@@ -59,6 +59,7 @@ dev = [
     'pytest-cov',
     'django-celery-results',
     'factory-boy',
+    'django-test-plus',
 ]
 
 [project.urls]
