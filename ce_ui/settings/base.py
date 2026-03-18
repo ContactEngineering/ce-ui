@@ -128,7 +128,6 @@ THIRD_PARTY_APPS = [
     "rest_framework",  # REST API
     "django_filters",
     "storages",  # S3 storage
-    "guardian",  # needed for migrations only
     "notifications",
     "tagulous",  # tag-model with hierarchies
     "watchman",  # system status report
