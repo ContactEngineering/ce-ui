@@ -1,4 +1,8 @@
 import notifications.urls
+# Plugin URLs
+import topobank_contact.urls
+import topobank_publication.urls
+import topobank_statistics.urls
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth.decorators import user_passes_test
@@ -8,16 +12,10 @@ from django.urls import include, path, re_path
 from django.views import defaults as default_views
 from django.views.generic import RedirectView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
-
-from topobank.organizations.models import Organization
+from topobank_orcid.organizations.models import Organization
 from topobank_rest_api.views import entry_points
 
 from . import views
-
-# Plugin URLs
-import topobank_contact.urls
-import topobank_publication.urls
-import topobank_statistics.urls
 
 app_name = "ce_ui"
 

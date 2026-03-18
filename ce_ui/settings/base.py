@@ -139,12 +139,12 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     # Your stuff: custom apps go here
     "ce_ui.apps.CEUIAppConfig",
-    "topobank.users.apps.UsersAppConfig",
-    "topobank.authorization.apps.AuthorizationAppConfig",
+    "topobank_orcid.users.apps.UsersAppConfig",
+    "topobank_orcid.authorization.apps.AuthorizationAppConfig",
     "topobank.files.apps.FilesAppConfig",
     "topobank.manager.apps.ManagerAppConfig",
     "topobank.analysis.apps.AnalysisAppConfig",
-    "topobank.organizations.apps.OrganizationsAppConfig",
+    "topobank_orcid.organizations.apps.OrganizationsAppConfig",
     "topobank.properties.apps.PropertiesAppConfig",
     # Former plugins now integrated manually
     "topobank_contact.apps.ContactAppConfig",
@@ -176,6 +176,8 @@ AUTHENTICATION_BACKENDS = [
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#auth-user-model
 AUTH_USER_MODEL = "users.User"
+TOPOBANK_PERMISSION_MODEL = "authorization.PermissionSet"
+TOPOBANK_ORGANIZATION_MODEL = "organizations.Organization"
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-redirect-url
 LOGIN_REDIRECT_URL = "home"
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-url
@@ -338,12 +340,12 @@ CELERY_REDIS_BACKEND_HEALTH_CHECK_INTERVAL = 30
 # django-allauth
 # ------------------------------------------------------------------------------
 # https://docs.allauth.org/en/latest/account/configuration.html
-ACCOUNT_FORMS = {"signup": "topobank.users.forms.SignupFormWithName"}
+ACCOUNT_FORMS = {"signup": "topobank_orcid.users.forms.SignupFormWithName"}
 # ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_EMAIL_VERIFICATION = "none"
-ACCOUNT_ADAPTER = "topobank.users.adapters.AccountAdapter"
+ACCOUNT_ADAPTER = "topobank_orcid.users.adapters.AccountAdapter"
 # https://docs.allauth.org/en/latest/socialaccount/configuration.html
-SOCIALACCOUNT_ADAPTER = "topobank.users.adapters.SocialAccountAdapter"
+SOCIALACCOUNT_ADAPTER = "topobank_orcid.users.adapters.SocialAccountAdapter"
 SOCIALACCOUNT_LOGIN_ON_GET = True  # True: disable intermediate page
 ACCOUNT_LOGOUT_ON_GET = True  # True: disable intermediate page
 
