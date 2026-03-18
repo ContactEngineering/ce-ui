@@ -55,7 +55,7 @@ jobs:
         git clone -b 26_split_topobank https://github.com/ContactEngineering/topobank-contact.git
         git clone -b 26_split_topobank https://github.com/ContactEngineering/topobank-publication.git
         popd
-        pip install /tmp/topobank /tmp/topobank-rest-api /tmp/topobank-statistics /tmp/topobank-contact /tmp/topobank-publication .[dev]
+        pip install /tmp/topobank /tmp/topobank-rest-api /tmp/topobank-statistics /tmp/topobank-contact /tmp/topobank-publication git+https://github.com/ContactEngineering/topobank-orcid.git .[dev]
 
     - name: Test
       run: PYTHONPATH=/tmp/topobank pytest -v
