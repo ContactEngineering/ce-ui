@@ -177,6 +177,7 @@ AUTHENTICATION_BACKENDS = [
 AUTH_USER_MODEL = "users.User"
 TOPOBANK_PERMISSION_MODEL = "authorization.PermissionSet"
 TOPOBANK_ORGANIZATION_MODEL = "organizations.Organization"
+TOPOBANK_ANONYMOUS_USER_GETTER = "topobank_orcid.users.anonymous.get_anonymous_user"
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-redirect-url
 LOGIN_REDIRECT_URL = "home"
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-url
@@ -225,7 +226,7 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
     "termsandconditions.middleware.TermsAndConditionsRedirectMiddleware",
     # we need an anonymous user with a user id for API calls
-    "topobank.middleware.anonymous_user_middleware",
+    "topobank_orcid.users.middleware.anonymous_user_middleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
