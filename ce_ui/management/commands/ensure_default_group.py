@@ -1,7 +1,7 @@
 import logging
 
+from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
-from topobank.users.models import User
 
 from ce_ui.utils import DEFAULT_GROUP_NAME, get_default_group
 
@@ -15,6 +15,7 @@ class Command(BaseCommand):
 
         _log.info("Ensuring default group '{}' exists..".format(DEFAULT_GROUP_NAME))
         default_group = get_default_group()  # here the group is also created if not existing
+        User = get_user_model()
         users = User.objects.all()
 
         _log.info("Ensuring all users are members of this group..")

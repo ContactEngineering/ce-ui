@@ -375,3 +375,4 @@ static/js/*.woff2
 # *.js files
 static/js/*.js
 
+.env

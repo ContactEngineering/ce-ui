@@ -27,7 +27,7 @@ jobs:
 
     env:
       USE_DOCKER: no
-      DJANGO_SETTINGS_MODULE: topobank.settings.test
+      DJANGO_SETTINGS_MODULE: ce_ui.settings.test
       DATABASE_URL: postgres://postgres:secret@localhost/topobank-test
 
     strategy:
@@ -49,16 +49,13 @@ jobs:
       run: |
         pip install --upgrade pip pip-tools
         pushd /tmp
-        git clone https://github.com/ContactEngineering/topobank.git
-        git clone https://github.com/ContactEngineering/topobank-publication.git
+        git clone -b 26_split_topobank https://github.com/ContactEngineering/topobank.git
+        git clone https://github.com/ContactEngineering/topobank-rest-api.git
+        git clone -b 26_split_topobank https://github.com/ContactEngineering/topobank-statistics.git
+        git clone -b 26_split_topobank https://github.com/ContactEngineering/topobank-contact.git
+        git clone -b 26_split_topobank https://github.com/ContactEngineering/topobank-publication.git
         popd
-        pip-compile --extra dev pyproject.toml /tmp/topobank/pyproject.toml /tmp/topobank-publication/pyproject.toml
-        pip install -r requirements.txt
-        pip install /tmp/topobank-publication
-        pushd /tmp/topobank
-        USE_DOCKER=no python manage.py collectstatic
-        popd
-        pip install -e .[dev]
+        pip install /tmp/topobank /tmp/topobank-rest-api /tmp/topobank-statistics /tmp/topobank-contact /tmp/topobank-publication git+https://github.com/ContactEngineering/topobank-orcid.git .[dev]
 
     - name: Test
       run: PYTHONPATH=/tmp/topobank pytest -v

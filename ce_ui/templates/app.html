@@ -8,6 +8,12 @@
 {% endblock body %}
 
 {% block javascript %}
+    <script>
+        /**
+         * Initialize the topobank object if it doesn't exist yet.
+         */
+        var topobank = topobank || {};
+    </script>
     {% if serialized_object %}
         {{ serialized_object|json_script:"object" }}
     {% endif %}
@@ -69,7 +75,7 @@
         let appProps = {
             // Admin and login URLs
             adminUrl: '{% url 'admin:index' %}',
-            loginUrl: '{% provider_login_url 'orcid' method=" oauth2" %}',
+            loginUrl: '{% provider_login_url 'orcid' method="oauth2" %}',
             datasetListUrl: '{% url 'ce_ui:select' %}',
             // User information
             userApiUrl: '{{ request.user.get_absolute_url }}',

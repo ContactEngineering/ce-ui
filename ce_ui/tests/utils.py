@@ -1,5 +1,5 @@
 from django.shortcuts import reverse
-from topobank.manager.v1.views import SurfaceViewSet
+from topobank_rest_api.manager.v1.views import SurfaceViewSet
 from topobank.testing.utils import ordereddicts_to_dicts
 
 
