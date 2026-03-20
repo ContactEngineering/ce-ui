@@ -486,6 +486,12 @@ TRACKED_DEPENDENCIES = [
         "MIT",
         "https://github.com/ContactEngineering/topobank_publication",
     ),
+    (
+        "ce_ui",
+        "ce_ui.__version__",
+        "MIT",
+        "https://github.com/ContactEngineering/ce-ui",
+    ),
 ]
 
 TRACKED_DEPENDENCIES += [

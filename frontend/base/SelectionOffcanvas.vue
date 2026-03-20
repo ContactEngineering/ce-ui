@@ -46,7 +46,7 @@ async function refreshDatasets() {
 }
 
 function showCollectionInfo() {
-    const issue = "";
+    let issue = "";
     if (!selectionIsPublished.value) {
         issue = "Your selection contains unpublished datasets."
     }
@@ -69,13 +69,13 @@ const selectionIsPublished = computed(() => {
 </script>
 
 <template>
-    <BOffcanvas v-model="visible" placement="end" footer-class="offcanvas-header">
+    <BOffcanvas v-model="visible" placement="end">
         <template #title>
             <i class="fa fa-bell fa-fw" aria-hidden="true"></i>
             <span class="ms-2">Selected datasets</span>
         </template>
         <template #footer>
-            <BNavbarNav class="justify-content-end flex-grow-1">
+            <BNavbarNav class="p-3 justify-content-end flex-grow-1">
                 <BNavItem class="btn btn-success mb-2"
                     :href="`${analysisListUrl}?subjects=${selection.selectedAsBase64}`"
                     :disabled="selection.nbSelected === 0">

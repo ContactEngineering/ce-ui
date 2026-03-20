@@ -52,13 +52,13 @@ function clearNotifications() {
 </script>
 
 <template>
-    <BOffcanvas v-model="visible" placement="end" footer-class="offcanvas-header">
+    <BOffcanvas v-model="visible" placement="end">
         <template #title>
             <i class="fa fa-bell fa-fw" aria-hidden="true"></i>
             <span class="ms-2">Notifications</span>
         </template>
         <template #footer>
-            <BNavbarNav class="justify-content-end flex-grow-1">
+            <BNavbarNav class="p-3 justify-content-end flex-grow-1">
                 <BNavItem class="btn btn-secondary" @click="clearNotifications"
                           :disabled="unreadCount === 0">
                     Clear notifications

@@ -22,14 +22,14 @@ const contactModal = ref(false);
 </script>
 
 <template>
-    <BOffcanvas v-model="visible" placement="end" footer-class="offcanvas-header">
+    <BOffcanvas v-model="visible" placement="end">
         <template #title>
             <i class="fa fa-user-circle fa-fw" aria-hidden="true"></i>
             <span class="ms-2">{{ name }}</span>
         </template>
 
         <template #footer>
-            <BNavbarNav class="justify-content-end flex-grow-1">
+            <BNavbarNav class="p-3 justify-content-end flex-grow-1">
                 <BNavItem :href="`https://orcid.org/${orcid}`"
                           class="align-self-center">
                     <img src="/static/images/ORCID-iD_icon_vector.svg"
@@ -45,12 +45,12 @@ const contactModal = ref(false);
             </BNavbarNav>
         </template>
 
-        <BNavbarNav v-if="isStaff" class="justify-content-end flex-grow-1">
+        <BNavbarNav v-if="isStaff" class="p-3 justify-content-end flex-grow-1">
             <BNavItem :href="adminUrl">Admin interface</BNavItem>
             <BNavItem href="/watchman/dashboard/">Watchman dashboard</BNavItem>
             <BNavItem href="/watchman/">Watchman status (JSON)</BNavItem>
         </BNavbarNav>
-        <BNavbarNav class="justify-content-end flex-grow-1">
+        <BNavbarNav class="p-3 justify-content-end flex-grow-1">
             <BNavItem href="/termsandconditions/">Terms &amp; conditions</BNavItem>
             <BNavItem href="https://github.com/ContactEngineering/TopoBank/discussions">
                 Feedback
