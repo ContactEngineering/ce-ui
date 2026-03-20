@@ -146,9 +146,9 @@ LOCAL_APPS = [
     "topobank_orcid.organizations.apps.OrganizationsAppConfig",
     "topobank.properties.apps.PropertiesAppConfig",
     # Former plugins now integrated manually
-    "topobank_contact.apps.ContactAppConfig",
-    "topobank_statistics.apps.StatisticsAppConfig",
-    "topobank_publication.apps.PublicationAppConfig",
+    "topobank_contact.apps.TopobankContactAppConfig",
+    "topobank_statistics.apps.TopobankStatisticsAppConfig",
+    "topobank_publication.apps.TopobankPublicationAppConfig",
 ]
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
