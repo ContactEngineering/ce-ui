@@ -1,3 +1,6 @@
-from DiscoverVersion import get_version
+from importlib.metadata import version, PackageNotFoundError
 
-__version__ = get_version('ce_ui', __file__)
+try:
+    __version__ = version("ce-ui")
+except PackageNotFoundError:
+    __version__ = "unknown"
