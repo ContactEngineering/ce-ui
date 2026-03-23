@@ -5,14 +5,12 @@ import topobank_publication.urls
 import topobank_statistics.urls
 from django.conf import settings
 from django.contrib import admin
-from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.views import login_required
 from django.contrib.staticfiles import views as static_views
 from django.urls import include, path, re_path
 from django.views import defaults as default_views
 from django.views.generic import RedirectView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
-from topobank_orcid.organizations.models import Organization
 from topobank_rest_api.views import entry_points
 
 from . import views
@@ -20,53 +18,25 @@ from . import views
 app_name = "ce_ui"
 
 
-def plugin_urls(urllist, app_label, restricted):
-    for entry in urllist:
-        if hasattr(entry, "url_patterns"):
-            # This is a list of URL patterns
-            entry.url_patterns = plugin_urls(entry.url_patterns, app_label, restricted)
-        elif hasattr(entry, "callback"):
-            # This is a path with a view
-            def plugin_available_check(user):
-                if restricted:
-                    return app_label in Organization.objects.get_plugins_available(user)
-                return True
-
-            callback_decorator = user_passes_test(
-                plugin_available_check, login_url="/403/", redirect_field_name=None
-            )
-            entry.callback = callback_decorator(entry.callback)
-    return urllist
-
-
-#
-# Plugin URL patterns
-#
-plugin_patterns = [
-    path(
-        topobank_contact.urls.urlprefix,
-        include(
-            (plugin_urls(topobank_contact.urls.urlpatterns, "topobank_contact", True), "topobank_contact")
-        ),
-    ),
-    path(
-        topobank_publication.urls.urlprefix,
-        include(
-            (plugin_urls(topobank_publication.urls.urlpatterns, "topobank_publication", False), "topobank_publication")
-        ),
-    ),
-    path(
-        topobank_statistics.urls.urlprefix,
-        include(
-            (plugin_urls(topobank_statistics.urls.urlpatterns, "topobank_statistics", False), "topobank_statistics")
-        ),
-    ),
-]
-
 #
 # Top-level routes
 #
-urlpatterns = plugin_patterns + [
+urlpatterns = [
+    #
+    # Plugin URL patterns (now regular apps)
+    #
+    path(
+        topobank_contact.urls.urlprefix,
+        include((topobank_contact.urls.urlpatterns, "topobank_contact"), namespace="topobank_contact")
+    ),
+    path(
+        topobank_publication.urls.urlprefix,
+        include((topobank_publication.urls.urlpatterns, "topobank_publication"), namespace="topobank_publication")
+    ),
+    path(
+        topobank_statistics.urls.urlprefix,
+        include((topobank_statistics.urls.urlpatterns, "topobank_statistics"), namespace="topobank_statistics")
+    ),
     #
     # Entry points
     #
@@ -115,37 +85,6 @@ urlpatterns = plugin_patterns + [
                 path(
                     "analysis/",
                     include("topobank_rest_api.analysis.urls", namespace="analysis"),
-                ),
-            ]
-        ),
-    ),
-    path(
-        "plugins/",
-        include(
-            [
-                path(
-                    topobank_contact.urls.urlprefix,
-                    include(
-                        (plugin_urls(topobank_contact.urls.urlpatterns, "topobank_contact", True), "topobank_contact")
-                    ),
-                ),
-                path(
-                    topobank_publication.urls.urlprefix,
-                    include(
-                        (
-                            plugin_urls(topobank_publication.urls.urlpatterns, "topobank_publication", False),
-                            "publication"
-                        )
-                    ),
-                ),
-                path(
-                    topobank_statistics.urls.urlprefix,
-                    include(
-                        (
-                            plugin_urls(topobank_statistics.urls.urlpatterns, "topobank_statistics", False),
-                            "topobank_statistics"
-                        )
-                    ),
                 ),
             ]
         ),
