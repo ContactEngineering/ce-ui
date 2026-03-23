@@ -698,6 +698,6 @@ TOPOBANK_DELETE_DELAY = timedelta(days=7)  # Hold deleted datasets this long
 
 # ALLAUTH SETTINGS
 # ------------------------------------------------------------------------------
-ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_SIGNUP_FIELDS = ['email', 'username*', 'password1*', 'password2*']
 USER_MODEL_USERNAME_FIELD = "username"
 USERNAME_MIN_LENGTH = 3
