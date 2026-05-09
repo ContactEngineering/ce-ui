@@ -14,7 +14,7 @@ from termsandconditions.models import TermsAndConditions
 from termsandconditions.views import (AcceptTermsView, GetTermsViewMixin,
                                       TermsView)
 from topobank.analysis.models import Workflow
-from topobank.analysis.registry import get_analysis_function_names
+from topobank.analysis.registry import get_workflow_names
 from topobank.manager.models import Surface, Topography
 from topobank.manager.utils import subjects_from_base64, subjects_to_base64
 from topobank_orcid.users.models import User
@@ -295,7 +295,7 @@ class AnalysisDetailView(AppDetailView):
 
         workflow = self.object
         # Check if user is allowed to use this function
-        if workflow.name not in get_analysis_function_names(self.request.user):
+        if workflow.name not in get_workflow_names(self.request.user):
             raise PermissionDenied()
 
         # Decide whether to open extra tabs for surface/topography details

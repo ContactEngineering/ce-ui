@@ -1,8 +1,8 @@
 import pytest
 from topobank.testing.factories import OrganizationFactory  # noqa: F401
 from topobank.testing.factories import UserFactory
-from topobank.testing.fixtures import sync_analysis_functions  # noqa: F401
-from topobank.testing.fixtures import test_analysis_function  # noqa: F401
+from topobank.testing.fixtures import sync_workflows  # noqa: F401
+from topobank.testing.fixtures import test_workflow  # noqa: F401
 from topobank.testing.fixtures import two_topos  # noqa: F401
 from topobank.testing.fixtures import (  # noqa: F401
     user_alice, user_three_topographies_three_surfaces_three_tags)

@@ -1,18 +1,13 @@
 import pytest
 from rest_framework.reverse import reverse
-
 from topobank.analysis.models import WorkflowResult
-from topobank.testing.factories import (
-    SurfaceFactory,
-    Topography1DFactory,
-    TopographyAnalysisFactory,
-    UserFactory,
-)
+from topobank.testing.factories import (SurfaceFactory, Topography1DFactory,
+                                        TopographyAnalysisFactory, UserFactory)
 
 
 @pytest.mark.django_db
 def test_refresh_analyses_api(
-    api_client, test_analysis_function, django_capture_on_commit_callbacks
+    api_client, test_workflow, django_capture_on_commit_callbacks
 ):
     """Test whether existing analyses can be renewed by API call."""
 
@@ -21,7 +16,7 @@ def test_refresh_analyses_api(
     topo1 = Topography1DFactory(surface=surface)
     topo2 = Topography1DFactory(surface=surface)
 
-    func = test_analysis_function
+    func = test_workflow
 
     analysis1a = TopographyAnalysisFactory(subject_topography=topo1, function=func)
     analysis2a = TopographyAnalysisFactory(subject_topography=topo2, function=func)
