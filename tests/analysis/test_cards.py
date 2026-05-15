@@ -1,20 +1,14 @@
 import pytest
 from django.contrib.contenttypes.models import ContentType
 from rest_framework.reverse import reverse
-
 from topobank.analysis.models import Workflow, WorkflowResult
 from topobank.analysis.workflows import VIZ_SERIES
 from topobank.manager.models import Surface, Topography
 from topobank.manager.utils import subjects_to_base64
-from topobank.testing.factories import (
-    AnalysisSubjectFactory,
-    SurfaceAnalysisFactory,
-    SurfaceFactory,
-    Topography1DFactory,
-    Topography2DFactory,
-    TopographyAnalysisFactory,
-    UserFactory,
-)
+from topobank.testing.factories import (SurfaceAnalysisFactory, SurfaceFactory,
+                                        Topography1DFactory,
+                                        Topography2DFactory,
+                                        TopographyAnalysisFactory, UserFactory)
 
 
 @pytest.mark.skip("URL does not resolve correctly in CI")
@@ -115,7 +109,7 @@ def test_series_card_if_no_successful_topo_analysis(
     # There is a successful surface analysis, but no successful topography analysis
     SurfaceAnalysisFactory(
         task_state="su",
-        subject_dispatch=AnalysisSubjectFactory(surface_id=topo.surface.id),
+        subject_surface_id=topo.surface.id,
         function=func1,
         user=user,
     )
@@ -123,27 +117,27 @@ def test_series_card_if_no_successful_topo_analysis(
     # add a failed analysis for the topography
     TopographyAnalysisFactory(
         task_state="fa",
-        subject_dispatch=AnalysisSubjectFactory(topography_id=topo.id),
+        subject_topography_id=topo.id,
         function=func1,
         user=user,
     )
 
     assert (
         WorkflowResult.objects.filter(
-            function=func1, subject_dispatch__topography_id=topo.id, task_state="su"
+            function=func1, subject_topography_id=topo.id, task_state="su"
         ).count()
         == 0
     )
     assert (
         WorkflowResult.objects.filter(
-            function=func1, subject_dispatch__topography_id=topo.id, task_state="fa"
+            function=func1, subject_topography_id=topo.id, task_state="fa"
         ).count()
         == 1
     )
     assert (
         WorkflowResult.objects.filter(
             function=func1,
-            subject_dispatch__surface_id=topo.surface.id,
+            subject_surface_id=topo.surface.id,
             task_state="su",
         ).count()
         == 1

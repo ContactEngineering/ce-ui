@@ -42,8 +42,8 @@ def test_refresh_analyses_api(
     #
     # New Analysis objects should be there and marked for the user
     #
-    analysis1b = WorkflowResult.objects.get(function=func, subject_dispatch__topography=topo1)
-    analysis2b = WorkflowResult.objects.get(function=func, subject_dispatch__topography=topo2)
+    analysis1b = WorkflowResult.objects.get(function=func, subject_topography=topo1)
+    analysis2b = WorkflowResult.objects.get(function=func, subject_topography=topo2)
 
     assert analysis1b.has_permission(user, "view")
     assert analysis2b.has_permission(user, "view")
