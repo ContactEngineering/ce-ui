@@ -272,7 +272,7 @@ TEMPLATES = [
 # FIXTURES
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#fixture-dirs
-FIXTURE_DIRS = (str(APPS_DIR.path("fixtures")),)
+FIXTURE_DIRS = ()
 
 # EMAIL
 # ------------------------------------------------------------------------------
