@@ -51,6 +51,7 @@ const contactModal = ref(false);
             <BNavItem href="/watchman/">Watchman status (JSON)</BNavItem>
         </BNavbarNav>
         <BNavbarNav class="p-3 justify-content-end flex-grow-1">
+            <BNavItem href="/file-formats/">Supported file formats</BNavItem>
             <BNavItem href="/termsandconditions/">Terms &amp; conditions</BNavItem>
             <BNavItem href="https://github.com/ContactEngineering/TopoBank/discussions">
                 Feedback
