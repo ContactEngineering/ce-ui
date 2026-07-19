@@ -134,6 +134,11 @@ THIRD_PARTY_APPS = [
     "request_profiler",  # keep track of response times for selected routes
     "drf_spectacular",  # API documentation
     "termsandconditions",
+    # Bootstrap 5 rendering for the server-side allauth authentication pages
+    # (login/signup/password management). The main UI is Vue, but allauth forms
+    # are rendered by Django and rely on the crispy_forms_tags template library.
+    "crispy_forms",
+    "crispy_bootstrap5",
 ]
 LOCAL_APPS = [
     # Your stuff: custom apps go here
@@ -154,6 +159,11 @@ LOCAL_APPS = [
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 # Remove duplicate entries
 INSTALLED_APPS = list(set(DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS))
+
+# CRISPY FORMS (Bootstrap 5 template pack for server-rendered allauth pages)
+# ------------------------------------------------------------------------------
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 # MIGRATIONS
 # ------------------------------------------------------------------------------
