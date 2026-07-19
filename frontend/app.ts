@@ -15,6 +15,18 @@ import {registerAnalysisCardComponents} from "./analysis/index";
 // Import the AppFrame component
 import AppFrame from './apps/AppFrame.vue';
 
+function getCookie(name: string) {
+    const cookie = document.cookie
+        .split('; ')
+        .find((row) => row.startsWith(`${name}=`));
+
+    if (cookie === undefined) {
+        return null;
+    }
+
+    return decodeURIComponent(cookie.split('=').slice(1).join('='));
+}
+
 /**
  * Create Vue.js app for a component and hook it up to DOM element
  */
@@ -24,7 +36,21 @@ export function createAppFrame(element, csrfToken, appProps, componentProps) {
     pinia.use(piniaPluginPersistedstate);
     app.use(pinia);
     app.use(createBootstrap());
+    axios.defaults.xsrfCookieName = 'csrftoken';
+    axios.defaults.xsrfHeaderName = 'X-CSRFToken';
+    axios.defaults.withXSRFToken = true;
     axios.defaults.headers.common['X-CSRFToken'] = csrfToken;
+    axios.interceptors.request.use((config) => {
+        const tokenFromCookie = getCookie('csrftoken');
+        const token = tokenFromCookie ?? csrfToken;
+
+        if (token !== null && token !== undefined && token !== '') {
+            config.headers = config.headers ?? {};
+            config.headers['X-CSRFToken'] = token;
+        }
+
+        return config;
+    });
     app.provide('csrfToken', csrfToken);
     app.provide('appProps', appProps);
     // Register all single-page components from the index

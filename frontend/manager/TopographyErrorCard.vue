@@ -17,20 +17,25 @@ export default {
         topography: {
             type: Object,
             default: null
+        },
+        topographyUrl: {
+            type: String,
+            default: null
         }
     },
     methods: {
         deleteTopography() {
-            axios.delete(this.topography.url);
-            this.$emit('delete:topography', this.topography.url);
+            axios.delete(this.topographyUrl).then(() => {
+                this.$emit('delete:topography', this.topographyUrl);
+            });
         },
         forceInspect() {
-            axios.post(`${this.topography.url}force-inspect/`).then(response => {
+            axios.post(`${this.topographyUrl}force-inspect/`).then(response => {
                 this.$emit('update:topography', response.data);
             });
         },
         dataSourceChanged(value) {
-            axios.patch(this.topography.url, {'data_source': this.topography.data_source}).then(response => {
+            axios.patch(this.topographyUrl, {'data_source': this.topography.data_source}).then(response => {
                 this.$emit('update:topography', response.data);
             });
         }

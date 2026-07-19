@@ -376,3 +376,11 @@ static/js/*.woff2
 static/js/*.js
 
 .env
+
+# Shared project data paths (homogenized across ContactEngineering repos)
+data-lake
+topographies
+topobank/analysis/tests/topographies
+
+# Legacy docker-based generated pip packages
+docker/local/django/pip-packages/*
