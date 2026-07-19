@@ -19,7 +19,7 @@ export default {
     props: {
         url: {
             type: String,
-            default: '/users/api/user/'
+            default: '/users/v1/user/'
         },
         maxResults: {
             type: Number,
@@ -37,8 +37,8 @@ export default {
     },
     methods: {
         searchUser(searchTerm) {
-            axios.get(`${this.url}?name=${searchTerm}&max=${this.maxResults}`).then(response => {
-                this._searchResult = response.data;
+            axios.get(`${this.url}?name=${searchTerm}&limit=${this.maxResults}`).then(response => {
+                this._searchResult = response.data.results;
             });
         },
         selectUser(user) {
