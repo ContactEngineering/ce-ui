@@ -1,13 +1,13 @@
 import celery.states
 import pytest
-from topobank_rest_api.utils import get_api_url
 from django.test import override_settings
 from rest_framework.reverse import reverse
-
 from topobank.analysis.models import Workflow, WorkflowResult
 from topobank.analysis.tasks import schedule_workflow
 from topobank.manager.utils import dict_to_base64, subjects_to_base64
-from topobank.testing.factories import SurfaceFactory, Topography1DFactory, UserFactory
+from topobank.testing.factories import (SurfaceFactory, Topography1DFactory,
+                                        UserFactory)
+from topobank_rest_api.utils import get_api_url
 
 
 @pytest.mark.django_db
@@ -18,7 +18,7 @@ def test_dependencies(api_client, django_capture_on_commit_callbacks):
     surface = SurfaceFactory(created_by=user)
     topo1 = Topography1DFactory(surface=surface)
 
-    func = Workflow.objects.get(name="topobank.testing.test2")
+    func = Workflow(name="topobank.testing.test2")
 
     api_client.force_login(user)
 
@@ -39,7 +39,7 @@ def test_dependencies(api_client, django_capture_on_commit_callbacks):
     # New Analysis objects should be there and marked for the user
     #
     assert WorkflowResult.objects.count() == 3
-    test_ana1, test_ana2, test2_ana = WorkflowResult.objects.all().order_by("function__name")
+    test_ana1, test_ana2, test2_ana = WorkflowResult.objects.all().order_by("workflow_name")
     assert test2_ana.function.name == "topobank.testing.test2"
     assert test_ana1.function.name == "topobank.testing.test"
     assert test_ana2.function.name == "topobank.testing.test"
@@ -67,7 +67,7 @@ def test_dependency_status():
     surface = SurfaceFactory(created_by=user)
     topo1 = Topography1DFactory(surface=surface)
 
-    func = Workflow.objects.get(name="topobank.testing.test2")
+    func = Workflow(name="topobank.testing.test2")
 
     kwargs = {"c": 33, "d": 7.5}
     analysis = func.submit(user, topo1, kwargs)
@@ -79,7 +79,7 @@ def test_dependency_status():
     # New Analysis objects should be there and marked for the user
     #
     assert WorkflowResult.objects.count() == 3
-    test_ana1, test_ana2, test2_ana = WorkflowResult.objects.all().order_by("function__name")
+    test_ana1, test_ana2, test2_ana = WorkflowResult.objects.all().order_by("workflow_name")
     assert test2_ana.function.name == "topobank.testing.test2"
     assert test_ana1.function.name == "topobank.testing.test"
     assert test_ana2.function.name == "topobank.testing.test"
@@ -113,7 +113,7 @@ def test_error_propagation(
     surface = SurfaceFactory(created_by=user)
     topo1 = Topography1DFactory(surface=surface)
 
-    func = Workflow.objects.get(
+    func = Workflow(
         name="topobank.testing.test_error_in_dependency"
     )
 
@@ -129,7 +129,7 @@ def test_error_propagation(
     # New Analysis objects should be there and marked for the user
     #
     assert WorkflowResult.objects.count() == 2
-    test_ana1, test_ana2 = WorkflowResult.objects.all().order_by("function__name")
+    test_ana1, test_ana2 = WorkflowResult.objects.all().order_by("workflow_name")
     assert test_ana1.function.name == "topobank.testing.test_error"
     assert test_ana2.function.name == "topobank.testing.test_error_in_dependency"
     assert test_ana1.dependencies == {}
@@ -172,7 +172,7 @@ def test_integer_key_dependencies(api_client, django_capture_on_commit_callbacks
     surface = SurfaceFactory(created_by=user)
     topo1 = Topography1DFactory(surface=surface)
 
-    func = Workflow.objects.get(name="topobank.testing.test_integer_keys")
+    func = Workflow(name="topobank.testing.test_integer_keys")
 
     api_client.force_login(user)
 
@@ -193,7 +193,7 @@ def test_integer_key_dependencies(api_client, django_capture_on_commit_callbacks
     assert WorkflowResult.objects.count() == 2
 
     # Find the main analysis (the one with integer key dependencies)
-    main_ana = WorkflowResult.objects.get(function__name="topobank.testing.test_integer_keys")
+    main_ana = WorkflowResult.objects.get(workflow_name="topobank.testing.test_integer_keys")
 
     # Verify the workflow completed successfully
     # If integer keys are not handled correctly, this will fail with:

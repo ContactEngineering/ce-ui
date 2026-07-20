@@ -18,8 +18,8 @@ def test_refresh_analyses_api(
 
     func = test_workflow
 
-    analysis1a = TopographyAnalysisFactory(subject_topography=topo1, function=func)
-    analysis2a = TopographyAnalysisFactory(subject_topography=topo2, function=func)
+    analysis1a = TopographyAnalysisFactory(subject_topography=topo1, workflow_name=func.name)
+    analysis2a = TopographyAnalysisFactory(subject_topography=topo2, workflow_name=func.name)
 
     api_client.force_login(user)
 
@@ -42,8 +42,8 @@ def test_refresh_analyses_api(
     #
     # New Analysis objects should be there and marked for the user
     #
-    analysis1b = WorkflowResult.objects.get(function=func, subject_topography=topo1)
-    analysis2b = WorkflowResult.objects.get(function=func, subject_topography=topo2)
+    analysis1b = WorkflowResult.objects.get(workflow_name=func.name, subject_topography=topo1)
+    analysis2b = WorkflowResult.objects.get(workflow_name=func.name, subject_topography=topo2)
 
     assert analysis1b.has_permission(user, "view")
     assert analysis2b.has_permission(user, "view")
