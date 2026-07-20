@@ -462,6 +462,43 @@ const batchActiveTab = ref('home'); // shared active tab for batch mode
                                 When reusing this dataset, please cite the original
                                 source.
                             </p>
+                            <h6>Recommended citation</h6>
+                            <p>
+                                When referencing this dataset or the
+                                Contact.Engineering platform in a publication, we
+                                recommend the following wording:
+                            </p>
+                            <p class="fw-semibold mb-1">
+                                In the main text (software citation):
+                            </p>
+                            <BAlert :model-value="true" variant="secondary">
+                                Portions of the topography analysis were conducted
+                                using the open-source Contact.Engineering software
+                                [<a href="https://doi.org/10.1088/2051-672X/ac860a"
+                                    target="_blank" rel="noopener">Röttger et al.,
+                                Surface Topography: Metrology and Properties 10.3
+                                (2022): 035032</a>].
+                            </BAlert>
+                            <template v-if="_publication.doi_name">
+                                <p class="fw-semibold mb-1">
+                                    In the Data Availability Statement:
+                                </p>
+                                <BAlert :model-value="true" variant="secondary">
+                                    Measured topographies have been made publicly
+                                    available through Contact.Engineering
+                                    [<a href="https://doi.org/10.1088/2051-672X/ac860a"
+                                        target="_blank" rel="noopener">Röttger et al.,
+                                    Surface Topography: Metrology and Properties 10.3
+                                    (2022): 035032</a>], and are accessible via DOI:
+                                    <a :href="`https://doi.org/${_publication.doi_name}`"
+                                       target="_blank"
+                                       rel="noopener">https://doi.org/{{ _publication.doi_name }}</a>.
+                                </BAlert>
+                            </template>
+                            <hr/>
+                            <p class="fw-semibold">
+                                Bibliographic reference for this dataset:
+                            </p>
                             <BAccordion>
                                 <BAccordionItem title="Citation" visible>
                                     <div v-html="_publication.citation.html"/>
