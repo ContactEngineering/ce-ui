@@ -14,7 +14,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@bokeh/bokehjs": "^3.0.3",
+    "@bokeh/bokehjs": "3.9.1",
     "@bokeh/numbro": "^1.6.2",
     "@bokeh/slickgrid": "^2.4.4103",
     "@fortawesome/fontawesome-free": "^7.0.0",

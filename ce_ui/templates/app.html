@@ -23,6 +23,14 @@
     {% if serialized_object %}
         {{ serialized_object|json_script:"object" }}
     {% endif %}
+    {# Prebuilt BokehJS bundle, exposed as the global `Bokeh`. The app bundle #}
+    {# references it via webpack `externals` (see webpack.config.js), so these #}
+    {# must load before app.bundle.js. Keep the version in sync with the #}
+    {# @bokeh/bokehjs version in package.json. #}
+    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-3.9.1.min.js"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-api-3.9.1.min.js"
+            crossorigin="anonymous"></script>
     <script src="{% static 'js/app.bundle.js' %}"></script>
     <script>
         /**

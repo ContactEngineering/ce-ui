@@ -37,6 +37,12 @@ module.exports = env => {
                 topobank: path.resolve(__dirname, "frontend"),
                 "@": path.resolve(__dirname, "frontend")
             }, extensions: [".js", ".ts", ".scss", ".vue"]
+        }, externals: {
+            // Do not bundle BokehJS. Webpack re-transpiling the @bokeh/bokehjs
+            // source breaks it for Bokeh >= 3.1.0 (class-field init order); use
+            // the prebuilt bundle exposed as the global `Bokeh` instead. The
+            // matching bokeh-*.min.js scripts are loaded in app.html.
+            "@bokeh/bokehjs": "Bokeh"
         }, plugins: [new VueLoaderPlugin()]
     };
 };
