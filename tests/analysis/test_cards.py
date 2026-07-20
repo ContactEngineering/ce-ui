@@ -20,12 +20,12 @@ def test_series_card_data_sources(api_client, handle_usage_statistics):
     password = "secret"
     user = UserFactory(password=password)
     surface = SurfaceFactory(created_by=user)
-    func1 = Workflow.objects.get(name="topobank.testing.test")
+    func1 = Workflow(name="topobank.testing.test")
 
     topo1 = Topography2DFactory(surface=surface)
 
     analysis = TopographyAnalysisFactory(
-        subject_topography=topo1, function=func1, user=user
+        subject_topography=topo1, workflow_name=func1.name, user=user
     )
 
     #
@@ -101,7 +101,7 @@ def test_series_card_if_no_successful_topo_analysis(
     user = UserFactory(password=password)
     ContentType.objects.get_for_model(Topography)
     ContentType.objects.get_for_model(Surface)
-    func1 = Workflow.objects.get(name="topobank.testing.test")
+    func1 = Workflow(name="topobank.testing.test")
 
     surf = SurfaceFactory(created_by=user)
     topo = Topography1DFactory(surface=surf)  # also generates the surface
@@ -110,7 +110,7 @@ def test_series_card_if_no_successful_topo_analysis(
     SurfaceAnalysisFactory(
         task_state="su",
         subject_surface_id=topo.surface.id,
-        function=func1,
+        workflow_name=func1.name,
         user=user,
     )
 
@@ -118,25 +118,25 @@ def test_series_card_if_no_successful_topo_analysis(
     TopographyAnalysisFactory(
         task_state="fa",
         subject_topography_id=topo.id,
-        function=func1,
+        workflow_name=func1.name,
         user=user,
     )
 
     assert (
         WorkflowResult.objects.filter(
-            function=func1, subject_topography_id=topo.id, task_state="su"
+            workflow_name=func1.name, subject_topography_id=topo.id, task_state="su"
         ).count()
         == 0
     )
     assert (
         WorkflowResult.objects.filter(
-            function=func1, subject_topography_id=topo.id, task_state="fa"
+            workflow_name=func1.name, subject_topography_id=topo.id, task_state="fa"
         ).count()
         == 1
     )
     assert (
         WorkflowResult.objects.filter(
-            function=func1,
+            workflow_name=func1.name,
             subject_surface_id=topo.surface.id,
             task_state="su",
         ).count()
