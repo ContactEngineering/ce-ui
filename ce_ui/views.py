@@ -16,7 +16,8 @@ from termsandconditions.views import (AcceptTermsView, GetTermsViewMixin,
 from topobank.analysis.models import Workflow
 from topobank.analysis.registry import get_workflow_names
 from topobank.manager.models import Surface, Topography
-from topobank.manager.utils import subjects_from_base64, subjects_to_base64
+from topobank.manager.utils import (get_reader_infos, subjects_from_base64,
+                                    subjects_to_base64)
 from topobank_orcid.users.models import User
 from topobank_publication.models import PublicationCollection
 from topobank_publication.serializers import PublicationCollectionSerializer
@@ -363,6 +364,30 @@ class AnalysisListView(AppView):
 
 class HomeView(AppView):
     vue_component = "Home"
+
+
+class FileFormatsView(AppView):
+    """Overview of the file formats supported for topography upload.
+
+    The list is generated dynamically from the SurfaceTopography reader
+    registry, so it stays up to date as new readers are added.
+    """
+
+    template_name = "pages/file_formats.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["reader_infos"] = get_reader_infos()
+        context["extra_tabs"] = [
+            {
+                "icon": "file",
+                "title": "Supported file formats",
+                "href": self.request.path,
+                "active": True,
+                "login_required": False,
+            }
+        ]
+        return context
 
 
 class TermsListView(TemplateView, GetTermsViewMixin):

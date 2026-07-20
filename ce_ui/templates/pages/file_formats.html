@@ -1,0 +1,47 @@
+{% extends "app.html" %}
+{% load static i18n %}
+
+{% block appcontent %}
+    <div class="container mt-3">
+        <h1>Supported file formats</h1>
+
+        <p>
+            Extending the list of supported file formats is a continuous work in
+            progress. If your file is not supported, if you have a question or a
+            problem uploading topography data, or if you need more information,
+            please
+            <a href="https://github.com/ContactEngineering/TopoBank/issues"
+               target="_blank" rel="noopener">open an issue on GitHub</a>.
+            Thank you for your help!
+        </p>
+
+        <p>
+            The following file formats are supported. Click on a format name to
+            expand its description.
+        </p>
+
+        <div class="accordion" id="file-formats">
+            {% for name, format, description in reader_infos %}
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#collapse-format-{{ forloop.counter }}"
+                                aria-expanded="false"
+                                aria-controls="collapse-format-{{ forloop.counter }}">
+                            <span class="me-auto">{{ name }}</span>
+                            <span class="badge bg-secondary">{{ format }}</span>
+                        </button>
+                    </h2>
+                    <div id="collapse-format-{{ forloop.counter }}"
+                         class="accordion-collapse collapse"
+                         data-bs-parent="#file-formats">
+                        <div class="accordion-body">
+                            {{ description|safe }}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock appcontent %}

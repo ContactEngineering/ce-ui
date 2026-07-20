@@ -51,6 +51,11 @@ urlpatterns = [
         name="terms",
     ),
     path(
+        "file-formats/",
+        views.FileFormatsView.as_view(),
+        name="file-formats",
+    ),
+    path(
         "search/",
         RedirectView.as_view(pattern_name="ce_ui:select"),
         name="search",
