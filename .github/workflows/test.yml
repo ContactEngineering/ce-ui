@@ -49,12 +49,12 @@ jobs:
       run: |
         pip install --upgrade pip pip-tools
         pip install \
-          git+https://github.com/ContactEngineering/topobank.git \
-          git+https://github.com/ContactEngineering/topobank-rest-api.git \
-          git+https://github.com/ContactEngineering/topobank-statistics.git \
-          git+https://github.com/ContactEngineering/topobank-contact.git \
-          git+https://github.com/ContactEngineering/topobank-publication.git \
-          git+https://github.com/ContactEngineering/topobank-orcid.git \
+          git+https://github.com/ContactEngineering/topobank.git@main \
+          git+https://github.com/ContactEngineering/topobank-rest-api.git@main \
+          git+https://github.com/ContactEngineering/topobank-statistics.git@main \
+          git+https://github.com/ContactEngineering/topobank-contact.git@main \
+          git+https://github.com/ContactEngineering/topobank-publication.git@main \
+          git+https://github.com/ContactEngineering/topobank-orcid.git@main \
           .[dev]
 
     - name: Test
