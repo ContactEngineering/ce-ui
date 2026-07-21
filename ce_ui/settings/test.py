@@ -139,9 +139,6 @@ STORAGES = {
     "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
 }
 
-print(f"STORAGES: {STORAGES}")
-print(f"USE_S3_STORAGE: {USE_S3_STORAGE}")
-
 # URL of the SPA (not used in testing)
 WEBAPP_URL = "http://localhost:5173/"
 TESTING_WEBAPP_URL = "http://localhost:5173/"

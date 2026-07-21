@@ -8,7 +8,7 @@ import sys
 from django.core.wsgi import get_wsgi_application
 
 # If we are running without DJANGO_DEBUG, then topobank has been installed via pip
-if os.environ.get("DJANGO_DEBUG", default=False):
+if os.environ.get("DJANGO_DEBUG", "").lower() in ("1", "true", "yes", "on"):
     # This allows easy placement of apps within the interior
     # ce_ui directory when running in debug mode.
     app_path = os.path.abspath(

@@ -1,18 +1,17 @@
+import argparse
+import datetime
+import decimal
+
+import markdown2
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django.utils.html import escape
-
-import datetime
-import argparse
-import decimal
-import markdown2
-
 from termsandconditions.models import TermsAndConditions
 
 
 def valid_date(s):
     try:
-        return datetime.strptime(s, "%Y-%m-%d")
+        return datetime.datetime.strptime(s, "%Y-%m-%d")
     except ValueError:
         msg = "Not a valid date: '{0}'.".format(s)
         raise argparse.ArgumentTypeError(msg)

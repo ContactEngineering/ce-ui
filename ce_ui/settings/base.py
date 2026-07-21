@@ -158,7 +158,7 @@ LOCAL_APPS = [
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 # Remove duplicate entries
-INSTALLED_APPS = list(set(DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS))
+INSTALLED_APPS = list(dict.fromkeys(DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS))
 
 # CRISPY FORMS (Bootstrap 5 template pack for server-rendered allauth pages)
 # ------------------------------------------------------------------------------
@@ -441,10 +441,8 @@ AWS_S3_FILE_OVERWRITE = False
 STATIC_ROOT = env.str(
     "DJANGO_STATIC_ROOT", default=(APPS_DIR - 2).path("staticfiles")
 )  # This is not used in the development environment
-print(f"STATIC_ROOT: {STATIC_ROOT}")
 # https://docs.djangoproject.com/en/dev/ref/settings/#static-url
 STATIC_URL = "/static/"
-print(f"STATIC_URL: {STATIC_URL}")
 # https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#std:setting-STATICFILES_DIRS
 STATICFILES_DIR = env.str("DJANGO_STATICFILES_DIR", default=None)
 # The /static dir of each app is searched automatically, we here add one auxiliary directory
@@ -452,7 +450,6 @@ if STATICFILES_DIR is None:
     STATICFILES_DIRS = []
 else:
     STATICFILES_DIRS = [STATICFILES_DIR]
-print(f"STATICFILES_DIRS: {STATICFILES_DIRS}")
 
 # https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#staticfiles-finders
 STATICFILES_FINDERS = [
@@ -709,5 +706,5 @@ TOPOBANK_DELETE_DELAY = timedelta(days=7)  # Hold deleted datasets this long
 # ALLAUTH SETTINGS
 # ------------------------------------------------------------------------------
 ACCOUNT_SIGNUP_FIELDS = ['email', 'username*', 'password1*', 'password2*']
-USER_MODEL_USERNAME_FIELD = "username"
-USERNAME_MIN_LENGTH = 3
+ACCOUNT_USER_MODEL_USERNAME_FIELD = "username"
+ACCOUNT_USERNAME_MIN_LENGTH = 3

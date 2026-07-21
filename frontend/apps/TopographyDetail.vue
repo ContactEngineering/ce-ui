@@ -33,6 +33,8 @@ const props = defineProps({
     }
 });
 
+const emit = defineEmits(["topography-deleted"]);
+
 const appProps = inject("appProps");
 
 const _disabled = ref(false);
@@ -61,6 +63,8 @@ async function updateCard(topography = null) {
     if (["pe", "st"].includes(topography.task_state)) {
         try {
             const response = await axios.get(_topography.value.url);
+            _topography.value = response.data;
+            _disabled.value = _topography.value === null || _topography.value.permissions.current_user.permission === "view";
         } catch (error) {
             show?.({
                 props: {
@@ -75,7 +79,7 @@ async function updateCard(topography = null) {
 
 function deleteTopography() {
     axios.delete(_topography.value.url).then(response => {
-        this.$emit("topography-deleted", _topography.value.url);
+        emit("topography-deleted", _topography.value.url);
         const id = getIdFromUrl(_topography.value.surface);
         window.location.href = `/ui/dataset-detail/${id}/`;
     }).catch(error => {

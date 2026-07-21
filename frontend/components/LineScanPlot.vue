@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import axios from "axios";
-import {onMounted, ref} from "vue";
+import {onBeforeUnmount, onMounted, ref} from "vue";
 import {ColumnDataSource, Plotting} from "@bokeh/bokehjs";
 import {NetCDFReader} from 'netcdfjs';
 
@@ -12,6 +12,10 @@ const props = defineProps({
 });
 
 const _bokehPlotElement = ref(null);
+
+// Bokeh objects, kept so they can be disposed on unmount
+let _figure = null;
+let _view = null;
 
 onMounted(() => {
     axios.get(props.topography.squeezed_datafile?.file, {responseType: 'arraybuffer'})
@@ -46,8 +50,34 @@ onMounted(() => {
             });
 
             // Render to component
-            Plotting.show(figure, _bokehPlotElement.value);
+            _figure = figure;
+            _view = Plotting.show(figure, _bokehPlotElement.value);
         });
+});
+
+onBeforeUnmount(() => {
+    /* Dispose the embedded Bokeh view and clear the figure's document so they do not leak. */
+    if (_view != null) {
+        Promise.resolve(_view).then(view => {
+            try {
+                if (view != null && typeof view.remove === "function") {
+                    view.remove();
+                }
+            } catch (e) {
+                /* Ignore errors during teardown */
+            }
+        }).catch(() => { /* Ignore rejected view promises during teardown */ });
+        _view = null;
+    }
+    try {
+        const doc = _figure == null ? null : _figure.document;
+        if (doc != null && typeof doc.clear === "function") {
+            doc.clear();
+        }
+    } catch (e) {
+        /* Ignore errors during teardown */
+    }
+    _figure = null;
 });
 
 </script>

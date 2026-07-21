@@ -40,6 +40,16 @@ const props = defineProps({
     },
 });
 
+// Escape a string for safe interpolation into HTML (text content and attribute values).
+function escapeHtml(value) {
+    return String(value == null ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
 // Displayed data
 const _analyses = ref(null);
 const _columnDefs = ref([
@@ -51,8 +61,11 @@ const _columns = ref([
     {
         title: "Measurement",
         render: function(data, type, row) {
-            let name = row.topography_name;
-            return `<a target="_blank" title="${name}" href="${row.topography_url}">${name}</a>`;
+            // `topography_name` and `topography_url` are user-controlled and must be escaped to prevent XSS.
+            const name = escapeHtml(row.topography_name);
+            // Encode the URL and escape it for safe use inside the attribute value.
+            const url = escapeHtml(encodeURI(row.topography_url == null ? "" : row.topography_url));
+            return `<a target="_blank" title="${name}" href="${url}">${name}</a>`;
         }
     },
     { data: "quantity", title: "Quantity" },
@@ -79,7 +92,7 @@ onMounted(() => {
 });
 
 const analysisIds = computed(() => {
-    return _analyses.value.map(a => a.id).join();
+    return _analyses.value?.map(a => a.id).join() ?? [];
 });
 
 function updateCard() {

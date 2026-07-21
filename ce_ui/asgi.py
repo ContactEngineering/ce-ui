@@ -8,6 +8,7 @@ https://docs.djangoproject.com/en/dev/howto/deployment/asgi/
 
 """
 
+import os
 import sys
 from pathlib import Path
 
@@ -17,6 +18,9 @@ from django.core.asgi import get_asgi_application
 # ce_ui directory.
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 sys.path.append(str(BASE_DIR / "ce_ui"))
+
+# We defer to a DJANGO_SETTINGS_MODULE already in the environment.
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ce_ui.settings.production")
 
 # This application object is used by any ASGI server configured to use this file.
 django_application = get_asgi_application()

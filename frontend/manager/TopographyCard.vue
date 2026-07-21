@@ -90,6 +90,9 @@ function topographyDeleted(url) {
 
 const topographyModel = computed({
     get() {
+        // FIXME: side-effect (scheduleStateCheck) inside a computed getter. The getter runs on every dependency
+        // read/re-evaluation, so state-check polling is scheduled at unpredictable times. This should be refactored
+        // to a watcher, but that is a higher-risk change handled in a separate pass.
         scheduleStateCheck(props.topography);
         return props.topography;
     },

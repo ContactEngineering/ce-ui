@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import axios from "axios";
-import {onMounted, ref} from "vue";
+import {onBeforeUnmount, onMounted, ref} from "vue";
 
 import {
     BAlert,
@@ -28,9 +28,18 @@ const props = defineProps({
 
 const messages = ref([]);
 
+let pollingIntervalId = null;
+
 onMounted(() => {
-    setInterval(updateNotifications, props.pollingInterval);
+    pollingIntervalId = setInterval(updateNotifications, props.pollingInterval);
     updateNotifications();
+});
+
+onBeforeUnmount(() => {
+    if (pollingIntervalId != null) {
+        clearInterval(pollingIntervalId);
+        pollingIntervalId = null;
+    }
 });
 
 function updateNotifications() {
@@ -38,6 +47,10 @@ function updateNotifications() {
         .then(response => {
             unreadCount.value = response.data.unread_count;
             messages.value = response.data.unread_list;
+        })
+        .catch(error => {
+            // Swallow transient server errors so polling does not produce unhandled rejections
+            console.error("Failed to update notifications:", error);
         });
 }
 

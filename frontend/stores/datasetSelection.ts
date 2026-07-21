@@ -28,9 +28,12 @@ export const useDatasetSelectionStore = defineStore('selection', {
             this.datasetIds = this.datasetIds.filter(
                 (id: number): boolean => id !== datasetId
             );
+            // Also prune the cache so it does not grow unbounded
+            delete this.datasetCache[datasetId];
         },
         clear() {
             this.datasetIds = [];
+            this.datasetCache = {};
         },
         getDataset(datasetId: number) {
             return this.datasetCache[datasetId];

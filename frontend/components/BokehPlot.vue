@@ -7,7 +7,7 @@
  */
 
 import {v4 as uuid4} from 'uuid';
-import {computed, onMounted, ref, watch} from "vue";
+import {computed, onBeforeUnmount, onMounted, ref, watch} from "vue";
 
 import {
     AjaxDataSource,
@@ -121,6 +121,7 @@ const _lineWidth = ref(1);
 
 // Reorganized plot information
 let _bokehFigures = [];  // Stores Bokeh figure, line and symbol objects
+let _bokehViews = [];  // Stores the views returned by `Plotting.show` so we can dispose them on unmount
 let _categoryElements = ref([]);  // Sorted categories with selectable elements
 let _categoryElementSelections = [];  // Flags which categories are selected
 
@@ -421,16 +422,22 @@ function createFigures() {
     for (const [index, figure] of _bokehFigures.entries()) {
         figure.legend = new Legend({items: figure.legendItems, visible: false});
         figure.figure.add_layout(figure.legend);
-        Plotting.show(figure.figure, `#bokeh-figure-${props.uid}-${index}`);
+        /* `Plotting.show` returns a (promise of a) view that embeds the figure in the DOM. We keep a reference so
+           that we can dispose the embedded view when the component is unmounted. */
+        _bokehViews.push(Plotting.show(figure.figure, `#bokeh-figure-${props.uid}-${index}`));
     }
 }
 
 function createPlots() {
-    /* Destroy all lines */
+    /* Destroy all lines. We also reset `sources` and `legendItems`, otherwise they accumulate on every rebuild
+       (triggered by the `dataSources` watcher) which duplicates legend entries and makes `setPlotVisibility`
+       index stale items. */
     for (const figure of _bokehFigures) {
         figure.lines.length = 0;
         figure.symbols.length = 0;
         figure.figure.renderers.length = 0;
+        figure.sources.length = 0;
+        figure.legendItems.length = 0;
     }
 
     /* Get first and second category (to decide on color and dash) */
@@ -659,6 +666,39 @@ function onTap(obj, data) {
     /* Emit event */
     emit("selected", obj, data);
 }
+
+onBeforeUnmount(() => {
+    /* Dispose the embedded Bokeh views so they do not leak once the component is gone. */
+    for (const viewOrPromise of _bokehViews) {
+        Promise.resolve(viewOrPromise).then(view => {
+            try {
+                if (view != null && typeof view.remove === "function") {
+                    view.remove();
+                }
+            } catch (e) {
+                /* Ignore errors during teardown */
+            }
+        }).catch(() => { /* Ignore rejected view promises during teardown */ });
+    }
+    _bokehViews.length = 0;
+
+    /* Clear the Bokeh documents and all accumulators. */
+    for (const figure of _bokehFigures) {
+        try {
+            const doc = figure.figure == null ? null : figure.figure.document;
+            if (doc != null && typeof doc.clear === "function") {
+                doc.clear();
+            }
+        } catch (e) {
+            /* Ignore errors during teardown */
+        }
+        figure.lines.length = 0;
+        figure.symbols.length = 0;
+        figure.sources.length = 0;
+        figure.legendItems.length = 0;
+    }
+    _bokehFigures.length = 0;
+});
 
 </script>
 
