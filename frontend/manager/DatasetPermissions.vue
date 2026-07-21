@@ -23,7 +23,7 @@ const props = defineProps({
 });
 
 const emit = defineEmits([
-    'updated:permissions'
+    'update:permissions'
 ]);
 
 const isEditing = ref(false);
@@ -45,7 +45,7 @@ function saveCard() {
                 variant: 'danger'
             }
         });
-        selfPermissions.value = this.savedPermissions;
+        selfPermissions.value = savedPermissions.value;
     }).finally(() => {
         isSaving.value = false;
     });

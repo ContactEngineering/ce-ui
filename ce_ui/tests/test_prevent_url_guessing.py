@@ -1,11 +1,11 @@
 import pytest
 from django.contrib.auth.models import Permission
 from django.urls import reverse
-# from topobank.testing.utils import are_collaborating
 from topobank.testing.factories import SurfaceFactory
 
+from ce_ui.views import _users_share_dataset
 
-@pytest.mark.skip("FIXME! Reimplement are_collaborating")
+
 @pytest.mark.django_db
 def test_sharing_profile(client, django_user_model, handle_usage_statistics):
     user1 = django_user_model.objects.create_user(username='testuser1', password="abcd$1234")
@@ -18,21 +18,21 @@ def test_sharing_profile(client, django_user_model, handle_usage_statistics):
 
     assert client.login(username='testuser1', password='abcd$1234')
 
-    response = client.get(reverse('users:detail', kwargs={'username': 'testuser1'}))  # same user
+    response = client.get(reverse('ce_ui:user-detail', kwargs={'username': 'testuser1'}))  # same user
     assert response.status_code == 200
 
     #
     # both users don't share anything, so they can't see each others profiles
     #
-    # assert not are_collaborating(user1, user2)
+    assert not _users_share_dataset(user1, user2)
 
-    response = client.get(reverse('users:detail', kwargs={'username': 'testuser2'}))  # other user!!
+    response = client.get(reverse('ce_ui:user-detail', kwargs={'username': 'testuser2'}))  # other user!!
     assert response.status_code == 403  # Forbidden
 
     # share sth. and the view of profile is possible
-    surface = SurfaceFactory(creator=user1)
-    surface.share(user2)
+    surface = SurfaceFactory(created_by=user1)
+    surface.permissions.grant_for_user(user2, "view")
 
-    # assert are_collaborating(user1, user2)
-    response = client.get(reverse('users:detail', kwargs={'username': 'testuser2'}))
+    assert _users_share_dataset(user1, user2)
+    response = client.get(reverse('ce_ui:user-detail', kwargs={'username': 'testuser2'}))
     assert response.status_code == 200  # Allowed

@@ -21,6 +21,9 @@ const _modalVisible = ref(false);
 let _lastNbRunningOrPending = null;
 const nbRunningOrPending = computed(() => {
     const currentNbRunningOrPending = countTaskStates(analyses.value, ['pe', 'st', 're']);
+    // FIXME: side-effect (emit) inside a computed getter. Emitting events from a computed getter is fragile —
+    // the getter runs on every dependency read/re-evaluation, so events fire at unpredictable times. This should
+    // be refactored to a watcher, but that is a higher-risk change handled in a separate pass.
     // Emit event when all tasks are finished
     if (_lastNbRunningOrPending !== null && _lastNbRunningOrPending > 0) {
         if (currentNbRunningOrPending === 0) {

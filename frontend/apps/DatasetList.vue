@@ -2,7 +2,7 @@
 
 import axios from "axios";
 
-import {computed, onMounted, ref} from "vue";
+import {computed, onBeforeUnmount, onMounted, ref} from "vue";
 
 import {
     BButton,
@@ -81,17 +81,26 @@ const _previousUrl = ref(null);
 
 let searchDelayTimer = null;
 
+// Sequence token to discard stale (out-of-order) responses
+let _requestSequence = 0;
+
 function getDatasets(offset: number = 0) {
     searchDelayTimer = null;
+    // Capture the token for this request; responses from superseded requests are ignored.
+    const requestId = ++_requestSequence;
     _isLoading.value = true;
     _currentPage.value = offset / _pageSize.value + 1;
     let queryUrl = `${props.apiUrl}?offset=${offset}&limit=${_pageSize.value}`;
     queryUrl += `&order_by=${_orderBy.value}`;
     queryUrl += `&sharing_status=${_sharingStatus.value}`;
-    if (_searchTerm != null) {
-        queryUrl += `&search=${_searchTerm.value}`;
+    if (_searchTerm.value != null) {
+        queryUrl += `&search=${encodeURIComponent(_searchTerm.value)}`;
     }
     axios.get(queryUrl).then(response => {
+        // Ignore this response if a newer request has been issued in the meantime
+        if (requestId !== _requestSequence) {
+            return;
+        }
         _nbDatasets.value = response.data.count;
         _nbDatasetsOnCurrentPage.value = Math.min(response.data.results.length, _pageSize.value);
         _nextUrl.value = response.data.next;
@@ -99,6 +108,9 @@ function getDatasets(offset: number = 0) {
         _datasets.value = response.data.results;
         _isLoading.value = false;
     }).catch(error => {
+        if (requestId !== _requestSequence) {
+            return;
+        }
         show?.({
             props: {
                 title: "Error fetching datasets",
@@ -112,6 +124,13 @@ function getDatasets(offset: number = 0) {
 
 onMounted(() => {
     getDatasets();
+});
+
+onBeforeUnmount(() => {
+    if (searchDelayTimer != null) {
+        clearTimeout(searchDelayTimer);
+        searchDelayTimer = null;
+    }
 });
 
 const currentPage = computed({

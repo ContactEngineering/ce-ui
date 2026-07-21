@@ -538,7 +538,7 @@ const batchActiveTab = ref('home'); // shared active tab for batch mode
                             Publish
                         </a>
 
-                        <a v-if="_versions == null || _versions.length === 0 && hasFullAccess"
+                        <a v-if="(_versions == null || _versions.length === 0) && hasFullAccess"
                            class="btn btn-danger mb-2"
                            href="#" @click="_showDeleteModal = true">
                             Delete

@@ -4,9 +4,13 @@ from .base import env
 # GENERAL
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#secret-key
-SECRET_KEY = env("DJANGO_SECRET_KEY", default=random_string())  # noqa: F405
+SECRET_KEY = env("DJANGO_SECRET_KEY")
 # https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["example.com"])
+
+# https://docs.djangoproject.com/en/dev/ref/settings/#debug
+# Never run with debug turned on in production.
+DEBUG = False
 
 # DATABASES
 # ------------------------------------------------------------------------------
@@ -75,7 +79,7 @@ EMAIL_SUBJECT_PREFIX = env(
 # ADMIN
 # ------------------------------------------------------------------------------
 # Django Admin URL regex.
-ADMIN_URL = env("DJANGO_ADMIN_URL", default=random_string())  # noqa: F405
+ADMIN_URL = env("DJANGO_ADMIN_URL")
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 

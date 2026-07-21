@@ -6,7 +6,7 @@
  */
 
 import axios from "axios";
-import {onMounted, ref, watch} from "vue";
+import {onBeforeUnmount, onMounted, ref, watch} from "vue";
 import {BSpinner, useToastController} from "bootstrap-vue-next";
 
 const props = defineProps({
@@ -39,6 +39,10 @@ let viewer = null;
 // File list
 let inventory = null;
 
+// Bookkeeping for the 404-retry timeout and unmount state
+let retryTimeoutId = null;
+let isMounted = false;
+
 // GUI logic
 const _openSeadragonElement = ref(null);
 const _isLoaded = ref(false);
@@ -48,7 +52,26 @@ const _colormap = ref(null);
 const _errorMessage = ref(null);
 
 onMounted(() => {
+    isMounted = true;
     requestDzi();
+});
+
+onBeforeUnmount(() => {
+    isMounted = false;
+    // Stop any pending 404-retry
+    if (retryTimeoutId != null) {
+        clearTimeout(retryTimeoutId);
+        retryTimeoutId = null;
+    }
+    // Destroy the OpenSeadragon viewer
+    if (viewer != null) {
+        try {
+            viewer.destroy();
+        } catch (e) {
+            /* Ignore errors during teardown */
+        }
+        viewer = null;
+    }
 });
 
 
@@ -79,6 +102,12 @@ function getTileSource(meta) {
 
 
 function refreshDzi() {
+    // The viewer may not exist yet if the folderUrl/prefix watcher fires before `requestDzi` created it.
+    // In that case there is nothing to refresh; the initial `requestDzi` will pick up the new props.
+    if (viewer == null) {
+        return;
+    }
+
     // We are loading a new image
     _isLoaded.value = false;
 
@@ -86,6 +115,16 @@ function refreshDzi() {
     axios.get(props.folderUrl).then(response => {
         inventory = response.data;
         axios.get(inventory[`${props.prefix}dzi.json`].file).then(response => {
+            // Guard again: the viewer may have been destroyed while the request was in flight
+            if (viewer == null) {
+                return;
+            }
+            // Remove any previously loaded images before adding the new one
+            if (viewer.world != null) {
+                while (viewer.world.getItemCount() > 0) {
+                    viewer.world.removeItem(viewer.world.getItemAt(0));
+                }
+            }
             viewer.addTiledImage({
                 tileSource: getTileSource(response.data),
                 success: () => {
@@ -106,6 +145,11 @@ function refreshDzi() {
 
 
 function requestDzi() {
+    // Do not (re)start requests once the component has been unmounted
+    if (!isMounted) {
+        return;
+    }
+
     _isLoaded.value = false;
 
     axios.get(props.folderUrl).then(response => {
@@ -206,9 +250,11 @@ function requestDzi() {
         if (error_has_response && (error.response.status == 0)) {
             _errorMessage.value = "Canceled loading of plot.";
         } else if (error_has_response && (error.response.status == 404)) {
-            /* 404 indicates the resource is not yet available, retry */
+            /* 404 indicates the resource is not yet available, retry (unless we have been unmounted) */
             console.log("Resource not yet available, retrying...")
-            setTimeout(requestDzi, props.retryDelay);
+            if (isMounted) {
+                retryTimeoutId = setTimeout(requestDzi, props.retryDelay);
+            }
         } else {
             /* Treat any other code as an actual error */
             _errorMessage.value = error.message;

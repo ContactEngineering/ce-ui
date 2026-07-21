@@ -285,6 +285,23 @@ def extra_tabs_if_single_item_selected(context, subjects):
         )
 
 
+def _safe_subjects_from_request(request):
+    """Decode the ``subjects`` GET parameter without ever raising.
+
+    Returns an empty list when the parameter is missing/empty or cannot be
+    decoded (e.g. malformed base64 or JSON), instead of bubbling up an
+    AttributeError / binascii.Error / JSONDecodeError as a 500 error.
+    """
+    encoded = request.GET.get("subjects")
+    if not encoded:
+        return []
+    try:
+        return subjects_from_base64(encoded, user=request.user)
+    except Exception:
+        _log.warning("Could not decode 'subjects' parameter %r; ignoring.", encoded)
+        return []
+
+
 class AnalysisDetailView(AppDetailView):
     model = Workflow
     slug_field = "name"
@@ -300,9 +317,7 @@ class AnalysisDetailView(AppDetailView):
             raise PermissionDenied()
 
         # Decide whether to open extra tabs for surface/topography details
-        subjects = subjects_from_base64(
-            self.request.GET.get("subjects"), user=self.request.user
-        )
+        subjects = _safe_subjects_from_request(self.request)
         extra_tabs_if_single_item_selected(context, subjects)
         subjects = subjects_to_base64(subjects)
         breadcrumb.add_generic(
@@ -338,9 +353,7 @@ class AnalysisListView(AppView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        subjects = subjects_from_base64(
-            self.request.GET.get("subjects"), user=self.request.user
-        )
+        subjects = _safe_subjects_from_request(self.request)
         extra_tabs_if_single_item_selected(context, subjects)
 
         # Decide whether to open extra tabs for surface/topography details
@@ -496,6 +509,21 @@ class TabbedEmailView(EmailView):
         return context
 
 
+def _users_share_dataset(user_a, user_b):
+    """Return True if both users can view at least one common surface (dataset).
+
+    Two users are considered collaborating when there is at least one surface
+    that both of them are allowed to view (via user or organization
+    permissions). No reusable ``are_collaborating`` helper exists in topobank
+    core, so we implement the check here using the authorization-aware
+    ``Surface.objects.for_user`` queryset.
+    """
+    surfaces_a = set(Surface.objects.for_user(user_a).values_list("pk", flat=True))
+    if not surfaces_a:
+        return False
+    return Surface.objects.for_user(user_b).filter(pk__in=surfaces_a).exists()
+
+
 class UserDetailView(LoginRequiredMixin, DetailView):
     model = User
     # These next two lines tell the view to index lookups by username
@@ -503,7 +531,17 @@ class UserDetailView(LoginRequiredMixin, DetailView):
     slug_url_kwarg = "username"
 
     def dispatch(self, request, *args, **kwargs):
-        # FIXME! Raise permission denied error if the two users have no shared datasets
+        # Users may view their own profile, and the profile of anyone they
+        # collaborate with (i.e. share at least one dataset with). Otherwise
+        # deny access so profiles cannot be enumerated by guessing usernames.
+        if request.user.is_authenticated:
+            target_user = self.get_object()
+            if request.user != target_user and not _users_share_dataset(
+                request.user, target_user
+            ):
+                raise PermissionDenied(
+                    "You may only view the profile of users you share a dataset with."
+                )
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
