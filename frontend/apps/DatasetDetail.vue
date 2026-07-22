@@ -8,6 +8,7 @@ import {
     BAccordionItem,
     BAlert,
     BBadge,
+    BButton,
     BCard,
     BCardText,
     BDropdown,
@@ -73,6 +74,7 @@ const _versions = ref(null);  // Published versions of this surface
 // GUI logic
 const _saving = ref(false);  // Saving batch edits
 const _showDeleteModal = ref(false);  // Triggers delete modal
+const _showBatchEditModal = ref(false);  // Triggers batch-edit modal
 const _selected = ref([]);  // Selected topographies (for batch editing)
 
 // Batch edit data
@@ -229,7 +231,8 @@ function saveBatchEdit(topography) {
     // Reset the batch edit topography template
     _batchEditTopography.value = emptyTopography();
 
-    // Saving is done
+    // Close the modal and stop the saving spinner
+    _showBatchEditModal.value = false;
     _saving.value = false;
 }
 
@@ -239,6 +242,9 @@ function discardBatchEdit() {
 
     // Reset the batch edit topography template
     _batchEditTopography.value = emptyTopography();
+
+    // Close the modal
+    _showBatchEditModal.value = false;
 }
 
 function surfaceHrefForVersion(version) {
@@ -296,6 +302,10 @@ const anySelected = computed(() => {
     return _selected.value.reduce((x, y) => x || y, false);
 });
 
+const selectedCount = computed(() => {
+    return _selected.value.reduce((x, y) => x + (y ? 1 : 0), 0);
+});
+
 const someSelected = computed(() => {
     const nbSelected = _selected.value.reduce((x, y) => x + (y ? 1 : 0), 0);
     const nbTopographies = _topographies.value.reduce((x, y) => x + (y != null ? 1 : 0), 0);
@@ -340,25 +350,30 @@ const batchActiveTab = ref('home'); // shared active tab for batch mode
                         <template #title>
                             Measurements <BBadge>{{measurementCount}}</BBadge>
                         </template>
-                        <DropZone v-if="isEditable && !anySelected" @files-dropped="filesDropped">
+                        <DropZone v-if="isEditable" @files-dropped="filesDropped">
                         </DropZone>
-                        <topography-update-card v-if="anySelected"
-                                                v-model:topography="_batchEditTopography"
-                                                v-model:active-tab="batchActiveTab"
-                                                :batch-edit="true"
-                                                :saving="_saving"
-                                                @save:edit="saveBatchEdit"
-                                                @discard:edit="discardBatchEdit">
-                        </topography-update-card>
-                        <div v-if="isEditable && _topographies.length > 0"
-                             class="d-flex mb-1">
-                            <BCard>
+                        <!-- Selection toolbar: Select all, plus a Batch edit
+                             button once anything is selected. -->
+                        <BCard v-if="isEditable && _topographies.length > 0"
+                               body-class="py-2"
+                               class="mb-1">
+                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                                 <BFormCheckbox v-model="allSelected"
                                                :indeterminate="someSelected" size="sm">
                                     Select all
                                 </BFormCheckbox>
-                            </BCard>
-                        </div>
+                                <div v-if="anySelected"
+                                     class="d-flex align-items-center gap-2">
+                                    <span class="text-secondary small">
+                                        {{ selectedCount }} selected
+                                    </span>
+                                    <BButton variant="primary" size="sm"
+                                             @click="_showBatchEditModal = true">
+                                        <i class="fa fa-pen me-1"></i>Batch edit
+                                    </BButton>
+                                </div>
+                            </div>
+                        </BCard>
                         <div v-for="(topography, index) in _topographies">
                             <TopographyCard v-if="topography != null"
                                             v-model:selected="_selected[index]"
@@ -371,6 +386,36 @@ const batchActiveTab = ref('home'); // shared active tab for batch mode
                                             @delete:topography="() => deleteTopography(index)">
                             </TopographyCard>
                         </div>
+                        <!-- Batch edit happens in a modal (normal colour) rather
+                             than inline on top of the measurement list. The
+                             Save/Discard live in the modal header, so the card
+                             hides its own controls and there is no redundant
+                             close button or duplicate "Batch edit" title. -->
+                        <BModal v-model="_showBatchEditModal"
+                                title="Batch edit"
+                                size="xl"
+                                no-header-close>
+                            <topography-update-card v-model:topography="_batchEditTopography"
+                                                    v-model:active-tab="batchActiveTab"
+                                                    :batch-edit="true"
+                                                    :hide-batch-controls="true"
+                                                    :saving="_saving">
+                            </topography-update-card>
+                            <!-- Actions live in the modal footer (standard
+                                 Bootstrap placement: right-aligned, primary last). -->
+                            <template #footer>
+                                <BButton variant="danger"
+                                         @click="discardBatchEdit">
+                                    Discard
+                                </BButton>
+                                <BButton variant="success"
+                                         :disabled="_saving"
+                                         @click="saveBatchEdit(_batchEditTopography)">
+                                    <BSpinner small v-if="_saving"></BSpinner>
+                                    Save
+                                </BButton>
+                            </template>
+                        </BModal>
                     </BTab>
                     <BTab title="Bandwidths">
                         <BCard class="w-100">

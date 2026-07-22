@@ -45,6 +45,13 @@ module.exports = env => {
             // the prebuilt bundle exposed as the global `Bokeh` instead. The
             // matching bokeh-*.min.js scripts are loaded in app.html.
             "@bokeh/bokehjs": "Bokeh"
-        }, plugins: [new VueLoaderPlugin()]
+        }, plugins: [
+            new VueLoaderPlugin(),
+            new webpack.DefinePlugin({
+                __VUE_OPTIONS_API__: JSON.stringify(true),
+                __VUE_PROD_DEVTOOLS__: JSON.stringify(false),
+                __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: JSON.stringify(false)
+            })
+        ]
     };
 };

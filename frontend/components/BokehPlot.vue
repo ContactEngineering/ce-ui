@@ -11,7 +11,6 @@ import {computed, onBeforeUnmount, onMounted, ref, watch} from "vue";
 
 import {
     AjaxDataSource,
-    Circle,
     CustomJSTickFormatter,
     HoverTool,
     Legend,
@@ -19,6 +18,7 @@ import {
     Palettes,
     Plotting,
     SaveTool,
+    Scatter,
     TapTool
 } from '@bokeh/bokehjs';
 
@@ -564,26 +564,30 @@ function createPlots() {
                         {field: "y"},
                         symbolAttrs);
                 } else {
-                    symbols = figure.figure.circle(
+                    symbols = figure.figure.scatter(
                         {field: "x"},
                         {field: "y"},
-                        symbolAttrs);
+                        {...symbolAttrs, marker: "circle"});
                 }
                 const alphaAttrs = {};
                 if (plot.alphaData != null) {
                     alphaAttrs.fill_alpha = {field: "alpha"};
                 }
-                symbols.selection_glyph = new Circle({
+                symbols.selection_glyph = new Scatter({
                     ...alphaAttrs,
                     ...{
+                        marker: "circle",
+                        size: Number(_symbolSize.value),
                         fill_color: attrs.color,
                         line_color: "black",
                         line_width: 4
                     }
                 });
-                symbols.nonselection_glyph = new Circle({
+                symbols.nonselection_glyph = new Scatter({
                     ...alphaAttrs,
                     ...{
+                        marker: "circle",
+                        size: Number(_symbolSize.value),
                         fill_color: attrs.color,
                         line_color: null
                     }

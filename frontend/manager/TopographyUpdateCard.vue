@@ -31,6 +31,7 @@ const {show} = useToastController();
 
 const props = defineProps({
     batchEdit: {type: Boolean, default: false},
+    hideBatchControls: {type: Boolean, default: false},  // hide in-card batch label + Save/Discard (they live in the modal header)
     defaultResolutionUnit: {type: String, default: 'nm'},
     defaultResolutionValue: {type: Number, value: 300},
     defaultTipRadiusUnit: {type: String, default: 'nm'},
@@ -262,11 +263,14 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
 
 <template>
     <BCard class="mb-1"
-           :class="{ 'border-danger border-2': !batchEdit && isMetadataIncomplete, 'bg-secondary-subtle': selected, 'bg-warning-subtle': batchEdit }">
+           :class="{ 'border-danger border-2': !batchEdit && isMetadataIncomplete, 'bg-secondary-subtle': selected }">
         <template #header>
             <!-- Action row: selection/channel on the left, actions on the right.
-                 Flex + wrap (no floats) so nothing collides when the card is narrow. -->
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                 Flex + wrap (no floats) so nothing collides when the card is narrow.
+                 Hidden entirely when the batch controls live in the modal header,
+                 so the tabs sit at the top of the header. -->
+            <div v-if="!(batchEdit && hideBatchControls)"
+                 class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div class="d-flex align-items-center gap-2">
                     <template v-if="!batchEdit && topography != null">
                         <BFormCheckbox v-if="selectable" v-model="selectedModel"
@@ -281,7 +285,7 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                             size="sm">
                         </BFormSelect>
                     </template>
-                    <div v-if="batchEdit" class="fs-5 fw-bold">
+                    <div v-if="batchEdit && !hideBatchControls" class="fs-5 fw-bold">
                         Batch edit
                     </div>
                 </div>
@@ -332,7 +336,7 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                             <i class="fa fa-trash"></i>
                         </BButton>
                     </BButtonGroup>
-                    <BButtonGroup v-if="_editing || _saving || saving" size="sm">
+                    <BButtonGroup v-if="(_editing || _saving || saving) && !hideBatchControls" size="sm">
                         <BButton v-if="_editing"
                                  variant="danger"
                                  @click="discardEdits">

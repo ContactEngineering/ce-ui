@@ -77,9 +77,16 @@ function scheduleStateCheck() {
             // The analysis function did not raise an exception itself. This means it actually finished and
             // we have a result.json, that should contain an error message.
             axios.get(analysis.value.folder).then(response => {
-                axios.get(response.data["result.json"].url).then(response => {
-                    _error.value = response.data.message;
-                });
+                const resultFile = response.data["result.json"];
+                if (resultFile?.url != null) {
+                    axios.get(resultFile.url).then(response => {
+                        _error.value = response.data.message;
+                    }).catch(error => {
+                        show?.({props: {title: "Request failed", body: error, variant: 'danger'}});
+                    });
+                }
+            }).catch(error => {
+                show?.({props: {title: "Request failed", body: error, variant: 'danger'}});
             });
         } else {
             // The analysis function failed and we have an error message (Python exception).
