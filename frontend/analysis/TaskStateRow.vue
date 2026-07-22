@@ -73,7 +73,10 @@ function scheduleStateCheck() {
         }
     } else if (analysis.value.task_state === 'fa') {
         // This is a failure. Query reason.
-        if (analysis.value.error == null) {
+        if (analysis.value.task_error) {
+            // The analysis function failed and we have an error message (Python exception).
+            _error.value = analysis.value.task_error;
+        } else {
             // The analysis function did not raise an exception itself. This means it actually finished and
             // we have a result.json, that should contain an error message.
             axios.get(analysis.value.folder).then(response => {
@@ -88,9 +91,6 @@ function scheduleStateCheck() {
             }).catch(error => {
                 show?.({props: {title: "Request failed", body: error, variant: 'danger'}});
             });
-        } else {
-            // The analysis function failed and we have an error message (Python exception).
-            _error.value = analysis.value.error;
         }
     }
 }
@@ -118,6 +118,19 @@ function renew() {
 const taskMemoryPretty = computed(() => {
     return prettyBytes(analysis.value.task_memory);
 });
+
+// Format an ISO date string for display, returning null for missing/invalid
+// values (e.g. a failed task that never started has no start time).
+function formatDateTime(value) {
+    if (value == null) {
+        return null;
+    }
+    const date = new Date(value);
+    return isNaN(date.getTime()) ? null : date.toLocaleString();
+}
+
+const creationTimePretty = computed(() => formatDateTime(analysis.value.creation_time));
+const startTimePretty = computed(() => formatDateTime(analysis.value.task_start_time));
 
 watch(() => analysis.value, () => {
     scheduleStateCheck();
@@ -150,29 +163,24 @@ watch(() => analysis.value, () => {
                 <b>Parameters:</b> {{ analysis.kwargs }}
             </div>
             <div v-if="analysis.task_state === 'su'">
-                <span><b>Created on:</b> {{ new Date(analysis.creation_time).toLocaleString() }}
-                    &#8212; <b>Started at:</b> {{ new Date(analysis.start_time).toLocaleString() }}
-                    &#8212; <b>Duration:</b> {{ analysis.duration }}</span>
+                <span><b>Created on:</b> {{ creationTimePretty }}
+                    <template v-if="startTimePretty != null">&#8212; <b>Started at:</b> {{ startTimePretty }}</template>
+                    <template v-if="analysis.task_duration != null">&#8212; <b>Duration:</b> {{ analysis.task_duration }}</template></span>
                 <span v-if="analysis.task_memory != null">
                     &#8212; <b>Peak memory usage:</b> {{ taskMemoryPretty }}
                 </span>
             </div>
             <div v-if="analysis.task_state === 'fa'">
-                This task was created on {{ new Date(analysis.creation_time).toLocaleString() }},
-                started running {{ new Date(analysis.start_time).toLocaleString() }}
-                but failed
-                <span v-if="_error != null">
-                    with message: <i>{{ _error }}</i>
-                </span>
-                <span v-if="_error == null">.</span>
+                This task was created on {{ creationTimePretty }}<template v-if="startTimePretty != null">, started running {{ startTimePretty }}</template>
+                but failed<span v-if="_error != null"> with message: <i>{{ _error }}</i></span><span v-else>.</span>
             </div>
             <div v-if="analysis.task_state === 'pe'">
-                This task was created on {{ new Date(analysis.creation_time).toLocaleString() }} and is
+                This task was created on {{ creationTimePretty }} and is
                 currently waiting to be started.
             </div>
             <div v-if="analysis.task_state === 'st'">
-                This task was created on {{ new Date(analysis.creation_time).toLocaleString() }}, started
-                {{ new Date(analysis.start_time).toLocaleString() }}
+                This task was created on {{ creationTimePretty }}<template v-if="startTimePretty != null">, started
+                {{ startTimePretty }}</template>
                 and is currently running.
             </div>
         </td>
