@@ -36,7 +36,6 @@ module.exports = env => {
             }]
         }, resolve: {
             alias: {
-                topobank: path.resolve(__dirname, "frontend"),
                 "@": path.resolve(__dirname, "frontend")
             }, extensions: [".js", ".ts", ".scss", ".vue"]
         }, externals: {

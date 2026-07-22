@@ -1,0 +1,196 @@
+<script setup lang="ts">
+
+import axios from "axios";
+
+import { computed, inject, onMounted, ref } from "vue";
+import {
+    BAlert,
+    BButton,
+    BModal,
+    BTab,
+    BTabs,
+    useToastController
+} from "bootstrap-vue-next";
+
+import { getIdFromUrl, subjectsToBase64 } from "@/utils/api";
+
+import Attachments from "@/components/manager/Attachments.vue";
+import TopographyBadges from "@/components/manager/TopographyBadges.vue";
+import TopographyCard from "@/components/manager/TopographyCard.vue";
+import DeepZoomImage from "@/components/ui/DeepZoomImage.vue";
+import LineScanPlot from "@/components/ui/LineScanPlot.vue";
+import LoadingIndicator from "@/components/ui/LoadingIndicator.vue";
+
+const { show } = useToastController();
+
+const props = defineProps({
+    topographyUrl: String,
+    topographyUrlPrefix: {
+        type: String,
+        default: "/manager/api/topography/"
+    }
+});
+
+const emit = defineEmits(["topography-deleted"]);
+
+const appProps = inject("appProps");
+
+const _disabled = ref(false);
+const _showDeleteModal = ref(false);
+const _topography = ref(null);
+
+function getTopographyUrl() {
+    if (props.topographyUrl != null) {
+        return props.topographyUrl;
+    }
+    const topographyId = appProps.searchParams.get("topography");
+    return `${props.topographyUrlPrefix}${topographyId}`;
+}
+
+onMounted(async () => {
+    await updateCard(appProps.object);
+});
+
+async function updateCard(topography = null) {
+    if (topography !== null) {
+        _topography.value = topography;
+        _disabled.value = _topography.value === null || _topography.value.permissions.current_user.permission === "view";
+    }
+
+    /* Fetch topography info from API endpoint if status is pending */
+    if (["pe", "st"].includes(topography.task_state)) {
+        try {
+            const response = await axios.get(_topography.value.url);
+            _topography.value = response.data;
+            _disabled.value = _topography.value === null || _topography.value.permissions.current_user.permission === "view";
+        } catch (error) {
+            show?.({
+                props: {
+                    title: "Failed to load measurement",
+                    body: error,
+                    variant: "danger"
+                }
+            });
+        }
+    }
+}
+
+function deleteTopography() {
+    axios.delete(_topography.value.url).then(response => {
+        emit("topography-deleted", _topography.value.url);
+        const id = getIdFromUrl(_topography.value.surface);
+        window.location.href = `/ui/dataset-detail/${id}/`;
+    }).catch(error => {
+        show?.({
+            props: {
+                title: "Failed to delete measurement",
+                body: error,
+                variant: "danger"
+            }
+        });
+    });
+}
+
+async function forceInspect() {
+    try {
+        const response = await axios.post(_topography.value.api.force_inspect);
+        await updateCard(response.data);
+    } catch (error) {
+        show?.({
+            props: {
+                title: "Failed to create zoomable image",
+                body: error,
+                variant: "danger"
+            }
+        });
+    }
+}
+
+const base64Subjects = computed(() => {
+    return subjectsToBase64({
+        topography: [_topography.value.id]
+    });
+});
+
+</script>
+
+<template>
+    <div class="container">
+        <LoadingIndicator v-if="_topography == null"/>
+        <div v-if="_topography !== null"
+             class="row">
+            <div class="col-12">
+                <BTabs class="nav-pills-custom"
+                       content-class="w-100"
+                       fill
+                       pills
+                       vertical>
+                    <BTab title="Visualization">
+                        <BAlert variant="warning"
+                                :show="_topography.deepzoom === null && _topography.size_y !== null">
+                            <p class="mb-2">
+                                This measurement does not have a zoomable image.
+                            </p>
+                            <BButton variant="secondary"
+                                     @click="forceInspect">
+                                Retry creation of zoomable image
+                            </BButton>
+                        </BAlert>
+                        <LineScanPlot v-if="_topography.size_y === null"
+                                      :topography="_topography">
+                        </LineScanPlot>
+                        <DeepZoomImage
+                            v-if="_topography.deepzoom !== null && _topography.size_y !== null"
+                            :colorbar="true"
+                            :folder-url="_topography.deepzoom">
+                        </DeepZoomImage>
+                    </BTab>
+                    <BTab title="Details">
+                        <TopographyCard :topography-url="_topography.url"
+                                        v-model:topography="_topography"
+                                        :enlarged="true"
+                                        :disabled="_disabled">
+                        </TopographyCard>
+                    </BTab>
+                    <BTab title="Attachments">
+                        <Attachments :attachments-url="_topography.attachments"
+                                     :permission="_topography.permissions.current_user.permission">
+                        </Attachments>
+                    </BTab>
+                    <template #tabs-end>
+                        <hr />
+                        <a :href="`/ui/analysis-list/?subjects=${base64Subjects}`"
+                           class="btn btn-success mb-2 mt-2">
+                            Analyze
+                        </a>
+
+                        <a :href="_topography.datafile?.file"
+                           class="btn btn-light mb-2">
+                            Download
+                        </a>
+
+                        <a href="#"
+                           class="btn btn-danger mb-2"
+                           @click="_showDeleteModal = true">
+                            Delete
+                        </a>
+                        <hr />
+                        <div class="card mt-2">
+                            <div class="card-body">
+                                <topography-badges
+                                    :topography="_topography"></topography-badges>
+                            </div>
+                        </div>
+                    </template>
+                </BTabs>
+            </div>
+        </div>
+    </div>
+    <BModal v-if="_topography !== null"
+            v-model="_showDeleteModal"
+            @ok="deleteTopography"
+            title="Delete measurement">
+        You are about to delete the measurement with name <b>{{ _topography.name }}</b>.
+        Are you sure you want to proceed?
+    </BModal>
+</template>
