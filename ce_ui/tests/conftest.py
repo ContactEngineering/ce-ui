@@ -13,7 +13,7 @@ from .fixtures import orcid_socialapp  # noqa: F401
 def user_with_plugin(db):
     """Fixture returning a user with ce_ui plugin access."""
     org_name = "Test Organization"
-    org = OrganizationFactory(name=org_name, plugins_available="ce_ui")
+    org = OrganizationFactory(name=org_name)
     user = UserFactory()
     user.groups.add(org.group)
     return user
