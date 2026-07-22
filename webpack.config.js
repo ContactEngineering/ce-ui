@@ -12,11 +12,13 @@ module.exports = env => {
             library: ["topobank", "[name]"]
         }, module: {
             rules: [{
-                test: /\.ts$/, use: [{
-                    loader: "ts-loader", options: {
-                        appendTsSuffixTo: [/\.vue$/], transpileOnly: true
-                    }
-                }], exclude: /node_modules/
+                // Transpile-only TS -> JS via esbuild (no type-checking, and no
+                // dependency on the TypeScript compiler JS API, which the native
+                // TypeScript 7 package no longer exposes). VueLoaderPlugin clones
+                // this rule to also handle <script lang="ts"> blocks in .vue SFCs.
+                test: /\.ts$/, loader: "esbuild-loader", options: {
+                    loader: "ts", target: "es2020"
+                }, exclude: /node_modules/
             }, {
                 test: /\.vue$/, loader: "vue-loader", options: {
                     loaders: {
