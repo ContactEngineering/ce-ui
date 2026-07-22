@@ -38,7 +38,7 @@
     "netcdfjs": "^4.0.0",
     "nouislider": "^15.8.1",
     "openseadragon": "^6.0.0",
-    "pinia": "^3.0.3",
+    "pinia": "^4.0.0",
     "pinia-plugin-persistedstate": "^4.4.1",
     "popper.js": "^1.16.1",
     "proj4": "^2.19.9",
