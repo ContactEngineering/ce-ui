@@ -171,45 +171,6 @@ div.live_notify_list {
     width: 600px;
 }
 
-/** Workaround for problem with django-tagolous and crispy forms
- See https://github.com/radiac/django-tagulous/issues/35
- */
-.select2-container-multi .select2-choices {
-    background-image: linear-gradient(to bottom, #eee0 1%, #f3f3f300 15%) !important;
-    border: none !important;
-    background-color: transparent !important;
-}
-
-/** make chevrons for showing topographies in surface list tree larger, GH #381 */
-span.fancytree-node > span.fancytree-expander {
-    font-size: large;
-    vertical-align: baseline;
-    margin-right: 20px;
-}
-
-
-span.fancytree-node > span.fancytree-title {
-    font-size: larger;
-    vertical-align: middle;
-    margin-right: 20px;
-}
-
-
-span.fancytree-checkbox {
-    /** padding-top: 1%; */
-    font-size: large;
-    line-height: 50%;
-    /** display: table-cell; */
-    vertical-align: middle !important;
-    /** line-height: 1;*/
-    margin-right: 20px;
-}
-
-tr.fancytree-active {
-    background-color: var(--light) !important;
-    /*color: white !important;*/
-}
-
 /**
   Settings for task table
 */
@@ -327,30 +288,35 @@ section[title="Terms and Conditions"] div.toc-container, #tc-terms-html {
     font-size: large;
 }
 
-/** vertical navigation */
-.nav-pills-custom .nav-item {
+/** Vertical navigation (the <BTabs pills vertical class="nav-pills-custom">).
+ *  All selectors are qualified with `.nav-pills` so they only style this
+ *  vertical pills nav — NOT other navs nested in the tab content (e.g. the
+ *  `.nav-tabs` inside a TopographyUpdateCard), which previously inherited the
+ *  full-width pill look and an extra bottom margin. */
+
+.nav-pills-custom .nav-pills .nav-item {
     margin-bottom: 0.5rem;
 }
 
-.nav-pills-custom .nav-fill {
+.nav-pills-custom .nav-pills.nav-fill {
     width: 15rem;
 }
 
-.nav-pills-custom .nav-link {
+.nav-pills-custom .nav-pills .nav-link {
     width: 100%;
     background: $white;
     position: relative;
     border: 1px solid $primary-border-subtle;
 }
 
-.nav-pills-custom .nav-link.active {
+.nav-pills-custom .nav-pills .nav-link.active {
     background: $primary;
     border: 1px solid $primary;
 }
 
 /* Add indicator arrow for the active tab */
 @media (min-width: 992px) {
-    .nav-pills-custom .nav-link::before {
+    .nav-pills-custom .nav-pills .nav-link::before {
         content: '';
         display: block;
         border-top: 8px solid transparent;
@@ -364,7 +330,7 @@ section[title="Terms and Conditions"] div.toc-container, #tc-terms-html {
     }
 }
 
-.nav-pills-custom .nav-link.active::before {
+.nav-pills-custom .nav-pills .nav-link.active::before {
     opacity: 1;
 }
 
@@ -454,13 +420,6 @@ section[title="Terms and Conditions"] div.toc-container, #tc-terms-html {
     align-content: center;
 }
 
-.card-header {
-    background-color: unset;
-}
-
-.card-footer {
-    background-color: unset;
-}
 .dot {
     width: 1em;
     height: 1em;
@@ -470,14 +429,6 @@ section[title="Terms and Conditions"] div.toc-container, #tc-terms-html {
     border-radius: 100%;
     top: 0.3em; /* to center the dot, there is probably a better way to do this */
     margin-right: 0.5em;
-}
-
-.plot-controls-card-header {
-    padding: 0px;
-}
-
-.plot-controls-card-body {
-    padding: 3px 12px;
 }
 
 /*!

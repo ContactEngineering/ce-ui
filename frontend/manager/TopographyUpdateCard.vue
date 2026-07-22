@@ -14,6 +14,8 @@ import {
     BFormSelect,
     BFormTextarea,
     BModal,
+    BNav,
+    BNavItem,
     BSpinner,
     useToastController
 } from 'bootstrap-vue-next';
@@ -67,7 +69,7 @@ const activeTab = defineModel('activeTab', {
     default: 'home'
 });
 
-function handlebatchTabChange(value) {  
+function handlebatchTabChange(value) {
     activeTab.value = value;
 }
 
@@ -75,7 +77,7 @@ const localTab = ref('home');
 
 const currentTab = computed({
   get() {
-    return props.batchEdit||props.syncTab ? activeTab.value : localTab.value; 
+    return props.batchEdit||props.syncTab ? activeTab.value : localTab.value;
   },
   set(value) {
     if (props.batchEdit||props.syncTab) {
@@ -262,122 +264,120 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
     <BCard class="mb-1"
            :class="{ 'border-danger border-2': !batchEdit && isMetadataIncomplete, 'bg-secondary-subtle': selected, 'bg-warning-subtle': batchEdit }">
         <template #header>
-            <div v-if="!batchEdit && topography != null" class="d-flex float-start">
-                <BFormCheckbox v-if="selectable" v-model="selectedModel"
-                               :disabled="_editing"
-                               size="sm">
-                </BFormCheckbox>
-                <BFormSelect
-                    v-if="topography.channel_names != null && topography.channel_names.length > 0"
-                    :options="channelOptions"
-                    v-model="topography.data_source"
-                    :disabled="!_editing"
-                    size="sm">
-                </BFormSelect>
+            <!-- Action row: selection/channel on the left, actions on the right.
+                 Flex + wrap (no floats) so nothing collides when the card is narrow. -->
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <template v-if="!batchEdit && topography != null">
+                        <BFormCheckbox v-if="selectable" v-model="selectedModel"
+                                       :disabled="_editing"
+                                       size="sm">
+                        </BFormCheckbox>
+                        <BFormSelect
+                            v-if="topography.channel_names != null && topography.channel_names.length > 0"
+                            :options="channelOptions"
+                            v-model="topography.data_source"
+                            :disabled="!_editing"
+                            size="sm">
+                        </BFormSelect>
+                    </template>
+                    <div v-if="batchEdit" class="fs-5 fw-bold">
+                        Batch edit
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <BButtonGroup
+                        v-if="!batchEdit && topography != null && !_editing && !_saving && !saving && !enlarged"
+                        size="sm">
+                        <BButton v-if="!selected"
+                                 variant="light"
+                                 :href="`/ui/topography/${topography.id}/`">
+                            <i class="fa fa-expand"></i>
+                        </BButton>
+                        <BButton v-if="selected"
+                                 variant="outline-secondary"
+                                 disabled>
+                            <i class="fa fa-expand"></i>
+                        </BButton>
+                    </BButtonGroup>
+                    <BButtonGroup
+                        v-if="!batchEdit && topography != null && !_editing && !_saving && !saving"
+                        size="sm">
+                        <BButton v-if="!disabled"
+                                 variant="light"
+                                 :disabled="selected"
+                                 @click="_savedTopography = cloneDeep(topography); _editing = true">
+                            <i class="fa fa-pen"></i>
+                        </BButton>
+                        <BButton v-if="!enlarged && !selected"
+                                 variant="light"
+                                 :href="topography.datafile?.file">
+                            <i class="fa fa-download"></i>
+                        </BButton>
+                        <BButton v-if="!disabled && selected"
+                                 variant="light"
+                                 disabled>
+                            <i class="fa fa-download"></i>
+                        </BButton>
+                        <BButton v-if="!disabled"
+                                 variant="light"
+                                 :disabled="selected">
+                            <i class="fa fa-refresh"
+                               @click="forceInspect"></i>
+                        </BButton>
+                        <BButton v-if="!disabled && !enlarged"
+                                 :disabled="selected"
+                                 variant="light"
+                                 @click="_showDeleteModal = true">
+                            <i class="fa fa-trash"></i>
+                        </BButton>
+                    </BButtonGroup>
+                    <BButtonGroup v-if="_editing || _saving || saving" size="sm">
+                        <BButton v-if="_editing"
+                                 variant="danger"
+                                 @click="discardEdits">
+                            Discard
+                        </BButton>
+                        <BButton variant="success"
+                                 @click="saveEdits">
+                            <BSpinner small v-if="_saving || saving"></BSpinner>
+                            Save
+                        </BButton>
+                    </BButtonGroup>
+                    <BButtonGroup v-if="!batchEdit" size="sm">
+                        <BButton variant="light"
+                                 :href="`/ui/analysis-list/?subjects=${subjectsToBase64({topography: [topography.id]})}`">
+                            Analyze
+                        </BButton>
+                    </BButtonGroup>
+                </div>
             </div>
-            <div v-if="batchEdit" class="float-start fs-5 fw-bold">
-                Batch edit
-            </div>
-            <BButtonGroup
-                v-if="!batchEdit && topography != null && !_editing && !_saving && !saving && !enlarged"
-                size="sm" class="float-end">
-                <BButton v-if="!selected"
-                         class="float-end ms-2"
-                         variant="light"
-                         :href="`/ui/topography/${topography.id}/`">
-                    <i class="fa fa-expand"></i>
-                </BButton>
-                <BButton v-if="selected"
-                         class="float-end ms-2"
-                         variant="outline-secondary"
-                         disabled>
-                    <i class="fa fa-expand"></i>
-                </BButton>
-            </BButtonGroup>
-            <BButtonGroup
-                v-if="!batchEdit && topography != null && !_editing && !_saving && !saving"
-                size="sm" class="float-end">
-                <BButton v-if="!disabled"
-                         variant="light"
-                         :disabled="selected"
-                         @click="_savedTopography = cloneDeep(topography); _editing = true">
-                    <i class="fa fa-pen"></i>
-                </BButton>
-                <BButton v-if="!enlarged && !selected"
-                         variant="light"
-                         :href="topography.datafile?.file">
-                    <i class="fa fa-download"></i>
-                </BButton>
-                <BButton v-if="!disabled && selected"
-                         variant="light"
-                         disabled>
-                    <i class="fa fa-download"></i>
-                </BButton>
-                <BButton v-if="!disabled"
-                         variant="light"
-                         :disabled="selected">
-                    <i class="fa fa-refresh"
-                       @click="forceInspect"></i>
-                </BButton>
-                <BButton v-if="!disabled && !enlarged"
-                         :disabled="selected"
-                         variant="light"
-                         @click="_showDeleteModal = true">
-                    <i class="fa fa-trash"></i>
-                </BButton>
-            </BButtonGroup>
-            <BButtonGroup v-if="_editing || _saving || saving" size="sm"
-                          class="float-end">
-                <BButton v-if="_editing"
-                         variant="danger"
-                         @click="discardEdits">
-                    Discard
-                </BButton>
-                <BButton variant="success"
-                         @click="saveEdits">
-                    <BSpinner small v-if="_saving || saving"></BSpinner>
-                    Save
-                </BButton>
-            </BButtonGroup>
-            <BButtonGroup v-if="!batchEdit" size="sm" class="float-end me-2">
-                <BButton variant="light"
-                         :href="`/ui/analysis-list/?subjects=${subjectsToBase64({topography: [topography.id]})}`">
-                    Analyze
-                </BButton>
-            </BButtonGroup>
-            <BButtonGroup size="sm" class="float-end me-2">
-                <BButton :active="currentTab === 'home'"
-                        @click="currentTab = 'home'"
-                        variant="outline-secondary">
+
+            <!-- Tabs via bootstrap-vue-next BNav (card-header + tabs): renders
+                 nav-tabs.card-header-tabs so they sit flush against the card body. -->
+            <BNav tabs card-header small class="mt-2">
+                <BNavItem :active="currentTab === 'home'"
+                          @click="currentTab = 'home'">
                     Home
-                </BButton>
-
-                <BButton :active="currentTab === 'description'"
-                        @click="currentTab = 'description'"
-                        variant="outline-secondary">
+                </BNavItem>
+                <BNavItem :active="currentTab === 'description'"
+                          @click="currentTab = 'description'">
                     Description
-                </BButton>
-
-                <BButton :active="currentTab === 'instrument'"
-                        @click="currentTab = 'instrument'"
-                        variant="outline-secondary">
+                </BNavItem>
+                <BNavItem :active="currentTab === 'instrument'"
+                          @click="currentTab = 'instrument'">
                     Instrument
-                </BButton>
-
-                <BButton :active="currentTab === 'filters'"
-                        @click="currentTab = 'filters'"
-                        variant="outline-secondary">
+                </BNavItem>
+                <BNavItem :active="currentTab === 'filters'"
+                          @click="currentTab = 'filters'">
                     Filters
-                </BButton>
-
-                <BButton v-if="!enlarged && !batchEdit"
-                        :active="currentTab === 'attachments'"
-                        @click="currentTab = 'attachments'"
-                        variant="outline-secondary">
+                </BNavItem>
+                <BNavItem v-if="!enlarged && !batchEdit"
+                          :active="currentTab === 'attachments'"
+                          @click="currentTab = 'attachments'">
                     Attachments
-                </BButton>
-            </BButtonGroup>
-
+                </BNavItem>
+            </BNav>
         </template>
         <div v-if="topography == null" class="tab-content">
             <BSpinner small></BSpinner>
@@ -574,7 +574,7 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                             :permission="topography.permissions.current_user.permission">
                 </Attachments>
             </div>
-            
+
         </div>
         <template #footer>
             <TopographyBadges v-if="!batchEdit && !enlarged"
