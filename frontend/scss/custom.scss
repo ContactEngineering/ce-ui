@@ -40,6 +40,11 @@ $border-radius-sm: .375rem;
 $border-radius-lg: .75rem;
 $border-radius-xl: 1rem;
 
+// Buttons crisper (less rounded) than the base — a precise, technical feel
+$btn-border-radius:    .2rem;
+$btn-border-radius-sm: .15rem;
+$btn-border-radius-lg: .25rem;
+
 // -- Typography: IBM Plex (self-hosted via @fontsource, imported below), ------
 //  an engineered-but-humanist family that suits a measurement instrument.
 //  Falls back to the native system stack if the web font hasn't loaded.
