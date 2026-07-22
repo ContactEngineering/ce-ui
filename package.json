@@ -37,7 +37,7 @@
     "mathjax-full": "^3.2.2",
     "netcdfjs": "^3.0.0",
     "nouislider": "^15.8.1",
-    "openseadragon": "^5.0.1",
+    "openseadragon": "^6.0.0",
     "pinia": "^3.0.3",
     "pinia-plugin-persistedstate": "^4.4.1",
     "popper.js": "^1.16.1",
