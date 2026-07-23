@@ -1,92 +1,87 @@
-/*
+const superscriptMap: { [key: string]: string } = {
+    '0': '⁰',
+    '1': '¹',
+    '2': '²',
+    '3': '³',
+    '4': '⁴',
+    '5': '⁵',
+    '6': '⁶',
+    '7': '⁷',
+    '8': '⁸',
+    '9': '⁹',
+    '+': '⁺',
+    '-': '⁻',
+    '.': '⋅',
+};
+
+/**
  * Convert numerals inside a string into the unicode superscript equivalent, e.g.
  *   µm3 => µm³
  */
-function unicodeSuperscript(s: string): string {
-    var superscript_dict = {
-        '0': '⁰',
-        '1': '¹',
-        '2': '²',
-        '3': '³',
-        '4': '⁴',
-        '5': '⁵',
-        '6': '⁶',
-        '7': '⁷',
-        '8': '⁸',
-        '9': '⁹',
-        '+': '⁺',
-        '-': '⁻',
-        '.': '⋅',
-    };
-    return s.split('').map(c => c in superscript_dict ? superscript_dict[c] : c).join('');
+export function unicodeSuperscript(s: string): string {
+    return s.split('').map(c => superscriptMap[c] ?? c).join('');
 }
 
-
 /**
- * Creates a formatter that formats numbers to show no more than
- * [maxNumberOfDecimalPlaces] decimal places in exponential notation.
- * Exponentials will be displayed human readably, i.e. 1.3×10³.
+ * Format a number in exponential notation with no more than
+ * `maxNumberOfDecimalPlaces` decimal places. Exponentials are displayed
+ * human readably, i.e. 1.3×10³.
  *
- * @param {number} [d] The number to be formatted
- * @param {number} [maxNumberOfDecimalPlaces] The number of decimal places to show (default 3).
- *
- * @returns {Formatter} A formatter for general values.
+ * @param d The number to be formatted.
+ * @param maxNumberOfDecimalPlaces The number of decimal places to show (default 3).
+ * @returns The formatted number.
  */
-export function formatExponential(d: number, maxNumberOfDecimalPlaces: bigint): string {
-    if (maxNumberOfDecimalPlaces === undefined) {
-        maxNumberOfDecimalPlaces = 3;
-    }
-
-    if (d === 0 || d === undefined || isNaN(d) || Math.abs(d) == Infinity) {
-        return String(d);
-    } else if ("number" === typeof d) {
-        const multiplier = Math.pow(10, maxNumberOfDecimalPlaces);
-        const sign = d < 0 ? -1 : 1;
-        let e = Math.floor(Math.log(sign * d) / Math.log(10));
-        const m = sign * d / Math.pow(10, e);
-        let m_rounded = Math.round(m * multiplier) / multiplier;
-        if (10 === m_rounded) {
-            m_rounded = 1;
-            e++;
-        }
-        if (0 === e) {
-            return String(sign * m_rounded); // do not attach ×10⁰ == 1
-        } else if (1 == m_rounded) {
-            if (0 < sign) {
-                return "10" + unicodeSuperscript(String(e));
-            } else {
-                return "-10" + unicodeSuperscript(String(e));
-            }
-        } else {
-            return String(sign * m_rounded) + "×10" + unicodeSuperscript(String(e));
-        }
-    } else {
+export function formatExponential(d: number, maxNumberOfDecimalPlaces: number = 3): string {
+    if (typeof d !== "number" || d === 0 || isNaN(d) || !isFinite(d)) {
         return String(d);
     }
+
+    const multiplier = Math.pow(10, maxNumberOfDecimalPlaces);
+    const sign = d < 0 ? -1 : 1;
+    let e = Math.floor(Math.log(sign * d) / Math.log(10));
+    const m = sign * d / Math.pow(10, e);
+    let mRounded = Math.round(m * multiplier) / multiplier;
+    if (mRounded === 10) {
+        mRounded = 1;
+        e++;
+    }
+    if (e === 0) {
+        return String(sign * mRounded);  // do not attach ×10⁰ == 1
+    }
+    const exponent = "10" + unicodeSuperscript(String(e));
+    if (mRounded === 1) {
+        return sign > 0 ? exponent : "-" + exponent;
+    }
+    return String(sign * mRounded) + "×" + exponent;
 }
 
-
 /**
- * Format bytes as human-readable text.
+ * Format bytes as human-readable text, e.g. 1.21 kB.
  *
- * From: https://stackoverflow.com/questions/10420352/converting-file-size-in-bytes-to-human-readable-string
- *
- * @param {number} [size] Number of bytes. *
- * @returns {string} Formatted string.
- * */
-export function prettyBytes(size: bigint): string {
-    var i = size == 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
-    return (size / Math.pow(1024, i)).toFixed(2) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
-}
-
-
-/**
- * Formats a date-time string into a human-readable local date-time string.
- *
- * @param {string} dateTimeString - The date-time string to be formatted.
- * @returns {string} The formatted local date-time string.
+ * @param size Number of bytes.
+ * @returns Formatted string.
  */
-export function formatDateTime(dateTimeString: string): string {
-    var date = new Date(dateTimeString);
-    return date.toLocaleString();
+export function prettyBytes(size: number): string {
+    if (typeof size !== "number" || isNaN(size) || size < 0) {
+        return String(size);
+    }
+    const units = ['B', 'kB', 'MB', 'GB', 'TB'];
+    const i = size === 0 ? 0 : Math.min(units.length - 1, Math.floor(Math.log(size) / Math.log(1024)));
+    // parseFloat drops trailing zeros, e.g. "1.00" => 1
+    return `${parseFloat((size / Math.pow(1024, i)).toFixed(2))} ${units[i]}`;
+}
+
+/**
+ * Format a date-time string into a human-readable local date-time string.
+ *
+ * @param dateTimeString The date-time string to be formatted.
+ * @returns The formatted local date-time string, or `null` for missing or
+ *     unparseable input (e.g. a task that never started has no start time).
+ */
+export function formatDateTime(dateTimeString: string | null | undefined): string | null {
+    if (dateTimeString == null) {
+        return null;
+    }
+    const date = new Date(dateTimeString);
+    return isNaN(date.getTime()) ? null : date.toLocaleString();
 }

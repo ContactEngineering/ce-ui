@@ -8,7 +8,9 @@
   "scripts": {
     "dev": "webpack --env=prefix=.. --mode development --devtool inline-source-map --watch",
     "build-dev": "webpack --mode development",
-    "build-prod": "webpack --mode production"
+    "build-prod": "webpack --mode production",
+    "test": "vitest run",
+    "test-watch": "vitest"
   },
   "keywords": [],
   "author": "",
@@ -61,6 +63,7 @@
     "sass": "^1.89.2",
     "sass-loader": "^17.0.0",
     "typescript": "^7.0.0",
+    "vitest": "^4.1.10",
     "vue-loader": "^17.4.2",
     "vue-style-loader": "^4.1.3",
     "vue-template-compiler": "^2.7.16",
