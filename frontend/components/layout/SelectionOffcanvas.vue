@@ -99,8 +99,8 @@ const selectionIsPublished = computed(() => {
             </BNavbarNav>
         </template>
 
-        <BAlert :model-value="selection.nbSelected === 0" variant="light">
-            You have not selected any datasets.
+        <BAlert :model-value="selection.nbSelected === 0" variant="secondary">
+            <i class="fa-solid fa-circle-info me-2"></i>You have not selected any datasets.
         </BAlert>
         <BListGroup>
             <BListGroupItem v-for="dataset in datasets">

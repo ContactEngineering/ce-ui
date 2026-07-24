@@ -86,7 +86,17 @@ export default {
             </div>
         </div>
         <div class="card-body">
-            {{ topography.error }}
+            <p class="fw-semibold mb-1">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>Processing of this measurement failed.
+            </p>
+            <p v-if="topography.task_error" class="mb-0 font-monospace small">
+                {{ topography.task_error }}
+            </p>
+            <p v-else class="mb-0">
+                No error message was reported. Try re-inspecting the data file
+                (the refresh button above), or check that the file and its
+                metadata are valid.
+            </p>
         </div>
     </div>
 </template>

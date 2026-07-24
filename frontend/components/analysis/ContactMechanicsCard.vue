@@ -22,6 +22,10 @@ const props = defineProps({
         type: String,
         default: '/ui/analysis-detail/'
     },
+    description: {
+        type: String,
+        default: null
+    },
     enlarged: {
         type: Boolean,
         default: true
@@ -29,6 +33,10 @@ const props = defineProps({
     functionName: {
         type: String,
         required: true
+    },
+    referenceUrl: {
+        type: String,
+        default: null
     },
     subjects: {
         type: Object,
@@ -204,10 +212,12 @@ const analysisIds = computed(() => {
 
 <template>
     <AnalysisCard v-model:analyses="_analyses"
+                  :description="description"
                   :detailUrl="detailUrl"
                   :dois="_dois"
                   :enlarged="enlarged"
                   :functionName="functionName"
+                  :referenceUrl="referenceUrl"
                   :showLoadingSpinner="_nbPendingAjaxRequests > 0"
                   :subjects="subjects"
                   title="Contact mechanics"
@@ -243,7 +253,8 @@ const analysisIds = computed(() => {
 
             <!-- Right with simulation details and actions -->
             <div v-if="enlarged" class="col-6">
-                <div v-if="_selection == null && !_isLoading" id="geometry" class="alert alert-info">Select a point
+                <div v-if="_selection == null && !_isLoading" id="geometry" class="alert alert-secondary">
+                    <i class="fa-solid fa-circle-info me-2"></i>Select a point
                     in the graphs on the left for more details.
                 </div>
                 <LoadingIndicator v-if="_isLoading"/>

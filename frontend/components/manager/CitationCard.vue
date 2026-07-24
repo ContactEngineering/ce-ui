@@ -4,9 +4,10 @@
  * wording and bibliographic references in several formats.
  */
 
-import {BAccordion, BAccordionItem, BAlert, BCard} from 'bootstrap-vue-next';
+import {BAccordion, BAccordionItem, BAlert} from 'bootstrap-vue-next';
 
 import {ccLicenseInfo} from "@/utils/licenses";
+import HelpTooltip from "@/components/ui/HelpTooltip.vue";
 
 defineProps({
     publication: {
@@ -17,10 +18,7 @@ defineProps({
 </script>
 
 <template>
-    <BCard class="w-100">
-        <template #header>
-            <h5 class="float-start">How to cite</h5>
-        </template>
+    <div class="w-100">
         <p class="mb-5">
             <a :href="ccLicenseInfo[publication.license].descriptionUrl">
                 <img
@@ -71,6 +69,8 @@ defineProps({
         <hr/>
         <p class="fw-semibold">
             Bibliographic reference for this dataset:
+            <HelpTooltip label="About citation formats"
+                text="Copy the reference in the format your tools use: plain Citation (human-readable), or RIS / BibTeX / BibLaTeX for import into reference managers (EndNote, Zotero, LaTeX, etc.)."/>
         </p>
         <BAccordion>
             <BAccordionItem title="Citation" visible>
@@ -92,5 +92,5 @@ defineProps({
                 </code>
             </BAccordionItem>
         </BAccordion>
-    </BCard>
+    </div>
 </template>

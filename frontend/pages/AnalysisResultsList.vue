@@ -73,6 +73,8 @@ onMounted(() => {
                        v-if="analysis.isSelected(card.name)"
                        :enlarged="false"
                        :function-name="card.name"
+                       :description="card.description"
+                       :reference-url="card.reference_url"
                        :subjects="subjectsDict">
             </component>
         </div>

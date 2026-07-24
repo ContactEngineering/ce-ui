@@ -4,10 +4,9 @@ import axios from "axios";
 import { computed, ref } from 'vue';
 
 import {
+    BAlert,
     BButton,
     BButtonGroup,
-    BCard,
-    BCardBody,
     BFormInput,
     BSpinner,
     BTableSimple,
@@ -166,29 +165,34 @@ propertyCount.value = Object.keys(properties.value).length // Update the propert
 </script>
 
 <template>
-    <BCard>
-        <template #header>
-            <div class="d-flex">
-                <h5 class="flex-grow-1">Properties</h5>
-                <BButton size="sm" v-if="!_isEditing && isEditable" @click="enterEditMode" variant="outline-secondary">
-                    <i class="fa fa-pen"></i>
+    <div>
+        <div v-if="isEditable"
+             class="d-flex justify-content-end align-items-center border-bottom pb-2 mb-3">
+            <BButton size="sm" v-if="!_isEditing" @click="enterEditMode" variant="outline-secondary">
+                <i class="fa fa-pen me-1"></i>Edit
+            </BButton>
+            <BButtonGroup v-else size="sm">
+                <BButton v-if="_isEditing && !_isSaving" @click="discardChanges" variant="danger">
+                    Discard
                 </BButton>
-                <BButtonGroup v-else-if="isEditable" size="sm">
-                    <BButton v-if="_isEditing && !_isSaving" @click="discardChanges" variant="danger">
-                        Discard
-                    </BButton>
-                    <BButton :disabled="!formIsValid" @click="save" variant="success">
-                        <BSpinner v-if="_isSaving" small />
-                        SAVE
-                    </BButton>
-                </BButtonGroup>
-            </div>
-        </template>
-        <BCardBody>
-            <div v-if="!isEditable && _properties.length === 0">
-                This digital surface twin does not have properties.
-            </div>
-            <BTableSimple>
+                <BButton :disabled="!formIsValid" @click="save" variant="success">
+                    <BSpinner v-if="_isSaving" small />
+                    Save
+                </BButton>
+            </BButtonGroup>
+        </div>
+        <BAlert v-if="!isEditable && _properties.length === 0"
+                :model-value="true" variant="secondary">
+            <i class="fa-solid fa-circle-info me-2"></i>This digital surface twin does not have properties.
+        </BAlert>
+        <BAlert v-if="isEditable"
+                :model-value="true" variant="secondary">
+            <i class="fa-solid fa-circle-info me-2"></i>Properties are custom key–value pairs that describe this
+            digital surface twin (e.g. <i>material</i>, <i>applied load</i>). A
+            value that is a number can carry a unit; any other value is treated
+            as categorical (text).
+        </BAlert>
+        <BTableSimple>
                 <colgroup>
                     <col />
                     <col />
@@ -253,8 +257,7 @@ propertyCount.value = Object.keys(properties.value).length // Update the propert
                     Add property
                 </div>
             </div>
-        </BCardBody>
-    </BCard>
+    </div>
 </template>
 
 <style scoped>

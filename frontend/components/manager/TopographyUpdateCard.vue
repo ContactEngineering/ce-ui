@@ -27,6 +27,8 @@ import TopographyBadges from "@/components/manager/TopographyBadges.vue";
 import Attachments from '@/components/manager/Attachments.vue';
 import Thumbnail from "@/components/manager/Thumbnail.vue";
 import TipTapEditor from "@/components/manager/TipTapEditor.vue";
+import HelpTooltip from "@/components/ui/HelpTooltip.vue";
+import {paperSection} from "@/utils/references";
 
 const {show} = useToastController();
 
@@ -296,6 +298,7 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                         size="sm">
                         <BButton v-if="!selected"
                                  variant="light"
+                                 title="Open this measurement in full view"
                                  :href="`/ui/topography/${topography.id}/`">
                             <i class="fa fa-expand"></i>
                         </BButton>
@@ -310,12 +313,14 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                         size="sm">
                         <BButton v-if="!disabled"
                                  variant="light"
+                                 title="Edit metadata"
                                  :disabled="selected"
                                  @click="_savedTopography = cloneDeep(topography); _editing = true">
                             <i class="fa fa-pen"></i>
                         </BButton>
                         <BButton v-if="!enlarged && !selected"
                                  variant="light"
+                                 title="Download the original data file"
                                  :href="topography.datafile?.file">
                             <i class="fa fa-download"></i>
                         </BButton>
@@ -326,6 +331,7 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                         </BButton>
                         <BButton v-if="!disabled"
                                  variant="light"
+                                 title="Re-inspect the data file (re-read metadata and regenerate previews)"
                                  :disabled="selected">
                             <i class="fa fa-refresh"
                                @click="forceInspect"></i>
@@ -333,6 +339,7 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                         <BButton v-if="!disabled && !enlarged"
                                  :disabled="selected"
                                  variant="light"
+                                 title="Delete this measurement"
                                  @click="_showDeleteModal = true">
                             <i class="fa fa-trash"></i>
                         </BButton>
@@ -421,12 +428,19 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                                             :class="highlightInput('is_periodic')"
                                             :disabled="!_editing || !topography.is_periodic_editable">
                                 Data is periodic
+                                <HelpTooltip
+                                    text="Tick this if the surface repeats seamlessly at its edges (e.g. a simulated periodic cell). It changes how spectral analyses treat the boundaries: non-periodic data is windowed to avoid artifacts."
+                                    :link-url="paperSection('as4-3')"
+                                    link-text="Windowing (§4.3)"/>
                             </BFormCheckbox>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-8">
-                            <label for="input-physical-size">Physical size</label>
+                            <label for="input-physical-size">Physical size
+                                <HelpTooltip
+                                    text="The real-world extent of the scanned area (width × height, or length for a line scan). This sets the length scale for every analysis. It is read from the data file when available."/>
+                            </label>
                             <div class="input-group mb-1">
                                 <BFormInput id="input-physical-size"
                                             type="number"
@@ -462,7 +476,10 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                             </small>
                         </div>
                         <div class="col-4">
-                            <label for="input-physical-size">Height scale</label>
+                            <label for="input-physical-size">Height scale
+                                <HelpTooltip
+                                    text="Factor that converts the raw values in the data file into physical heights. Usually read from the file — override only if you know the correct scaling."/>
+                            </label>
                             <BFormInput id="input-physical-size"
                                         type="number"
                                         step="any"
@@ -490,7 +507,12 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                         </BFormInput>
                     </div>
                     <div class="col-6">
-                        <label for="input-instrument-type">Instrument type</label>
+                        <label for="input-instrument-type">Instrument type
+                            <HelpTooltip
+                                text="Determines how measurement reliability is estimated: unknown type (all scales treated as reliable), microscope (limited by lateral resolution), or contact/AFM (limited by the probe tip radius)."
+                                :link-url="paperSection('as4-9')"
+                                link-text="Reliability analysis (§4.9)"/>
+                        </label>
                         <BFormSelect id="input-instrument-type"
                                     :options="_instrumentChoices"
                                     :class="highlightInput('instrument_type')"
@@ -502,7 +524,12 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                 <div v-if="topography.instrument_type == 'microscope-based'" class="row">
                     <div class="col-12 mt-1">
                         <label for="input-instrument-resolution">Lateral instrument
-                            resolution</label>
+                            resolution
+                            <HelpTooltip
+                                text="The smallest lateral feature this microscope can resolve. Features finer than this are flagged as unreliable in scale-dependent analyses."
+                                :link-url="paperSection('as4-9')"
+                                link-text="Reliability analysis (§4.9)"/>
+                        </label>
                         <div id="input-instrument-resolution" class="input-group mb-1">
                             <BFormInput type="number"
                                         step="any"
@@ -523,7 +550,12 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                 </div>
                 <div v-if="topography.instrument_type == 'contact-based'" class="row">
                     <div class="col-12 mt-1">
-                        <label for="input-instrument-tip-radius">Probe tip radius</label>
+                        <label for="input-instrument-tip-radius">Probe tip radius
+                            <HelpTooltip
+                                text="Radius of the scanning probe tip. The tip cannot follow features sharper than itself, so smaller scales are flagged as unreliable."
+                                :link-url="paperSection('as4-9')"
+                                link-text="Reliability analysis (§4.9)"/>
+                        </label>
                         <div id="input-instrument-tip-radius" class="input-group mb-1">
                             <BFormInput type="number"
                                         step="any"
@@ -546,7 +578,12 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
             <div v-if="currentTab === 'filters'" class="col-10">
                 <div class="row">
                     <div class="col-6 mt-1">
-                        <label for="input-detrending">Detrending</label>
+                        <label for="input-detrending">Detrending
+                            <HelpTooltip
+                                text="Removes an overall trend before analysis: subtract the mean height, a tilt (best-fit plane), or curvature and tilt. Use this to separate roughness from the sample's overall shape."
+                                :link-url="paperSection('as3-2')"
+                                link-text="Preprocessing (§3.2)"/>
+                        </label>
                         <div id="input-detrending" class="input-group mb-1">
                             <BFormSelect :options="_detrendChoices"
                                         v-model="topography.detrend_mode"
@@ -556,7 +593,12 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                         </div>
                     </div>
                     <div class="col-6 mt-1">
-                        <label for="input-undefined-data">Undefined/missing data</label>
+                        <label for="input-undefined-data">Undefined/missing data
+                            <HelpTooltip
+                                text="How to treat pixels with no measured value: leave them undefined, or fill the gaps by solving a smooth (harmonic) interpolation from the surrounding data."
+                                :link-url="paperSection('as3-2')"
+                                link-text="Preprocessing (§3.2)"/>
+                        </label>
                         <div id="input-undefined-data" class="input-group mb-1">
                             <BFormSelect :options="_undefinedDataChoices"
                                         v-model="topography.fill_undefined_data_mode"

@@ -126,24 +126,48 @@ const base64Subjects = computed(() => {
                        pills
                        vertical>
                     <BTab title="Visualization">
-                        <BAlert variant="warning"
-                                :show="_topography.deepzoom === null && _topography.size_y !== null">
-                            <p class="mb-2">
-                                This measurement does not have a zoomable image.
+                        <!-- Processing failed: show the error here instead of
+                             attempting to render a plot/zoomable image (which
+                             would toast and spin forever). -->
+                        <BAlert v-if="_topography.task_state === 'fa'"
+                                :model-value="true" variant="danger">
+                            <p class="fw-semibold mb-1">
+                                <i class="fa-solid fa-triangle-exclamation me-2"></i>Processing of this measurement failed.
                             </p>
-                            <BButton variant="secondary"
+                            <p v-if="_topography.task_error"
+                               class="mb-2 font-monospace small">
+                                {{ _topography.task_error }}
+                            </p>
+                            <p v-else class="mb-2">
+                                No error message was reported. Try re-processing
+                                the data file, or check that the file and its
+                                metadata are valid.
+                            </p>
+                            <BButton variant="outline-danger" size="sm"
                                      @click="forceInspect">
-                                Retry creation of zoomable image
+                                Retry processing
                             </BButton>
                         </BAlert>
-                        <LineScanPlot v-if="_topography.size_y === null"
-                                      :topography="_topography">
-                        </LineScanPlot>
-                        <DeepZoomImage
-                            v-if="_topography.deepzoom !== null && _topography.size_y !== null"
-                            :colorbar="true"
-                            :folder-url="_topography.deepzoom">
-                        </DeepZoomImage>
+                        <template v-else>
+                            <BAlert variant="warning"
+                                    :show="_topography.deepzoom === null && _topography.size_y !== null">
+                                <p class="mb-2">
+                                    <i class="fa-solid fa-triangle-exclamation me-2"></i>This measurement does not have a zoomable image.
+                                </p>
+                                <BButton variant="secondary"
+                                         @click="forceInspect">
+                                    Retry creation of zoomable image
+                                </BButton>
+                            </BAlert>
+                            <LineScanPlot v-if="_topography.size_y === null"
+                                          :topography="_topography">
+                            </LineScanPlot>
+                            <DeepZoomImage
+                                v-if="_topography.deepzoom !== null && _topography.size_y !== null"
+                                :colorbar="true"
+                                :folder-url="_topography.deepzoom">
+                            </DeepZoomImage>
+                        </template>
                     </BTab>
                     <BTab title="Details">
                         <TopographyCard :topography-url="_topography.url"

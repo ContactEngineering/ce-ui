@@ -15,6 +15,7 @@ const ccLicenseInfos = [
         legal_code_url: "https://creativecommons.org/publicdomain/zero/1.0/legalcode",
         title: "CC0 1.0 Universal",
         option_name: "CC0 1.0",
+        summary: "Public domain: anyone may use the data for any purpose, no attribution required.",
         spdx_identifier: "CC0-1.0",
     },
     {
@@ -23,6 +24,7 @@ const ccLicenseInfos = [
         legal_code_url: "https://creativecommons.org/licenses/by/4.0/legalcode",
         title: "Creative Commons Attribution 4.0 International Public License",
         option_name: "CC BY 4.0",
+        summary: "Free to reuse and adapt, as long as you are credited (attribution).",
         spdx_identifier: "CC-BY-4.0",
     },
     {
@@ -31,6 +33,7 @@ const ccLicenseInfos = [
         legal_code_url: "https://creativecommons.org/licenses/by-sa/4.0/legalcode",
         title: "Creative Commons Attribution-ShareAlike 4.0 International Public License",
         option_name: "CC BY-SA 4.0",
+        summary: "Reuse and adapt with attribution, but derivatives must keep the same license (share-alike).",
         spdx_identifier: "CC-BY-SA-4.0",
     },
 ];
@@ -44,7 +47,7 @@ const selected = ref('cc0-1.0')
         </h2>
         <div class="d-flex flex-row justify-content-center">
             <BFormRadioGroup v-model="selected" name="radio-stacked" stacked>
-                <BFormRadio v-for="license in ccLicenseInfos" :value="license.key">
+                <BFormRadio v-for="license in ccLicenseInfos" :value="license.key" class="mb-2">
                     <div class="d-flex">
             <span class=" mr-auto" style="width: 110px;" :title="license.title">
               {{ license.option_name }}
@@ -56,6 +59,7 @@ const selected = ref('cc0-1.0')
               <a :href="license.legal_code_url"> Legal code</a>
             </span>
                     </div>
+                    <small class="text-muted d-block">{{ license.summary }}</small>
                 </BFormRadio>
             </BFormRadioGroup>
         </div>

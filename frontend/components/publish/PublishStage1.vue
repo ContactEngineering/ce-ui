@@ -23,10 +23,9 @@ axios.get(`/manager/api/surface/${props.surfaceId}`).then((response) => {
 </script>
 <template>
     <div v-if="props.stage == 0">
-        <div v-if="surface && !error" class="alert mt-5"
-             style="background-color: oklch(0.852 0.199 91.936 / 0.4);">
-            <h4>
-                You are about to publish the digital surface twin: {{ surface.name }}
+        <div v-if="surface && !error" class="alert alert-warning mt-5">
+            <h4 class="alert-heading">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>You are about to publish the digital surface twin: {{ surface.name }}
             </h4>
 
             By publishing, you create an <strong>immutable copy</strong> of this digital
@@ -35,10 +34,9 @@ axios.get(`/manager/api/surface/${props.surfaceId}`).then((response) => {
             This snapshot has a version number and a unique URL for citations and it is
             visible and usable to everyone.
         </div>
-        <div v-if="error" class="alert mt-5"
-             style="background-color: oklch(0.577 0.245 27.325 / 0.4);">
-            <h4>
-                Sorry we could not find a digital surface twin with the ID {{
+        <div v-if="error" class="alert alert-danger mt-5">
+            <h4 class="alert-heading">
+                <i class="fa-solid fa-circle-exclamation me-2"></i>Sorry we could not find a digital surface twin with the ID {{
                     surfaceId
                 }}
             </h4>

@@ -8,7 +8,6 @@ import {
     BBadge,
     BButton,
     BCard,
-    BCardText,
     BDropdown,
     BDropdownItem,
     BFormCheckbox,
@@ -31,7 +30,9 @@ import DatasetProperties from '@/components/manager/DatasetProperties.vue';
 import TopographyCard from "@/components/manager/TopographyCard.vue";
 import TopographyUpdateCard from "@/components/manager/TopographyUpdateCard.vue";
 import DropZone from '@/components/ui/DropZone.vue';
+import HelpTooltip from '@/components/ui/HelpTooltip.vue';
 import LoadingIndicator from '@/components/ui/LoadingIndicator.vue';
+import {paperSection} from "@/utils/references";
 
 const {show} = useToastController();
 
@@ -360,27 +361,24 @@ const measurementCount = computed(() => {
                         </BModal>
                     </BTab>
                     <BTab title="Bandwidths">
-                        <BCard class="w-100">
-                            <template #header>
-                                <h5 class="float-start">Bandwidths</h5>
-                            </template>
-                            <BAlert :model-value="_topographies.length == 0" info>
-                                This surface has no measurements.
-                            </BAlert>
-                            <BAlert :model-value="_topographies.length > 0"
-                                    secondary>
-                                This bandwidth plot shows the range of length scales
-                                that have been measured for
-                                this digital surface twin. Each of the blocks below
-                                represents one measurement.
-                                Part of the bandwidth shown may be unreliable due to
-                                the configured instrument's
-                                measurement capacities.
-                            </BAlert>
-                            <BandwidthPlot v-if="_topographies.length > 0"
-                                           :topographies="_topographies">
-                            </BandwidthPlot>
-                        </BCard>
+                        <BAlert :model-value="_topographies.length == 0" variant="secondary">
+                            <i class="fa-solid fa-circle-info me-2"></i>This surface has no measurements.
+                        </BAlert>
+                        <BAlert :model-value="_topographies.length > 0"
+                                variant="secondary">
+                            <i class="fa-solid fa-circle-info me-2"></i>This bandwidth plot shows the range of length scales
+                            that have been measured for
+                            this digital surface twin. Each block below
+                            represents one measurement. Each block is split into a
+                            <b>reliable</b> part and an <b>unreliable</b> part: below
+                            the reliability cutoff the tip radius or instrument
+                            resolution distorts the surface, so those scales are
+                            excluded from analyses.
+                            <a :href="paperSection('as4-9')" target="_blank" rel="noopener">Learn more (§4.9)</a>.
+                        </BAlert>
+                        <BandwidthPlot v-if="_topographies.length > 0"
+                                       :topographies="_topographies">
+                        </BandwidthPlot>
                     </BTab>
                     <BTab title="Description">
                         <DatasetDescription v-if="_surface != null"
@@ -419,16 +417,12 @@ const measurementCount = computed(() => {
                                             v-model:permissions="_permissions"
                                             :set-permissions-url="_surface.api.set_permissions">
                         </DatasetPermissions>
-                        <BCard v-if="_surface.publication != null" class="w-100">
-                            <template #header>
-                                <h5 class="float-start">Permissions</h5>
-                            </template>
-                            <BCardText>
-                                This dataset is published. It is visible to everyone
-                                (even without logging into the
-                                system) and can no longer be modified.
-                            </BCardText>
-                        </BCard>
+                        <BAlert v-if="_surface.publication != null"
+                                :model-value="true" variant="secondary">
+                            <i class="fa-solid fa-circle-info me-2"></i>This dataset is published. It is visible to everyone
+                            (even without logging into the
+                            system) and can no longer be modified.
+                        </BAlert>
                     </BTab>
                     <BTab v-if="isPublication"
                           title="How to cite">
@@ -490,6 +484,9 @@ const measurementCount = computed(() => {
                                     Version {{ version.version }}
                                 </BDropdownItem>
                             </BDropdown>
+                            <HelpTooltip class="mt-2 d-inline-block"
+                                label="About versions"
+                                text="&quot;Work in progress&quot; is the editable, unpublished original you are working on. Publishing it creates a numbered, immutable version with its own citable DOI; the original stays editable."/>
                         </BCard>
                     </template>
                 </BTabs>

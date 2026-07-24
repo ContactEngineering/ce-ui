@@ -7,6 +7,7 @@ from allauth.account.views import EmailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
+from django.http import Http404
 from django.urls import reverse
 from django.views.generic import (DetailView, ListView, RedirectView,
                                   TemplateView, UpdateView)
@@ -14,7 +15,7 @@ from termsandconditions.models import TermsAndConditions
 from termsandconditions.views import (AcceptTermsView, GetTermsViewMixin,
                                       TermsView)
 from topobank.analysis.models import Workflow
-from topobank.analysis.registry import get_workflow_names
+from topobank.analysis.registry import get_implementation, get_workflow_names
 from topobank.manager.models import Surface, Topography
 from topobank.manager.utils import (get_reader_infos, subjects_from_base64,
                                     subjects_to_base64)
@@ -303,10 +304,17 @@ def _safe_subjects_from_request(request):
 
 
 class AnalysisDetailView(AppDetailView):
-    model = Workflow
-    slug_field = "name"
     vue_component = "AnalysisDetail"
     serializer_class = WorkflowDetailSerializer
+
+    def get_object(self, queryset=None):
+        # ``Workflow`` is a registry-backed plain Python class, not a Django
+        # model, so the default ``DetailView`` ORM lookup does not apply.
+        # Resolve the workflow by its name (the URL slug) from the registry.
+        name = self.kwargs.get(self.slug_url_kwarg)
+        if get_implementation(name=name) is None:
+            raise Http404(f"No workflow named '{name}'.")
+        return Workflow(name=name)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

@@ -3,6 +3,8 @@
 import { computed, inject, ref } from "vue";
 import { BCard, BButton, BButtonGroup, BFormInput, BAlert } from "bootstrap-vue-next";
 
+import HelpTooltip from "@/components/ui/HelpTooltip.vue";
+
 import {
     type Author,
     emptyAffiliation,
@@ -99,8 +101,8 @@ const authorsString = computed(() => formatAuthorList(authors.value));
         <h2 class="alert-heading">
             Please enter the authors
         </h2>
-        <BAlert :model-value="true">
-            Authors will be listed like this: <strong> {{ authorsString }} </strong>
+        <BAlert :model-value="true" variant="secondary">
+            <i class="fa-solid fa-circle-info me-2"></i>Authors will be listed like this: <strong> {{ authorsString }} </strong>
         </BAlert>
         <div class="p-2">
             <BCard v-for="(author, index) in authors" class="mb-2" header-tag="header"
@@ -152,7 +154,12 @@ const authorsString = computed(() => formatAuthorList(authors.value));
                         </BFormInput>
                     </div>
                     <div class="d-flex flex-column">
-                        <span>ORCID ID (optional)</span>
+                        <span>ORCID iD (optional)
+                            <HelpTooltip label="What is an ORCID iD?"
+                                text="An ORCID iD is a free, unique identifier for researchers that permanently links you to your work — regardless of name changes or spellings."
+                                link-url="https://orcid.org/"
+                                link-text="orcid.org"/>
+                        </span>
                         <BFormInput v-model="author.person.orcidId"
                                     :state="author.person.orcidIdValid"
                                     placeholder="xxxx-xxxx-xxxx-xxxx">
@@ -195,7 +202,12 @@ const authorsString = computed(() => formatAuthorList(authors.value));
                             </BFormInput>
                         </div>
                         <div class="d-flex flex-column">
-                            <span>ROR ID (optional)</span>
+                            <span>ROR ID (optional)
+                                <HelpTooltip label="What is a ROR ID?"
+                                    text="A ROR ID (Research Organization Registry) is a free, unique identifier for a research institution — the organizational counterpart to an ORCID iD."
+                                    link-url="https://ror.org/"
+                                    link-text="ror.org"/>
+                            </span>
                             <BFormInput v-model="affiliation.rorId"
                                         :state="affiliation.rorIdValid"
                                         placeholder="0xxxxxxxx">

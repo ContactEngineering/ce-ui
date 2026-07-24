@@ -14,6 +14,14 @@ const functionName = computed(() => {
     return appProps.object.name;
 });
 
+const description = computed(() => {
+    return appProps.object.description;
+});
+
+const referenceUrl = computed(() => {
+    return appProps.object.reference_url;
+});
+
 const subjects = computed(() => {
     return subjectsFromBase64(appProps.searchParams.get("subjects"));
 });
@@ -26,6 +34,8 @@ const subjects = computed(() => {
             <component :is="`${visualizationType}-card`"
                        :enlarged="true"
                        :functionName="functionName"
+                       :description="description"
+                       :reference-url="referenceUrl"
                        :subjects="subjects">
             </component>
         </div>

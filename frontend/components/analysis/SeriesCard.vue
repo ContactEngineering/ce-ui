@@ -21,6 +21,10 @@ const props = defineProps({
         type: String,
         default: "/ui/analysis-detail/"
     },
+    description: {
+        type: String,
+        default: null
+    },
     enlarged: {
         type: Boolean,
         default: true
@@ -28,6 +32,10 @@ const props = defineProps({
     functionName: {
         type: String,
         required: true
+    },
+    referenceUrl: {
+        type: String,
+        default: null
     },
     subjects: {
         type: Object,
@@ -105,11 +113,13 @@ function updateCard() {
 
 <template>
     <AnalysisCard v-model:analyses="_analyses"
+                  :description="description"
                   :detailUrl="detailUrl"
                   :dois="_dois"
                   :enlarged="enlarged"
                   :functionName="functionName"
                   :messages="_messages"
+                  :referenceUrl="referenceUrl"
                   :showLoadingSpinner="_nbPendingAjaxRequests > 0"
                   :subjects="subjects"
                   :title="_title"

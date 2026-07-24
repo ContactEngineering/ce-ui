@@ -94,8 +94,8 @@ const validSelection = computed(() => {
         <h1>Publish a collection</h1>
         <div v-if="validSelection">
 
-            <BAlert :model-value="true" variant="info">
-                <h4 class="alert-heading">You are about to create a publication collection</h4>
+            <BAlert :model-value="true" variant="warning">
+                <h4 class="alert-heading"><i class="fa-solid fa-triangle-exclamation me-2"></i>You are about to create a publication collection</h4>
                 <p>
                     A publication collection is a object that bundles already published datasets. <br>
                     The Colection will be published under the <a
@@ -137,7 +137,7 @@ const validSelection = computed(() => {
             </div>
         </div>
         <BAlert v-else :model-value="true" variant="danger">
-            <h4 class="alert-heading">This will not work!</h4>
+            <h4 class="alert-heading"><i class="fa-solid fa-circle-exclamation me-2"></i>This will not work!</h4>
             <p>
                 A publication collection, bundles 2 or more published datasets. <br>
             </p>

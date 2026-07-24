@@ -8,8 +8,6 @@ import {formatDateTime} from "@/utils/formatting";
 import {uploadFile, createFileManifest} from "@/utils/upload";
 
 import {
-    BCard,
-    BCardBody,
     BButton,
     BAlert,
     BProgress,
@@ -156,16 +154,10 @@ const attachmentToShowInfo = computed(() => {
 
 </script>
 <template>
-    <BCard>
-        <template #header>
-            <div class="d-flex">
-                <h5 class="flex-grow-1">Attachments</h5>
-            </div>
-        </template>
-        <BCardBody>
-            <DropZone v-if="isEditable" @files-dropped="handleFileDrop" class="mb-5">
-                Drop your attachments here or
-            </DropZone>
+    <div>
+        <DropZone v-if="isEditable" @files-dropped="handleFileDrop" class="mb-5">
+            Drop your attachments here or
+        </DropZone>
             <div>
                 <div v-for="[key, value] in Object.entries(attachments)"
                      :key="value.id">
@@ -199,13 +191,12 @@ const attachmentToShowInfo = computed(() => {
                     </div>
                 </div>
                 <div v-if="attachmentCount == 0">
-                    <BAlert :model-value="true" variant="primary">
-                        This digital surface twin does not have file attachments yet.
+                    <BAlert :model-value="true" variant="secondary">
+                        <i class="fa-solid fa-circle-info me-2"></i>This digital surface twin does not have file attachments yet.
                     </BAlert>
                 </div>
             </div>
-        </BCardBody>
-    </BCard>
+    </div>
 
     <BModal v-model="deleteModal" v-if="attachmentToDelete" centered
             title="Delete Attachment">

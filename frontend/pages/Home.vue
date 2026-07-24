@@ -65,7 +65,7 @@ const stats = computed(() => [
         <section class="home-hero rounded-3 overflow-hidden mb-4">
             <div class="row g-0 align-items-stretch">
                 <div class="col-lg-6 p-4 p-lg-5 d-flex flex-column justify-content-center">
-                    <p class="home-eyebrow">Surface topography, digitally</p>
+                    <p class="home-eyebrow">The openI repository for topography data</p>
                     <h1 class="home-title">contact.<wbr>engineering</h1>
                     <p class="home-lead">
                         Store and organize surface measurements, characterize

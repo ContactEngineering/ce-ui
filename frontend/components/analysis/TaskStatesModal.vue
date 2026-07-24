@@ -34,8 +34,8 @@ const analyses = defineModel('analyses', {required: true});
                 </tbody>
             </table>
         </small>
-        <div v-if="analyses.length === 0" class="alert alert-info">
-            No analysis was triggered for this function and these subjects.
+        <div v-if="analyses.length === 0" class="alert alert-secondary">
+            <i class="fa-solid fa-circle-info me-2"></i>No analysis was triggered for this function and these subjects.
         </div>
     </BModal>
 </template>

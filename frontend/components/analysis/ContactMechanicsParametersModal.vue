@@ -269,7 +269,7 @@ function pressureValidator(str) {
             </div>
 
             <div class="alert alert-warning mt-2" v-if="_recalculateWarning">
-                Some of the input parameters were invalid. We have updated those
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>Some of the input parameters were invalid. We have updated those
                 parameters for you.
                 Please double-check
                 the parameters and click <b>Run calculation</b> when ready.

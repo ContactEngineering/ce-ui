@@ -79,8 +79,8 @@ function clearNotifications() {
             </BNavbarNav>
         </template>
 
-        <BAlert :model-value="unreadCount === 0" variant="light">
-            You have no unread notifications.
+        <BAlert :model-value="unreadCount === 0" variant="secondary">
+            <i class="fa-solid fa-circle-info me-2"></i>You have no unread notifications.
         </BAlert>
         <BListGroup>
             <BListGroupItem v-for="message in messages" :href="message.href">

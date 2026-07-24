@@ -6,8 +6,6 @@ import {
     BAlert,
     BButton,
     BButtonGroup,
-    BCard,
-    BCardBody,
     BForm,
     BFormGroup,
     BFormInput,
@@ -24,8 +22,6 @@ export default {
         BAlert,
         BButton,
         BButtonGroup,
-        BCard,
-        BCardBody,
         BForm,
         BFormGroup,
         BFormInput,
@@ -90,19 +86,17 @@ export default {
 </script>
 
 <template>
-    <BCard>
-        <template #header>
-            <h5 class="float-start">Description</h5>
-            <BButtonGroup v-if="!_editing && !_saving && isEditable"
-                          class="float-end"
+    <div>
+        <div v-if="isEditable"
+             class="d-flex justify-content-end align-items-center border-bottom pb-2 mb-3">
+            <BButtonGroup v-if="!_editing && !_saving"
                           size="sm">
                 <BButton variant="outline-secondary"
                          @click="_savedName = `${_name}`; _savedDescription = `${_description}`; _editing = true">
-                    <i class="fa fa-pen"></i>
+                    <i class="fa fa-pen me-1"></i>Edit
                 </BButton>
             </BButtonGroup>
             <BButtonGroup v-if="_editing || _saving"
-                          class="float-end"
                           size="sm">
                 <BButton v-if="_editing"
                          variant="danger"
@@ -112,16 +106,15 @@ export default {
                 <BButton variant="success"
                          @click="saveCard">
                     <b-spinner small v-if="_saving"></b-spinner>
-                    SAVE
+                    Save
                 </BButton>
             </BButtonGroup>
-        </template>
-        <BCardBody>
-            <BAlert :model-value="_error !== null"
-                    variant="danger">
-                {{ _error?.message }}
-            </BAlert>
-            <BForm>
+        </div>
+        <BAlert :model-value="_error !== null"
+                variant="danger">
+            <i class="fa-solid fa-circle-exclamation me-2"></i>{{ _error?.message }}
+        </BAlert>
+        <BForm>
                 <BFormGroup id="input-group-name"
                             label="Name"
                             label-for="input-name"
@@ -160,6 +153,5 @@ export default {
                     </BForm-tags>
                 </BFormGroup>
             </BForm>
-        </BCardBody>
-    </BCard>
+    </div>
 </template>

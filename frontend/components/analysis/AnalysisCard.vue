@@ -9,6 +9,7 @@ import {countTaskStates} from '@/utils/tasks';
 import BibliographyModal from '@/components/analysis/BibliographyModal.vue';
 import CardExpandButton from '@/components/analysis/CardExpandButton.vue';
 import TasksButton from '@/components/analysis/TasksButton.vue';
+import HelpTooltip from '@/components/ui/HelpTooltip.vue';
 import LoadingIndicator from '@/components/ui/LoadingIndicator.vue';
 
 const analyses = defineModel('analyses', {required: true});
@@ -20,8 +21,16 @@ const props = defineProps({
         type: String,
         default: '/ui/analysis-detail/'
     },
+    description: {
+        type: String,
+        default: null
+    },
     dois: {
         type: Array,
+        default: null
+    },
+    referenceUrl: {
+        type: String,
         default: null
     },
     enlarged: {
@@ -94,6 +103,11 @@ const nbSuccess = computed(() => {
             </BDropdown>
             <span class="align-middle lead">
                 <b>{{ title }}</b>
+                <HelpTooltip v-if="description"
+                             class="ms-2 fs-6 align-middle"
+                             :text="description"
+                             :link-url="referenceUrl"
+                             link-text="Learn more in the paper"/>
                 <BSpinner class="ms-2" v-if="showLoadingSpinner" small/>
             </span>
         </template>
@@ -109,7 +123,9 @@ const nbSuccess = computed(() => {
         </div>
 
         <div v-if="analyses != null && analyses.length === 0" class="tab-content">
-            <h5>This analysis reported no results for the selected datasets.</h5>
+            <div class="alert alert-secondary">
+                <i class="fa-solid fa-circle-info me-2"></i>This analysis reported no results for the selected datasets.
+            </div>
         </div>
 
         <div v-if="nbSuccess > 0" class="tab-content">
