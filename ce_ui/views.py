@@ -1,6 +1,4 @@
-import csv
 import logging
-import os
 from html import unescape
 
 from allauth.account.views import EmailView
@@ -624,26 +622,3 @@ class UserListView(LoginRequiredMixin, ListView):
     # These next two lines tell the view to index lookups by username
     slug_field = "username"
     slug_url_kwarg = "username"
-
-
-class ChallengeHomepageView(TemplateView):
-    template_name = "challenge/homepage.html"
-
-
-class ChallengeListOfPublishedDataView(TemplateView):
-    template_name = "challenge/list_of_published_data.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        data_list = {}
-        csv_path = os.path.join(os.path.dirname(__file__), "data", "challenge_data.csv")
-
-        with open(csv_path, mode="r") as file:
-            reader = csv.DictReader(file)
-
-            for row in reader:
-                sample_id = row["sample_id"]
-                data_list[sample_id] = {"doi_link": row["doi_link"]}
-        context["data_list"] = data_list
-        return context

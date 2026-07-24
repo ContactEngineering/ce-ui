@@ -32,6 +32,7 @@ import TopographyUpdateCard from "@/components/manager/TopographyUpdateCard.vue"
 import DropZone from '@/components/ui/DropZone.vue';
 import HelpTooltip from '@/components/ui/HelpTooltip.vue';
 import LoadingIndicator from '@/components/ui/LoadingIndicator.vue';
+import Toolbar from '@/components/ui/Toolbar.vue';
 import {paperSection} from "@/utils/references";
 
 const {show} = useToastController();
@@ -293,30 +294,27 @@ const measurementCount = computed(() => {
                         <template #title>
                             Measurements <BBadge>{{measurementCount}}</BBadge>
                         </template>
-                        <DropZone v-if="isEditable" @files-dropped="filesDropped">
-                        </DropZone>
                         <!-- Selection toolbar: Select all, plus a Batch edit
                              button once anything is selected. -->
-                        <BCard v-if="isEditable && _topographies.length > 0"
-                               body-class="py-2"
-                               class="mb-1">
-                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                                <BFormCheckbox v-model="allSelected"
-                                               :indeterminate="someSelected" size="sm">
-                                    Select all
-                                </BFormCheckbox>
-                                <div v-if="anySelected"
-                                     class="d-flex align-items-center gap-2">
-                                    <span class="text-secondary small">
-                                        {{ selectedCount }} selected
-                                    </span>
-                                    <BButton variant="primary" size="sm"
-                                             @click="_showBatchEditModal = true">
-                                        <i class="fa fa-pen me-1"></i>Batch edit
-                                    </BButton>
-                                </div>
+                        <Toolbar v-if="isEditable && _topographies.length > 0"
+                                 justify="between">
+                            <BFormCheckbox v-model="allSelected"
+                                           :indeterminate="someSelected" size="sm">
+                                Select all
+                            </BFormCheckbox>
+                            <div v-if="anySelected"
+                                 class="d-flex align-items-center gap-2">
+                                <span class="text-secondary small">
+                                    {{ selectedCount }} selected
+                                </span>
+                                <BButton variant="primary" size="sm"
+                                         @click="_showBatchEditModal = true">
+                                    <i class="fa fa-pen me-1"></i>Batch edit
+                                </BButton>
                             </div>
-                        </BCard>
+                        </Toolbar>
+                        <DropZone v-if="isEditable" @files-dropped="filesDropped">
+                        </DropZone>
                         <div v-for="(topography, index) in _topographies">
                             <TopographyCard v-if="topography != null"
                                             v-model:selected="_selected[index]"

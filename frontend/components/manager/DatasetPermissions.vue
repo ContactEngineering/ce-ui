@@ -13,6 +13,7 @@ import {
 
 import SearchUserModal from "@/components/ui/SearchUserModal.vue";
 import PermissionRow from "@/components/manager/PermissionRow.vue";
+import Toolbar from "@/components/ui/Toolbar.vue";
 
 const {show} = useToastController();
 
@@ -59,8 +60,7 @@ function addUser(user) {
 
 <template>
     <div>
-        <div v-if="selfPermissions.current_user.permission === 'full'"
-             class="d-flex justify-content-end align-items-center border-bottom pb-2 mb-3">
+        <Toolbar v-if="selfPermissions.current_user.permission === 'full'">
             <BButtonGroup v-if="isEditing || isSaving"
                           class="me-2"
                           size="sm">
@@ -91,7 +91,7 @@ function addUser(user) {
                     Save
                 </BButton>
             </BButtonGroup>
-        </div>
+        </Toolbar>
         <BAlert v-if="isEditing" :model-value="true" variant="secondary">
             <i class="fa-solid fa-circle-info me-2"></i>Access levels:
             <b>View</b> can see the data; <b>Edit</b> can also add, remove and

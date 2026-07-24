@@ -18,6 +18,8 @@ import {
     useToastController
 } from 'bootstrap-vue-next';
 
+import Toolbar from "@/components/ui/Toolbar.vue";
+
 const { show } = useToastController();
 
 const properties = defineModel('properties', {
@@ -166,8 +168,7 @@ propertyCount.value = Object.keys(properties.value).length // Update the propert
 
 <template>
     <div>
-        <div v-if="isEditable"
-             class="d-flex justify-content-end align-items-center border-bottom pb-2 mb-3">
+        <Toolbar v-if="isEditable">
             <BButton size="sm" v-if="!_isEditing" @click="enterEditMode" variant="outline-secondary">
                 <i class="fa fa-pen me-1"></i>Edit
             </BButton>
@@ -180,7 +181,7 @@ propertyCount.value = Object.keys(properties.value).length // Update the propert
                     Save
                 </BButton>
             </BButtonGroup>
-        </div>
+        </Toolbar>
         <BAlert v-if="!isEditable && _properties.length === 0"
                 :model-value="true" variant="secondary">
             <i class="fa-solid fa-circle-info me-2"></i>This digital surface twin does not have properties.

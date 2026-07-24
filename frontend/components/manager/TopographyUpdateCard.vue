@@ -8,7 +8,6 @@ import {
     BAlert,
     BButton,
     BButtonGroup,
-    BCard,
     BFormCheckbox,
     BFormInput,
     BFormSelect,
@@ -28,6 +27,7 @@ import Attachments from '@/components/manager/Attachments.vue';
 import Thumbnail from "@/components/manager/Thumbnail.vue";
 import TipTapEditor from "@/components/manager/TipTapEditor.vue";
 import HelpTooltip from "@/components/ui/HelpTooltip.vue";
+import Toolbar from "@/components/ui/Toolbar.vue";
 import {paperSection} from "@/utils/references";
 
 const {show} = useToastController();
@@ -265,15 +265,17 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
 </script>
 
 <template>
-    <BCard class="mb-1"
-           :class="{ 'border-danger border-2': !batchEdit && isMetadataIncomplete, 'bg-secondary-subtle': selected }">
-        <template #header>
-            <!-- Action row: selection/channel on the left, actions on the right.
-                 Flex + wrap (no floats) so nothing collides when the card is narrow.
-                 Hidden entirely when the batch controls live in the modal header,
-                 so the tabs sit at the top of the header. -->
-            <div v-if="!(batchEdit && hideBatchControls)"
-                 class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div :class="enlarged
+                 ? ''
+                 : ['card card-body mb-1',
+                    { 'border-danger border-2': !batchEdit && isMetadataIncomplete,
+                      'bg-secondary-subtle': selected }]">
+        <!-- Action toolbar: a framed card when shown standalone (the topography
+             Details page); a bare row inside the measurement card otherwise.
+             Hidden entirely when the batch controls live in the modal header. -->
+        <Toolbar v-if="!(batchEdit && hideBatchControls)"
+                 :framed="enlarged"
+                 justify="between">
                 <div class="d-flex align-items-center gap-2">
                     <template v-if="!batchEdit && topography != null">
                         <BFormCheckbox v-if="selectable" v-model="selectedModel"
@@ -363,11 +365,10 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                         </BButton>
                     </BButtonGroup>
                 </div>
-            </div>
+            </Toolbar>
 
-            <!-- Tabs via bootstrap-vue-next BNav (card-header + tabs): renders
-                 nav-tabs.card-header-tabs so they sit flush against the card body. -->
-            <BNav tabs card-header small class="mt-2">
+            <!-- Sub-tabs for the metadata sections. -->
+            <BNav tabs small class="mb-2">
                 <BNavItem :active="currentTab === 'home'"
                           @click="currentTab = 'home'">
                     Home
@@ -390,7 +391,6 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                     Attachments
                 </BNavItem>
             </BNav>
-        </template>
         <div v-if="topography == null" class="tab-content">
             <BSpinner small></BSpinner>
             Please wait...
@@ -616,7 +616,7 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
             </div>
 
         </div>
-        <template #footer>
+        <div v-if="batchEdit || !enlarged" class="mt-2 pt-2 border-top">
             <TopographyBadges v-if="!batchEdit && !enlarged"
                               :topography="topography"></TopographyBadges>
             <small v-if="batchEdit">You are about to change the metadata of multiple
@@ -627,8 +627,8 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                 includes physical sizes, unit or the height scale and may differ between
                 the measurements you are
                 updating.</small>
-        </template>
-    </BCard>
+        </div>
+    </div>
     <BModal v-if="topography != null"
             v-model="_showDeleteModal"
             @ok="deleteTopography"

@@ -15,6 +15,7 @@ import {
 } from "bootstrap-vue-next";
 
 import TipTapEditor from "@/components/manager/TipTapEditor.vue";
+import Toolbar from "@/components/ui/Toolbar.vue";
 
 export default {
     name: "surface-description",
@@ -28,7 +29,8 @@ export default {
         BFormSelect,
         BFormTags,
         BSpinner,
-        TipTapEditor
+        TipTapEditor,
+        Toolbar
     },
     props: {
         category: String,
@@ -87,8 +89,7 @@ export default {
 
 <template>
     <div>
-        <div v-if="isEditable"
-             class="d-flex justify-content-end align-items-center border-bottom pb-2 mb-3">
+        <Toolbar v-if="isEditable">
             <BButtonGroup v-if="!_editing && !_saving"
                           size="sm">
                 <BButton variant="outline-secondary"
@@ -109,7 +110,7 @@ export default {
                     Save
                 </BButton>
             </BButtonGroup>
-        </div>
+        </Toolbar>
         <BAlert :model-value="_error !== null"
                 variant="danger">
             <i class="fa-solid fa-circle-exclamation me-2"></i>{{ _error?.message }}

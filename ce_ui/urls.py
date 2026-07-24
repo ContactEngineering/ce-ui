@@ -235,18 +235,10 @@ urlpatterns += [path("ui/", include((ui_urlpatterns, app_name)))]
 # Routes under the 'challenge/' prefix
 #
 challenge_urlpatterns = [
-    #
-    # User management
-    #
     path(
         r"",
-        view=views.ChallengeHomepageView.as_view(),
+        view=RedirectView.as_view(url="https://surfacetopographychallenge.org/"),
         name="homepage",
-    ),
-    path(
-        r"list-of-published-data/",
-        view=views.ChallengeListOfPublishedDataView.as_view(),
-        name="list-of-published-data",
     ),
 ]
 
