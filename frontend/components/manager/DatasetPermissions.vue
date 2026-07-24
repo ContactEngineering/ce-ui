@@ -73,7 +73,7 @@ function addUser(user) {
             <BButtonGroup
                 v-if="!isEditing && !isSaving"
                 size="sm">
-                <BButton variant="outline-secondary"
+                <BButton variant="primary"
                          @click="savedPermissions = JSON.parse(JSON.stringify(selfPermissions)); isEditing = true">
                     <i class="fa fa-pen me-1"></i>Edit
                 </BButton>

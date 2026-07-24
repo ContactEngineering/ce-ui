@@ -67,6 +67,13 @@ const nbSuccess = computed(() => {
     return countTaskStates(analyses.value, ['su']);
 });
 
+// Number of tasks that are not yet finished (pending, started or not-yet-run).
+// While any of these remain we are still legitimately "waiting"; once none
+// remain and there are still no successes, every task has failed.
+const nbUnfinished = computed(() => {
+    return countTaskStates(analyses.value, ['pe', 'st', 'no']);
+});
+
 </script>
 
 <template>
@@ -113,8 +120,18 @@ const nbSuccess = computed(() => {
         </template>
         <LoadingIndicator v-if="analyses == null"/>
 
-        <LoadingIndicator v-if="analyses != null && analyses.length > 0 && nbSuccess == 0"
+        <LoadingIndicator v-if="analyses != null && analyses.length > 0 && nbSuccess == 0 && nbUnfinished > 0"
                           message="Waiting for a first analysis task to complete..."/>
+
+        <div v-if="analyses != null && analyses.length > 0 && nbSuccess == 0 && nbUnfinished == 0"
+             class="tab-content">
+            <div class="alert alert-danger">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>All analysis
+                tasks for this workflow failed, so there is nothing to display.
+                Open the task status (the list icon above) for the error details,
+                or use the refresh button to try again.
+            </div>
+        </div>
 
         <div v-if="analyses !== null && analyses.length > 0" class="tab-content">
             <div :class="['alert', message.alertClass]" v-for="message in messages">

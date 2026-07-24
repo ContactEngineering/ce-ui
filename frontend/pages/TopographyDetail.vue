@@ -98,7 +98,7 @@ async function forceInspect() {
     } catch (error) {
         show?.({
             props: {
-                title: "Failed to create zoomable image",
+                title: "Failed to retry processing",
                 body: error,
                 variant: "danger"
             }
@@ -148,6 +148,13 @@ const base64Subjects = computed(() => {
                                 Retry processing
                             </BButton>
                         </BAlert>
+                        <!-- Still processing (pending / started / not yet run):
+                             show a progress state rather than the plot, which
+                             would fail to load the not-yet-available data. -->
+                        <LoadingIndicator
+                            v-else-if="_topography.task_state !== 'su'"
+                            message="This measurement is being processed. Reload the page to check for updates."/>
+                        <!-- Processing succeeded: show the visualization. -->
                         <template v-else>
                             <BAlert variant="warning"
                                     :show="_topography.deepzoom === null && _topography.size_y !== null">

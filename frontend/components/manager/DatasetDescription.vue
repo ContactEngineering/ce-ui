@@ -92,7 +92,7 @@ export default {
         <Toolbar v-if="isEditable">
             <BButtonGroup v-if="!_editing && !_saving"
                           size="sm">
-                <BButton variant="outline-secondary"
+                <BButton variant="primary"
                          @click="_savedName = `${_name}`; _savedDescription = `${_description}`; _editing = true">
                     <i class="fa fa-pen me-1"></i>Edit
                 </BButton>

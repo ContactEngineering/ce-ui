@@ -169,7 +169,7 @@ propertyCount.value = Object.keys(properties.value).length // Update the propert
 <template>
     <div>
         <Toolbar v-if="isEditable">
-            <BButton size="sm" v-if="!_isEditing" @click="enterEditMode" variant="outline-secondary">
+            <BButton size="sm" v-if="!_isEditing" @click="enterEditMode" variant="primary">
                 <i class="fa fa-pen me-1"></i>Edit
             </BButton>
             <BButtonGroup v-else size="sm">
