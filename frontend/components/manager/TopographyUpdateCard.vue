@@ -21,6 +21,7 @@ import {
 
 import {subjectsToBase64} from "@/utils/api";
 import {filterTopographyForPatchRequest} from "@/utils/topography";
+import {formatSignificant} from "@/utils/formatting";
 
 import TopographyBadges from "@/components/manager/TopographyBadges.vue";
 import Attachments from '@/components/manager/Attachments.vue';
@@ -281,13 +282,19 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                                        :disabled="_editing"
                                        size="sm">
                         </BFormCheckbox>
-                        <BFormSelect
-                            v-if="topography.channel_names != null && topography.channel_names.length > 0"
-                            :options="channelOptions"
-                            v-model="topography.data_source"
-                            :disabled="!_editing"
-                            size="sm">
-                        </BFormSelect>
+                        <template
+                            v-if="topography.channel_names != null && topography.channel_names.length > 0">
+                            <BFormSelect
+                                :options="channelOptions"
+                                v-model="topography.data_source"
+                                :disabled="!_editing"
+                                size="sm">
+                            </BFormSelect>
+                            <HelpTooltip
+                                icon="fa-solid fa-circle-question"
+                                label="What is a data channel?"
+                                text="A measurement file can contain several data channels — for example height, deflection/error, phase, or separate forward and backward scans. This selects which channel provides the surface-height data for this measurement."/>
+                        </template>
                     </template>
                     <div v-if="batchEdit && !hideBatchControls" class="fs-5 fw-bold">
                         Batch edit
@@ -440,13 +447,25 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                                 <HelpTooltip
                                     text="The real-world extent of the scanned area (width × height, or length for a line scan). This sets the length scale for every analysis. It is read from the data file when available."/>
                             </label>
-                            <div class="input-group mb-1">
+                            <!-- Not editing: show the size rounded (~4 significant
+                                 figures) in the natural unit provided by the API. -->
+                            <div v-if="!_editing" class="form-control-plaintext py-0">
+                                <template v-if="topography.size_x != null">
+                                    {{ formatSignificant(topography.size_x) }}<template
+                                        v-if="topography.size_y != null"> &times;
+                                        {{ formatSignificant(topography.size_y) }}</template>
+                                    {{ topography.unit }}
+                                </template>
+                                <span v-else class="text-muted">Not set</span>
+                            </div>
+                            <!-- Editing: show the full-precision value for editing. -->
+                            <div v-else class="input-group mb-1">
                                 <BFormInput id="input-physical-size"
                                             type="number"
                                             step="any"
                                             :class="highlightInput('size_x')"
                                             v-model="topography.size_x"
-                                            :disabled="!_editing || !topography.size_editable">
+                                            :disabled="!topography.size_editable">
                                 </BFormInput>
                                 <span
                                     v-if="batchEdit || topography.resolution_y != null"
@@ -459,13 +478,13 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                                     step="any"
                                     :class="highlightInput('size_y')"
                                     v-model="topography.size_y"
-                                    :disabled="!_editing || !topography.size_editable">
+                                    :disabled="!topography.size_editable">
                                 </BFormInput>
                                 <BFormSelect class="unit-select"
                                                 :options="_units"
                                                 v-model="topography.unit"
                                                 :class="highlightInput('unit')"
-                                                :disabled="!_editing || !topography.unit_editable">
+                                                :disabled="!topography.unit_editable">
                                 </BFormSelect>
                             </div>
                             <small v-if="batchEdit">

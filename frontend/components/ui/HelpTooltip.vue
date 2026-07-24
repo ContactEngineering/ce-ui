@@ -20,7 +20,9 @@ defineProps({
     // Popover placement relative to the icon.
     placement: { type: String, default: "top" },
     // Accessible label for the trigger.
-    label: { type: String, default: "More information" }
+    label: { type: String, default: "More information" },
+    // FontAwesome classes for the trigger icon (e.g. a question mark).
+    icon: { type: String, default: "fa-solid fa-circle-info" }
 });
 </script>
 
@@ -31,7 +33,7 @@ defineProps({
                   role="button"
                   tabindex="0"
                   :aria-label="label">
-                <i class="fa-solid fa-circle-info"></i>
+                <i :class="icon"></i>
             </span>
         </template>
         <div v-if="text">{{ text }}</div>

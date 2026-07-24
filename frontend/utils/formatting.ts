@@ -72,6 +72,27 @@ export function prettyBytes(size: number): string {
 }
 
 /**
+ * Format a number rounded to `significantDigits` significant figures, dropping
+ * trailing zeros and never using exponential notation. Used to show a physical
+ * size compactly when not editing, e.g. 9.9999999 => "10", 6.3062809 => "6.306".
+ *
+ * @param value The number to format.
+ * @param significantDigits Number of significant figures (default 4).
+ * @returns The formatted number as a string.
+ */
+export function formatSignificant(value: number, significantDigits: number = 4): string {
+    if (value == null || typeof value !== "number" || isNaN(value) || !isFinite(value)) {
+        return String(value);
+    }
+    if (value === 0) {
+        return "0";
+    }
+    // toPrecision may yield exponential form; parseFloat converts back to a
+    // plain decimal number and drops trailing zeros.
+    return `${parseFloat(value.toPrecision(significantDigits))}`;
+}
+
+/**
  * Format a date-time string into a human-readable local date-time string.
  *
  * @param dateTimeString The date-time string to be formatted.
