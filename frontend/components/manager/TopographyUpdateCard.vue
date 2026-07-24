@@ -305,13 +305,13 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                         v-if="!batchEdit && topography != null && !_editing && !_saving && !saving && !enlarged"
                         size="sm">
                         <BButton v-if="!selected"
-                                 variant="light"
+                                 variant="primary"
                                  title="Open this measurement in full view"
                                  :href="`/ui/topography/${topography.id}/`">
                             <i class="fa fa-expand"></i>
                         </BButton>
                         <BButton v-if="selected"
-                                 variant="outline-secondary"
+                                 variant="primary"
                                  disabled>
                             <i class="fa fa-expand"></i>
                         </BButton>
@@ -320,25 +320,25 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                         v-if="!batchEdit && topography != null && !_editing && !_saving && !saving"
                         size="sm">
                         <BButton v-if="!disabled"
-                                 variant="light"
+                                 variant="primary"
                                  title="Edit metadata"
                                  :disabled="selected"
                                  @click="_savedTopography = cloneDeep(topography); _editing = true">
                             <i class="fa fa-pen"></i>
                         </BButton>
                         <BButton v-if="!enlarged && !selected"
-                                 variant="light"
+                                 variant="primary"
                                  title="Download the original data file"
                                  :href="topography.datafile?.file">
                             <i class="fa fa-download"></i>
                         </BButton>
                         <BButton v-if="!disabled && selected"
-                                 variant="light"
+                                 variant="primary"
                                  disabled>
                             <i class="fa fa-download"></i>
                         </BButton>
                         <BButton v-if="!disabled"
-                                 variant="light"
+                                 variant="primary"
                                  title="Re-inspect the data file (re-read metadata and regenerate previews)"
                                  :disabled="selected">
                             <i class="fa fa-refresh"
@@ -346,7 +346,7 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                         </BButton>
                         <BButton v-if="!disabled && !enlarged"
                                  :disabled="selected"
-                                 variant="light"
+                                 variant="danger"
                                  title="Delete this measurement"
                                  @click="_showDeleteModal = true">
                             <i class="fa fa-trash"></i>
@@ -365,7 +365,7 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                         </BButton>
                     </BButtonGroup>
                     <BButtonGroup v-if="!batchEdit" size="sm">
-                        <BButton variant="light"
+                        <BButton variant="primary"
                                  :href="`/ui/analysis-list/?subjects=${subjectsToBase64({topography: [topography.id]})}`">
                             Analyze
                         </BButton>

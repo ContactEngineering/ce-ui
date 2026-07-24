@@ -131,15 +131,6 @@ watch(() => analysis.value, () => {
 <template>
     <tr>
         <td>
-            <ProgressIndicator
-                :value="analysis.task_progress == null ? 0 : analysis.task_progress"
-                :state="analysis.task_state">
-            </ProgressIndicator>
-        </td>
-        <td v-if="analysis == null">
-            <p>Fetching analysis status, please wait...</p>
-        </td>
-        <td v-if="analysis != null">
             <div v-if="_function == null || _subject == null">
                 <div class="spinner"></div>
                 Retrieving function information...
@@ -173,10 +164,22 @@ watch(() => analysis.value, () => {
                 {{ startTimePretty }}</template>
                 and is currently running.
             </div>
+            <!-- Wide progress bar underneath the task description. -->
+            <ProgressIndicator
+                class="mt-2"
+                :value="analysis.task_progress == null ? 0 : analysis.task_progress"
+                :state="analysis.task_state">
+            </ProgressIndicator>
         </td>
-        <td>
-            <BButton @click="renew">
-                Renew
+        <td class="align-middle text-end" style="width:120px">
+            <BButton variant="outline-primary"
+                     size="sm"
+                     :disabled="analysis.task_state === 'pe' || analysis.task_state === 'st'"
+                     :title="analysis.task_state === 'pe' || analysis.task_state === 'st'
+                             ? 'This task is already queued or running'
+                             : 'Discard the result and run this analysis again'"
+                     @click="renew">
+                <i class="fa fa-rotate-right me-1"></i>Renew
             </BButton>
         </td>
     </tr>

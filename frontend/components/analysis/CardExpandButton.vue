@@ -13,7 +13,7 @@ const props = defineProps({
 </script>
 
 <template>
-    <BButton variant="light"
+    <BButton variant="primary"
              size="sm">
         <a :href="`${detailUrl}${functionName}/?subjects=${subjectsToBase64(subjects)}`"
            class="text-reset">

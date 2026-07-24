@@ -81,7 +81,7 @@ const nbUnfinished = computed(() => {
     <div>
         <Toolbar justify="between">
             <div class="d-flex align-items-center gap-2">
-                <BDropdown variant="light" size="sm">
+                <BDropdown variant="primary" size="sm">
                     <template #button-content>
                         <i class="fa fa-bars"></i>
                     </template>
@@ -107,7 +107,7 @@ const nbUnfinished = computed(() => {
                              @someTasksFinished="(nbRunningOrPending) => emit('someTasksFinished', nbRunningOrPending)">
                 </TasksButton>
                 <BButton v-if="analyses !== null"
-                         variant="light"
+                         variant="primary"
                          size="sm"
                          @click="emit('refreshButtonClicked')">
                     <i class="fa fa-redo"></i>

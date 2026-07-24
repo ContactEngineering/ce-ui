@@ -65,7 +65,7 @@ function addUser(user) {
                           class="me-2"
                           size="sm">
                 <BButton v-if="isEditing"
-                         variant="outline-secondary"
+                         variant="primary"
                          @click="searchUser = !searchUser">
                     Add user (share dataset)
                 </BButton>

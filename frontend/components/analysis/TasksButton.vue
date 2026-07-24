@@ -49,7 +49,7 @@ const nbFailed = computed(() => {
 </script>
 
 <template>
-    <BButton variant="light"
+    <BButton variant="primary"
              size="sm"
              @click="_modalVisible = !_modalVisible">
         <span v-if="nbRunningOrPending > 0" class="spinner"></span>
