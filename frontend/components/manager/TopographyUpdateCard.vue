@@ -267,14 +267,13 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
 <template>
     <div :class="enlarged
                  ? ''
-                 : ['card card-body mb-1',
-                    { 'border-danger border-2': !batchEdit && isMetadataIncomplete,
+                 : ['mb-1 p-2 rounded',
+                    { 'border border-danger border-2': !batchEdit && isMetadataIncomplete,
                       'bg-secondary-subtle': selected }]">
         <!-- Action toolbar: a framed card when shown standalone (the topography
              Details page); a bare row inside the measurement card otherwise.
              Hidden entirely when the batch controls live in the modal header. -->
         <Toolbar v-if="!(batchEdit && hideBatchControls)"
-                 :framed="enlarged"
                  justify="between">
                 <div class="d-flex align-items-center gap-2">
                     <template v-if="!batchEdit && topography != null">
