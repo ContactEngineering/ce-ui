@@ -115,10 +115,6 @@ const stats = computed(() => [
         <div v-else class="row g-3 mb-4">
             <div class="col-md-6">
                 <div class="example-card h-100">
-                    <a href="/ui/analysis-detail/topobank_statistics.power_spectral_density/?subjects=eyJzdXJmYWNlIjpbMTg4OV19">
-                        <img class="example-img" src="/static/images/screenshot_psd.jpg"
-                             alt="Power-spectral density example"/>
-                    </a>
                     <div class="example-body">
                         <h2 class="h5">Statistical surface characterization</h2>
                         <p class="text-secondary mb-3">
@@ -134,11 +130,6 @@ const stats = computed(() => [
             </div>
             <div class="col-md-6">
                 <div class="example-card h-100">
-                    <a href="/ui/analysis-detail/topobank_contact.boundary_element_method/?subjects=eyJ0b3BvZ3JhcGh5IjpbMTk1OF19">
-                        <img class="example-img"
-                             src="/static/images/screenshot_contact_mechanics.jpg"
-                             alt="Contact mechanics example"/>
-                    </a>
                     <div class="example-body">
                         <h2 class="h5">Contact mechanics</h2>
                         <p class="text-secondary mb-3">
@@ -293,14 +284,6 @@ a:hover > .stat-tile {
 .example-card:hover {
     box-shadow: 0 .5rem 1.25rem rgba(37, 49, 34, .12);
     transform: translateY(-2px);
-}
-
-.example-img {
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
-    display: block;
-    border-bottom: 1px solid var(--bs-border-color);
 }
 
 .example-body {

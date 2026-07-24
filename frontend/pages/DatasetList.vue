@@ -2,15 +2,13 @@
 
 import axios from "axios";
 
-import {computed, onBeforeUnmount, onMounted, ref} from "vue";
+import {computed, onBeforeUnmount, onMounted, ref, watch} from "vue";
 
 import {
     BButton,
     BButtonToolbar,
     BFormGroup,
-    BFormInput,
     BFormSelect,
-    BInputGroup,
     BListGroup,
     BOverlay,
     BPagination,
@@ -21,7 +19,8 @@ import {useDatasetSelectionStore} from "@/stores/datasetSelection";
 
 import SelectionOffcanvas from "@/components/layout/SelectionOffcanvas.vue";
 import DatasetListRow from '@/components/manager/DatasetListRow.vue';
-import SearchHelpModal from '@/components/manager/SearchHelpModal.vue';
+import HelpTooltip from '@/components/ui/HelpTooltip.vue';
+import SearchTokenInput from '@/components/ui/SearchTokenInput.vue';
 
 const {show} = useToastController();
 const selection = useDatasetSelectionStore();
@@ -71,7 +70,8 @@ const _nbDatasetsOnCurrentPage = ref<number>(null);
 const _orderBy = ref(orderByFilterChoices[0].value);
 const _pageSize = ref<number>(props.pageSize);
 const _searchTerm = ref<string>(props.searchTerm);
-const _searchInfoModalVisible = ref<boolean>(false);
+// Structured search filters (chips), e.g. [{type: 'author', value: 'Lars'}]
+const _searchTokens = ref<any[]>([]);
 const _selectionOffcanvasVisible = ref<boolean>(false);
 const _sharingStatus = ref(sharingStatusFilterChoices[0].value);
 
@@ -84,19 +84,36 @@ let searchDelayTimer = null;
 // Sequence token to discard stale (out-of-order) responses
 let _requestSequence = 0;
 
+// Controller to cancel the in-flight request when a newer one supersedes it
+let _abortController: AbortController | null = null;
+
+// Minimum length of the free search text before it is sent to the server
+const MIN_SEARCH_LENGTH = 2;
+
 function getDatasets(offset: number = 0) {
     searchDelayTimer = null;
     // Capture the token for this request; responses from superseded requests are ignored.
     const requestId = ++_requestSequence;
+    // Cancel any request still in flight; its response would be discarded anyway
+    if (_abortController != null) {
+        _abortController.abort();
+    }
+    _abortController = new AbortController();
     _isLoading.value = true;
     _currentPage.value = offset / _pageSize.value + 1;
     let queryUrl = `${props.apiUrl}?offset=${offset}&limit=${_pageSize.value}`;
     queryUrl += `&order_by=${_orderBy.value}`;
     queryUrl += `&sharing_status=${_sharingStatus.value}`;
-    if (_searchTerm.value != null) {
+    // Structured filters (chips) become dedicated query parameters...
+    for (const token of _searchTokens.value) {
+        queryUrl += `&${token.type}=${encodeURIComponent(token.value)}`;
+    }
+    // ...while remaining free text goes through full-text search (only once it
+    // is long enough to be meaningful)
+    if (_searchTerm.value != null && _searchTerm.value.trim().length >= MIN_SEARCH_LENGTH) {
         queryUrl += `&search=${encodeURIComponent(_searchTerm.value)}`;
     }
-    axios.get(queryUrl).then(response => {
+    axios.get(queryUrl, {signal: _abortController.signal}).then(response => {
         // Ignore this response if a newer request has been issued in the meantime
         if (requestId !== _requestSequence) {
             return;
@@ -109,6 +126,9 @@ function getDatasets(offset: number = 0) {
         _isLoading.value = false;
     }).catch(error => {
         if (requestId !== _requestSequence) {
+            return;
+        }
+        if (axios.isCancel(error)) {
             return;
         }
         show?.({
@@ -162,18 +182,10 @@ const pageSize = computed({
     }
 });
 
-const searchTerm = computed({
-    get() {
-        if (_searchTerm.value.length === 0) {
-            return null;
-        }
-        return _searchTerm.value;
-    },
-    set(value) {
-        _searchTerm.value = value;
-        clearTimeout(searchDelayTimer);
-        searchDelayTimer = setTimeout(getDatasets, props.searchDelay);
-    }
+// Re-query (debounced) whenever the free text or the filter chips change
+watch([_searchTerm, _searchTokens], () => {
+    clearTimeout(searchDelayTimer);
+    searchDelayTimer = setTimeout(getDatasets, props.searchDelay);
 });
 
 function createSurface() {
@@ -200,17 +212,31 @@ function sharingStatusChanged() {
     <div class="row">
         <div class="col-8">
             <BFormGroup class="mb-2"
-                        description="Search for digital surface twins by name or tags">
-                <BInputGroup>
-                    <BFormInput v-model="searchTerm"
-                                placeholder="Type to start searching..."
-                                type="search"/>
-                    <BButton title="Tips for searching"
-                             variant="light"
-                             @click="_searchInfoModalVisible = true">
-                        <i aria-hidden="true" class="fa fa-info-circle"></i>
-                    </BButton>
-                </BInputGroup>
+                        description="Search for digital surface twins by name or tags. Type author:, tag: or name: to filter specific fields.">
+                <div class="d-flex align-items-center gap-2">
+                    <SearchTokenInput v-model:tokens="_searchTokens"
+                                      v-model:text="_searchTerm"/>
+                    <HelpTooltip label="Tips for searching"
+                                 placement="bottom">
+                        <p class="mb-1">
+                            Searches names, descriptions, tags and authors of
+                            datasets and their measurements.
+                        </p>
+                        <p class="mb-1">
+                            <b>Filters:</b> type <code>author:</code>,
+                            <code>tag:</code> or <code>name:</code> — the prefix
+                            becomes a chip and suggestions appear while you type.
+                            Confirm with Enter, remove with &times; or Backspace.
+                        </p>
+                        <p class="mb-0">
+                            <b>Expressions:</b> words combine with AND;
+                            <code>OR</code> for alternatives,
+                            <code>-word</code> to exclude,
+                            <code>"exact phrase"</code> to quote. Example:
+                            <code>"AFM surface" imported -material</code>
+                        </p>
+                    </HelpTooltip>
+                </div>
             </BFormGroup>
         </div>
         <div class="col-4">
@@ -274,7 +300,6 @@ function sharingStatusChanged() {
             {{ _nbDatasets }}.
         </div>
     </BOverlay>
-    <SearchHelpModal v-model:visible="_searchInfoModalVisible"></SearchHelpModal>
     <SelectionOffcanvas
         v-model:visible="_selectionOffcanvasVisible"
     ></SelectionOffcanvas>
