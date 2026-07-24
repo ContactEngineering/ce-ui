@@ -315,11 +315,12 @@ const measurementCount = computed(() => {
                         </Toolbar>
                         <DropZone v-if="isEditable" @files-dropped="filesDropped">
                         </DropZone>
-                        <!-- Left accent bar (primary) visually separates each
-                             measurement. -->
+                        <!-- Left accent bar (primary) plus alternating row
+                             background visually separate each measurement. -->
                         <div v-for="(topography, index) in _topographies"
                              :key="index"
-                             class="border-start border-primary border-4 ps-3 mb-2">
+                             class="border-start border-primary border-4 ps-3 mb-2"
+                             :class="index % 2 === 0 ? 'bg-body' : 'bg-body-tertiary'">
                             <TopographyCard v-if="topography != null"
                                             v-model:selected="_selected[index]"
                                             v-model:topography="_topographies[index]"
