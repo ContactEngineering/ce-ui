@@ -164,6 +164,14 @@ function requestDzi() {
             return;
         }
         axios.get(inventory[dziJson].file).then(response => {
+            // The component may have been unmounted (e.g. the panel was hidden
+            // and re-created for a new selection) while these requests were in
+            // flight. Creating the viewer now would append to a detached/null
+            // element and throw "Cannot read properties of null (appendChild)".
+            if (!isMounted || _openSeadragonElement.value == null) {
+                return;
+            }
+
             // DZI metadata
             const meta = response.data;
 
