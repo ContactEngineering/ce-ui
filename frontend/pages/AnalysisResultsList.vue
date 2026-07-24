@@ -42,6 +42,20 @@ const subjectsDict = computed(() => {
     return getSubjectsDict();
 });
 
+// Position of each card among the *visible* (selected) cards, so the
+// alternating background stripes the shown cards correctly even when some
+// workflows are hidden.
+const visibleIndex = computed(() => {
+    const index = {};
+    let i = 0;
+    for (const card of _cards.value) {
+        if (analysis.isSelected(card.name)) {
+            index[card.name] = i++;
+        }
+    }
+    return index;
+});
+
 onMounted(() => {
     let queryParams = '';
     axios.get(`${props.apiRegistryUrl}${queryParams}`).then(response => {
@@ -69,14 +83,19 @@ onMounted(() => {
         <div v-for="card in _cards"
              :key="card.name"
              :class="{ 'col-lg-6': true, 'mb-4': true, 'd-none': !analysis.isSelected(card.name) }">
-            <component :is="`${card.visualization_type}-card`"
-                       v-if="analysis.isSelected(card.name)"
-                       :enlarged="false"
-                       :function-name="card.name"
-                       :description="card.description"
-                       :reference-url="card.reference_url"
-                       :subjects="subjectsDict">
-            </component>
+            <!-- Left accent bar (primary) plus alternating background visually
+                 separate each analysis card, matching the measurement list. -->
+            <div class="border-start border-primary border-4 ps-3 h-100"
+                 :class="visibleIndex[card.name] % 2 === 0 ? 'bg-body' : 'bg-body-tertiary'">
+                <component :is="`${card.visualization_type}-card`"
+                           v-if="analysis.isSelected(card.name)"
+                           :enlarged="false"
+                           :function-name="card.name"
+                           :description="card.description"
+                           :reference-url="card.reference_url"
+                           :subjects="subjectsDict">
+                </component>
+            </div>
         </div>
     </div>
 </template>

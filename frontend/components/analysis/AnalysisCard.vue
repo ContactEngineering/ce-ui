@@ -2,7 +2,7 @@
 
 import {computed, ref} from "vue";
 
-import {BButton, BCard, BDropdown, BDropdownItem, BSpinner} from 'bootstrap-vue-next';
+import {BButton, BDropdown, BDropdownItem, BSpinner} from 'bootstrap-vue-next';
 
 import {countTaskStates} from '@/utils/tasks';
 
@@ -11,6 +11,7 @@ import CardExpandButton from '@/components/analysis/CardExpandButton.vue';
 import TasksButton from '@/components/analysis/TasksButton.vue';
 import HelpTooltip from '@/components/ui/HelpTooltip.vue';
 import LoadingIndicator from '@/components/ui/LoadingIndicator.vue';
+import Toolbar from '@/components/ui/Toolbar.vue';
 
 const analyses = defineModel('analyses', {required: true});
 
@@ -77,9 +78,29 @@ const nbUnfinished = computed(() => {
 </script>
 
 <template>
-    <BCard :header="title">
-        <template #header>
-            <div class="btn-group btn-group-sm float-end">
+    <div>
+        <Toolbar justify="between">
+            <div class="d-flex align-items-center gap-2">
+                <BDropdown variant="light" size="sm">
+                    <template #button-content>
+                        <i class="fa fa-bars"></i>
+                    </template>
+                    <BDropdownItem v-if="dois != null" @click="_bibliographyVisible = true">
+                        Bibliography...
+                    </BDropdownItem>
+                    <slot name="dropdowns"></slot>
+                </BDropdown>
+                <span class="align-middle lead">
+                    <b>{{ title }}</b>
+                    <HelpTooltip v-if="description"
+                                 class="ms-2 fs-6 align-middle"
+                                 :text="description"
+                                 :link-url="referenceUrl"
+                                 link-text="Learn more in the paper"/>
+                    <BSpinner class="ms-2" v-if="showLoadingSpinner" small/>
+                </span>
+            </div>
+            <div class="btn-group btn-group-sm">
                 <TasksButton v-if="analyses !== null"
                              v-model:analyses="analyses"
                              @allTasksFinished="(nbRunningOrPending) => emit('allTasksFinished', nbRunningOrPending)"
@@ -88,36 +109,17 @@ const nbUnfinished = computed(() => {
                 <BButton v-if="analyses !== null"
                          variant="light"
                          size="sm"
-                         @click="emit('refreshButtonClicked')"
-                         class="float-end ms-1">
+                         @click="emit('refreshButtonClicked')">
                     <i class="fa fa-redo"></i>
                 </BButton>
                 <CardExpandButton v-if="!enlarged"
                                   :detail-url="detailUrl"
                                   :function-name="functionName"
-                                  :subjects="subjects"
-                                  class="float-end">
+                                  :subjects="subjects">
                 </CardExpandButton>
             </div>
-            <BDropdown variant="light" size="sm" class="float-start me-2">
-                <template #button-content>
-                    <i class="fa fa-bars"></i>
-                </template>
-                <BDropdownItem v-if="dois != null" @click="_bibliographyVisible = true">
-                    Bibliography...
-                </BDropdownItem>
-                <slot name="dropdowns"></slot>
-            </BDropdown>
-            <span class="align-middle lead">
-                <b>{{ title }}</b>
-                <HelpTooltip v-if="description"
-                             class="ms-2 fs-6 align-middle"
-                             :text="description"
-                             :link-url="referenceUrl"
-                             link-text="Learn more in the paper"/>
-                <BSpinner class="ms-2" v-if="showLoadingSpinner" small/>
-            </span>
-        </template>
+        </Toolbar>
+
         <LoadingIndicator v-if="analyses == null"/>
 
         <LoadingIndicator v-if="analyses != null && analyses.length > 0 && nbSuccess == 0 && nbUnfinished > 0"
@@ -148,6 +150,6 @@ const nbUnfinished = computed(() => {
         <div v-if="nbSuccess > 0" class="tab-content">
             <slot></slot>
         </div>
-    </BCard>
+    </div>
     <BibliographyModal v-if="dois != null" v-model:visible="_bibliographyVisible" :dois="dois"></BibliographyModal>
 </template>

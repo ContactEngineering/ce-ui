@@ -31,13 +31,15 @@ const subjects = computed(() => {
 <template>
     <div class="row">
         <div class="col-lg-12 mb-4">
-            <component :is="`${visualizationType}-card`"
-                       :enlarged="true"
-                       :functionName="functionName"
-                       :description="description"
-                       :reference-url="referenceUrl"
-                       :subjects="subjects">
-            </component>
+            <div class="border-start border-primary border-4 ps-3">
+                <component :is="`${visualizationType}-card`"
+                           :enlarged="true"
+                           :functionName="functionName"
+                           :description="description"
+                           :reference-url="referenceUrl"
+                           :subjects="subjects">
+                </component>
+            </div>
         </div>
     </div>
 </template>
