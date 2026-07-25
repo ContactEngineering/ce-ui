@@ -263,6 +263,27 @@ const instrumentParametersResolutionUnit = instrumentParameterModel('resolution'
 const instrumentParametersTipRadiusValue = instrumentParameterModel('tip_radius', 'value');
 const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius', 'unit');
 
+// Physical sizes are shown in the same (disabled) form controls when not
+// editing, but cropped to ~4 significant figures; the full-precision value
+// appears once editing starts.
+function croppedSizeModel(field: string) {
+    return computed({
+        get() {
+            const value = props.topography?.[field];
+            if (value == null || _editing.value) {
+                return value;
+            }
+            return parseFloat(formatSignificant(value));
+        },
+        set(value) {
+            props.topography[field] = value;
+        }
+    });
+}
+
+const sizeXModel = croppedSizeModel('size_x');
+const sizeYModel = croppedSizeModel('size_y');
+
 </script>
 
 <template>
@@ -447,25 +468,17 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                                 <HelpTooltip
                                     text="The real-world extent of the scanned area (width × height, or length for a line scan). This sets the length scale for every analysis. It is read from the data file when available."/>
                             </label>
-                            <!-- Not editing: show the size rounded (~4 significant
-                                 figures) in the natural unit provided by the API. -->
-                            <div v-if="!_editing" class="form-control-plaintext py-0">
-                                <template v-if="topography.size_x != null">
-                                    {{ formatSignificant(topography.size_x) }}<template
-                                        v-if="topography.size_y != null"> &times;
-                                        {{ formatSignificant(topography.size_y) }}</template>
-                                    {{ topography.unit }}
-                                </template>
-                                <span v-else class="text-muted">Not set</span>
-                            </div>
-                            <!-- Editing: show the full-precision value for editing. -->
-                            <div v-else class="input-group mb-1">
+                            <!-- Same controls whether viewing or editing; the
+                                 value is cropped (~4 significant figures) in
+                                 the disabled state and full-precision while
+                                 editing. -->
+                            <div class="input-group mb-1">
                                 <BFormInput id="input-physical-size"
                                             type="number"
                                             step="any"
                                             :class="highlightInput('size_x')"
-                                            v-model="topography.size_x"
-                                            :disabled="!topography.size_editable">
+                                            v-model="sizeXModel"
+                                            :disabled="!_editing || !topography.size_editable">
                                 </BFormInput>
                                 <span
                                     v-if="batchEdit || topography.resolution_y != null"
@@ -477,14 +490,14 @@ const instrumentParametersTipRadiusUnit = instrumentParameterModel('tip_radius',
                                     type="number"
                                     step="any"
                                     :class="highlightInput('size_y')"
-                                    v-model="topography.size_y"
-                                    :disabled="!topography.size_editable">
+                                    v-model="sizeYModel"
+                                    :disabled="!_editing || !topography.size_editable">
                                 </BFormInput>
                                 <BFormSelect class="unit-select"
                                                 :options="_units"
                                                 v-model="topography.unit"
                                                 :class="highlightInput('unit')"
-                                                :disabled="!topography.unit_editable">
+                                                :disabled="!_editing || !topography.unit_editable">
                                 </BFormSelect>
                             </div>
                             <small v-if="batchEdit">
