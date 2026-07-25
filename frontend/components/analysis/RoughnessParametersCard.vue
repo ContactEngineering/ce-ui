@@ -69,8 +69,8 @@ const _columns = ref([
     },
     { data: "quantity", title: "Quantity" },
     { data: "from", title: "From" },
-    { data: "symbol", title: "<span title=\"Symbol according to ASME B46.1\">Sym. 🛈</span>" },
-    { data: "direction", title: "Direct." },
+    { data: "symbol", title: "Symbol" },
+    { data: "direction", title: "Direction" },
     {
         data: "value", title: "Value", render: function(x) {
             return formatExponential(x, 5);
