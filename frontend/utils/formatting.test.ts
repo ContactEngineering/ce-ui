@@ -1,6 +1,12 @@
 import {describe, expect, it} from "vitest";
 
-import {formatDateTime, formatExponential, prettyBytes, unicodeSuperscript} from "@/utils/formatting";
+import {
+    formatDateTime,
+    formatExponential,
+    preferExponentialLabels,
+    prettyBytes,
+    unicodeSuperscript
+} from "@/utils/formatting";
 
 describe("unicodeSuperscript", () => {
     it("converts digits and signs to superscript", () => {
@@ -49,6 +55,41 @@ describe("formatExponential", () => {
 
     it("rolls over to the next exponent when rounding up", () => {
         expect(formatExponential(999999, 2)).toBe("10⁶");
+    });
+});
+
+describe("preferExponentialLabels", () => {
+    // The label strings below are what Bokeh's BasicTickFormatter actually
+    // produces for these ticks, including its unicode minus sign.
+    it("keeps plain decimal labels untouched", () => {
+        expect(preferExponentialLabels([0, 25, 50, 75, 100], ["0", "25", "50", "75", "100"]))
+            .toEqual(["0", "25", "50", "75", "100"]);
+        expect(preferExponentialLabels([-50, 0, 50], ["−50", "0", "50"]))
+            .toEqual(["−50", "0", "50"]);
+        expect(preferExponentialLabels([0.25, 0.5], ["0.25", "0.5"]))
+            .toEqual(["0.25", "0.5"]);
+    });
+
+    it("replaces e-notation with powers of ten", () => {
+        expect(preferExponentialLabels([1e-6, 2e-6, 3e-6], ["1.000e−6", "2.000e−6", "3.000e−6"]))
+            .toEqual(["10⁻⁶", "2×10⁻⁶", "3×10⁻⁶"]);
+        expect(preferExponentialLabels([1e6, 2e6], ["1.000e+6", "2.000e+6"]))
+            .toEqual(["10⁶", "2×10⁶"]);
+    });
+
+    it("converts the whole set so one axis never mixes notations", () => {
+        // Bokeh applies one precision to the whole set, so a plain-looking
+        // label can sit beside an exponential one; both must be converted.
+        expect(preferExponentialLabels([1, 1e6], ["1", "1.000e+6"]))
+            .toEqual(["1", "10⁶"]);
+    });
+
+    it("recognises an upper-case exponent", () => {
+        expect(preferExponentialLabels([1e6], ["1E+6"])).toEqual(["10⁶"]);
+    });
+
+    it("handles an empty tick set", () => {
+        expect(preferExponentialLabels([], [])).toEqual([]);
     });
 });
 

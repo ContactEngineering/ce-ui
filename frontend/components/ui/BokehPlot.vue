@@ -11,7 +11,6 @@ import {computed, onBeforeUnmount, onMounted, ref, watch} from "vue";
 
 import {
     AjaxDataSource,
-    CustomJSTickFormatter,
     HoverTool,
     Legend,
     LegendItem,
@@ -30,7 +29,6 @@ import {
     BTabs
 } from "bootstrap-vue-next";
 
-import {formatExponential} from "@/utils/formatting";
 import {applyDefaultBokehStyle} from "@/utils/bokeh";
 import {
     assignElementColors,
@@ -299,21 +297,9 @@ function createFigures() {
             output_backend: props.outputBackend
         });
 
-        /* Change formatters for linear axes */
-        const exponentialFormatter = new CustomJSTickFormatter({
-            code: "return formatExponential(tick);",
-            args: {
-                formatExponential: formatExponential  // inject formatting function into local scope
-            }
-        });
-        if (xAxisType === "linear") {
-            figure.xaxis.formatter = exponentialFormatter;
-        }
-        if (yAxisType === "linear") {
-            figure.yaxis.formatter = exponentialFormatter;
-        }
-
-        /* This should become a Bokeh theme (supported in BokehJS with 3.0 - but I cannot find the `use_theme` method) */
+        /* This should become a Bokeh theme (supported in BokehJS with 3.0 - but I cannot find the `use_theme` method).
+           This also installs the tick formatters, which now cover log axes too: Bokeh renders whole decades as 10³ but
+           reverts to e-notation once a log axis spans less than a decade. */
         applyDefaultBokehStyle(figure);
 
         _bokehFigures.push({

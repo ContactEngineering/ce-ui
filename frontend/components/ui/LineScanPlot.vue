@@ -6,6 +6,7 @@ import {ColumnDataSource, Plotting} from "@bokeh/bokehjs";
 import {NetCDFReader} from 'netcdfjs';
 
 import {applyDefaultBokehStyle} from "@/utils/bokeh";
+import {maxAbsolute, rescaleLengthUnit} from "@/utils/units";
 
 const props = defineProps({
     topography: Object
@@ -24,9 +25,16 @@ onMounted(() => {
             const x = netcdfReader.getDataVariable('x');
             const heights = netcdfReader.getDataVariable('heights');
 
+            // Position and height are stored in the same unit but routinely
+            // differ by orders of magnitude — a scan micrometres long is often
+            // only nanometres tall — so each axis gets the unit that suits its
+            // own data and reads without an exponent.
+            const positionScale = rescaleLengthUnit(maxAbsolute(x), props.topography.unit);
+            const heightScale = rescaleLengthUnit(maxAbsolute(heights), props.topography.unit);
+
             const figure = new Plotting.figure({
-                x_axis_label: `Position (${props.topography.unit})`,
-                y_axis_label: `Height (${props.topography.unit})`,
+                x_axis_label: `Position (${positionScale.unit})`,
+                y_axis_label: `Height (${heightScale.unit})`,
                 output_backend: 'svg',
                 sizing_mode: 'stretch_width'
             });
@@ -35,10 +43,12 @@ onMounted(() => {
             applyDefaultBokehStyle(figure);
 
             // Construct data source
+            // `Array.from` rather than `map`, so scaling a typed integer array
+            // cannot silently truncate the result back to integers.
             const plot_source = new ColumnDataSource({
                 data: {
-                    x: x,
-                    heights: heights
+                    x: Array.from(x, (v: number) => v * positionScale.factor),
+                    heights: Array.from(heights, (v: number) => v * heightScale.factor)
                 }
             });
 

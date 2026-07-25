@@ -56,6 +56,27 @@ export function formatExponential(d: number, maxNumberOfDecimalPlaces: number = 
 }
 
 /**
+ * Choose the labels for one axis, given the labels its plain formatter
+ * produced.
+ *
+ * Bokeh formats ticks as plain decimals while they stay inside
+ * [10⁻³, 10⁵] and switches to e-notation (`1.0e-6`) outside it. Plain decimals
+ * are the more readable of the two and are left untouched; only the
+ * e-notation case is replaced by `formatExponential`.
+ *
+ * The decision is made for the whole tick set rather than per tick, so that a
+ * single axis never mixes the two notations.
+ *
+ * @param ticks The tick values.
+ * @param plainLabels The labels produced for them by Bokeh's own formatter.
+ * @returns The labels to display.
+ */
+export function preferExponentialLabels(ticks: number[], plainLabels: string[]): string[] {
+    const needsExponential = plainLabels.some(label => label.includes("e") || label.includes("E"));
+    return needsExponential ? ticks.map(tick => formatExponential(tick)) : plainLabels;
+}
+
+/**
  * Format bytes as human-readable text, e.g. 1.21 kB.
  *
  * @param size Number of bytes.
