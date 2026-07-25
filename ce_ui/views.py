@@ -385,6 +385,49 @@ class HomeView(AppView):
     vue_component = "Home"
 
 
+class StaffDashboardView(AppView):
+    """
+    Base for the staff-only dashboards.
+
+    Access is enforced by the `staff_member_required` decorator applied to the
+    route in `urls.py`, not here; this class only supplies the breadcrumb.
+    """
+
+    breadcrumb_title = None
+    breadcrumb_icon = None
+    breadcrumb_tooltip = None
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        breadcrumb.add_generic(
+            context,
+            {
+                "title": self.breadcrumb_title,
+                "icon": self.breadcrumb_icon,
+                "icon_style_prefix": "fas",
+                "href": self.request.path,
+                "active": True,
+                "login_required": True,
+                "tooltip": self.breadcrumb_tooltip,
+            },
+        )
+        return context
+
+
+class StaffUserDashboardView(StaffDashboardView):
+    vue_component = "StaffUserDashboard"
+    breadcrumb_title = "Users"
+    breadcrumb_icon = "users"
+    breadcrumb_tooltip = "All users registered on this instance"
+
+
+class StaffTaskDashboardView(StaffDashboardView):
+    vue_component = "StaffTaskDashboard"
+    breadcrumb_title = "Tasks"
+    breadcrumb_icon = "gears"
+    breadcrumb_tooltip = "Analysis tasks and Celery worker status"
+
+
 class FileFormatsView(AppView):
     """Overview of the file formats supported for topography upload.
 

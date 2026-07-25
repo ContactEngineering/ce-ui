@@ -9,6 +9,8 @@ import DatasetDetail from '@/pages/DatasetDetail.vue';
 import DatasetList from '@/pages/DatasetList.vue';
 import DatasetPublish from '@/pages/DatasetPublish.vue';
 import Home from '@/pages/Home.vue';
+import StaffTaskDashboard from '@/pages/StaffTaskDashboard.vue';
+import StaffUserDashboard from '@/pages/StaffUserDashboard.vue';
 import TopographyDetail from '@/pages/TopographyDetail.vue';
 
 /*
@@ -26,6 +28,8 @@ const pageComponents: { [name: string]: any } = {
     DatasetList: DatasetList,
     DatasetPublish: DatasetPublish,
     Home: Home,
+    StaffTaskDashboard: StaffTaskDashboard,
+    StaffUserDashboard: StaffUserDashboard,
     TopographyDetail: TopographyDetail,
 };
 

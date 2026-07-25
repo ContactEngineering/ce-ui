@@ -56,6 +56,16 @@ EMAIL_HOST = "localhost"
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-port
 EMAIL_PORT = 1025
 
+# ORCID
+# ------------------------------------------------------------------------------
+# Registered here as it is in `local` and `production`: without the provider
+# app, `app.html` cannot render (it builds the sign-in link with
+# `provider_login_url 'orcid'`), so no Vue page could be tested at all.
+INSTALLED_APPS.insert(  # noqa: F405
+    INSTALLED_APPS.index("allauth.socialaccount") + 1,  # noqa: F405
+    "allauth.socialaccount.providers.orcid",
+)
+
 # CELERY
 # ------------------------------------------------------------------------------
 # All celery tasks need to execute immediately because we want to run supplib

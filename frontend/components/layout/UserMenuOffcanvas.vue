@@ -46,6 +46,8 @@ const contactModal = ref(false);
         </template>
 
         <BNavbarNav v-if="isStaff" class="p-3 justify-content-end flex-grow-1">
+            <BNavItem href="/ui/staff/users/">User dashboard</BNavItem>
+            <BNavItem href="/ui/staff/tasks/">Task dashboard</BNavItem>
             <BNavItem :href="adminUrl">Admin interface</BNavItem>
             <BNavItem href="/watchman/dashboard/">Watchman dashboard</BNavItem>
             <BNavItem href="/watchman/">Watchman status (JSON)</BNavItem>

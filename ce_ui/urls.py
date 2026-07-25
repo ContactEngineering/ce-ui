@@ -5,6 +5,7 @@ import topobank_publication.urls
 import topobank_statistics.urls
 from django.conf import settings
 from django.contrib import admin
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.views import login_required
 from django.contrib.staticfiles import views as static_views
 from django.urls import include, path, re_path
@@ -86,6 +87,10 @@ urlpatterns = [
                 path(
                     "analysis/",
                     include("topobank_rest_api.analysis.urls", namespace="analysis"),
+                ),
+                path(
+                    "staff/",
+                    include("topobank_rest_api.staff.urls", namespace="staff"),
                 ),
             ]
         ),
@@ -227,6 +232,21 @@ ui_urlpatterns = [
         r"analysis-detail/<str:slug>/",
         view=views.AnalysisDetailView.as_view(),
         name="results-detail",
+    ),
+    #
+    # Staff dashboards. `staff_member_required` gates them on exactly the flag
+    # that gates the Django admin, and redirects everybody else to the admin
+    # login.
+    #
+    path(
+        "staff/users/",
+        view=staff_member_required(views.StaffUserDashboardView.as_view()),
+        name="staff-users",
+    ),
+    path(
+        "staff/tasks/",
+        view=staff_member_required(views.StaffTaskDashboardView.as_view()),
+        name="staff-tasks",
     ),
 ]
 urlpatterns += [path("ui/", include((ui_urlpatterns, app_name)))]
