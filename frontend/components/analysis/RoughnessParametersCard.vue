@@ -12,6 +12,7 @@ DataTable.use(DataTablesLib);
 
 import { formatExponential } from "@/utils/formatting";
 import { subjectsToBase64 } from "@/utils/api";
+import { buildTableCsvRows, slugifyFilename, toCsvText, triggerBrowserDownload } from "@/utils/download";
 import { escapeHtml } from "@/utils/html";
 
 import AnalysisCard from "@/components/analysis/AnalysisCard.vue";
@@ -90,9 +91,20 @@ onMounted(() => {
     updateCard();
 });
 
-const analysisIds = computed(() => {
-    return _analyses.value?.map(a => a.id).join() ?? [];
+const hasData = computed(() => {
+    return _data.value != null && _data.value.length > 0;
 });
+
+/* Download the table as a CSV file. The table is fully client-side already, so nothing needs to be fetched. The
+   measurement column renders a link and therefore carries no plain value; it is added back explicitly from the
+   underlying row data. */
+function downloadCsv() {
+    triggerBrowserDownload(
+        `${slugifyFilename(_title)}.csv`,
+        toCsvText(buildTableCsvRows(_data.value, _columns.value,
+                                    [{ title: "Measurement", data: "topography_name" }])),
+        "text/csv;charset=utf-8");
+}
 
 function updateCard() {
     /* Fetch JSON describing the card */
@@ -144,13 +156,10 @@ function updateCard() {
                   @refreshButtonClicked="updateCard"
                   @someTasksFinished="updateCard">
         <template #dropdowns>
-            <template v-if="_analyses != null && _analyses.length > 0">
+            <template v-if="hasData">
                 <BDropdownDivider></BDropdownDivider>
-                <BDropdownItem :href="`/analysis/download/${analysisIds}/csv`">
+                <BDropdownItem @click="downloadCsv()">
                     Download CSV
-                </BDropdownItem>
-                <BDropdownItem :href="`/analysis/download/${analysisIds}/xlsx`">
-                    Download XLSX
                 </BDropdownItem>
             </template>
         </template>

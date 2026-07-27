@@ -30,6 +30,7 @@ import {
 } from "bootstrap-vue-next";
 
 import {applyDefaultBokehStyle} from "@/utils/bokeh";
+import {slugifyFilename} from "@/utils/download";
 import {
     assignElementColors,
     assignElementDashes,
@@ -276,8 +277,12 @@ function createFigures() {
             }));
         }
 
-        /* Add save tool, file name derives from function name */
-        const saveTool = new SaveTool({filename: props.functionTitle.replace(" ", "_").toLowerCase()});
+        /* Add save tool, file name derives from function name. If there is more than one plot, the plot title is
+           appended so that the files of the individual plots can be told apart. */
+        const filename = props.plots.length > 1 && plot.title != null
+            ? `${slugifyFilename(props.functionTitle)}-${slugifyFilename(plot.title)}`
+            : slugifyFilename(props.functionTitle);
+        const saveTool = new SaveTool({filename: filename});
         tools.push(saveTool);
 
         /* Determine type of x and y-axis */
@@ -542,6 +547,20 @@ function setPlotVisibility(categoryIndex, elementIndex, visible) {
         }
     }
 }
+
+/* Save the plot(s) to a file, in the format determined by `outputBackend` ("svg" yields SVG, "canvas" yields PNG).
+   This drives the same `SaveTool` that sits in the Bokeh toolbar by emitting its action signal, so that the menu entry
+   of a parent card and the toolbar button behave identically. Exposed so parent components can offer a download entry
+   in their own menus. */
+function download() {
+    for (const figure of _bokehFigures) {
+        figure.save.do.emit(undefined);
+    }
+}
+
+defineExpose({
+    download
+});
 
 function onTap(obj, data) {
     /* Make sure only the selection for one topography is active

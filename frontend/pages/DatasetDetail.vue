@@ -31,6 +31,7 @@ import TopographyCard from "@/components/manager/TopographyCard.vue";
 import TopographyUpdateCard from "@/components/manager/TopographyUpdateCard.vue";
 import DropZone from '@/components/ui/DropZone.vue';
 import HelpTooltip from '@/components/ui/HelpTooltip.vue';
+import DownloadModal from '@/components/ui/DownloadModal.vue';
 import LoadingIndicator from '@/components/ui/LoadingIndicator.vue';
 import Toolbar from '@/components/ui/Toolbar.vue';
 import {paperSection} from "@/utils/references";
@@ -70,6 +71,7 @@ const _topographies = ref([]);  // Topographies contained in this surface
 const _versions = ref(null);  // Published versions of this surface
 
 // GUI logic
+const _downloadModal = ref(null);  // Reports progress while the ZIP archive is built
 const _saving = ref(false);  // Saving batch edits
 const _showDeleteModal = ref(false);  // Triggers delete modal
 const _showBatchEditModal = ref(false);  // Triggers batch-edit modal
@@ -204,6 +206,22 @@ function resetBatchEdit() {
 
 function surfaceHrefForVersion(version) {
     return `/ui/dataset-detail/${getIdFromUrl(version.surface)}/`;
+}
+
+/* Download this dataset as a ZIP archive.
+
+   A published dataset has an archived container in storage, and that file is the one its DOI refers to. It can be
+   fetched straight away, so there is nothing to wait for. Everything else has to be assembled by a Celery worker
+   first; the modal reports that progress and starts the download once it is ready. */
+function download() {
+    const archivedContainer = _publication.value?.download_url;
+    if (archivedContainer != null) {
+        window.location.assign(archivedContainer);
+        return;
+    }
+    _downloadModal.value.download(
+        _surface.value.api.async_download,
+        {title: `Download '${_surface.value.name}'`});
 }
 
 function deleteSurface() {
@@ -438,8 +456,8 @@ const measurementCount = computed(() => {
                             Analyze
                         </a>
 
-                        <a :href="`${_surface.url}download/`"
-                           class="btn btn-light mb-2">
+                        <a class="btn btn-light mb-2"
+                           @click="download()">
                             Download
                         </a>
 
@@ -505,4 +523,5 @@ const measurementCount = computed(() => {
         }}</b> and all contained
         measurements. Are you sure you want to proceed?
     </BModal>
+    <DownloadModal ref="_downloadModal"></DownloadModal>
 </template>
