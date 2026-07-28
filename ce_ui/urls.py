@@ -32,7 +32,7 @@ urlpatterns = [
     ),
     path(
         topobank_publication.urls.urlprefix,
-        include((topobank_publication.urls.urlpatterns, "topobank_publication"), namespace="topobank_publication")
+        include((topobank_publication.urls.urlpatterns, "topobank_publication"), namespace="publication")
     ),
     path(
         topobank_statistics.urls.urlprefix,
