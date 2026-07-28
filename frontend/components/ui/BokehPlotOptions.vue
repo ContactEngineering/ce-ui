@@ -6,10 +6,10 @@
  */
 
 import {
-    BFormGroup,
     BFormInput,
     BFormSelect,
-    BFormSelectOption
+    BFormSelectOption,
+    BBadge
 } from "bootstrap-vue-next";
 
 defineProps({
@@ -29,71 +29,55 @@ const opacity = defineModel('opacity', {type: [Number, String], default: 0.4});
 </script>
 
 <template>
-    <BFormGroup v-if="optionsWidgets.includes('layout')"
-                class="mt-2"
-                label="Plot layout"
-                label-cols="4"
-                content-cols="8">
-        <BFormSelect v-model="layout">
-            <BFormSelectOption value="web">
-                Optimize plot for web (plot scales with window size)
-            </BFormSelectOption>
-            <BFormSelectOption value="print-single">
-                Optimize plot for print (single-column layout)
-            </BFormSelectOption>
-            <BFormSelectOption value="print-double">
-                Optimize plot for print (two-column layout)
-            </BFormSelectOption>
-        </BFormSelect>
-    </BFormGroup>
+    <div class="d-flex flex-column gap-3">
+        <!-- Row 1: Dropdown selects for layout and legend -->
+        <div v-if="optionsWidgets.includes('layout') || optionsWidgets.includes('legend')" class="row g-3 align-items-center">
+            <div v-if="optionsWidgets.includes('layout')" class="col-sm-6 col-md-6 col-lg-4">
+                <label class="form-label small fw-semibold text-muted mb-1">Plot layout</label>
+                <BFormSelect v-model="layout" size="sm">
+                    <BFormSelectOption value="web">Responsive (web)</BFormSelectOption>
+                    <BFormSelectOption value="print-single">Print (single column)</BFormSelectOption>
+                    <BFormSelectOption value="print-double">Print (two columns)</BFormSelectOption>
+                </BFormSelect>
+            </div>
 
-    <BFormGroup v-if="optionsWidgets.includes('legend')"
-                class="mt-2"
-                label="Legend"
-                label-cols="4"
-                content-cols="8">
-        <BFormSelect v-model="legendLocation">
-            <BFormSelectOption value="off">Do not show legend</BFormSelectOption>
-            <BFormSelectOption value="top_right">Show legend top right</BFormSelectOption>
-            <BFormSelectOption value="top_left">Show legend top left</BFormSelectOption>
-            <BFormSelectOption value="bottom_right">Show legend bottom right</BFormSelectOption>
-            <BFormSelectOption value="bottom_left">Show legend bottom left</BFormSelectOption>
-        </BFormSelect>
-    </BFormGroup>
+            <div v-if="optionsWidgets.includes('legend')" class="col-sm-6 col-md-6 col-lg-4">
+                <label class="form-label small fw-semibold text-muted mb-1">Legend</label>
+                <BFormSelect v-model="legendLocation" size="sm">
+                    <BFormSelectOption value="off">Hidden</BFormSelectOption>
+                    <BFormSelectOption value="top_right">Top right</BFormSelectOption>
+                    <BFormSelectOption value="top_left">Top left</BFormSelectOption>
+                    <BFormSelectOption value="bottom_right">Bottom right</BFormSelectOption>
+                    <BFormSelectOption value="bottom_left">Bottom left</BFormSelectOption>
+                </BFormSelect>
+            </div>
+        </div>
 
-    <BFormGroup v-if="optionsWidgets.includes('lineWidth')"
-                class="mt-2"
-                label="Line width"
-                label-cols="4"
-                content-cols="8">
-        <BFormInput type="range"
-                    min="0.1"
-                    max="3.0"
-                    step="0.1"
-                    v-model="lineWidth"/>
-    </BFormGroup>
+        <!-- Row 2: Sliders for line width, symbol size, and opacity -->
+        <div v-if="optionsWidgets.includes('lineWidth') || optionsWidgets.includes('symbolSize') || optionsWidgets.includes('opacity')" class="row g-3 align-items-center">
+            <div v-if="optionsWidgets.includes('lineWidth')" class="col-sm-4 col-md-4 col-lg-4">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <label class="form-label small fw-semibold text-muted mb-0">Line width</label>
+                    <BBadge variant="secondary" size="sm">{{ lineWidth }}px</BBadge>
+                </div>
+                <BFormInput type="range" min="0.1" max="3.0" step="0.1" v-model="lineWidth" size="sm" />
+            </div>
 
-    <BFormGroup v-if="optionsWidgets.includes('symbolSize')"
-                class="mt-2"
-                label="Symbol size"
-                label-cols="4"
-                content-cols="8">
-        <BFormInput type="range"
-                    min="1"
-                    max="20"
-                    step="1"
-                    v-model="symbolSize"/>
-    </BFormGroup>
+            <div v-if="optionsWidgets.includes('symbolSize')" class="col-sm-4 col-md-4 col-lg-4">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <label class="form-label small fw-semibold text-muted mb-0">Symbol size</label>
+                    <BBadge variant="secondary" size="sm">{{ symbolSize }}px</BBadge>
+                </div>
+                <BFormInput type="range" min="1" max="20" step="1" v-model="symbolSize" size="sm" />
+            </div>
 
-    <BFormGroup v-if="optionsWidgets.includes('opacity')"
-                class="mt-2"
-                label="Opacity of lines/symbols (measurements only)"
-                label-cols="4"
-                content-cols="8">
-        <BFormInput type="range"
-                    min="0"
-                    max="1"
-                    step="0.1"
-                    v-model="opacity"/>
-    </BFormGroup>
+            <div v-if="optionsWidgets.includes('opacity')" class="col-sm-4 col-md-4 col-lg-4">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <label class="form-label small fw-semibold text-muted mb-0">Opacity</label>
+                    <BBadge variant="secondary" size="sm">{{ Math.round(Number(opacity) * 100) }}%</BBadge>
+                </div>
+                <BFormInput type="range" min="0" max="1" step="0.1" v-model="opacity" size="sm" />
+            </div>
+        </div>
+    </div>
 </template>
