@@ -15,26 +15,26 @@ const props = defineProps({
     user: Object
 });
 
-const appProps = inject("appProps");
+const appProps = inject("appProps") as any;
 
 const { show } = useToastController();
 
 const stage = ref(0);
 const pending_request = ref(false);
 
-let authors;
-let license;
+let authors: any;
+let license: any;
 
 function publish() {
     pending_request.value = true;
     // NOTE: The django view expects the author data in a structure thats not convenient
     // NOTE: for vue. Thats why we transform the structure here.
-    const authorsTransformed = authors.map((author) => {
+    const authorsTransformed = authors.map((author: any) => {
         return {
             first_name: author.person.firstName,
             last_name: author.person.lastName,
             orcid_id: author.person.orcidId,
-            affiliations: author.affiliations.map((affiliation) => {
+            affiliations: author.affiliations.map((affiliation: any) => {
                 return {
                     name: affiliation.name,
                     ror_id: affiliation.rorId
@@ -49,7 +49,7 @@ function publish() {
     }).then((response) => {
         window.location.href = `/ui/dataset-detail/${response.data.dataset_id}/`;
     }).catch((error) => {
-        if (error.response.status == 429) { // Too Many Requests
+        if (error.response?.status == 429) { // Too Many Requests
             show?.({
                 props: {
                     title: "Too many requests",
@@ -72,22 +72,26 @@ function publish() {
 </script>
 
 <template>
-    <div class="container">
-        <PublishProgress :stage="stage" />
-        <div class="p-5">
-            <PublishStage1 :stage="stage" :surfaceId="appProps.object.id"
-                           @continue="stage = 1"></PublishStage1>
-            <PublishStage2 :stage="stage" :user="props.user" @continue="(emitedAuthors) => {
-                authors = emitedAuthors;
-                stage = 2;
-            }" @back="stage = 0"></PublishStage2>
-            <PublishStage3 :stage="stage" @continue="(emitedLicense) => {
-                license = emitedLicense;
-                stage = 3;
-            }" @back="stage = 1"></PublishStage3>
-            <PublishStage4 :stage="stage" @back="stage = 2" @publish="publish()"
-                           :pending_request="pending_request">
-            </PublishStage4>
+    <div class="container py-4">
+        <div class="card shadow border-0 rounded-4 overflow-hidden">
+            <div class="card-header bg-body border-0 pt-4 px-4 pb-0">
+                <PublishProgress :stage="stage" />
+            </div>
+            <div class="card-body p-4 p-md-5">
+                <PublishStage1 :stage="stage" :surfaceId="appProps.object.id"
+                               @continue="stage = 1"></PublishStage1>
+                <PublishStage2 :stage="stage" :user="props.user" @continue="(emitedAuthors) => {
+                    authors = emitedAuthors;
+                    stage = 2;
+                }" @back="stage = 0"></PublishStage2>
+                <PublishStage3 :stage="stage" @continue="(emitedLicense) => {
+                    license = emitedLicense;
+                    stage = 3;
+                }" @back="stage = 1"></PublishStage3>
+                <PublishStage4 :stage="stage" @back="stage = 2" @publish="publish()"
+                               :pending_request="pending_request">
+                </PublishStage4>
+            </div>
         </div>
     </div>
 </template>
