@@ -12,6 +12,7 @@ import {
     useToastController
 } from "bootstrap-vue-next";
 
+import DownloadModal from "@/components/ui/DownloadModal.vue";
 import { useDatasetSelectionStore } from "@/stores/datasetSelection";
 import { onMounted, ref, computed } from "vue";
 
@@ -29,6 +30,18 @@ const props = defineProps({
 });
 
 const datasets = ref([]);
+const _downloadModal = ref(null);
+
+/* Download the selected datasets as a single ZIP archive. The archive is built by a Celery worker; the modal reports its
+   progress and starts the download once it is ready. */
+function download() {
+    if (selection.nbSelected === 0) {
+        return;
+    }
+    _downloadModal.value.download(
+        `/manager/v2/download-surface/${selection.selectedAsString}/`,
+        {title: "Download selected datasets"});
+}
 
 onMounted(async () => {
     await refreshDatasets();
@@ -82,8 +95,8 @@ const selectionIsPublished = computed(() => {
                     Analyze
                 </BNavItem>
                 <BNavItem class="btn btn-light mb-2"
-                    :href="`/manager/api/surface/${selection.selectedAsString}/download/`"
-                    :disabled="selection.nbSelected === 0">
+                    :disabled="selection.nbSelected === 0"
+                    @click="download()">
                     Download
                 </BNavItem>
                 <BNavItem v-if="selection.nbSelected > 1 && selectionIsPublished" class="btn btn-light mb-2"
@@ -109,4 +122,5 @@ const selectionIsPublished = computed(() => {
             </BListGroupItem>
         </BListGroup>
     </BOffcanvas>
+    <DownloadModal ref="_downloadModal"></DownloadModal>
 </template>

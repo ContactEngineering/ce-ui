@@ -14,6 +14,7 @@ import {
 } from "bootstrap-vue-next";
 
 import ThumbnailRow from "@/components/manager/ThumbnailRow.vue";
+import DownloadModal from "@/components/ui/DownloadModal.vue";
 
 const selected = defineModel<string[]>("selected");
 
@@ -23,6 +24,20 @@ const props = defineProps({
 
 const _creator = ref(null);
 const _publication = ref(null);
+const _downloadModal = ref(null);
+
+/* Download this dataset as a ZIP archive. A published dataset has an archived container that can be fetched straight
+   away; everything else is assembled by a Celery worker, with the modal reporting progress. See `DatasetDetail`. */
+function download() {
+    const archivedContainer = _publication.value?.download_url;
+    if (archivedContainer != null) {
+        window.location.assign(archivedContainer);
+        return;
+    }
+    _downloadModal.value.download(
+        props.dataset.api.async_download,
+        {title: `Download '${props.dataset.name}'`});
+}
 
 onMounted(() => {
     axios.get(props.dataset.creator)
@@ -139,12 +154,13 @@ const creationDatePretty = computed(() => {
                         Analyze
                     </BButton>
                     <BButton variant="light"
-                             :href="dataset.api.download">
+                             @click="download()">
                         Download
                     </BButton>
                 </BButtonGroup>
             </div>
         </div>
+        <DownloadModal ref="_downloadModal"></DownloadModal>
     </BListGroupItem>
 </template>
 

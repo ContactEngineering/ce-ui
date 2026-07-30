@@ -6,11 +6,18 @@ import { computed, onMounted, ref } from "vue";
 import { BDropdownDivider, BDropdownItem, BTab, BTabs, useToastController } from "bootstrap-vue-next";
 
 import { subjectsToBase64 } from "@/utils/api";
+import {
+    buildColumnsCsvRows,
+    describeRequestError,
+    toCsvText,
+    triggerBrowserDownload
+} from "@/utils/download";
 
 import AnalysisCard from "@/components/analysis/AnalysisCard.vue";
 import ContactMechanicsParametersModal from "@/components/analysis/ContactMechanicsParametersModal.vue";
 import BokehPlot from "@/components/ui/BokehPlot.vue";
 import DeepZoomImagePanel from "@/components/ui/DeepZoomImagePanel.vue";
+import DownloadModal from "@/components/ui/DownloadModal.vue";
 import LoadingIndicator from "@/components/ui/LoadingIndicator.vue";
 
 const props = defineProps({
@@ -60,6 +67,8 @@ const _isLoading = ref(false);
 // GUI logic
 const _nbPendingAjaxRequests = ref(0);
 const _parametersVisible = ref(false);
+const _plot = ref(null);
+const _downloadModal = ref(null);
 
 onMounted(() => {
     updateCard();
@@ -208,6 +217,67 @@ const analysisIds = computed(() => {
     return Object.entries(_analyses.value).map(([key, a]) => a.id).join();
 });
 
+const hasData = computed(() => {
+    return _dataSources.value != null && _dataSources.value.length > 0;
+});
+
+/* Columns of the summary data, i.e. of what the two plots of this card show. These are the keys of the result of a
+   contact mechanics calculation, one entry per calculation step. */
+const SUMMARY_COLUMNS = [
+    { key: "mean_pressures", title: "Normalized pressure p/E*" },
+    { key: "total_contact_areas", title: "Fractional contact area A/A0" },
+    { key: "mean_gaps", title: "Normalized mean gap u/h_rms" },
+    { key: "converged", title: "Converged" },
+    { key: "data_paths", title: "Directory of the detailed results" }
+];
+
+/* Download the summary data of the plots as a CSV file. This is the data the card has already fetched from the object
+   store, so no server-side conversion is involved. The maps of the individual calculation steps are much larger and are
+   bundled server-side instead, see `downloadZip`. */
+async function downloadCsv() {
+    const dataSources = _dataSources.value;
+    if (dataSources == null || dataSources.length === 0) {
+        return;
+    }
+
+    _nbPendingAjaxRequests.value++;
+    try {
+        const responses = await Promise.all(dataSources.map(dataSource => axios.get(dataSource.url)));
+        const groups = dataSources.map((dataSource, index) => ({
+            label: dataSource.subjectName,
+            data: responses[index].data
+        }));
+        triggerBrowserDownload(
+            "contact-mechanics.csv",
+            toCsvText(buildColumnsCsvRows(groups, SUMMARY_COLUMNS, "Measurement")),
+            "text/csv;charset=utf-8");
+    } catch (error) {
+        show?.({
+            props: {
+                title: "Error preparing download",
+                body: describeRequestError(error),
+                variant: "danger"
+            }
+        });
+    } finally {
+        _nbPendingAjaxRequests.value--;
+    }
+}
+
+/* Download all result files as a ZIP archive.
+
+   A contact mechanics result holds one NetCDF file per calculation step, each with maps of pressure, gap and
+   displacement over the full grid, so an archive can be very large. Bundling therefore happens in a Celery worker; the
+   modal reports its progress and starts the download once the archive is ready. */
+function downloadZip() {
+    if (analysisIds.value.length === 0) {
+        return;
+    }
+    _downloadModal.value.download(
+        `/analysis/v2/download-results/${analysisIds.value}/`,
+        {title: "Download contact mechanics results"});
+}
+
 </script>
 
 <template>
@@ -229,18 +299,23 @@ const analysisIds = computed(() => {
             <BDropdownItem @click="_parametersVisible = true">
                 Parameters...
             </BDropdownItem>
-            <BDropdownDivider></BDropdownDivider>
-            <BDropdownItem :href="`/analysis/download/${analysisIds}/zip`">
-                Download ZIP
-            </BDropdownItem>
-            <BDropdownItem @click="$refs.plot.download()">
-                Download SVG
-            </BDropdownItem>
+            <template v-if="hasData">
+                <BDropdownDivider></BDropdownDivider>
+                <BDropdownItem @click="downloadCsv()">
+                    Download CSV
+                </BDropdownItem>
+                <BDropdownItem @click="downloadZip()">
+                    Download ZIP
+                </BDropdownItem>
+                <BDropdownItem @click="_plot.download()">
+                    Download SVG
+                </BDropdownItem>
+            </template>
         </template>
         <div class="row">
             <div :class="{ 'col-6': enlarged, 'col-12': !enlarged }">
                 <BokehPlot
-                    ref="plot"
+                    ref="_plot"
                     :categories="contactMechanicsCategories"
                     :data-sources="_dataSources"
                     :options-widgets="['layout', 'legend', 'lineWidth', 'symbolSize']"
@@ -310,6 +385,7 @@ const analysisIds = computed(() => {
             </div>
         </div>
     </AnalysisCard>
+    <DownloadModal ref="_downloadModal"></DownloadModal>
     <ContactMechanicsParametersModal v-if="_limitsToFunctionKwargs !== null && _functionKwargs !== null"
                                      v-model:kwargs="_functionKwargs"
                                      v-model:visible="_parametersVisible"

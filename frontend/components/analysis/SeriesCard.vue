@@ -6,6 +6,15 @@ import { computed, onMounted, ref } from "vue";
 import { BDropdownDivider, BDropdownItem, useToastController } from "bootstrap-vue-next";
 
 import { subjectsToBase64 } from "@/utils/api";
+import {
+    buildSeriesCsvRows,
+    buildSeriesTxt,
+    describeRequestError,
+    seriesFromDataSource,
+    slugifyFilename,
+    toCsvText,
+    triggerBrowserDownload
+} from "@/utils/download";
 
 import AnalysisCard from "@/components/analysis/AnalysisCard.vue";
 import BokehPlot from "@/components/ui/BokehPlot.vue";
@@ -56,6 +65,7 @@ const _showSymbols = ref(true);
 
 // GUI logic
 const _nbPendingAjaxRequests = ref(0);
+const _plot = ref(null);
 
 // Auxiliary information
 const _dois = ref([]);
@@ -66,12 +76,8 @@ onMounted(() => {
     updateCard();
 });
 
-const analysisIds = computed(() => {
-    if (_analyses.value == null) {
-        return [];
-    } else {
-        return _analyses.value.map(a => a.id).join();
-    }
+const hasData = computed(() => {
+    return _dataSources.value != null && _dataSources.value.length > 0;
 });
 
 function updateCard() {
@@ -109,6 +115,55 @@ function updateCard() {
         });
 }
 
+/* Download the plotted data as a text or CSV file.
+
+   The data series themselves live in the object store and are fetched straight from there, in the same way the plot
+   fetches them. We convert them here rather than asking the server for a converted file, which would mean reading every
+   series back out of the object store inside the request. */
+async function downloadData(fileFormat) {
+    const dataSources = _dataSources.value;
+    if (dataSources == null || dataSources.length === 0) {
+        return;
+    }
+
+    const plot = _plots.value[0];
+    const basename = slugifyFilename(_title.value);
+
+    _nbPendingAjaxRequests.value++;
+    try {
+        const responses = await Promise.all(dataSources.map(dataSource => axios.get(dataSource.url)));
+        const series = dataSources.map(
+            (dataSource, index) => seriesFromDataSource(dataSource, responses[index].data));
+
+        if (fileFormat === "csv") {
+            triggerBrowserDownload(
+                `${basename}.csv`,
+                toCsvText(buildSeriesCsvRows(series, plot.xAxisLabel, plot.yAxisLabel)),
+                "text/csv;charset=utf-8");
+        } else {
+            triggerBrowserDownload(
+                `${basename}.txt`,
+                buildSeriesTxt(series, {
+                    title: _title.value,
+                    xLabel: plot.xAxisLabel,
+                    yLabel: plot.yAxisLabel,
+                    dois: _dois.value
+                }),
+                "text/plain;charset=utf-8");
+        }
+    } catch (error) {
+        show?.({
+            props: {
+                title: "Error preparing download",
+                body: describeRequestError(error),
+                variant: "danger"
+            }
+        });
+    } finally {
+        _nbPendingAjaxRequests.value--;
+    }
+}
+
 </script>
 
 <template>
@@ -127,21 +182,21 @@ function updateCard() {
                   @refreshButtonClicked="updateCard"
                   @someTasksFinished="updateCard">
         <template #dropdowns>
-            <BDropdownDivider></BDropdownDivider>
-            <BDropdownItem :href="`/analysis/download/${analysisIds}/txt`">
-                Download TXT
-            </BDropdownItem>
-            <BDropdownItem :href="`/analysis/download/${analysisIds}/csv`">
-                Download CSV
-            </BDropdownItem>
-            <BDropdownItem :href="`/analysis/download/${analysisIds}/xlsx`">
-                Download XLSX
-            </BDropdownItem>
-            <BDropdownItem @click="$refs.plot.download()">
-                Download SVG
-            </BDropdownItem>
+            <template v-if="hasData">
+                <BDropdownDivider></BDropdownDivider>
+                <BDropdownItem @click="downloadData('txt')">
+                    Download TXT
+                </BDropdownItem>
+                <BDropdownItem @click="downloadData('csv')">
+                    Download CSV
+                </BDropdownItem>
+                <BDropdownItem @click="_plot.download()">
+                    Download SVG
+                </BDropdownItem>
+            </template>
         </template>
-        <BokehPlot v-model:nbPendingAjaxRequests="_nbPendingAjaxRequests"
+        <BokehPlot ref="_plot"
+                   v-model:nbPendingAjaxRequests="_nbPendingAjaxRequests"
                    :categories="_categories"
                    :dataSources="_dataSources"
                    :functionTitle="_title"
