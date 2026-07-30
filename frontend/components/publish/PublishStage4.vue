@@ -11,9 +11,9 @@ const props = defineProps({
 const emit = defineEmits(['back', 'publish']);
 
 const check1 = ref(false);
-const valid1 = ref(null);
+const valid1 = ref<boolean | null>(null);
 const check2 = ref(false);
-const valid2 = ref(null);
+const valid2 = ref<boolean | null>(null);
 
 function checkAndPublish() {
     valid1.value = check1.value;
@@ -24,72 +24,91 @@ function checkAndPublish() {
 }
 
 </script>
+
 <template>
-    <div v-if="stage == 3">
-        <h2>Implications of publishing</h2>
-        <div class="mt-4">
-            <ul>
-                <li>The digital twin and all measurements will be <b>visible by
-                        everyone</b>,
-                    registered or anonymous users, now and in future.
-                </li>
-                <li>The related data (raw data, descriptions, ..) <b>will be
-                        downloadable by everyone</b>.
-                </li>
-                <li>Every user can perform analyses on your data.</li>
-                <li>You choose a license for your data - the choice of the license is
-                    irrevocable.
-                </li>
-                <li>If you have assigned tags to the digital twin or its measurements,
-                    these tags are also
-                    part of the publication.
-                </li>
-                <li>Your ORCID iD will saved along with your publication.</li>
-                <li>A <a href="https://www.doi.org/">DOI (Digital Object
-                        Identifier)</a> will be generated
-                    with the given data. Your data will be accessible under the
-                    corresponding URL.
-                </li>
-            </ul>
-            <p>
-                This is great if you want to <b>make your data public under a permanent
-                    URL</b>, e.g. in order
-                to reference your data in a citation.
-            </p>
-            <p>
-                Since a copy is made, you can still work on your
-                original data as before the publication.
-                You may also publish an updated version of this digital surface twin
-                later.
-            </p>
+    <div v-if="stage == 3" class="stage-container">
+        <div class="mb-4">
+            <h3 class="fw-bold mb-1">Final Review & Confirmation</h3>
+            <p class="text-muted mb-0">Please review the implications of publishing your digital surface twin dataset.</p>
         </div>
-        <div class="d-flex flex-row justify-content-center">
-            <div class="d-flex flex-column">
-                <BFormCheckbox v-model="check1" :state="valid1">
-                    I understand the implications of publishing this digital surface
-                    twin and I agree.*<br>
-                    <span class="text-muted"> Please read the implications of publishing listed above and check.</span>
-                </BFormCheckbox>
-                <BFormCheckbox v-model="check2" :state="valid2">
-                    I hold copyright of this data or have been authorized by the
-                    copyright holders.*<br>
-                    <span class="text-muted"> Please make sure you're not publishing data from others without their
-                        authorization.
-                    </span>
-                </BFormCheckbox>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 bg-light p-3 shadow-sm text-center">
+                    <div class="text-primary mb-2">
+                        <i class="fa-solid fa-globe fs-2"></i>
+                    </div>
+                    <h6 class="fw-bold mb-1">Publicly Accessible</h6>
+                    <p class="small text-muted mb-0">Visible and downloadable by everyone, including registered and guest users worldwide.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 bg-light p-3 shadow-sm text-center">
+                    <div class="text-success mb-2">
+                        <i class="fa-solid fa-link fs-2"></i>
+                    </div>
+                    <h6 class="fw-bold mb-1">Permanent DOI</h6>
+                    <p class="small text-muted mb-0">A unique Digital Object Identifier (DOI) will be registered for academic citation.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 bg-light p-3 shadow-sm text-center">
+                    <div class="text-warning mb-2">
+                        <i class="fa-solid fa-lock-open fs-2"></i>
+                    </div>
+                    <h6 class="fw-bold mb-1">Irrevocable License</h6>
+                    <p class="small text-muted mb-0">Your chosen open license is permanent. An immutable snapshot copy of your data will be created.</p>
+                </div>
             </div>
         </div>
-        <div class="d-flex flex-row justify-content-between">
-            <BButton @click="$emit('back')" variant="primary">
-                Back
+
+        <div class="card border-0 bg-light-subtle p-3 mb-4 rounded-3 shadow-sm">
+            <div class="d-flex flex-column gap-3">
+                <div class="card p-3 border-2 transition-all cursor-pointer"
+                     :class="{ 'border-primary bg-primary-subtle': check1, 'border-danger': valid1 === false, 'border-light-subtle': check1 === false && valid1 !== false }"
+                     @click="check1 = !check1">
+                    <BFormCheckbox v-model="check1" :state="valid1" class="fw-semibold text-dark" @click.stop>
+                        I understand the implications of publishing this digital surface twin dataset and I agree. <span class="text-danger">*</span>
+                    </BFormCheckbox>
+                    <small class="text-muted ms-4 d-block mt-1">
+                        I confirm that I have reviewed the permanent public access and citation implications listed above.
+                    </small>
+                </div>
+
+                <div class="card p-3 border-2 transition-all cursor-pointer"
+                     :class="{ 'border-primary bg-primary-subtle': check2, 'border-danger': valid2 === false, 'border-light-subtle': check2 === false && valid2 !== false }"
+                     @click="check2 = !check2">
+                    <BFormCheckbox v-model="check2" :state="valid2" class="fw-semibold text-dark" @click.stop>
+                        I hold copyright of this data or have been explicitly authorized by the copyright holders. <span class="text-danger">*</span>
+                    </BFormCheckbox>
+                    <small class="text-muted ms-4 d-block mt-1">
+                        Ensure you are not publishing proprietary or restricted third-party data without authorization.
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between pt-3 border-top">
+            <BButton @click="$emit('back')" variant="outline-secondary" size="lg" class="px-4">
+                <i class="fa-solid fa-arrow-left me-2"></i> Back
             </BButton>
-            <BButton v-if="pending_request" disabled variant="success" size="lg">
-                Publish
-                <BSpinner variant="primary" style="width: 1.2rem; height: 1.2rem;" />
+            
+            <BButton v-if="pending_request" disabled variant="success" size="lg" class="px-4">
+                <BSpinner small class="me-2" />
+                Publishing Snapshot...
             </BButton>
-            <BButton v-else @click="checkAndPublish()" variant="success" size="lg">
-                Publish 🚀
+            <BButton v-else @click="checkAndPublish()" variant="success" size="lg" class="px-4 fw-bold shadow-sm">
+                Publish Digital Twin 🚀
             </BButton>
         </div>
     </div>
 </template>
+
+<style scoped>
+.cursor-pointer {
+    cursor: pointer;
+}
+.transition-all {
+    transition: all 0.2s ease-in-out;
+}
+</style>

@@ -28,15 +28,15 @@ urlpatterns = [
     #
     path(
         topobank_contact.urls.urlprefix,
-        include((topobank_contact.urls.urlpatterns, "topobank_contact"), namespace="topobank_contact")
+        include((topobank_contact.urls.urlpatterns, "contact"), namespace="contact")
     ),
     path(
         topobank_publication.urls.urlprefix,
-        include((topobank_publication.urls.urlpatterns, "topobank_publication"), namespace="publication")
+        include((topobank_publication.urls.urlpatterns, "publication"), namespace="publication")
     ),
     path(
         topobank_statistics.urls.urlprefix,
-        include((topobank_statistics.urls.urlpatterns, "topobank_statistics"), namespace="topobank_statistics")
+        include((topobank_statistics.urls.urlpatterns, "statistics"), namespace="statistics")
     ),
     #
     # Entry points
