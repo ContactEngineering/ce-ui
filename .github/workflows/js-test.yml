@@ -17,7 +17,10 @@ jobs:
 
     strategy:
       matrix:
-        node-version: ['22']
+        # Node 24 (npm 11) matches the version pinned in the devbox development
+        # environment, so `npm ci` here resolves the lock file the same way it
+        # does locally.
+        node-version: ['24']
 
     steps:
     - uses: actions/checkout@v7
