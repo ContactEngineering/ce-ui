@@ -27,6 +27,12 @@ onMounted(() => {
         <a v-if="versions.topobank" :href="versions.topobank.homepage">
             topobank
         </a><span v-if="versions.topobank"> v{{ versions.topobank.version }},</span>
+        <a v-if="versions.topobank_rest_api" :href="versions.topobank_rest_api.homepage">
+            rest-api
+        </a><span v-if="versions.topobank_rest_api"> v{{ versions.topobank_rest_api.version }},</span>
+        <a v-if="versions.topobank_orcid" :href="versions.topobank_orcid.homepage">
+            orcid
+        </a><span v-if="versions.topobank_orcid"> v{{ versions.topobank_orcid.version }},</span>
         <a v-if="versions.ce_ui" :href="versions.ce_ui.homepage">
             ui
         </a><span v-if="versions.ce_ui"> v{{ versions.ce_ui.version }}</span>;

@@ -477,6 +477,18 @@ TRACKED_DEPENDENCIES = [
         "https://github.com/ContactEngineering/topobank",
     ),
     (
+        "topobank_rest_api",
+        "topobank_rest_api.__version__",
+        "MIT",
+        "https://github.com/ContactEngineering/topobank-rest-api",
+    ),
+    (
+        "topobank_orcid",
+        "topobank_orcid.__version__",
+        "MIT",
+        "https://github.com/ContactEngineering/topobank-orcid",
+    ),
+    (
         "topobank_statistics",
         "topobank_statistics.__version__",
         "MIT",
