@@ -8,6 +8,7 @@ from datetime import timedelta
 
 import environ
 import topobank
+from celery.schedules import crontab
 from django.core.exceptions import ImproperlyConfigured
 from watchman import constants as watchman_constants
 
@@ -684,6 +685,20 @@ def REQUEST_PROFILER_GLOBAL_EXCLUDE_FUNC(x):
 
 # Keep records for a month
 REQUEST_PROFILER_LOG_TRUNCATION_DAYS = 30
+
+# Nothing in request_profiler enforces the retention above on its own, so
+# schedule the truncation ourselves. Registered through the extension hook that
+# topobank.taskapp.celeryapp reads, which merges into its own beat schedule.
+# Pinned to an off-peak time rather than a plain 24h interval, which would drift
+# to whenever beat happened to start: the delete still rewrites a day's worth of
+# rows per run, so it should not land during peak traffic.
+TOPOBANK_CELERY_BEAT_SCHEDULE_EXTRA = {
+    "truncate-request-profiler-logs": {
+        "task": "ce_ui.tasks.truncate_request_profiler_logs",
+        "schedule": crontab(hour=3, minute=30),
+        "options": {"queue": TOPOBANK_MANAGER_QUEUE},
+    },
+}
 
 # Upload method
 UPLOAD_METHOD = env("TOPOBANK_UPLOAD_METHOD", default="POST")
