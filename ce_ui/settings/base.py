@@ -322,11 +322,17 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 # http://docs.celeryproject.org/en/latest/userguide/configuration.html#std:setting-result_serializer
 CELERY_RESULT_SERIALIZER = "json"
-# TODO: set to whatever value is adequate in your circumstances
-# CELERYD_TASK_TIME_LIMIT = 5 * 60
-# http://docs.celeryproject.org/en/latest/userguide/configuration.html#task-soft-time-limit
-# TODO: set to whatever value is adequate in your circumstances
-# CELERYD_TASK_SOFT_TIME_LIMIT = 60
+# Time limits. `topobank.analysis.tasks` applies these to its tasks explicitly
+# (falling back to the same defaults when the settings are absent), so a task
+# that runs away is killed rather than occupying a slot forever. The soft limit
+# raises `SoftTimeLimitExceeded` inside the task, which its own error handling
+# turns into a recorded FAILURE with partial timings; the hard limit is the
+# backstop that kills the child process if that does not work.
+# https://docs.celeryq.dev/en/stable/userguide/configuration.html#task-time-limit
+CELERY_TASK_TIME_LIMIT = env.int("CELERY_TASK_TIME_LIMIT", default=6 * 3600)
+CELERY_TASK_SOFT_TIME_LIMIT = env.int(
+    "CELERY_TASK_SOFT_TIME_LIMIT", default=CELERY_TASK_TIME_LIMIT - 300
+)
 # https://docs.celeryq.dev/en/latest/userguide/configuration.html#task-acks-late
 CELERY_TASK_ACKS_LATE = False
 # https://docs.celeryq.dev/en/latest/userguide/configuration.html#task-publish-retry
@@ -728,6 +734,27 @@ DELETE_EXISTING_FILES = env.bool("TOPOBANK_DELETE_EXISTING_FILES", default=False
 # ------------------------------------------------------------------------------
 TOPOBANK_THUMBNAIL_FORMAT = "jpeg"  # File format for thumbnails
 TOPOBANK_DELETE_DELAY = timedelta(days=7)  # Hold deleted datasets this long
+
+# Memory budget for a single analysis, in bytes. An analysis predicted to need
+# more than this is failed before it starts, with an explanatory message, rather
+# than being killed by the OOM killer half way through - see
+# `topobank.analysis.sizing`, which learns the per-workflow memory coefficient
+# from the peak usage recorded by previous runs. Set to 0 to disable the guard,
+# which is the default: without a value tuned to the workers actually deployed,
+# refusing work is worse than the status quo.
+TOPOBANK_ANALYSIS_MEMORY_BUDGET = env.int("TOPOBANK_ANALYSIS_MEMORY_BUDGET", default=0)
+# Percentile of observed bytes-per-point used for the prediction, the factor
+# applied on top of it, and how many observations a workflow needs before its
+# coefficient is trusted at all. The defaults live in `analysis.sizing`.
+TOPOBANK_ANALYSIS_MEMORY_PERCENTILE = env.float(
+    "TOPOBANK_ANALYSIS_MEMORY_PERCENTILE", default=0.95
+)
+TOPOBANK_ANALYSIS_MEMORY_SAFETY_FACTOR = env.float(
+    "TOPOBANK_ANALYSIS_MEMORY_SAFETY_FACTOR", default=1.2
+)
+TOPOBANK_ANALYSIS_MEMORY_MIN_SAMPLES = env.int(
+    "TOPOBANK_ANALYSIS_MEMORY_MIN_SAMPLES", default=5
+)
 
 
 # ALLAUTH SETTINGS

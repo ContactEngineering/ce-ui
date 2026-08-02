@@ -131,6 +131,21 @@ function resetOrdering() {
     load();
 }
 
+/**
+ * Label for the user who created a task.
+ *
+ * `name` is not guaranteed to be a usable label: it can be empty, or
+ * whitespace-only for accounts with neither a name nor a first/last name (the
+ * anonymous user, for instance). Those must fall back to the username rather
+ * than render an empty cell, which reads as "this task has no user".
+ */
+function userLabel(user: any): string {
+    if (user == null) {
+        return "–";
+    }
+    return user.name?.trim() || user.username?.trim() || "–";
+}
+
 /** Link to the UI page for a task's subject, if it has one we can link to. */
 function subjectHref(subject: any): string | null {
     if (subject == null || subject.id == null) {
@@ -257,7 +272,7 @@ function subjectHref(subject: any): string | null {
                         </div>
                     </td>
                     <td class="small">
-                        {{ task.created_by?.name ?? "–" }}
+                        {{ userLabel(task.created_by) }}
                     </td>
                     <td class="small">{{ task.queue ?? "–" }}</td>
                     <td class="small">

@@ -1,5 +1,11 @@
 # Changelog for plugin *ce-ui*
 
+## Unreleased
+
+- BUG: Task dashboard shows the username when a user has no name set
+- MAINT: Celery task time limits are now explicit and env-configurable
+- MAINT: Added `TOPOBANK_ANALYSIS_MEMORY_*` settings for the analysis memory guard
+
 ## 1.33.0 (2026-08-02)
 
 - ENH: Visual facelift: new analysis and dataset card style, tabs instead of pills,
