@@ -1,5 +1,18 @@
 # Changelog for plugin *ce-ui*
 
+## 1.33.0 (2026-08-02)
+
+- MAINT: The changelog is no longer served as a static file. The component
+  versions in the side panel link to the respective repositories, where the
+  changelogs are published, which covers all components rather than just this one
+- BUILD: Force-include the app's static files in the built distribution. The bare
+  `static/` pattern in `.gitignore` also matched `ce_ui/static/`, and since
+  hatchling honours VCS ignore files the favicon, logos, Creative Commons images,
+  terms & conditions and the vendored OpenSeadragon viewer were missing from the
+  wheel, so `collectstatic` could not collect them
+- BUILD: Anchored the `static/` pattern in `.gitignore` to the repository root, so
+  it only matches the webpack output directory
+
 ## 1.32.0 (2025-12-16)
 
 - ENH: Dataset Collection view and publish UI

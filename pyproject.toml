@@ -69,3 +69,18 @@ repository = 'https://github.com/ContactEngineering/ce-ui'
 
 [tool.hatch.version]
 source = "vcs"
+
+[tool.hatch.build]
+# `.gitignore` contains a bare `static/` pattern, meant for the webpack output
+# directory at the repository root and for `staticfiles/`. It also matches this
+# package's own static directory, and hatchling honours VCS ignore files when
+# selecting files for a distribution. Without this override the app's static
+# assets (favicon, logos, Creative Commons images, terms & conditions, the
+# vendored OpenSeadragon viewer) are absent from the built wheel, so Django's
+# `AppDirectoriesFinder` cannot find them and `collectstatic` silently omits
+# them. `ManifestStaticFilesStorage` then raises `ValueError: Missing staticfiles
+# manifest entry for ...` on the first `{% static %}` lookup.
+artifacts = ["ce_ui/static/**"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["ce_ui"]
