@@ -2,16 +2,45 @@
 
 ## 1.33.0 (2026-08-02)
 
-- MAINT: The changelog is no longer served as a static file. The component
-  versions in the side panel link to the respective repositories, where the
-  changelogs are published, which covers all components rather than just this one
-- BUILD: Force-include the app's static files in the built distribution. The bare
-  `static/` pattern in `.gitignore` also matched `ce_ui/static/`, and since
-  hatchling honours VCS ignore files the favicon, logos, Creative Commons images,
-  terms & conditions and the vendored OpenSeadragon viewer were missing from the
-  wheel, so `collectstatic` could not collect them
-- BUILD: Anchored the `static/` pattern in `.gitignore` to the repository root, so
-  it only matches the webpack output directory
+- ENH: Visual facelift: new analysis and dataset card style, tabs instead of pills,
+  homogenized toolbars, less chrome
+- ENH: Contextual help throughout the site
+- ENH: User and tasks dashboard
+- ENH: Token-based search
+- ENH: Asynchronous ZIP downloads
+- ENH: Citation recommendation for published datasets
+- ENH: Reintroduced the supported file formats overview page
+- ENH: Component versions shown in the user side panel, including
+  `topobank-rest-api` and `topobank-orcid`
+- ENH: Spinner while the site is loading
+- BUG: Hardened settings and fixed backend and frontend audit findings
+- BUG: Forward the CSRF token from the cookie on axios requests; fixed the
+  topography delete URL
+- BUG: Fixed the user search modal (wrong endpoint, paginated response)
+- BUG: No spinner is shown when all tasks have failed
+- BUG: Fixed error reporting and the version information in the offcanvas
+- MAINT: The Django project configuration lives here now: `manage.py`, the
+  `ce_ui.settings.*` modules, the root URL configuration and the WSGI/ASGI entry
+  points moved over from `topobank`
+- MAINT: Plugins are wired explicitly through `INSTALLED_APPS`; removed the old
+  entry-point plugin system and plugin permissions
+- MAINT: REST API split into `topobank-rest-api`; users, organizations and
+  authorization into `topobank-orcid`; removed django-guardian
+- MAINT: Reorganized the JS component structure; logic extracted into tested TS
+  modules
+- MAINT: Celery beat task for truncating the request profiler log
+- MAINT: Refresh of Bokeh plots for visualization
+- MAINT: Physical sizes are displayed without e-notation
+- MAINT: `analysis_function` -> `workflow`
+- MAINT: The changelog is no longer served as a static file; the component versions
+  in the side panel link to the repositories where changelogs are published
+- BUILD: Changed build system to hatchling
+- BUILD: Load BokehJS from a prebuilt bundle instead of re-bundling it (#67)
+- BUILD: Updated frontend dependencies (Bokeh 3.9, Pinia 4, OpenSeadragon 6,
+  DataTables 3, bootstrap-vue-next 0.45)
+- BUILD: Force-include the app's static files in the distribution; they were missing
+  from the wheel because `.gitignore` matched `ce_ui/static/`
+- BUILD: Anchored the `static/` pattern in `.gitignore` to the repository root
 
 ## 1.32.0 (2025-12-16)
 
