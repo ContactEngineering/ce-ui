@@ -2,6 +2,9 @@
 
 ## 1.34.0 (2026-08-03)
 
+- ENH: The dataset list shows one row per dataset, naming its version and offering
+  the older ones, instead of a separate row per published version
+
 - ENH: The publish wizard states on its first step when a dataset cannot be
   published, listing the measurements that are not ready, instead of failing at the
   final "Publish" step
