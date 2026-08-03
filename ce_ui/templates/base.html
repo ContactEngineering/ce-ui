@@ -9,13 +9,18 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport"
           content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description"
-          content="Cloud service for storing and analysis surface topography measurements">
-    <meta name="author" content="Michael Röttger, Lars Pastewka, Tevis Jacobs">
-    <meta name="keywords"
-          content="roughness, surface finish, contact calculator, contact mechanics">
+    {% block meta_description %}
+        <meta name="description"
+              content="Cloud service for storing and analysis surface topography measurements">
+        <meta name="author" content="Michael Röttger, Lars Pastewka, Tevis Jacobs">
+        <meta name="keywords"
+              content="roughness, surface finish, contact calculator, contact mechanics">
+    {% endblock meta_description %}
 
-    <title>contact.engineering - A surface topography cloud database</title>
+    <title>{% block title %}contact.engineering - A surface topography cloud database{% endblock title %}</title>
+
+    {# Machine-readable description of the page, for harvesters and crawlers #}
+    {% block head_metadata %}{% endblock head_metadata %}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
 

@@ -5,6 +5,10 @@
 - ENH: The publish wizard states on its first step when a dataset cannot be
   published, listing the measurements that are not ready, instead of failing at the
   final "Publish" step
+- ENH: The landing page of a published dataset now carries server-rendered metadata:
+  a dataset-specific title and description, a schema.org JSON-LD description,
+  citation meta tags and signposting typed links. Harvesters do not execute
+  JavaScript, so anything they are meant to find has to be in the served HTML
 - BUG: Task dashboard shows the username when a user has no name set
 - MAINT: Celery task time limits are now explicit and env-configurable
 - MAINT: Added `TOPOBANK_ANALYSIS_MEMORY_*` settings for the analysis memory guard

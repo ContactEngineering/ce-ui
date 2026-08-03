@@ -25,6 +25,7 @@ from topobank_rest_api.manager.v1.serializers import (SurfaceSerializer,
                                                       TopographySerializer)
 
 from ce_ui import breadcrumb
+from ce_ui.publication_metadata import publication_metadata
 
 ORDER_BY_CHOICES = {"name": "name", "-creation_datetime": "date"}
 SHARING_STATUS_FILTER_CHOICES = {
@@ -95,6 +96,8 @@ class DatasetDetailView(AppDetailView):
     model = Surface
     vue_component = "DatasetDetail"
     serializer_class = SurfaceSerializer
+    # Extends app.html and adds server-rendered metadata to its head
+    template_name = "dataset_detail.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -109,6 +112,11 @@ class DatasetDetailView(AppDetailView):
         # Breadcrumb navigation
         #
         breadcrumb.add_surface(context, self.object)
+
+        #
+        # Metadata for harvesters, see `dataset_detail.html`
+        #
+        context.update(publication_metadata(self.object, self.request))
 
         return context
 

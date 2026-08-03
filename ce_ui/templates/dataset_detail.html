@@ -1,0 +1,69 @@
+{% extends 'app.html' %}
+{% load static %}
+
+{#
+    Landing page of a dataset.
+
+    The page itself is rendered by Vue, which means that a client that does not
+    execute JavaScript sees nothing but the app shell. For a *published* dataset
+    that is a problem: its DOI resolves here, and this is where FAIR assessment
+    tools, search engines and reference managers come looking for the metadata.
+
+    Everything below is therefore rendered server-side, and only for published
+    datasets: an unpublished one is not public and has nothing to advertise.
+#}
+
+{% block title %}{% if publication %}{{ dataset_name }} - contact.engineering{% else %}{{ block.super }}{% endif %}{% endblock title %}
+
+{% block meta_description %}
+    {% if publication %}
+        <meta name="description" content="{{ dataset_description }}">
+        <meta name="author" content="{{ dataset_authors }}">
+    {% else %}
+        {{ block.super }}
+    {% endif %}
+{% endblock meta_description %}
+
+{% block head_metadata %}
+    {% if publication %}
+        {# Structured description of the dataset, https://schema.org/Dataset #}
+        {% if schema_org_jsonld %}
+            <script type="application/ld+json">{{ schema_org_jsonld|safe }}</script>
+        {% endif %}
+
+        {# Citation metadata, as read by reference managers and Google Scholar #}
+        <meta name="citation_title" content="{{ dataset_name }}">
+        {% for author in publication.authors_json %}
+            <meta name="citation_author"
+                  content="{{ author.last_name }}, {{ author.first_name }}">
+        {% endfor %}
+        <meta name="citation_publication_date"
+              content="{{ publication.datetime|date:'Y/m/d' }}">
+        {% if publication.doi_name %}
+            <meta name="citation_doi" content="{{ publication.doi_name }}">
+        {% endif %}
+        <meta name="citation_public_url" content="{{ landing_page_url }}">
+
+        {# Signposting typed links, https://signposting.org/FAIR/ #}
+        {% if publication.doi_url %}
+            <link rel="cite-as" href="{{ publication.doi_url }}">
+        {% endif %}
+        {% if metadata_url %}
+            <link rel="describedby" href="{{ metadata_url }}"
+                  type="application/ld+json">
+        {% endif %}
+        {% if container_url %}
+            <link rel="item" href="{{ container_url }}" type="application/zip">
+        {% endif %}
+        {% if license_url %}
+            <link rel="license" href="{{ license_url }}">
+        {% endif %}
+        {% for author in publication.authors_json %}
+            {% if author.orcid_id %}
+                <link rel="author" href="https://orcid.org/{{ author.orcid_id }}">
+            {% endif %}
+        {% endfor %}
+        <link rel="type" href="https://schema.org/Dataset">
+        <link rel="type" href="https://schema.org/AboutPage">
+    {% endif %}
+{% endblock head_metadata %}
