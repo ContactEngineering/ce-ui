@@ -248,7 +248,7 @@ propertyCount.value = Object.keys(properties.value).length // Update the propert
                             <span class="text-muted">(categorical)</span>
                         </BTd>
                     </BTr>
-                </BTBody>
+                </BTbody>
             </BTableSimple>
             <div v-if="isEditable" @click="addProperty" class="d-flex highlight-on-hover rounded-3">
                 <div class="p-2 flex-shrink-1">

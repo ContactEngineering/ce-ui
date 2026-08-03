@@ -9,6 +9,7 @@ import {
     BButtonToolbar,
     BFormGroup,
     BFormSelect,
+    BInputGroup,
     BListGroup,
     BOverlay,
     BPagination,
