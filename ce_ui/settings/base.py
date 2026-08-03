@@ -274,6 +274,7 @@ TEMPLATES = [
                 "django.template.context_processors.static",
                 "django.template.context_processors.tz",
                 "django.contrib.messages.context_processors.messages",
+                "ce_ui.context_processors.bokehjs_processor",
                 "ce_ui.context_processors.fixed_tabs_processor",
             ],
         },

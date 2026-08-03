@@ -9,4 +9,6 @@ class CEUIAppConfig(AppConfig):
         # make sure the functions are registered now
 
         # noinspection PyUnresolvedReferences
+        import ce_ui.checks  # noqa: F401
+        # noinspection PyUnresolvedReferences
         import ce_ui.signals  # noqa: F401
