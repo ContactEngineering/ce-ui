@@ -18,6 +18,8 @@ import {
     useToastController
 } from 'bootstrap-vue-next';
 
+import {useActiveTab} from "@/stores/tabs";
+
 import {getIdFromUrl, subjectsToBase64} from "@/utils/api";
 import {emptyTopography, filterTopographyForPatchRequest} from "@/utils/topography";
 
@@ -77,6 +79,7 @@ const _showDeleteModal = ref(false);  // Triggers delete modal
 const _showBatchEditModal = ref(false);  // Triggers batch-edit modal
 const _selected = ref([]);  // Selected topographies (for batch editing)
 const batchActiveTab = ref('home'); // shared active tab for batch mode
+const activeTab = useActiveTab("dataset-detail");  // survives a page reload
 
 // Batch edit data
 const _batchEditTopography = ref(emptyTopography());
@@ -303,12 +306,13 @@ const measurementCount = computed(() => {
         <LoadingIndicator v-if="_surface == null"/>
         <div v-if="_surface != null" class="row">
             <div class="col-12">
-                <BTabs class="nav-pills-custom"
+                <BTabs v-model="activeTab"
+                       class="nav-pills-custom"
                        content-class="w-100"
                        fill
                        pills
                        vertical>
-                    <BTab title="Measurements">
+                    <BTab id="dataset-measurements" title="Measurements">
                         <template #title>
                             Measurements <BBadge>{{measurementCount}}</BBadge>
                         </template>
@@ -381,7 +385,7 @@ const measurementCount = computed(() => {
                             </template>
                         </BModal>
                     </BTab>
-                    <BTab title="Bandwidths">
+                    <BTab id="dataset-bandwidths" title="Bandwidths">
                         <BAlert :model-value="_topographies.length == 0" variant="secondary">
                             <i class="fa-solid fa-circle-info me-2"></i>This surface has no measurements.
                         </BAlert>
@@ -401,7 +405,7 @@ const measurementCount = computed(() => {
                                        :topographies="_topographies">
                         </BandwidthPlot>
                     </BTab>
-                    <BTab title="Description">
+                    <BTab id="dataset-description" title="Description">
                         <DatasetDescription v-if="_surface != null"
                                             :description="_surface.description"
                                             :name="_surface.name"
@@ -410,7 +414,7 @@ const measurementCount = computed(() => {
                                             :tags="_surface.tags">
                         </DatasetDescription>
                     </BTab>
-                    <BTab title="Properties" v-if="propertyCount !== 0 || isEditable">
+                    <BTab id="dataset-properties" title="Properties" v-if="propertyCount !== 0 || isEditable">
                         <template #title>
                             Properties <BBadge>{{ propertyCount }}</BBadge>
                         </template>
@@ -422,7 +426,9 @@ const measurementCount = computed(() => {
                         </DatasetProperties>
                     </BTab>
                     <!-- The tab is not displayed when the attachment count is 0 and the dataset is not editable -->
-                    <BTab title="Attachments" v-if="attachmentCount === null || attachmentCount !== 0 || isEditable">
+                    <BTab id="dataset-attachments"
+                          title="Attachments"
+                          v-if="attachmentCount === null || attachmentCount !== 0 || isEditable">
                         <template #title>
                             Attachments <BBadge>{{ attachmentCount }}</BBadge>
                         </template>
@@ -432,7 +438,8 @@ const measurementCount = computed(() => {
                                      v-model:attachmentCount="attachmentCount">
                         </Attachments>
                     </BTab>
-                    <BTab v-if="_surface != null"
+                    <BTab id="dataset-permissions"
+                          v-if="_surface != null"
                           title="Permissions">
                         <DatasetPermissions v-if="_surface.publication == null"
                                             v-model:permissions="_permissions"
@@ -445,7 +452,8 @@ const measurementCount = computed(() => {
                             system) and can no longer be modified.
                         </BAlert>
                     </BTab>
-                    <BTab v-if="isPublication"
+                    <BTab id="dataset-how-to-cite"
+                          v-if="isPublication"
                           title="How to cite">
                         <CitationCard :publication="_publication"/>
                     </BTab>
