@@ -2,7 +2,7 @@
 
 import {computed} from "vue";
 
-import {formatExponential} from "@/utils/formatting";
+import {formatExponential, formatPercentage} from "@/utils/formatting";
 import {paperSection} from "@/utils/references";
 import HelpTooltip from "@/components/ui/HelpTooltip.vue";
 
@@ -21,6 +21,22 @@ const isMetadataIncomplete = computed(() => {
 const shortReliabilityCutoff = computed(() => {
     return formatExponential(props.topography.short_reliability_cutoff, 2) + ` m`;
 });
+
+/* How much of the measurement has no value. Older measurements carry no
+   fraction until they are inspected again, in which case the badge says only
+   that there is undefined data, as it did before. */
+const undefinedDataPercentage = computed(() => {
+    return formatPercentage(props.topography?.undefined_data_fraction);
+});
+
+const undefinedDataTooltip = computed(() => {
+    const share = undefinedDataPercentage.value;
+    const extent = share == null
+        ? "Some pixels have no measured value (data gaps)."
+        : `${share} of the pixels have no measured value (data gaps).`;
+    return `${extent} You can choose how to handle these under the Filters tab `
+        + `(leave undefined, or fill by harmonic interpolation).`;
+});
 </script>
 
 <template>
@@ -29,9 +45,10 @@ const shortReliabilityCutoff = computed(() => {
         <span class="badge bg-info ms-2">{{ topography.resolution_x }} &times; {{
                 topography.resolution_y
             }} data points</span>
-        <span v-if="topography.has_undefined_data" class="badge bg-danger ms-2">undefined data
+        <span v-if="topography.has_undefined_data" class="badge bg-danger ms-2">
+            <template v-if="undefinedDataPercentage != null">{{ undefinedDataPercentage }} </template>undefined data
             <HelpTooltip label="About undefined data"
-                text="Some pixels have no measured value (data gaps). You can choose how to handle these under the Filters tab (leave undefined, or fill by harmonic interpolation)."/>
+                :text="undefinedDataTooltip"/>
         </span>
         <span v-if="isMetadataIncomplete" class="badge bg-danger ms-2">metadata incomplete
             <HelpTooltip label="About incomplete metadata"
@@ -48,9 +65,10 @@ const shortReliabilityCutoff = computed(() => {
     <div v-if="topography !== null && topography.resolution_y === null">
         <div class="badge bg-warning ms-1">{{ topography.datafile_format }}</div>
         <div class="badge bg-info ms-2">{{ topography.resolution_x }} data points</div>
-        <span v-if="topography.has_undefined_data" class="badge bg-danger ms-2">undefined data
+        <span v-if="topography.has_undefined_data" class="badge bg-danger ms-2">
+            <template v-if="undefinedDataPercentage != null">{{ undefinedDataPercentage }} </template>undefined data
             <HelpTooltip label="About undefined data"
-                text="Some pixels have no measured value (data gaps). You can choose how to handle these under the Filters tab (leave undefined, or fill by harmonic interpolation)."/>
+                :text="undefinedDataTooltip"/>
         </span>
         <span v-if="isMetadataIncomplete" class="badge bg-danger ms-2">metadata incomplete
             <HelpTooltip label="About incomplete metadata"

@@ -4,7 +4,8 @@
 
 - ENH: The Filters tab names the trend that detrending subtracted, i.e. the slope
   of the removed tilt and the radius of the removed curvature
-
+- ENH: The "undefined data" badge of a measurement names how much of it is
+  undefined
 - ENH: The publish wizard states on its first step when a dataset cannot be
   published, listing the measurements that are not ready, instead of failing at the
   final "Publish" step
@@ -21,6 +22,8 @@
   `0:00:42.123456` of the API, at a resolution that means something
 - ENH: Reloading a dataset, measurement or contact-mechanics page returns to the tab
   that was open instead of the first one
+- ENH: Power-spectral density plots carry a second axis above them showing the
+  real-space size scale λ = 2π/q
 - BUG: Task dashboard shows the username when a user has no name set
 - MAINT: Removed the npm dependencies that nothing imports, left over from when
   webpack still bundled BokehJS from source
