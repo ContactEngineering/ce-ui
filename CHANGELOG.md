@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- ENH: The publish wizard states on its first step when a dataset cannot be
+  published, listing the measurements that are not ready, instead of failing at the
+  final "Publish" step
 - BUG: Task dashboard shows the username when a user has no name set
 - MAINT: Celery task time limits are now explicit and env-configurable
 - MAINT: Added `TOPOBANK_ANALYSIS_MEMORY_*` settings for the analysis memory guard

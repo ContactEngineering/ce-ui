@@ -12,11 +12,18 @@ const props = defineProps({
 const emit = defineEmits(['continue']);
 
 const surface = ref();
+const readiness = ref();
 const error = ref(false);
 const loading = ref(true);
 
-axios.get(`/manager/api/surface/${props.surfaceId}`).then((response) => {
-    surface.value = response.data;
+// Check publishability up front, so a dataset that `publish` would reject is
+// flagged here rather than after the user has filled in authors and a license.
+Promise.all([
+    axios.get(`/manager/api/surface/${props.surfaceId}`),
+    axios.get(`/go/publishable/${props.surfaceId}/`)
+]).then(([surfaceResponse, readinessResponse]) => {
+    surface.value = surfaceResponse.data;
+    readiness.value = readinessResponse.data;
     loading.value = false;
 }).catch((err) => {
     error.value = true;
@@ -81,8 +88,39 @@ axios.get(`/manager/api/surface/${props.surfaceId}`).then((response) => {
                 </div>
             </BCard>
 
+            <div v-if="readiness && !readiness.publishable"
+                 class="alert alert-danger p-4 rounded-3 shadow-sm">
+                <div class="d-flex align-items-start">
+                    <i class="fa-solid fa-circle-exclamation fs-3 me-3"></i>
+                    <div class="w-100">
+                        <h5 class="alert-heading fw-bold mb-2">This dataset cannot be published yet</h5>
+                        <p v-for="blocker in readiness.blockers" :key="blocker.code" class="mb-2">
+                            {{ blocker.message }}
+                        </p>
+                        <div v-if="readiness.unready_measurements.length" class="mt-3">
+                            <strong class="d-block small mb-1">Measurements that are not ready</strong>
+                            <ul class="mb-2">
+                                <li v-for="measurement in readiness.unready_measurements" :key="measurement.id">
+                                    {{ measurement.name }}
+                                    <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle ms-1">
+                                        {{ measurement.detail }}
+                                    </span>
+                                </li>
+                            </ul>
+                            <p class="mb-0 small">
+                                Publishing creates a permanently read-only copy, so anything still missing here
+                                could never be corrected afterwards. Wait for any running processing to finish,
+                                re-upload or remove measurements that failed, and fill in the missing metadata
+                                for measurements that need it.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="d-flex justify-content-end">
-                <BButton @click="emit('continue')" variant="primary" size="lg" class="px-4">
+                <BButton @click="emit('continue')" variant="primary" size="lg" class="px-4"
+                         :disabled="!readiness || !readiness.publishable">
                     Continue to Authors <i class="fa-solid fa-arrow-right ms-2"></i>
                 </BButton>
             </div>
