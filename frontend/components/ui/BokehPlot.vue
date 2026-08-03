@@ -13,8 +13,10 @@ import {
     HoverTool,
     Legend,
     LegendItem,
+    LogAxis,
     Palettes,
     Plotting,
+    Range1d,
     SaveTool,
     Scatter,
     TapTool
@@ -26,6 +28,7 @@ import {
     BTabs
 } from "bootstrap-vue-next";
 
+import {wavelengthAxis, wavelengthRange} from "@/utils/axes";
 import {applyDefaultBokehStyle} from "@/utils/bokeh";
 import {slugifyFilename} from "@/utils/download";
 import {
@@ -109,6 +112,11 @@ let _categoryElementSelections = [];  // Flags which categories are selected
 // Colors
 const _parentColorPalette = Palettes.Greys256;  // Surfaces are shown in black/grey
 const _childColorPalette = Palettes.Plasma256;  // Plasma is used for topographies
+
+/* Name under which the range of the secondary real-space axis is registered on a
+   figure. Bokeh addresses an extra range by name, and there is at most one of
+   these per figure. */
+const WAVELENGTH_RANGE = "wavelength";
 
 onMounted(() => {
     isMounted.value = true;
@@ -286,6 +294,43 @@ function destroyBokehViews() {
     _bokehFigures.length = 0;
 }
 
+/* Add a second x axis above the plot showing the wavelength that corresponds to
+   the wavevector below it.
+
+   Bokeh links a secondary axis by giving it its own range, so the two are kept
+   in step by recomputing that range whenever the primary one changes: on the
+   initial auto-range, on zoom and pan, and on reset. The mapping itself is left
+   to the axis, which is why this is only offered for logarithmic axes, where
+   `log λ = log 2π − log q` is affine in the coordinates the axis is drawn in
+   (see `wavelengthAxis`).
+
+   The axis is added before the default style is applied, so that it picks up the
+   same fonts and tick formatting as every other axis on the site. */
+function addWavelengthAxis(figure, wavelength) {
+    // A decade wide and positive, rather than the default range starting at
+    // zero, which a logarithmic scale cannot map. It is replaced with the real
+    // bounds as soon as the primary range knows them.
+    const range = new Range1d({start: 1, end: 10});
+    figure.extra_x_ranges = {...figure.extra_x_ranges, [WAVELENGTH_RANGE]: range};
+    figure.add_layout(new LogAxis({
+        x_range_name: WAVELENGTH_RANGE,
+        axis_label: wavelength.label
+    }), "above");
+
+    const synchronize = () => {
+        const bounds = wavelengthRange(figure.x_range.start, figure.x_range.end);
+        if (bounds != null) {
+            range.setv(bounds);
+        }
+    };
+    // The primary range is a `DataRange1d`, so its bounds are unset until the
+    // view has computed them from the data; the change signals cover that first
+    // assignment as well as later interaction.
+    figure.x_range.properties.start.change.connect(synchronize);
+    figure.x_range.properties.end.change.connect(synchronize);
+    synchronize();
+}
+
 function createFigures() {
     destroyBokehViews();
 
@@ -330,6 +375,14 @@ function createFigures() {
             tools: tools,
             output_backend: props.outputBackend
         });
+
+        /* A wavevector axis gets a second axis above it showing the size scale
+           2π/q, which is what a reader without a background in spectral analysis
+           can interpret. */
+        const wavelength = wavelengthAxis(plot.xAxisLabel, xAxisType);
+        if (wavelength != null) {
+            addWavelengthAxis(figure, wavelength);
+        }
 
         applyDefaultBokehStyle(figure);
 
