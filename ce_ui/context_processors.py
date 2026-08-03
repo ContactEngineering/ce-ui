@@ -1,8 +1,19 @@
 from django.conf import settings
 from django.shortcuts import reverse
 
+from . import bokehjs
+
 HOME_URL = reverse("home")
 SEARCH_URL = reverse("ce_ui:select")
+
+
+def bokehjs_processor(request):
+    """Adds the version of BokehJS the frontend is written against.
+
+    `app.html` renders it into the CDN URLs of the prebuilt bundle, so that the
+    served version cannot drift from the one pinned in `package.json`.
+    """
+    return {"bokehjs_version": bokehjs.VERSION}
 
 
 def fixed_tabs_processor(request):
