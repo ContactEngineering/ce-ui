@@ -5,6 +5,7 @@ import {
     formatDateTime,
     formatDuration,
     formatExponential,
+    formatPercentage,
     preferExponentialLabels,
     prettyBytes,
     unicodeSuperscript
@@ -178,5 +179,28 @@ describe("formatDuration", () => {
         expect(formatDuration(null)).toBe("–");
         expect(formatDuration(undefined)).toBe("–");
         expect(formatDuration("nonsense")).toBe("–");
+    });
+});
+
+describe("formatPercentage", () => {
+    it("formats a fraction as a percentage", () => {
+        expect(formatPercentage(0.07)).toBe("7%");
+        expect(formatPercentage(1)).toBe("100%");
+        expect(formatPercentage(0)).toBe("0%");
+    });
+
+    it("keeps two significant digits", () => {
+        expect(formatPercentage(0.1234)).toBe("12%");
+        expect(formatPercentage(0.001234)).toBe("0.12%");
+    });
+
+    it("does not round a very small share down to nothing", () => {
+        expect(formatPercentage(0.00001)).toBe("< 0.01%");
+    });
+
+    it("has no result for a measurement that has not been inspected", () => {
+        expect(formatPercentage(null)).toBeNull();
+        expect(formatPercentage(undefined)).toBeNull();
+        expect(formatPercentage(NaN)).toBeNull();
     });
 });

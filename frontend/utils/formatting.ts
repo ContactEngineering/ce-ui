@@ -184,6 +184,29 @@ export function formatDuration(value: number | string | null | undefined): strin
 }
 
 /**
+ * Format a fraction in [0, 1] as a percentage, e.g. 0.07 => "7%".
+ *
+ * Kept to two significant digits: the exact share of undefined pixels in a
+ * measurement carries no more information than its order of magnitude, and a
+ * share far below a percent should still read as something other than "0%".
+ *
+ * @param fraction The fraction to format.
+ * @returns The formatted percentage, or `null` for a missing or non-finite
+ *     value (a measurement that has not been inspected has no fraction).
+ */
+export function formatPercentage(fraction: number | null | undefined): string | null {
+    if (typeof fraction !== "number" || !isFinite(fraction)) {
+        return null;
+    }
+    if (fraction > 0 && fraction < 0.0001) {
+        // Two significant digits would render this as "0%", which reads as
+        // "none" rather than "very little".
+        return "< 0.01%";
+    }
+    return `${formatSignificant(100 * fraction, 2)}%`;
+}
+
+/**
  * Format a date-time string into a human-readable local date-time string.
  *
  * @param dateTimeString The date-time string to be formatted.
