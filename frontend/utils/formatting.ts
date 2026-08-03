@@ -113,6 +113,76 @@ export function formatSignificant(value: number, significantDigits: number = 4):
     return `${parseFloat(value.toPrecision(significantDigits))}`;
 }
 
+/** Shown wherever a duration or time stamp is absent. */
+const MISSING = "–";
+
+/**
+ * Matches the way Django renders a `timedelta`: `[-][DD ]HH:MM:SS[.ffffff]`,
+ * which is what a DRF `DurationField` puts into the JSON.
+ */
+const DURATION_PATTERN = /^(-?)(?:(\d+)\s)?(\d+):(\d{2}):(\d{2}(?:\.\d+)?)$/;
+
+/**
+ * Number of seconds in a duration as it arrives from the API.
+ *
+ * Durations come in two shapes: the staff dashboard computes them itself and
+ * sends a number of seconds, while a serialized `timedelta` arrives as the
+ * string Django renders it as.
+ *
+ * @param value Seconds, or a Django duration string.
+ * @returns The duration in seconds, or `null` if there is none (a task that has
+ *     not finished has no duration) or the string does not parse.
+ */
+export function durationSeconds(value: number | string | null | undefined): number | null {
+    if (typeof value === "number") {
+        return isFinite(value) ? value : null;
+    }
+    if (typeof value !== "string") {
+        return null;
+    }
+    const match = DURATION_PATTERN.exec(value.trim());
+    if (match == null) {
+        return null;
+    }
+    const [, sign, days, hours, minutes, seconds] = match;
+    const total = (days == null ? 0 : Number(days)) * 86400
+        + Number(hours) * 3600 + Number(minutes) * 60 + Number(seconds);
+    return sign === "-" ? -total : total;
+}
+
+/**
+ * Format a duration for display, e.g. "< 1 sec", "42 sec", "7 min" or
+ * "10 h 31 min".
+ *
+ * The resolution is deliberately coarse: seconds only carry information for a
+ * task that finishes in under a minute, and a task measured in hours is not
+ * described any better by naming its seconds. Nothing is padded, so no unit
+ * ever shows a leading zero.
+ *
+ * @param value Seconds, or a Django duration string (see `durationSeconds`).
+ * @returns The formatted duration, or a dash if there is none.
+ */
+export function formatDuration(value: number | string | null | undefined): string {
+    const seconds = durationSeconds(value);
+    if (seconds == null || seconds < 0) {
+        return MISSING;
+    }
+    if (seconds < 1) {
+        return "< 1 sec";
+    }
+    if (seconds < 60) {
+        // Truncate rather than round, so that a duration never displays as the
+        // next unit up ("60 sec").
+        return `${Math.floor(seconds)} sec`;
+    }
+    if (seconds < 3600) {
+        return `${Math.floor(seconds / 60)} min`;
+    }
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    return minutes === 0 ? `${hours} h` : `${hours} h ${minutes} min`;
+}
+
 /**
  * Format a date-time string into a human-readable local date-time string.
  *
