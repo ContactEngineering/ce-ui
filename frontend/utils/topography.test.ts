@@ -1,6 +1,6 @@
 import {describe, expect, it} from "vitest";
 
-import {emptyTopography, filterTopographyForPatchRequest} from "@/utils/topography";
+import {describeDetrend, emptyTopography, filterTopographyForPatchRequest} from "@/utils/topography";
 
 describe("emptyTopography", () => {
     it("has no server-side representation and no data", () => {
@@ -56,5 +56,40 @@ describe("filterTopographyForPatchRequest", () => {
             height_scale: 1.5,
             is_periodic: true
         });
+    });
+});
+
+describe("describeDetrend", () => {
+    it("names the slope in each lateral direction", () => {
+        expect(describeDetrend({slope_x: 0.0025, slope_y: 0.0071}, "µm"))
+            .toBe("slope 0.0025 in x, slope 0.0071 in y");
+    });
+
+    it("names the radius with the lateral unit", () => {
+        expect(describeDetrend({slope_x: 0.5, radius_x: 50}, "µm"))
+            .toBe("slope 0.5 in x, radius 50 µm in x");
+    });
+
+    it("switches to exponential notation below a thousandth", () => {
+        expect(describeDetrend({slope_x: 2.5e-7}, "µm")).toBe("slope 2.5×10⁻⁷ in x");
+    });
+
+    it("omits what the fit does not determine", () => {
+        // A line scan has no y component, and a flat direction has no radius
+        expect(describeDetrend({slope_x: 0.5}, "µm")).toBe("slope 0.5 in x");
+    });
+
+    it("has no description when no trend was fitted", () => {
+        // A mode that only subtracts the mean
+        expect(describeDetrend({}, "µm")).toBeNull();
+    });
+
+    it("has no description for a measurement that has not been inspected", () => {
+        expect(describeDetrend(null, "µm")).toBeNull();
+        expect(describeDetrend(undefined, "µm")).toBeNull();
+    });
+
+    it("leaves the unit off when the measurement has none", () => {
+        expect(describeDetrend({radius_x: 50}, null)).toBe("radius 50 in x");
     });
 });
