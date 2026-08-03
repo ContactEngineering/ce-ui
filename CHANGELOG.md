@@ -27,6 +27,10 @@
 - ENH: Power-spectral density plots carry a second axis above them showing the
   real-space size scale λ = 2π/q
 - BUG: Task dashboard shows the username when a user has no name set
+- BUG: The dataset list renders the "Page size" and "Sort by" controls again;
+  `BInputGroup` was used without being imported, and this project registers
+  bootstrap-vue-next components per file. Also corrected the casing of a closing
+  `BTbody` tag in the properties table
 - MAINT: Removed the npm dependencies that nothing imports, left over from when
   webpack still bundled BokehJS from source
 - MAINT: Celery task time limits are now explicit and env-configurable
