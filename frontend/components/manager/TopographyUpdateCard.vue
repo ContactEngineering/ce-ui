@@ -20,7 +20,7 @@ import {
 } from 'bootstrap-vue-next';
 
 import {subjectsToBase64} from "@/utils/api";
-import {filterTopographyForPatchRequest} from "@/utils/topography";
+import {describeDetrend, filterTopographyForPatchRequest} from "@/utils/topography";
 import {formatSignificant} from "@/utils/formatting";
 
 import TopographyBadges from "@/components/manager/TopographyBadges.vue";
@@ -124,6 +124,13 @@ const _instrumentChoices = [
     },
     {value: 'contact-based', text: 'Contact-based instrument with known tip radius'}
 ];
+/* The trend the last inspection subtracted, shown only while not editing: the
+   values belong to the mode that was in effect at that inspection, which is not
+   necessarily the one currently selected. */
+const detrendDescription = computed(() => {
+    return describeDetrend(props.topography?.detrend_parameters, props.topography?.unit);
+});
+
 const _detrendChoices = [
     {value: 'center', text: 'No detrending, but subtract mean height'},
     {value: 'height', text: 'Remove tilt'},
@@ -621,6 +628,12 @@ const sizeYModel = croppedSizeModel('size_y');
                                         :class="highlightInput('detrend_mode')"
                                         :disabled="!_editing">
                             </BFormSelect>
+                        </div>
+                        <div v-if="!_editing && detrendDescription != null"
+                             class="form-text mt-0 mb-1">
+                            Removed: {{ detrendDescription }}
+                            <HelpTooltip
+                                text="The trend that was fitted and subtracted when this measurement was last read. Slopes are heights per lateral distance; a radius describes the curvature that was removed."/>
                         </div>
                     </div>
                     <div class="col-6 mt-1">

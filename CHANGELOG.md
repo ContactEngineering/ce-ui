@@ -2,6 +2,9 @@
 
 ## 1.34.0 (2026-08-03)
 
+- ENH: The Filters tab names the trend that detrending subtracted, i.e. the slope
+  of the removed tilt and the radius of the removed curvature
+
 - ENH: The publish wizard states on its first step when a dataset cannot be
   published, listing the measurements that are not ready, instead of failing at the
   final "Publish" step

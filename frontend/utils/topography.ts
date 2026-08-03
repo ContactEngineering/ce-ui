@@ -1,3 +1,5 @@
+import {formatExponential, formatSignificant} from "@/utils/formatting";
+
 /**
  * Helpers for working with topography (measurement) API objects.
  */
@@ -60,4 +62,45 @@ export function filterTopographyForPatchRequest(topography: any): any {
         }
     }
     return patch;
+}
+
+/**
+ * Describe the trend that detrending subtracted from a measurement.
+ *
+ * The backend fits the trend while reading the file and reports only the
+ * components its detrend mode determines: a measurement that merely has its mean
+ * subtracted has none, a line scan has no y component, and a direction the fit
+ * found to be flat has no radius.
+ *
+ * @param parameters The `detrend_parameters` of the measurement, as reported by
+ *     the API. Null for a measurement that has not been inspected.
+ * @param unit The lateral unit of the measurement, in which radii are given.
+ * @returns A description such as "slope 2.5×10⁻³ in x, radius 50 µm in x", or
+ *     null when no trend was fitted.
+ */
+export function describeDetrend(parameters: any, unit: string | null | undefined): string | null {
+    if (parameters == null) {
+        return null;
+    }
+    const parts: string[] = [];
+    for (const direction of ["x", "y"]) {
+        const slope = parameters[`slope_${direction}`];
+        if (slope != null) {
+            parts.push(`slope ${formatQuantity(slope)} in ${direction}`);
+        }
+    }
+    for (const direction of ["x", "y"]) {
+        const radius = parameters[`radius_${direction}`];
+        if (radius != null) {
+            const withUnit = unit == null ? formatQuantity(radius) : `${formatQuantity(radius)} ${unit}`;
+            parts.push(`radius ${withUnit} in ${direction}`);
+        }
+    }
+    return parts.length === 0 ? null : parts.join(", ");
+}
+
+/* Plain decimals stay readable down to about a thousandth; below that they turn
+   into a row of zeros, which is where the site's exponential notation takes over. */
+function formatQuantity(value: number): string {
+    return Math.abs(value) >= 1e-3 ? formatSignificant(value, 3) : formatExponential(value, 2);
 }
