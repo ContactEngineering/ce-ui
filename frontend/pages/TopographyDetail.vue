@@ -12,6 +12,8 @@ import {
     useToastController
 } from "bootstrap-vue-next";
 
+import { useActiveTab } from "@/stores/tabs";
+
 import { getIdFromUrl, subjectsToBase64 } from "@/utils/api";
 
 import Attachments from "@/components/manager/Attachments.vue";
@@ -38,6 +40,7 @@ const appProps = inject("appProps");
 const _disabled = ref(false);
 const _showDeleteModal = ref(false);
 const _topography = ref(null);
+const activeTab = useActiveTab("measurement-detail");  // survives a page reload
 
 function getTopographyUrl() {
     if (props.topographyUrl != null) {
@@ -120,12 +123,13 @@ const base64Subjects = computed(() => {
         <div v-if="_topography !== null"
              class="row">
             <div class="col-12">
-                <BTabs class="nav-pills-custom"
+                <BTabs v-model="activeTab"
+                       class="nav-pills-custom"
                        content-class="w-100"
                        fill
                        pills
                        vertical>
-                    <BTab title="Visualization">
+                    <BTab id="measurement-visualization" title="Visualization">
                         <!-- Processing failed: show the error here instead of
                              attempting to render a plot/zoomable image (which
                              would toast and spin forever). -->
@@ -176,14 +180,14 @@ const base64Subjects = computed(() => {
                             </DeepZoomImage>
                         </template>
                     </BTab>
-                    <BTab title="Details">
+                    <BTab id="measurement-details" title="Details">
                         <TopographyCard :topography-url="_topography.url"
                                         v-model:topography="_topography"
                                         :enlarged="true"
                                         :disabled="_disabled">
                         </TopographyCard>
                     </BTab>
-                    <BTab title="Attachments">
+                    <BTab id="measurement-attachments" title="Attachments">
                         <Attachments :attachments-url="_topography.attachments"
                                      :permission="_topography.permissions.current_user.permission">
                         </Attachments>
