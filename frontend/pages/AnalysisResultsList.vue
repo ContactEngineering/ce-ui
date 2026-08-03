@@ -42,6 +42,31 @@ const subjectsDict = computed(() => {
     return getSubjectsDict();
 });
 
+// Number of workflows that are currently shown, out of those on offer
+const nbSelected = computed(() => {
+    return _cards.value.filter(card => analysis.isSelected(card.name)).length;
+});
+
+/* Select or deselect every workflow at once. Picking twenty workflows one by
+   one is the tedious part of this page, and the state in between is what the
+   checkbox shows as indeterminate. */
+const allSelected = computed({
+    get() {
+        return _cards.value.length > 0 && nbSelected.value === _cards.value.length;
+    },
+    set(value: boolean) {
+        if (value) {
+            analysis.selectAll(_cards.value.map(card => card.name));
+        } else {
+            analysis.clear();
+        }
+    }
+});
+
+const someSelected = computed(() => {
+    return nbSelected.value > 0 && nbSelected.value < _cards.value.length;
+});
+
 // Position of each card among the *visible* (selected) cards, so the
 // alternating background stripes the shown cards correctly even when some
 // workflows are hidden.
@@ -69,6 +94,15 @@ onMounted(() => {
     <div class="row mb-2">
         <BForm class="col-12">
             <BFormGroup>
+                <BFormCheckbox v-model="allSelected"
+                               :disabled="_cards.length === 0"
+                               :indeterminate="someSelected">
+                    Select all
+                    <span v-if="nbSelected > 0" class="text-secondary">
+                        ({{ nbSelected }} of {{ _cards.length }} selected)
+                    </span>
+                </BFormCheckbox>
+                <hr class="my-2">
                 <BFormCheckboxGroup v-model="analysis.workflows">
                     <BFormCheckbox v-for="card in _cards"
                                    :key="card.name"

@@ -16,6 +16,11 @@ export const useAnalysisStore = defineStore('analysis', {
                 (w: string): boolean => w !== workflow
             );
         },
+        selectAll(workflows: string[]) {
+            // Assign rather than push, so that selecting all does not leave
+            // duplicates behind for the workflows that were already selected
+            this.workflows = [...workflows];
+        },
         clear() {
             this.workflows = [];
         }
