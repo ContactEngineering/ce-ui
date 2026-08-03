@@ -2,6 +2,8 @@
 
 ## 1.34.0 (2026-08-03)
 
+- ENH: The dataset list shows one row per dataset, naming its version and offering
+  the older ones, instead of a separate row per published version
 - ENH: The Filters tab names the trend that detrending subtracted, i.e. the slope
   of the removed tilt and the radius of the removed curvature
 - ENH: The "undefined data" badge of a measurement names how much of it is

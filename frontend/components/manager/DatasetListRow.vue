@@ -3,7 +3,8 @@
 import { computed, onMounted, ref } from "vue";
 
 import axios from "axios";
-import { subjectsToBase64 } from "@/utils/api";
+import { getIdFromUrl, subjectsToBase64 } from "@/utils/api";
+import { describeVersions } from "@/utils/versions";
 
 import {
     BBadge,
@@ -25,6 +26,13 @@ const props = defineProps({
 const _creator = ref(null);
 const _publication = ref(null);
 const _downloadModal = ref(null);
+
+/* Older versions of this dataset. The list shows only the latest version, so the
+   others have to be reachable from here; they are fetched when the row is
+   expanded rather than for every row of every page. */
+const _versionsVisible = ref(false);
+const _versions = ref(null);
+const _versionsLoading = ref(false);
 
 /* Download this dataset as a ZIP archive. A published dataset has an archived container that can be fetched straight
    away; everything else is assembled by a Celery worker, with the modal reporting progress. See `DatasetDetail`. */
@@ -50,6 +58,36 @@ onMounted(() => {
         });
     }
 });
+
+const versions = computed(() => {
+    return describeVersions(_versions.value, props.dataset?.version);
+});
+
+function toggleVersions() {
+    _versionsVisible.value = !_versionsVisible.value;
+    if (!_versionsVisible.value || _versions.value != null || _versionsLoading.value) {
+        return;
+    }
+    /* All versions of a dataset share an original, which is what the publication
+       endpoint groups by. */
+    const originalSurface = _publication.value?.original_surface;
+    if (originalSurface == null) {
+        _versions.value = [];
+        return;
+    }
+    _versionsLoading.value = true;
+    axios.get(`/go/publication/?original_surface=${getIdFromUrl(originalSurface)}`)
+        .then(response => {
+            _versions.value = response.data.results ?? response.data;
+        })
+        .catch(() => {
+            // Leave the list empty; the row itself stays usable
+            _versions.value = [];
+        })
+        .finally(() => {
+            _versionsLoading.value = false;
+        });
+}
 
 const publicationAuthorsPretty = computed(() => {
     if (_publication.value == null) {
@@ -128,16 +166,36 @@ const creationDatePretty = computed(() => {
                 <p v-if="dataset.description != null && dataset.description !== ''"
                    class="dataset-description">
                     {{ dataset.description }}</p>
-                <p v-if="dataset.topography_count != null && dataset.version != null"
-                   class="dataset-info">
-                    This is version {{ dataset.version }} of this digital surface twin
-                    and
-                    contains
+                <p v-if="dataset.topography_count != null" class="dataset-info">
+                    This digital surface twin contains
                     {{ dataset.topography_count }} measurements.
                 </p>
-                <p v-else-if="dataset.version != null" class="dataset-info">
-                    This is version {{ dataset.version }} of this digital surface twin.
-                </p>
+                <!-- The list shows only the latest version of a dataset, so say
+                     which one this is and offer the others. -->
+                <div v-if="dataset.version != null" class="dataset-info">
+                    <BBadge variant="secondary">Version {{ dataset.version }}</BBadge>
+                    <BButton v-if="dataset.nb_versions > 1"
+                             class="ms-2 py-0"
+                             size="sm"
+                             variant="outline-secondary"
+                             @click="toggleVersions">
+                        <i :class="_versionsVisible ? 'fa fa-caret-up' : 'fa fa-caret-down'"
+                           class="me-1"></i>{{ dataset.nb_versions }} versions
+                    </BButton>
+                    <div v-if="_versionsVisible" class="mt-1 ms-1">
+                        <span v-if="_versionsLoading">Loading versions&hellip;</span>
+                        <span v-else-if="versions.length === 0">
+                            The other versions of this dataset are not available.
+                        </span>
+                        <ul v-else class="list-unstyled mb-0">
+                            <li v-for="version of versions" :key="version.version">
+                                <a :href="version.href">Version {{ version.version }}</a>
+                                <span v-if="version.date"> &mdash; {{ version.date }}</span>
+                                <span v-if="version.isCurrent" class="text-secondary"> (shown here)</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
                 <p v-else-if="dataset.topography_count != null" class="dataset-info">
                     This digital surface twin contains {{ dataset.topography_count }}
                     measurements.
