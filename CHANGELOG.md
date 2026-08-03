@@ -19,6 +19,8 @@
 - ENH: Reloading a dataset, measurement or contact-mechanics page returns to the tab
   that was open instead of the first one
 - BUG: Task dashboard shows the username when a user has no name set
+- MAINT: Removed the npm dependencies that nothing imports, left over from when
+  webpack still bundled BokehJS from source
 - MAINT: Celery task time limits are now explicit and env-configurable
 - MAINT: Added `TOPOBANK_ANALYSIS_MEMORY_*` settings for the analysis memory guard
 
