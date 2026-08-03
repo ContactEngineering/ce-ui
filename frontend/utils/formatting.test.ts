@@ -1,7 +1,9 @@
 import {describe, expect, it} from "vitest";
 
 import {
+    durationSeconds,
     formatDateTime,
+    formatDuration,
     formatExponential,
     preferExponentialLabels,
     prettyBytes,
@@ -123,5 +125,58 @@ describe("formatDateTime", () => {
         expect(formatDateTime(null)).toBeNull();
         expect(formatDateTime(undefined)).toBeNull();
         expect(formatDateTime("not a date")).toBeNull();
+    });
+});
+
+describe("durationSeconds", () => {
+    it("passes a number of seconds through", () => {
+        expect(durationSeconds(12.5)).toBe(12.5);
+    });
+
+    it("parses the way Django renders a timedelta", () => {
+        expect(durationSeconds("00:00:05.123456")).toBeCloseTo(5.123456);
+        expect(durationSeconds("01:02:03")).toBe(3723);
+        expect(durationSeconds("3 01:00:00")).toBe(3 * 86400 + 3600);
+        expect(durationSeconds("-00:00:10")).toBe(-10);
+    });
+
+    it("returns null when there is no duration", () => {
+        expect(durationSeconds(null)).toBeNull();
+        expect(durationSeconds(undefined)).toBeNull();
+        expect(durationSeconds("a while")).toBeNull();
+        expect(durationSeconds(Infinity)).toBeNull();
+    });
+});
+
+describe("formatDuration", () => {
+    it("does not claim sub-second resolution", () => {
+        expect(formatDuration(0)).toBe("< 1 sec");
+        expect(formatDuration(0.5)).toBe("< 1 sec");
+        expect(formatDuration("00:00:00.123456")).toBe("< 1 sec");
+    });
+
+    it("shows whole seconds below a minute", () => {
+        expect(formatDuration(1)).toBe("1 sec");
+        expect(formatDuration(42.7)).toBe("42 sec");
+        // Truncating keeps this from reading as the next unit up
+        expect(formatDuration(59.9)).toBe("59 sec");
+    });
+
+    it("shows whole minutes below an hour", () => {
+        expect(formatDuration(60)).toBe("1 min");
+        expect(formatDuration(192)).toBe("3 min");
+        expect(formatDuration(3599)).toBe("59 min");
+    });
+
+    it("shows hours, and minutes only when there are any", () => {
+        expect(formatDuration(3600)).toBe("1 h");
+        expect(formatDuration(3840)).toBe("1 h 4 min");
+        expect(formatDuration("10:31:00")).toBe("10 h 31 min");
+    });
+
+    it("renders a dash for a task that has not finished", () => {
+        expect(formatDuration(null)).toBe("–");
+        expect(formatDuration(undefined)).toBe("–");
+        expect(formatDuration("nonsense")).toBe("–");
     });
 });
