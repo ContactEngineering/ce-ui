@@ -18,9 +18,9 @@ import {
 import TaskStateBadge from "@/components/staff/TaskStateBadge.vue";
 import WorkerStatusCard from "@/components/staff/WorkerStatusCard.vue";
 import SortableTh from "@/components/staff/SortableTh.vue";
+import {formatDuration} from "@/utils/formatting";
 import {
     formatBytes,
-    formatDuration,
     formatTimestamp,
     usePaginatedList
 } from "@/utils/paginatedList";

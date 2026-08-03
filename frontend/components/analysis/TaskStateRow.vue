@@ -5,7 +5,7 @@ import {computed, onMounted, onBeforeUnmount, ref, watch} from "vue";
 
 import {BButton, useToastController} from "bootstrap-vue-next";
 
-import {formatDateTime, prettyBytes} from "@/utils/formatting";
+import {formatDateTime, formatDuration, prettyBytes} from "@/utils/formatting";
 
 import ProgressIndicator from "@/components/ui/ProgressIndicator.vue";
 
@@ -119,6 +119,7 @@ const taskMemoryPretty = computed(() => {
     return prettyBytes(analysis.value.task_memory);
 });
 
+const durationPretty = computed(() => formatDuration(analysis.value.task_duration));
 const creationTimePretty = computed(() => formatDateTime(analysis.value.creation_time));
 const startTimePretty = computed(() => formatDateTime(analysis.value.task_start_time));
 
@@ -146,7 +147,7 @@ watch(() => analysis.value, () => {
             <div v-if="analysis.task_state === 'su'">
                 <span><b>Created on:</b> {{ creationTimePretty }}
                     <template v-if="startTimePretty != null">&#8212; <b>Started at:</b> {{ startTimePretty }}</template>
-                    <template v-if="analysis.task_duration != null">&#8212; <b>Duration:</b> {{ analysis.task_duration }}</template></span>
+                    <template v-if="analysis.task_duration != null">&#8212; <b>Duration:</b> {{ durationPretty }}</template></span>
                 <span v-if="analysis.task_memory != null">
                     &#8212; <b>Peak memory usage:</b> {{ taskMemoryPretty }}
                 </span>

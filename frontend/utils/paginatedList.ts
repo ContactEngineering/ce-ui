@@ -107,20 +107,6 @@ export function usePaginatedList(apiUrl: string, options: {
     };
 }
 
-/** Format a duration in seconds as e.g. "2.4 s", "3 min 12 s" or "1 h 04 min". */
-export function formatDuration(seconds: number | null): string {
-    if (seconds == null) {
-        return "–";
-    }
-    if (seconds < 60) {
-        return `${seconds.toFixed(1)} s`;
-    }
-    if (seconds < 3600) {
-        return `${Math.floor(seconds / 60)} min ${String(Math.floor(seconds % 60)).padStart(2, "0")} s`;
-    }
-    return `${Math.floor(seconds / 3600)} h ${String(Math.floor((seconds % 3600) / 60)).padStart(2, "0")} min`;
-}
-
 /** Format an ISO timestamp for the dashboards, or a dash if it is absent. */
 export function formatTimestamp(value: string | null): string {
     if (value == null) {
