@@ -103,14 +103,15 @@ Promise.all([
                                 <li v-for="measurement in readiness.unready_measurements" :key="measurement.id">
                                     {{ measurement.name }}
                                     <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle ms-1">
-                                        {{ measurement.task_state_display }}
+                                        {{ measurement.detail }}
                                     </span>
                                 </li>
                             </ul>
                             <p class="mb-0 small">
-                                Publishing creates a permanently read-only copy, so a measurement that has not
-                                been processed successfully could never be fixed afterwards. Wait for any running
-                                processing to finish, and re-upload or remove measurements that failed.
+                                Publishing creates a permanently read-only copy, so anything still missing here
+                                could never be corrected afterwards. Wait for any running processing to finish,
+                                re-upload or remove measurements that failed, and fill in the missing metadata
+                                for measurements that need it.
                             </p>
                         </div>
                     </div>
