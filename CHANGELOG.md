@@ -14,6 +14,8 @@
   JavaScript
 - BUG: Task durations are shown as "42 sec" or "1 h 4 min" instead of the raw
   `0:00:42.123456` of the API, at a resolution that means something
+- ENH: Reloading a dataset, measurement or contact-mechanics page returns to the tab
+  that was open instead of the first one
 - BUG: Task dashboard shows the username when a user has no name set
 - MAINT: Celery task time limits are now explicit and env-configurable
 - MAINT: Added `TOPOBANK_ANALYSIS_MEMORY_*` settings for the analysis memory guard

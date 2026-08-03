@@ -5,6 +5,8 @@ import { computed, onMounted, ref } from "vue";
 
 import { BDropdownDivider, BDropdownItem, BTab, BTabs, useToastController } from "bootstrap-vue-next";
 
+import { useActiveTab } from "@/stores/tabs";
+
 import { subjectsToBase64 } from "@/utils/api";
 import {
     buildColumnsCsvRows,
@@ -69,6 +71,9 @@ const _nbPendingAjaxRequests = ref(0);
 const _parametersVisible = ref(false);
 const _plot = ref(null);
 const _downloadModal = ref(null);
+// Which result of the selected step is shown; survives a page reload and
+// picking another point in the contact-mechanics plot
+const activeTab = useActiveTab("contact-mechanics-card");
 
 onMounted(() => {
     updateCard();
@@ -333,31 +338,31 @@ function downloadZip() {
                     in the graphs on the left for more details.
                 </div>
                 <LoadingIndicator v-if="_isLoading"/>
-                <BTabs v-if="_selection != null && !_isLoading">
-                    <BTab title="Contact geometry">
+                <BTabs v-if="_selection != null && !_isLoading" v-model="activeTab">
+                    <BTab id="contact-geometry" title="Contact geometry">
                         <DeepZoomImagePanel :folder-url="_selection.folder"
                                             :prefix="`${_selection.dataPath}/dzi/contacting-points/`">
                         </DeepZoomImagePanel>
                     </BTab>
-                    <BTab title="Contact pressure">
+                    <BTab id="contact-pressure" title="Contact pressure">
                         <DeepZoomImagePanel :colorbar="true"
                                             :folder-url="_selection.folder"
                                             :prefix="`${_selection.dataPath}/dzi/pressure/`">
                         </DeepZoomImagePanel>
                     </BTab>
-                    <BTab title="Displacement">
+                    <BTab id="contact-displacement" title="Displacement">
                         <DeepZoomImagePanel :colorbar="true"
                                             :folder-url="_selection.folder"
                                             :prefix="`${_selection.dataPath}/dzi/displacement/`">
                         </DeepZoomImagePanel>
                     </BTab>
-                    <BTab title="Gap">
+                    <BTab id="contact-gap" title="Gap">
                         <DeepZoomImagePanel :colorbar="true"
                                             :folder-url="_selection.folder"
                                             :prefix="`${_selection.dataPath}/dzi/gap/`">
                         </DeepZoomImagePanel>
                     </BTab>
-                    <BTab title="Pressure distribution">
+                    <BTab id="contact-pressure-distribution" title="Pressure distribution">
                         <BokehPlot v-if="_selection != null"
                                    :data-sources="distributionDataSources"
                                    :options-widgets='["layout", "lineWidth", "symbolSize"]'
@@ -365,7 +370,7 @@ function downloadZip() {
                                    :plots="pressureDistributionPlot">
                         </BokehPlot>
                     </BTab>
-                    <BTab title="Gap distribution">
+                    <BTab id="contact-gap-distribution" title="Gap distribution">
                         <BokehPlot v-if="_selection != null"
                                    :data-sources="distributionDataSources"
                                    :options-widgets='["layout", "lineWidth", "symbolSize"]'
@@ -373,7 +378,7 @@ function downloadZip() {
                                    :plots="gapDistributionPlot">
                         </BokehPlot>
                     </BTab>
-                    <BTab title="Cluster area distribution">
+                    <BTab id="contact-cluster-area-distribution" title="Cluster area distribution">
                         <BokehPlot v-if="_selection != null"
                                    :data-sources="distributionDataSources"
                                    :options-widgets='["layout", "lineWidth", "symbolSize"]'
