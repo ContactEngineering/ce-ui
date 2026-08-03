@@ -755,6 +755,13 @@ TOPOBANK_ANALYSIS_MEMORY_SAFETY_FACTOR = env.float(
 TOPOBANK_ANALYSIS_MEMORY_MIN_SAMPLES = env.int(
     "TOPOBANK_ANALYSIS_MEMORY_MIN_SAMPLES", default=5
 )
+# How far back the coefficients are learned from. This window is what lets a
+# coefficient fall again after a workflow is optimised: over an unbounded history
+# a high percentile barely moves, so the guard would keep predicting
+# pre-optimisation memory and start refusing analyses that now fit.
+TOPOBANK_ANALYSIS_MEMORY_WINDOW_DAYS = env.int(
+    "TOPOBANK_ANALYSIS_MEMORY_WINDOW_DAYS", default=90
+)
 
 
 # ALLAUTH SETTINGS
