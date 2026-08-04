@@ -1,6 +1,6 @@
 <script setup>
 
-import {computed, ref} from "vue";
+import {computed, ref, watch} from "vue";
 
 import {BButton} from 'bootstrap-vue-next';
 
@@ -18,22 +18,20 @@ const emit = defineEmits(['allTasksFinished', 'someTasksFinished']);
 const _modalVisible = ref(false);
 
 // Number of running or pending tasks
-let _lastNbRunningOrPending = null;
 const nbRunningOrPending = computed(() => {
-    const currentNbRunningOrPending = countTaskStates(analyses.value, ['pe', 'st', 're']);
-    // FIXME: side-effect (emit) inside a computed getter. Emitting events from a computed getter is fragile —
-    // the getter runs on every dependency read/re-evaluation, so events fire at unpredictable times. This should
-    // be refactored to a watcher, but that is a higher-risk change handled in a separate pass.
-    // Emit event when all tasks are finished
-    if (_lastNbRunningOrPending !== null && _lastNbRunningOrPending > 0) {
-        if (currentNbRunningOrPending === 0) {
-            emit('allTasksFinished', currentNbRunningOrPending);
-        } else if (currentNbRunningOrPending < _lastNbRunningOrPending) {
-            emit('someTasksFinished', currentNbRunningOrPending);
+    return countTaskStates(analyses.value, ['pe', 'st', 're']);
+});
+
+// Tell the parent when tasks finish. A watcher only fires when the count
+// actually changes, so parents can safely react by re-fetching data.
+watch(nbRunningOrPending, (current, previous) => {
+    if (previous > 0) {
+        if (current === 0) {
+            emit('allTasksFinished', current);
+        } else if (current < previous) {
+            emit('someTasksFinished', current);
         }
     }
-    _lastNbRunningOrPending = currentNbRunningOrPending;
-    return currentNbRunningOrPending;
 });
 
 // Number of successful tasks

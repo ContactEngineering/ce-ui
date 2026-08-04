@@ -1,7 +1,8 @@
 <script setup lang="ts">
 
 import axios from "axios";
-import { computed, onMounted, ref } from "vue";
+import throttle from "lodash/throttle";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 
 import { BDropdownDivider, BDropdownItem, BTab, BTabs, useToastController } from "bootstrap-vue-next";
 
@@ -77,6 +78,17 @@ const activeTab = useActiveTab("contact-mechanics-card");
 
 onMounted(() => {
     updateCard();
+});
+
+/* While a batch of tasks drains, every single task that finishes reports
+   "some tasks finished". Rebuilding the card is expensive (the server
+   re-serializes every analysis and the browser re-fetches every data series),
+   so partial completions are coalesced into at most one refresh per interval;
+   the final refresh comes from `allTasksFinished`, which is not throttled. */
+const updateCardThrottled = throttle(() => updateCard(), 10000, {leading: false, trailing: true});
+
+onBeforeUnmount(() => {
+    updateCardThrottled.cancel();
 });
 
 function updateCard() {
@@ -298,7 +310,7 @@ function downloadZip() {
                   title="Contact mechanics"
                   @allTasksFinished="updateCard"
                   @refreshButtonClicked="updateCard"
-                  @someTasksFinished="updateCard">
+                  @someTasksFinished="updateCardThrottled">
         <template #dropdowns>
             <BDropdownDivider></BDropdownDivider>
             <BDropdownItem @click="_parametersVisible = true">
@@ -313,7 +325,8 @@ function downloadZip() {
                     Download ZIP
                 </BDropdownItem>
                 <BDropdownItem @click="_plot.download()">
-                    Download SVG
+                    <!-- The save format follows the Bokeh output backend -->
+                    Download {{ _outputBackend === 'svg' ? 'SVG' : 'PNG' }}
                 </BDropdownItem>
             </template>
         </template>
