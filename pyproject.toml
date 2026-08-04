@@ -90,5 +90,16 @@ packages = ["ce_ui"]
 force-include = { "package.json" = "ce_ui/package.json" }
 
 [tool.coverage.run]
-# Generated migration modules would dilute the coverage numbers
-omit = ["*/migrations/*"]
+omit = [
+    # Generated migration modules would dilute the coverage numbers
+    "*/migrations/*",
+    # The test suite covering itself says nothing about the application
+    "*/tests/*",
+    # Deployment-time modules that a test run never executes: the suite runs
+    # under `ce_ui.settings.test`, and nothing imports the ASGI entry point.
+    # Counting them is a permanent deduction that hides real gaps rather than
+    # pointing at anything actionable.
+    "*/ce_ui/settings/local.py",
+    "*/ce_ui/settings/production.py",
+    "*/ce_ui/asgi.py",
+]
