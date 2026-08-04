@@ -200,7 +200,9 @@ MIDDLEWARE.insert(  # noqa: F405
 # ------------------------------------------------------------------------------
 USE_S3_STORAGE = True
 STORAGES = {
-    "default": {"BACKEND": "storages.backends.s3boto3.S3Boto3Storage"},
+    # Memoizes presigned URLs so browsers can cache thumbnails, plot data and
+    # deep-zoom tiles between page loads; see ce_ui.storage
+    "default": {"BACKEND": "ce_ui.storage.CachedPresignedUrlStorage"},
     "staticfiles": {
         "BACKEND": "servestatic.storage.CompressedManifestStaticFilesStorage"
     },

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { computed, onMounted, ref } from "vue";
+import { computed, ref } from "vue";
 
 import axios from "axios";
 import { getIdFromUrl, subjectsToBase64 } from "@/utils/api";
@@ -23,8 +23,10 @@ const props = defineProps({
     dataset: Object
 });
 
-const _creator = ref(null);
-const _publication = ref(null);
+/* The v2 list response embeds the creator's name and a publication summary,
+   so a row makes no requests of its own. */
+const _creator = computed(() => props.dataset?.created_by?.name ?? null);
+const _publication = computed(() => props.dataset?.publication ?? null);
 const _downloadModal = ref(null);
 
 /* Older versions of this dataset. The list shows only the latest version, so the
@@ -46,18 +48,6 @@ function download() {
         props.dataset.api.async_download,
         {title: `Download '${props.dataset.name}'`});
 }
-
-onMounted(() => {
-    axios.get(props.dataset.creator)
-        .then(response => {
-            _creator.value = response.data.name;
-        });
-    if (props.dataset?.publication) {
-        axios.get(props.dataset.publication).then(response => {
-            _publication.value = response.data;
-        });
-    }
-});
 
 const versions = computed(() => {
     return describeVersions(_versions.value, props.dataset?.version);
@@ -101,7 +91,7 @@ const publicationDatePretty = computed(() => {
 });
 
 const creationDatePretty = computed(() => {
-    return new Date(props.dataset.creation_datetime).toISOString().substring(0, 10);
+    return new Date(props.dataset.created_at).toISOString().substring(0, 10);
 });
 
 </script>
@@ -123,13 +113,6 @@ const creationDatePretty = computed(() => {
                         :href="`https://doi.org/${_publication.doi_name}`">
                     https://doi.org/{{ _publication.doi_name }}
                 </BBadge>
-                <a v-if="dataset.publication_doi != null"
-                   class="badge bg-dark me-1 text-decoration-none"
-                   :href="dataset.publication_doi">{{ dataset.publication_doi }}</a>
-                <img v-if="dataset.publication_license != null"
-                     :src="`/static/images/cc/${dataset.publication_license}.svg`"
-                     title="Dataset can be reused under the terms of a Creative Commons license."
-                     style="float:right">
                 <p v-if="dataset.sharing_status === 'own'" class='badge bg-info me-1'>
                     Created by you
                 </p>
@@ -151,7 +134,7 @@ const creationDatePretty = computed(() => {
                     This digital surface twin was published by {{ publicationAuthorsPretty }} on {{ publicationDatePretty }}
                 </p>
                 <ThumbnailRow class="mb-3"
-                              :data-sources="dataset.topography_set">
+                              :data-sources="dataset.topographies">
                 </ThumbnailRow>
                 <p v-if="_publication == null" class="dataset-authors">
                     This digital surface twin is unpublished.
@@ -159,16 +142,16 @@ const creationDatePretty = computed(() => {
                     <span v-if="_creator != null">
                         by {{ _creator }}
                     </span>
-                    <span v-if="dataset.creation_datetime != null">
+                    <span v-if="dataset.created_at != null">
                         on {{ creationDatePretty }}
                     </span>.
                 </p>
                 <p v-if="dataset.description != null && dataset.description !== ''"
                    class="dataset-description">
                     {{ dataset.description }}</p>
-                <p v-if="dataset.topography_count != null" class="dataset-info">
+                <p v-if="dataset.topographies != null" class="dataset-info">
                     This digital surface twin contains
-                    {{ dataset.topography_count }} measurements.
+                    {{ dataset.topographies.length }} measurements.
                 </p>
                 <!-- The list shows only the latest version of a dataset, so say
                      which one this is and offer the others. -->
@@ -196,10 +179,6 @@ const creationDatePretty = computed(() => {
                         </ul>
                     </div>
                 </div>
-                <p v-else-if="dataset.topography_count != null" class="dataset-info">
-                    This digital surface twin contains {{ dataset.topography_count }}
-                    measurements.
-                </p>
             </div>
             <div class="d-block">
                 <BButtonGroup vertical size="sm">

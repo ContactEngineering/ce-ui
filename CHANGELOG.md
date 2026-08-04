@@ -1,5 +1,19 @@
 # Changelog for plugin *ce-ui*
 
+## 1.36.0 (2026-08-04)
+
+- ENH: The dataset list runs on the v2 API and renders each page from a single
+  response: creator names, publication details (DOI, license, authors) and
+  measurement thumbnails arrive embedded, replacing the two to three requests
+  every row used to make on its own
+- ENH: Presigned storage URLs are memoized for half their lifetime
+  (`ce_ui.storage.CachedPresignedUrlStorage`), so the URL for a thumbnail, a
+  plot data series or a deep-zoom tile stays the same between page loads and
+  browsers can serve it from their cache instead of re-downloading it
+- ENH: Uploaded objects carry a `Cache-Control` header matching that window
+- ENH: The "Created by you" / "shared with you" badges on dataset rows work
+  again; they relied on a `sharing_status` field that no API version reported
+
 ## 1.35.0 (2026-08-04)
 
 - ENH: Analysis cards refresh at most once every ten seconds while a batch of
