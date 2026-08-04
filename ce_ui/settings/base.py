@@ -450,6 +450,16 @@ AWS_S3_FILE_OVERWRITE = False
 # stable, publicly cacheable URLs).
 AWS_QUERYSTRING_EXPIRE = env.int("AWS_QUERYSTRING_EXPIRE", default=86400)
 
+# Stored on every uploaded object and echoed by S3 in GET responses. Files in
+# the data lake are immutable (replacing one means a new manifest under a new
+# path), so browsers may cache them; 'private' keeps shared proxies out of it.
+# The max-age matches the presigned-URL memoization window (half the URL
+# lifetime, see ce_ui.storage.CachedPresignedUrlStorage) — beyond that the URL
+# changes and the cache entry would never be hit again anyway.
+AWS_S3_OBJECT_PARAMETERS = {
+    "CacheControl": f"private, max-age={AWS_QUERYSTRING_EXPIRE // 2}",
+}
+
 # STATIC
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#static-root
