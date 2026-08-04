@@ -29,7 +29,7 @@ const selection = useDatasetSelectionStore();
 const props = defineProps({
     apiUrl: {
         type: String,
-        default: "/manager/api/surface/"
+        default: "/manager/v2/surface/"
     },
     currentPage: {
         Number,
@@ -50,9 +50,9 @@ const props = defineProps({
     }
 });
 
-// Constants
+// Constants; the values are v2 `order` parameters
 const orderByFilterChoices = [
-    {text: 'Date', value: 'date'},
+    {text: 'Date', value: '-created_at'},
     {text: 'Name', value: 'name'},
 ];
 const sharingStatusFilterChoices = [
@@ -103,8 +103,10 @@ function getDatasets(offset: number = 0) {
     _isLoading.value = true;
     _currentPage.value = offset / _pageSize.value + 1;
     let queryUrl = `${props.apiUrl}?offset=${offset}&limit=${_pageSize.value}`;
-    queryUrl += `&order_by=${_orderBy.value}`;
+    queryUrl += `&order=${_orderBy.value}`;
     queryUrl += `&sharing_status=${_sharingStatus.value}`;
+    // Collapse published versions of a dataset to the latest one
+    queryUrl += `&latest_versions=true`;
     // Structured filters (chips) become dedicated query parameters...
     for (const token of _searchTokens.value) {
         queryUrl += `&${token.type}=${encodeURIComponent(token.value)}`;
@@ -190,7 +192,7 @@ watch([_searchTerm, _searchTokens], () => {
 });
 
 function createSurface() {
-    axios.post('/manager/api/surface/').then(response => {
+    axios.post('/manager/v2/surface/').then(response => {
         window.location.href = `/ui/dataset-detail/${response.data.id}/`;
     });
 }

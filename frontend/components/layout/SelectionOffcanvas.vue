@@ -52,7 +52,7 @@ onMounted(async () => {
 
 async function refreshDatasets() {
     datasets.value = (await Promise.all(selection.datasetIds.map(async (id) => {
-        return axios.get("/manager/api/surface/" + id);
+        return axios.get("/manager/v2/surface/" + id + "/");
     }))).map(response => {
         return response.data;
     });
