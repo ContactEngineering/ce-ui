@@ -14,7 +14,12 @@ DEBUG = False
 
 # DATABASES
 # ------------------------------------------------------------------------------
-DATABASES["default"]["CONN_MAX_AGE"] = env.int("CONN_MAX_AGE", default=0)  # noqa F405
+# Keep database connections alive between requests. The default of 0 opens a
+# new Postgres connection for every request; pages of the single-page frontend
+# fan out into dozens of API requests, so connection setup is pure overhead.
+DATABASES["default"]["CONN_MAX_AGE"] = env.int("CONN_MAX_AGE", default=60)  # noqa F405
+# Guard reused connections against having been closed by the server
+DATABASES["default"]["CONN_HEALTH_CHECKS"] = True  # noqa F405
 
 # SECURITY
 # ------------------------------------------------------------------------------
@@ -165,7 +170,11 @@ LOGGING = {
 # - 'svg': Render using SVG. Plot will download as SVG if this is enabled while they download as PNG in the 'canvas'
 #   backend. SVG has problems with zooming plots.
 # - 'webgl': Accelerates some plots using WebGL
-BOKEH_OUTPUT_BACKEND = "svg"
+# The SVG backend creates one DOM subtree per glyph; a PSD/ACF plot over a
+# large dataset collection has hundreds of line glyphs and legend entries,
+# which freezes the page long after the data has arrived. Canvas handles that
+# size comfortably; the trade-off is that plots download as PNG instead of SVG.
+BOKEH_OUTPUT_BACKEND = env.str("BOKEH_OUTPUT_BACKEND", default="canvas")
 
 # Settings for watchman
 # WATCHMAN_AUTH_DECORATOR = 'watchman.decorators.token_required'

@@ -443,6 +443,13 @@ AWS_DEFAULT_ACL = None
 # Append extra characters if new files have the same name
 AWS_S3_FILE_OVERWRITE = False
 
+# Lifetime of presigned URLs. The django-storages default of one hour means
+# thumbnails and plot data on a page left open start returning 403 after an
+# hour. Note that longer expiry does not make the URLs cacheable: every
+# response signs URLs afresh (a fix that requires serving derived files from
+# stable, publicly cacheable URLs).
+AWS_QUERYSTRING_EXPIRE = env.int("AWS_QUERYSTRING_EXPIRE", default=86400)
+
 # STATIC
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#static-root
@@ -697,9 +704,13 @@ TABNAV_DISPLAY_HOME_TAB = True
 
 # REQUEST PROFILER
 # ------------------------------------------------------------------------------
-# Default configuration is to ingore staff user, we override this here to log all requests
-def REQUEST_PROFILER_GLOBAL_EXCLUDE_FUNC(x):
-    return True
+# Default configuration is to ignore staff users, we override this here to log
+# all requests. High-frequency polling endpoints are excluded: each profiled
+# request is an INSERT into a large table, and the notification poll runs
+# continuously from every open tab of every logged-in user without ever being
+# the request whose timing anyone investigates.
+def REQUEST_PROFILER_GLOBAL_EXCLUDE_FUNC(request):
+    return not request.path.startswith("/inbox/notifications/")
 
 
 # Keep records for a month
