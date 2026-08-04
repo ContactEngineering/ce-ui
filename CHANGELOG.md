@@ -1,5 +1,34 @@
 # Changelog for plugin *ce-ui*
 
+## 1.35.0 (2026-08-04)
+
+- ENH: Analysis cards refresh at most once every ten seconds while a batch of
+  tasks is running (plus a final refresh when the batch completes), instead of
+  rebuilding the whole card - server round-trip, data-series downloads and all -
+  for every single task that finished
+- ENH: The dataset list renders thumbnails from the data it already has instead
+  of every row fetching its measurements from the API again; thumbnails load
+  lazily so off-screen rows don't compete for connections
+- ENH: Plots use the canvas renderer in production; the SVG renderer built one
+  DOM subtree per curve, which froze the page on analyses over large dataset
+  collections. Plot downloads are PNG accordingly, and the menu entry says so
+- ENH: Notifications are polled every 30 seconds instead of every second, and
+  not at all from background tabs
+- ENH: Task-status rows back off their polling from 5 to at most 30 seconds
+  while a task runs; measurement cards poll every 3 seconds instead of every
+  second
+- MAINT: Database connections are reused across requests in production
+  (`CONN_MAX_AGE`, env-overridable, with health checks) instead of reconnecting
+  per request
+- MAINT: Presigned storage URLs live for a day instead of an hour, so
+  thumbnails and plot data on a page left open no longer break after an hour
+- MAINT: The request profiler no longer records the notification poll, which
+  inserted a profiling row per request without ever being the request under
+  investigation
+- BUG: Task-finished events are emitted from a watcher instead of a computed
+  getter, and the "load more thumbnails" over-fetch (limit growing with offset)
+  is gone
+
 ## 1.34.0 (2026-08-03)
 
 - ENH: The dataset list shows one row per dataset, naming its version and offering
