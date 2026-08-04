@@ -1,5 +1,18 @@
 # Changelog for plugin *ce-ui*
 
+## 1.37.0 (2026-08-04)
+
+- ENH: The dataset detail page is server-rendered from the v2 API, which does
+  not inline full measurement representations; rendering the page costs a
+  handful of database queries instead of ~10 per measurement. The measurement
+  cards fetch their data asynchronously, so the page paints immediately
+- ENH: The publication details of a published dataset arrive embedded in the
+  v2 response instead of requiring a separate request before anything renders
+- ENH: The permissions tab runs on the v2 permission-set API
+  (grant/revoke endpoints) instead of the v1 whole-list PATCH
+- BUG: Tag badges on the dataset detail sidebar rendered empty (they read
+  `.name` off what has always been a plain string)
+
 ## 1.36.0 (2026-08-04)
 
 - ENH: The dataset list runs on the v2 API and renders each page from a single

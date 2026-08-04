@@ -23,6 +23,7 @@ from topobank_publication.serializers import PublicationCollectionSerializer
 from topobank_rest_api.analysis.serializers import WorkflowDetailSerializer
 from topobank_rest_api.manager.v1.serializers import (SurfaceSerializer,
                                                       TopographySerializer)
+from topobank_rest_api.manager.v2.serializers import SurfaceV2Serializer
 
 from ce_ui import breadcrumb
 from ce_ui.publication_metadata import publication_metadata
@@ -95,9 +96,32 @@ class DataSetListView(AppView):
 class DatasetDetailView(AppDetailView):
     model = Surface
     vue_component = "DatasetDetail"
-    serializer_class = SurfaceSerializer
+    # The v2 serializer does not inline full measurement representations (the
+    # page fetches those asynchronously), so rendering this page costs a
+    # handful of queries instead of ~10 per measurement.
+    serializer_class = SurfaceV2Serializer
     # Extends app.html and adds server-rendered metadata to its head
     template_name = "dataset_detail.html"
+
+    def get_queryset(self):
+        # Everything the v2 serializer touches, so serialization does not
+        # degenerate into per-relation queries
+        qs = Surface.objects.select_related(
+            "permissions",
+            "created_by",
+            "updated_by",
+            "owned_by",
+            "attachments",
+        ).prefetch_related(
+            "topography_set__thumbnail",
+            "properties",
+            "tags",
+            "permissions__user_permissions__user",
+        )
+        if hasattr(Surface, "publication"):
+            # Only present when the publication plugin is installed
+            qs = qs.select_related("publication")
+        return qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

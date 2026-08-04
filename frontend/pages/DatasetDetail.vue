@@ -66,10 +66,10 @@ const attachmentCount = ref(null);  // default count of the attachments
 const propertyCount = ref(null);  // default count of the properties
 
 // Data that is displayed or can be edited
-const _surface = shallowRef(null);  // Surface data
+const _surface = shallowRef(null);  // Surface data (v2 representation)
 const _publication = ref(null);  // Publication data
-const _permissions = ref(null);  // Permissions
 const _topographies = ref([]);  // Topographies contained in this surface
+const _loadingTopographies = ref(false);  // Measurements are fetched asynchronously
 const _versions = ref(null);  // Published versions of this surface
 
 // GUI logic
@@ -103,20 +103,54 @@ function getOriginalSurfaceId() {
 }
 
 function updateCard() {
-    /* Fetch JSON describing the card */
+    /* The server renders the v2 surface representation into the page; the
+       full measurement representations that the cards work on are fetched
+       asynchronously, so first paint does not wait for them. */
     _surface.value = appProps.object;
-    _permissions.value = appProps.object.permissions;
-    _topographies.value = appProps.object.topography_set;
-    _selected.value = new Array(_topographies.value.length).fill(false);  // Nothing is selected
+    fetchTopographies();
     updatePublication();
 }
 
+async function fetchTopographies() {
+    _loadingTopographies.value = true;
+    try {
+        const topographies = [];
+        // The endpoint may paginate; follow `next` until the list is complete
+        let url = `/manager/api/topography/?surface=${appProps.object.id}&limit=100`;
+        while (url != null) {
+            const response = await axios.get(url);
+            if (Array.isArray(response.data)) {
+                topographies.push(...response.data);
+                url = null;
+            } else {
+                topographies.push(...response.data.results);
+                url = response.data.next;
+            }
+        }
+        _topographies.value = topographies;
+        _selected.value = new Array(topographies.length).fill(false);  // Nothing is selected
+    } catch (error) {
+        show?.({
+            props: {
+                title: "Failed to fetch measurements",
+                body: error,
+                variant: 'danger'
+            }
+        });
+    } finally {
+        _loadingTopographies.value = false;
+    }
+}
+
 function updatePublication() {
+    /* The v2 representation embeds a compact publication summary; the full
+       record (citation formats, publisher) is only needed on this page and
+       only for published datasets. */
     if (_surface.value.publication == null) {
         _publication.value = null;
         updateVersions();
     } else {
-        axios.get(_surface.value.publication).then(response => {
+        axios.get(_surface.value.publication.url).then(response => {
             _publication.value = response.data;
             updateVersions();
         }).catch(error => {
@@ -153,7 +187,9 @@ function filesDropped(files) {
 
 function uploadNewTopography(file) {
     axios.post(props.newTopographyUrl, {
-        surface: _surface.value.url,
+        // The v1 create endpoint validates `surface` against the v1 route, so
+        // the URL is constructed here rather than taken from the v2 object
+        surface: `/manager/api/surface/${_surface.value.id}/`,
         name: file.name
     }).then(response => {
         let upload = response.data;
@@ -262,12 +298,18 @@ const publishUrl = computed(() => {
     return `/ui/dataset-publish/${getSurfaceId()}/`;
 });
 
+// The current user's access level; the v2 representation reports it as
+// `permissions.allow`
+const permission = computed(() => {
+    return _surface.value?.permissions?.allow ?? 'view';
+});
+
 const isEditable = computed(() => {
-    return _surface.value != null && _surface.value.permissions.current_user.permission !== 'view';
+    return _surface.value != null && permission.value !== 'view';
 });
 
 const hasFullAccess = computed(() => {
-    return _surface.value != null && _surface.value.permissions.current_user.permission === 'full';
+    return _surface.value != null && permission.value === 'full';
 });
 
 const isPublication = computed(() => {
@@ -337,6 +379,7 @@ const measurementCount = computed(() => {
                         </Toolbar>
                         <DropZone v-if="isEditable" @files-dropped="filesDropped">
                         </DropZone>
+                        <LoadingIndicator v-if="_loadingTopographies"/>
                         <!-- Left accent bar (primary) plus alternating row
                              background visually separate each measurement. -->
                         <div v-for="(topography, index) in _topographies"
@@ -386,7 +429,8 @@ const measurementCount = computed(() => {
                         </BModal>
                     </BTab>
                     <BTab id="dataset-bandwidths" title="Bandwidths">
-                        <BAlert :model-value="_topographies.length == 0" variant="secondary">
+                        <LoadingIndicator v-if="_loadingTopographies"/>
+                        <BAlert :model-value="!_loadingTopographies && _topographies.length == 0" variant="secondary">
                             <i class="fa-solid fa-circle-info me-2"></i>This surface has no measurements.
                         </BAlert>
                         <BAlert :model-value="_topographies.length > 0"
@@ -409,7 +453,7 @@ const measurementCount = computed(() => {
                         <DatasetDescription v-if="_surface != null"
                                             :description="_surface.description"
                                             :name="_surface.name"
-                                            :permission="_permissions.current_user.permission"
+                                            :permission="permission"
                                             :surface-url="_surface.url"
                                             :tags="_surface.tags">
                         </DatasetDescription>
@@ -420,7 +464,7 @@ const measurementCount = computed(() => {
                         </template>
                         <DatasetProperties v-if="_surface != null"
                                            v-model:properties="_surface.properties"
-                                           :permission="_permissions.current_user.permission"
+                                           :permission="permission"
                                            :surface-url="_surface.url"
                                            v-model:propertyCount="propertyCount">
                         </DatasetProperties>
@@ -433,8 +477,8 @@ const measurementCount = computed(() => {
                             Attachments <BBadge>{{ attachmentCount }}</BBadge>
                         </template>
                         <Attachments v-if="_surface != null"
-                                     :attachments-url="_surface.attachments"
-                                     :permission="_permissions.current_user.permission"
+                                     :attachments-url="_surface.attachments?.url"
+                                     :permission="permission"
                                      v-model:attachmentCount="attachmentCount">
                         </Attachments>
                     </BTab>
@@ -442,8 +486,7 @@ const measurementCount = computed(() => {
                           v-if="_surface != null"
                           title="Permissions">
                         <DatasetPermissions v-if="_surface.publication == null"
-                                            v-model:permissions="_permissions"
-                                            :set-permissions-url="_surface.api.set_permissions">
+                                            :permissions-url="_surface.permissions.url">
                         </DatasetPermissions>
                         <BAlert v-if="_surface.publication != null"
                                 :model-value="true" variant="secondary">
@@ -489,7 +532,7 @@ const measurementCount = computed(() => {
                             </div>
                             <div v-if="_surface.tags.length > 0">
                                 <span v-for="tag in _surface.tags"
-                                      class="badge bg-success">{{ tag.name }}</span>
+                                      class="badge bg-success">{{ tag }}</span>
                             </div>
                             <BDropdown
                                 v-if="_versions == null || _versions.length > 0"
