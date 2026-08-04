@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import axios from "axios";
-import {ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 
 import {
     BAlert,
@@ -14,30 +14,69 @@ import {
 import SearchUserModal from "@/components/ui/SearchUserModal.vue";
 import PermissionRow from "@/components/manager/PermissionRow.vue";
 import Toolbar from "@/components/ui/Toolbar.vue";
+import LoadingIndicator from '@/components/ui/LoadingIndicator.vue';
 
 const {show} = useToastController();
 
 const props = defineProps({
-    setPermissionsUrl: String,
-    permissions: Object
+    // v2 permission-set endpoint of the dataset
+    permissionsUrl: String
 });
-
-const emit = defineEmits([
-    'update:permissions'
-]);
 
 const isEditing = ref(false);
 const isSaving = ref(false);
-const selfPermissions = ref(props.permissions);
-const savedPermissions = ref(props.permissions);
 const searchUser = ref(false);
+
+/* Rows in the shape PermissionRow works on: {user: <url>, permission: <level>}.
+   The current user's row is read-only; the others can be edited with full
+   access. */
+const _api = ref(null);  // grant/revoke routes reported by the permission set
+const currentUser = ref(null);
+const otherUsers = ref([]);
+const savedOtherUsers = ref([]);
+
+onMounted(loadPermissions);
+
+function loadPermissions() {
+    axios.get(props.permissionsUrl).then(response => {
+        _api.value = response.data.api;
+        const rows = response.data.user_permissions.map(p => {
+            return {user: p.user.url, permission: p.allow, isCurrentUser: p.is_current_user};
+        });
+        currentUser.value = rows.find(row => row.isCurrentUser) ?? null;
+        otherUsers.value = rows.filter(row => !row.isCurrentUser);
+    }).catch(error => {
+        show?.({
+            props: {
+                title: "Failed to fetch permissions",
+                body: error,
+                variant: 'danger'
+            }
+        });
+    });
+}
+
+const hasFullAccess = computed(() => {
+    return currentUser.value?.permission === 'full';
+});
 
 function saveCard() {
     isEditing.value = false;
     isSaving.value = true;
-    axios.patch(props.setPermissionsUrl, selfPermissions.value.other_users).then(response => {
-        emit('update:permissions', response.data);
-    }).catch(error => {
+    // Grant changed access levels; a row set to 'no-access' is a revocation
+    const saved = new Map(savedOtherUsers.value.map(row => [row.user, row.permission]));
+    const requests = [];
+    for (const row of otherUsers.value) {
+        if (saved.get(row.user) === row.permission) {
+            continue;  // unchanged
+        }
+        if (row.permission === 'no-access') {
+            requests.push(axios.post(_api.value.revoke_user_access, {user: row.user}));
+        } else {
+            requests.push(axios.post(_api.value.grant_user_access, {user: row.user, allow: row.permission}));
+        }
+    }
+    Promise.all(requests).catch(error => {
         show?.({
             props: {
                 title: "Permission update failed",
@@ -45,22 +84,24 @@ function saveCard() {
                 variant: 'danger'
             }
         });
-        selfPermissions.value = savedPermissions.value;
     }).finally(() => {
+        // Re-read the authoritative state, whether saving succeeded or not
+        loadPermissions();
         isSaving.value = false;
     });
 }
 
 function addUser(user) {
     searchUser.value = false;
-    selfPermissions.value.other_users.push({user: user.url, permission: 'view'});
+    otherUsers.value.push({user: user.url, permission: 'view'});
 }
 
 </script>
 
 <template>
-    <div>
-        <Toolbar v-if="selfPermissions.current_user.permission === 'full'">
+    <LoadingIndicator v-if="currentUser == null"/>
+    <div v-if="currentUser != null">
+        <Toolbar v-if="hasFullAccess">
             <BButtonGroup v-if="isEditing || isSaving"
                           class="me-2"
                           size="sm">
@@ -74,7 +115,7 @@ function addUser(user) {
                 v-if="!isEditing && !isSaving"
                 size="sm">
                 <BButton variant="primary"
-                         @click="savedPermissions = JSON.parse(JSON.stringify(selfPermissions)); isEditing = true">
+                         @click="savedOtherUsers = JSON.parse(JSON.stringify(otherUsers)); isEditing = true">
                     <i class="fa fa-pen me-1"></i>Edit
                 </BButton>
             </BButtonGroup>
@@ -82,7 +123,7 @@ function addUser(user) {
                           size="sm">
                 <BButton v-if="isEditing"
                          variant="danger"
-                         @click="isEditing = false; selfPermissions = savedPermissions">
+                         @click="isEditing = false; otherUsers = savedOtherUsers">
                     Discard
                 </BButton>
                 <BButton variant="success"
@@ -98,16 +139,16 @@ function addUser(user) {
             modify measurements; <b>Full</b> can additionally publish and manage
             who has access.
         </BAlert>
-        <PermissionRow :user-permission="selfPermissions.current_user"
+        <PermissionRow :user-permission="currentUser"
                        :disabled="true">
         </PermissionRow>
         <hr/>
-        <div v-if="selfPermissions.other_users.length === 0">
+        <div v-if="otherUsers.length === 0">
             Only you can access this digital surface twin.
         </div>
-        <PermissionRow v-if="selfPermissions.other_users.length > 0"
-                       v-for="(userPermission, index) in selfPermissions.other_users"
-                       v-model:user-permission="selfPermissions.other_users[index]"
+        <PermissionRow v-if="otherUsers.length > 0"
+                       v-for="(userPermission, index) in otherUsers"
+                       v-model:user-permission="otherUsers[index]"
                        :disabled="!isEditing">
         </PermissionRow>
     </div>
