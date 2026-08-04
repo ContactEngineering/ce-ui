@@ -40,7 +40,19 @@ jobs:
 
     - name: Run unit tests
       run: |
-        npm test
+        set -o pipefail
+        npm test -- --coverage | tee vitest-output.txt
+
+    - name: Publish coverage summary
+      if: always()
+      run: |
+        # The v8 text report is the tail of the test output
+        if grep -q "Coverage report from v8" vitest-output.txt; then
+          echo "## Frontend code coverage" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          sed -n '/Coverage report from v8/,$p' vitest-output.txt >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+        fi
 
     - name: Check that the webpack bundle builds
       run: |

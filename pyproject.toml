@@ -88,3 +88,7 @@ packages = ["ce_ui"]
 # loaded from the CDN cannot drift from the one the app was compiled against. The
 # file lives at the repository root, which is outside the package.
 force-include = { "package.json" = "ce_ui/package.json" }
+
+[tool.coverage.run]
+# Generated migration modules would dilute the coverage numbers
+omit = ["*/migrations/*"]
