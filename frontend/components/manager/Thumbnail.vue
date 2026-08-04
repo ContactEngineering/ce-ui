@@ -32,9 +32,14 @@ const hasThumbnail = computed(() => {
            :title="hasFailed ? 'Processing of this measurement failed' : dataSource.name">
             <i v-if="hasFailed"
                :class="`fa-solid fa-triangle-exclamation fa-2x text-danger ${imgClass}`"></i>
+            <!-- Lazy loading keeps off-screen rows from competing with the
+                 visible ones for the browser's connection budget -->
             <img v-else-if="hasThumbnail"
                  :class="imgClass"
                  :src="dataSource.thumbnail.file"
+                 :alt="dataSource.name"
+                 loading="lazy"
+                 decoding="async"
                  @load="_isLoading = false"
                  @error="_isLoading = false">
             <i v-else

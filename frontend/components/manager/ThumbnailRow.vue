@@ -1,58 +1,47 @@
 <script setup lang="ts">
 
-import axios from "axios";
-import {onMounted, ref} from "vue";
+import {computed, ref} from "vue";
 
-import {BButton, BOverlay} from "bootstrap-vue-next";
+import {BButton} from "bootstrap-vue-next";
 
 import Thumbnail from "@/components/manager/Thumbnail.vue";
 
+/* The dataset list response already contains every measurement of every
+   dataset (`topography_set`), so the thumbnails are rendered from that data
+   instead of each row fetching its measurements again from the API. */
 const props = defineProps({
-    dataSourceListUrl: String,
+    dataSources: {
+        type: Array,
+        default: () => []
+    },
     nbThumbnailsIncrement: {
         type: Number,
         default: 5
     }
 });
 
-const _dataSources = ref([]);
-const _nbDataSources = ref<number>(0);
-const _nbThumbnails = ref<number>(0);
-const _isLoading = ref<boolean>(true);
+const _nbVisible = ref<number>(props.nbThumbnailsIncrement);
 
-onMounted(() => {
-    loadMoreThumbnails();
+const visibleDataSources = computed(() => {
+    return props.dataSources.slice(0, _nbVisible.value);
 });
-
-function loadMoreThumbnails() {
-    _isLoading.value = true;
-    axios.get(`${props.dataSourceListUrl}&offset=${_nbThumbnails.value}&limit=${_nbThumbnails.value + props.nbThumbnailsIncrement}`)
-        .then(response => {
-            _dataSources.value.push(...response.data.results);
-            _nbDataSources.value = response.data.count;
-            _nbThumbnails.value += props.nbThumbnailsIncrement;
-        })
-        .finally(() => {
-            _isLoading.value = false;
-        });
-}
 
 </script>
 
 <template>
-    <BOverlay class="thumbnail-row" :show="_isLoading">
-        <Thumbnail v-for="dataSource in _dataSources"
+    <div class="thumbnail-row">
+        <Thumbnail v-for="dataSource in visibleDataSources"
                    :key="dataSource.id"
                    class="me-1"
                    img-class="mh-100"
                    :data-source="dataSource">
         </Thumbnail>
-        <BButton v-if="_nbDataSources > _dataSources.length"
+        <BButton v-if="dataSources.length > _nbVisible"
                  variant="light" size="sm" class="me-1"
-                 @click="loadMoreThumbnails">
+                 @click="_nbVisible += nbThumbnailsIncrement">
             <i class="fa fa-ellipsis align-self-center"></i>
         </BButton>
-    </BOverlay>
+    </div>
 </template>
 
 <style scoped>

@@ -151,7 +151,7 @@ const creationDatePretty = computed(() => {
                     This digital surface twin was published by {{ publicationAuthorsPretty }} on {{ publicationDatePretty }}
                 </p>
                 <ThumbnailRow class="mb-3"
-                              :data-source-list-url="dataset.topographies">
+                              :data-sources="dataset.topography_set">
                 </ThumbnailRow>
                 <p v-if="_publication == null" class="dataset-authors">
                     This digital surface twin is unpublished.
