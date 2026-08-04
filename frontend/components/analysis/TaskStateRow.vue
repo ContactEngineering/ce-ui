@@ -1,7 +1,28 @@
+<script lang="ts">
+import axios from "axios";
+
+/* Task states are polled in one batched request per card (see TasksButton);
+   this row only displays them. It still fetches the workflow and subject
+   descriptions for its header - through a cache shared by all rows (module
+   scope, not per instance), since every row of a card asks for the same
+   workflow, and rows for the same subject repeat too. */
+const _sharedInfoCache = new Map();
+
+function cachedGet(url) {
+    if (!_sharedInfoCache.has(url)) {
+        _sharedInfoCache.set(url, axios.get(url).then(response => response.data).catch(error => {
+            // Do not cache failures
+            _sharedInfoCache.delete(url);
+            throw error;
+        }));
+    }
+    return _sharedInfoCache.get(url);
+}
+</script>
+
 <script setup lang="ts">
 
-import axios from "axios";
-import {computed, onMounted, onBeforeUnmount, ref, watch} from "vue";
+import {computed, ref, watch} from "vue";
 
 import {BButton, useToastController} from "bootstrap-vue-next";
 
@@ -13,52 +34,19 @@ const {show} = useToastController();
 
 const analysis = defineModel('analysis', {required: true});
 
-const props = defineProps({
-    pollingInterval: {
-        type: Number,
-        default: 5000  // milliseconds
-    },
-    maxPollingInterval: {
-        type: Number,
-        default: 30000  // milliseconds
-    }
-});
-
 const _error = ref(null);
 const _function = ref(null);
 const _subject = ref(null);
-let _timeoutID = null;
 
-/* Poll quickly at first, then back off: short tasks report promptly, while a
-   long-running task is not hammered with a request every few seconds by every
-   open row. Reset when the user renews the task. */
-let _currentPollingInterval = props.pollingInterval;
-
-onMounted(() => {
-    scheduleStateCheck();
-});
-
-onBeforeUnmount(() => {
-    if (_timeoutID != null) {
-        clearTimeout(_timeoutID);
-        _timeoutID = null;
-    }
-});
-
-function scheduleStateCheck() {
-    // Tasks are still pending or running if this state check is scheduled
-
-    // Get function information if we don't have it yet
-    if (_function.value == null) {
-        axios.get(analysis.value.function)
-            .then(response => {
-                _function.value = response.data;
-            }).catch(error => {
+function fetchInfo() {
+    if (_function.value == null && analysis.value.function != null) {
+        cachedGet(analysis.value.function).then(data => {
+            _function.value = data;
+        }).catch(error => {
             show?.({props: {title: "Request failed", body: error, variant: 'danger'}});
         });
     }
 
-    // Get subject information if we don't have it yet
     if (_subject.value == null) {
         const subject = analysis.value.subject;
         const subjectUrl = subject.topography != null ?
@@ -67,38 +55,8 @@ function scheduleStateCheck() {
         if (subjectUrl == null) {
             show?.({props: {title: "Error", body: "Unable to determine subject for analysis", variant: 'danger'}});
         } else {
-            axios.get(subjectUrl)
-                .then(response => {
-                    _subject.value = response.data;
-                }).catch(error => {
-                show?.({props: {title: "Request failed", body: error, variant: 'danger'}});
-            });
-        }
-    }
-
-    if (analysis.value.task_state == null || analysis.value.task_state === 'pe' || analysis.value.task_state === 'st') {
-        if (_timeoutID == null) {
-            _timeoutID = setTimeout(checkState, _currentPollingInterval);
-            _currentPollingInterval = Math.min(
-                _currentPollingInterval * 1.5, props.maxPollingInterval);
-        }
-    } else if (analysis.value.task_state === 'fa') {
-        // This is a failure. Query reason.
-        if (analysis.value.task_error) {
-            // The analysis function failed and we have an error message (Python exception).
-            _error.value = analysis.value.task_error;
-        } else {
-            // The analysis function did not raise an exception itself. This means it actually finished and
-            // we have a result.json, that should contain an error message.
-            axios.get(analysis.value.folder).then(response => {
-                const resultFile = response.data["result.json"];
-                if (resultFile?.url != null) {
-                    axios.get(resultFile.url).then(response => {
-                        _error.value = response.data.message;
-                    }).catch(error => {
-                        show?.({props: {title: "Request failed", body: error, variant: 'danger'}});
-                    });
-                }
+            cachedGet(subjectUrl).then(data => {
+                _subject.value = data;
             }).catch(error => {
                 show?.({props: {title: "Request failed", body: error, variant: 'danger'}});
             });
@@ -106,22 +64,34 @@ function scheduleStateCheck() {
     }
 }
 
-function checkState() {
-    _timeoutID = null;  // Indicate that no timer is currently running
-    axios.get(analysis.value.url).then(response => {
-        // Update current state of the analysis
-        analysis.value = response.data;  // This will trigger a check throw a watch
-    }).catch(error => {
-        show?.({props: {title: "Request failed", body: error, variant: 'danger'}});
-    });
+function fetchFailureReason() {
+    if (analysis.value.task_error) {
+        // The analysis function failed and we have an error message (Python exception).
+        _error.value = analysis.value.task_error;
+    } else {
+        // The analysis function did not raise an exception itself. This means it actually finished and
+        // we have a result.json, that should contain an error message.
+        axios.get(analysis.value.folder).then(response => {
+            const resultFile = response.data["result.json"];
+            if (resultFile?.url != null) {
+                axios.get(resultFile.url).then(response => {
+                    _error.value = response.data.message;
+                }).catch(error => {
+                    show?.({props: {title: "Request failed", body: error, variant: 'danger'}});
+                });
+            }
+        }).catch(error => {
+            show?.({props: {title: "Request failed", body: error, variant: 'danger'}});
+        });
+    }
 }
 
 function renew() {
-    _currentPollingInterval = props.pollingInterval;
-    analysis.value.task_state = 'pe';
+    analysis.value.task_state = 'pe';  // The batched poller in TasksButton picks this up
+    _error.value = null;
     // A PUT request triggers renewal of the analysis
     axios.put(analysis.value.url).then(response => {
-        analysis.value = response.data;  // This will trigger a check throw a watch
+        analysis.value = response.data;
     }).catch(error => {
         show?.({props: {title: "Request failed", body: error, variant: 'danger'}});
     });
@@ -136,8 +106,11 @@ const creationTimePretty = computed(() => formatDateTime(analysis.value.creation
 const startTimePretty = computed(() => formatDateTime(analysis.value.task_start_time));
 
 watch(() => analysis.value, () => {
-    scheduleStateCheck();
-});
+    fetchInfo();
+    if (analysis.value.task_state === 'fa' && _error.value == null) {
+        fetchFailureReason();
+    }
+}, {immediate: true});
 
 </script>
 
