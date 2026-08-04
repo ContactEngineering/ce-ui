@@ -25,8 +25,13 @@ PASSWORD = "abcd$1234"
 
 
 @pytest.fixture
-def analyst(db, client, django_user_model):
-    """A logged-in user, past the terms-and-conditions gate."""
+def analyst(db, client, django_user_model, orcid_socialapp):
+    """A logged-in user, past the terms-and-conditions gate.
+
+    `orcid_socialapp` is required because the base template renders an ORCID
+    login link, which raises `SocialApp.DoesNotExist` when no social app is
+    configured -- so every test that renders a page needs it, signed in or not.
+    """
     user = django_user_model.objects.create_user(
         username="analyst", password=PASSWORD
     )
