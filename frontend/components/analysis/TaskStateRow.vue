@@ -16,7 +16,11 @@ const analysis = defineModel('analysis', {required: true});
 const props = defineProps({
     pollingInterval: {
         type: Number,
-        default: 2000  // milliseconds
+        default: 5000  // milliseconds
+    },
+    maxPollingInterval: {
+        type: Number,
+        default: 30000  // milliseconds
     }
 });
 
@@ -24,6 +28,11 @@ const _error = ref(null);
 const _function = ref(null);
 const _subject = ref(null);
 let _timeoutID = null;
+
+/* Poll quickly at first, then back off: short tasks report promptly, while a
+   long-running task is not hammered with a request every few seconds by every
+   open row. Reset when the user renews the task. */
+let _currentPollingInterval = props.pollingInterval;
 
 onMounted(() => {
     scheduleStateCheck();
@@ -69,7 +78,9 @@ function scheduleStateCheck() {
 
     if (analysis.value.task_state == null || analysis.value.task_state === 'pe' || analysis.value.task_state === 'st') {
         if (_timeoutID == null) {
-            _timeoutID = setTimeout(checkState, props.pollingInterval);
+            _timeoutID = setTimeout(checkState, _currentPollingInterval);
+            _currentPollingInterval = Math.min(
+                _currentPollingInterval * 1.5, props.maxPollingInterval);
         }
     } else if (analysis.value.task_state === 'fa') {
         // This is a failure. Query reason.
@@ -106,6 +117,7 @@ function checkState() {
 }
 
 function renew() {
+    _currentPollingInterval = props.pollingInterval;
     analysis.value.task_state = 'pe';
     // A PUT request triggers renewal of the analysis
     axios.put(analysis.value.url).then(response => {

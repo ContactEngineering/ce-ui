@@ -19,7 +19,10 @@ const props = defineProps({
     },
     pollingInterval: {
         type: Number,
-        default: 1000  // milliseconds
+        // Every pending measurement on the dataset page polls its own state;
+        // one request per second per measurement adds up quickly during bulk
+        // uploads
+        default: 3000  // milliseconds
     },
     selectable: {
         type: Boolean,

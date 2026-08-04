@@ -22,7 +22,11 @@ const props = defineProps({
     },
     pollingInterval: {
         type: Number,
-        default: 1000  // milliseconds
+        // Notifications are ambient information: a half-minute delay is
+        // imperceptible, while polling every second from every open tab of
+        // every logged-in user was the single largest source of requests on
+        // the site.
+        default: 30000  // milliseconds
     },
 });
 
@@ -43,6 +47,11 @@ onBeforeUnmount(() => {
 });
 
 function updateNotifications() {
+    // Background tabs don't need fresh notifications; they catch up on the
+    // next tick after becoming visible again
+    if (document.hidden) {
+        return;
+    }
     axios.get(props.apiUrl)
         .then(response => {
             unreadCount.value = response.data.unread_count;
