@@ -1,7 +1,8 @@
 <script setup lang="ts">
 
 import axios from "axios";
-import { computed, onMounted, ref } from "vue";
+import throttle from "lodash/throttle";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 
 import { BDropdownDivider, BDropdownItem, useToastController } from "bootstrap-vue-next";
 
@@ -91,6 +92,17 @@ onMounted(() => {
     updateCard();
 });
 
+/* While a batch of tasks drains, every single task that finishes reports
+   "some tasks finished". Rebuilding the card is expensive (the server reads
+   every analysis result), so partial completions are coalesced into at most
+   one refresh per interval; the final refresh comes from `allTasksFinished`,
+   which is not throttled. */
+const updateCardThrottled = throttle(updateCard, 10000, {leading: false, trailing: true});
+
+onBeforeUnmount(() => {
+    updateCardThrottled.cancel();
+});
+
 const hasData = computed(() => {
     return _data.value != null && _data.value.length > 0;
 });
@@ -154,7 +166,7 @@ function updateCard() {
                   :title="_title"
                   @allTasksFinished="updateCard"
                   @refreshButtonClicked="updateCard"
-                  @someTasksFinished="updateCard">
+                  @someTasksFinished="updateCardThrottled">
         <template #dropdowns>
             <template v-if="hasData">
                 <BDropdownDivider></BDropdownDivider>
