@@ -1,5 +1,15 @@
 # Changelog for plugin *ce-ui*
 
+## 1.38.0 (2026-08-04)
+
+- ENH: Analysis cards poll the task states of all their pending analyses in a
+  single batched request per tick (v2 `ids` filter) instead of one request per
+  analysis every few seconds — running a workflow over a dataset with dozens
+  of measurements no longer floods the server with polling traffic
+- ENH: The task-status rows share a cache for workflow and subject
+  descriptions, so opening the task list of a card makes one request for the
+  workflow instead of one per row
+
 ## 1.37.0 (2026-08-04)
 
 - ENH: The dataset detail page is server-rendered from the v2 API, which does
