@@ -1,6 +1,6 @@
 import {describe, expect, it} from "vitest";
 
-import {maxAbsolute, rescaleLengthUnit} from "@/utils/units";
+import {factorFromMetrePower, maxAbsolute, parseLengthPower, rescaleLengthUnit} from "@/utils/units";
 
 /** Scale `magnitude` the way a caller would, to check the tick value it yields. */
 function scaled(magnitude: number, unit: string | null): { value: number, unit: string } {
@@ -83,6 +83,46 @@ describe("rescaleLengthUnit on realistic line scans", () => {
     // large numbers that need scaling down rather than up.
     it("scales down a scan stored in picometres", () => {
         expect(scaled(1e8, "pm")).toEqual({value: 100, unit: "µm"});
+    });
+});
+
+describe("parseLengthPower", () => {
+    it("treats a plain length unit as exponent 1", () => {
+        expect(parseLengthPower("µm")).toEqual({base: "µm", exponent: 1});
+    });
+
+    it("parses a reciprocal length", () => {
+        expect(parseLengthPower("µm⁻¹")).toEqual({base: "µm", exponent: -1});
+        expect(parseLengthPower("nm⁻¹")).toEqual({base: "nm", exponent: -1});
+    });
+
+    it("parses a positive power", () => {
+        expect(parseLengthPower("µm³")).toEqual({base: "µm", exponent: 3});
+    });
+
+    it("rejects units it does not know", () => {
+        expect(parseLengthPower("V")).toBeNull();
+        expect(parseLengthPower("V⁻¹")).toBeNull();
+        expect(parseLengthPower(null)).toBeNull();
+        expect(parseLengthPower(undefined)).toBeNull();
+    });
+});
+
+describe("factorFromMetrePower", () => {
+    it("converts a cubed length from metres", () => {
+        expect(factorFromMetrePower(3, "µm")).toBeCloseTo(1e18);
+        expect(factorFromMetrePower(3, "nm")).toBeCloseTo(1e27);
+        expect(factorFromMetrePower(3, "m")).toBeCloseTo(1);
+    });
+
+    it("converts a reciprocal length from metres", () => {
+        expect(factorFromMetrePower(-1, "µm")).toBeCloseTo(1e-6);
+        expect(factorFromMetrePower(-1, "nm")).toBeCloseTo(1e-9);
+    });
+
+    it("returns null for units it does not know", () => {
+        expect(factorFromMetrePower(3, "V")).toBeNull();
+        expect(factorFromMetrePower(3, null)).toBeNull();
     });
 });
 
