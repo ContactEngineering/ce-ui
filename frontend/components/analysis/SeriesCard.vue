@@ -4,7 +4,7 @@ import axios from "axios";
 import throttle from "lodash/throttle";
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 
-import { BDropdownDivider, BDropdownItem, useToastController } from "bootstrap-vue-next";
+import { BButton, BDropdownDivider, BDropdownItem, BFormCheckbox, useToastController } from "bootstrap-vue-next";
 
 import { subjectsToBase64 } from "@/utils/api";
 import {
@@ -16,6 +16,7 @@ import {
     toCsvText,
     triggerBrowserDownload
 } from "@/utils/download";
+import { buildReferenceDataSources, REFERENCE_DATASETS } from "@/utils/referenceData";
 
 import AnalysisCard from "@/components/analysis/AnalysisCard.vue";
 import BokehPlot from "@/components/ui/BokehPlot.vue";
@@ -71,6 +72,31 @@ const _plot = ref(null);
 // Auxiliary information
 const _dois = ref([]);
 const _messages = ref([]);
+
+// Reference data (fixed comparison curves, e.g. a consensus-study result)
+const _availableReferenceDatasets = computed(() => REFERENCE_DATASETS[props.functionName] ?? []);
+const _selectedReferenceDatasetKeys = ref<string[]>([]);
+// Collapsed by default: with several reference datasets registered for one
+// workflow, showing every checkbox unconditionally would clutter a card that
+// most views of it never need to compare against anything.
+const _showReferenceDatasets = ref(false);
+// Merged in, rather than mutating `_dataSources`, so re-fetching the card's own
+// data (`updateCard`) cannot lose a selection made in the meantime.
+const _plottedDataSources = computed(() => {
+    if (_dataSources.value == null || _availableReferenceDatasets.value.length === 0) {
+        return _dataSources.value;
+    }
+    const plot = _plots.value?.[0];
+    return [
+        ..._dataSources.value,
+        ...buildReferenceDataSources(
+            _selectedReferenceDatasetKeys.value,
+            props.functionName,
+            _dataSources.value,
+            plot?.xAxisLabel ?? null,
+            plot?.yAxisLabel ?? null)
+    ];
+});
 
 
 onMounted(() => {
@@ -208,10 +234,29 @@ async function downloadData(fileFormat) {
                 </BDropdownItem>
             </template>
         </template>
+        <template v-if="_availableReferenceDatasets.length > 0">
+            <div class="d-flex">
+                <!-- Reference data toggle button, mirroring BokehPlot's "Plot options" button -->
+                <BButton @click="_showReferenceDatasets = !_showReferenceDatasets"
+                         variant="outline-secondary" size="sm" class="ms-auto shadow-none mb-2">
+                    <i class="fa-solid fa-code-compare me-1"></i>
+                    {{ _showReferenceDatasets ? 'Hide reference data' : 'Compare to reference data' }}
+                </BButton>
+            </div>
+            <div v-if="_showReferenceDatasets" class="bg-light p-3 rounded border mb-2 shadow-sm">
+                <BFormCheckbox v-for="dataset in _availableReferenceDatasets"
+                               :key="dataset.key"
+                               v-model="_selectedReferenceDatasetKeys"
+                               :value="dataset.key"
+                               inline>
+                    {{ dataset.label }}
+                </BFormCheckbox>
+            </div>
+        </template>
         <BokehPlot ref="_plot"
                    v-model:nbPendingAjaxRequests="_nbPendingAjaxRequests"
                    :categories="_categories"
-                   :dataSources="_dataSources"
+                   :dataSources="_plottedDataSources"
                    :functionTitle="_title"
                    :outputBackend="_outputBackend"
                    :plots="_plots"
