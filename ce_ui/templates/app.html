@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% load static i18n %}
-{% load socialaccount %}
 
 {% block body %}
     <div id="app">
@@ -89,7 +88,11 @@
         let appProps = {
             // Admin and login URLs
             adminUrl: '{% url 'admin:index' %}',
-            loginUrl: '{% provider_login_url 'orcid' method="oauth2" %}',
+            {# The login page lists every identity provider the site offers, so #}
+            {# it is the entry point rather than any one provider's URL. #}
+            loginUrl: '{% url 'account_login' %}',
+            signupUrl: '{% url 'account_signup' %}',
+            connectionsUrl: '{% url 'socialaccount_connections' %}',
             datasetListUrl: '{% url 'ce_ui:select' %}',
             // User information
             userApiUrl: '{{ request.user.get_absolute_url }}',
@@ -97,7 +100,9 @@
             userFirstName: '{{ request.user.first_name }}',
             userLastName: '{{ request.user.last_name }}',
             userFullName: '{{ request.user.name }}',
-            userOrcid: '{{ request.user.orcid_id }}',
+            userOrcid: '{{ request.user.orcid_id|default_if_none:"" }}',
+            // Whether this user may publish; see `docs/authentication.rst`
+            userHasOrcid: {{ request.user.has_orcid|yesno:'true,false' }},
             userIsAnonymous: {{ request.user.is_anonymous|yesno:'true,false' }},
             userIsStaff: {{ request.user.is_staff|yesno:'true,false' }},
             searchParams: new URLSearchParams(window.location.search)

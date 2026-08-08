@@ -9,6 +9,7 @@ const props = defineProps({
     isAnonymous: Boolean,
     apiUrl: String,
     adminUrl: String,
+    connectionsUrl: String,
     userName: String,
     name: String,
     orcid: String,
@@ -30,6 +31,7 @@ const offcanvasVisible = ref(false);
         v-model:visible="offcanvasVisible"
         :api-url="apiUrl"
         :admin-url="adminUrl"
+        :connections-url="connectionsUrl"
         :name="name"
         :orcid="orcid"
         :is-staff="isStaff"

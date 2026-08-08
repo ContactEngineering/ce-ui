@@ -77,9 +77,9 @@ const stats = computed(() => [
                             <i class="fa fa-layer-group me-2"></i>
                             {{ appProps.userIsAnonymous ? "Browse the public library" : "Go to your datasets" }}
                         </a>
-                        <a v-if="appProps.userIsAnonymous" id="orcid-log-in-link"
+                        <a v-if="appProps.userIsAnonymous" id="log-in-link"
                            :href="appProps.loginUrl" class="btn btn-outline-light btn-lg">
-                            Sign in with ORCID
+                            Sign in
                         </a>
                     </div>
                     <p class="home-note mt-3 mb-0">

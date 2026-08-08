@@ -30,6 +30,22 @@
           {% endif %}
         {% endwith %}
       </p>
+
+      {% if object == request.user %}
+      <h2 class="h5">Connected identities</h2>
+      <ul class="list-unstyled">
+        {% for identity in object.connected_identities %}
+        <li>
+          <span class="fw-semibold">{{ identity.name }}</span>
+          {% if identity.url %}
+            <a href="{{ identity.url }}" rel="noopener noreferrer">{{ identity.uid }}</a>
+          {% elif identity.uid %}
+            <span class="text-muted">{{ identity.uid }}</span>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
     </div>
   </div>
 
@@ -40,6 +56,7 @@
   <div class="col-sm-12">
     <a class="btn btn-primary" href="{% url 'users:update' %}" role="button">My Info</a>
     <a class="btn btn-primary" href="{% url 'account_email' %}" role="button">E-Mail</a>
+    <a class="btn btn-primary" href="{% url 'socialaccount_connections' %}" role="button">Connected identities</a>
     <!-- Your Stuff: Custom user template urls -->
   </div>
 

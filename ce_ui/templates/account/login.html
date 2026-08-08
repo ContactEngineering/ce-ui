@@ -8,30 +8,32 @@
 
 {% block inner %}
 
-<h1>{% trans "Sign In" %}</h1>
+<h1 class="mb-3">{% trans "Sign In" %}</h1>
 
 {% get_providers as socialaccount_providers %}
 
 {% if socialaccount_providers %}
-<p>{% blocktrans with site.name as site_name %}Please sign in with one
-of your existing third party accounts. Or, <a href="{{ signup_url }}">sign up</a>
-for a {{ site_name }} account and sign in below:{% endblocktrans %}</p>
+<p class="text-muted">
+  Sign in with an account you already have. You can connect further accounts to
+  the same profile later — publishing a dataset requires an ORCID iD, but
+  nothing else does.
+</p>
 
-<div class="socialaccount_ballot">
-
-  <ul class="socialaccount_providers">
-    {% include "socialaccount/snippets/provider_list.html" with process="login" %}
-  </ul>
-
-  <div class="login-or">{% trans 'or' %}</div>
-
+<div class="d-grid gap-2 mb-4">
+  {% for provider in socialaccount_providers %}
+  <a class="btn btn-outline-primary btn-lg d-flex align-items-center justify-content-center gap-2"
+     href="{% provider_login_url provider.id process='login' %}">
+    {% include "socialaccount/snippets/provider_icon.html" with provider_id=provider.id %}
+    {% blocktrans with provider=provider.name %}Sign in with {{ provider }}{% endblocktrans %}
+  </a>
+  {% endfor %}
 </div>
 
-{% include "socialaccount/snippets/login_extra.html" %}
-
-{% else %}
-<p>{% blocktrans %}If you have not created an account yet, then please
-<a href="{{ signup_url }}">sign up</a> first.{% endblocktrans %}</p>
+<div class="d-flex align-items-center mb-4" aria-hidden="true">
+  <hr class="flex-grow-1">
+  <span class="px-2 text-muted small text-uppercase">{% trans 'or' %}</span>
+  <hr class="flex-grow-1">
+</div>
 {% endif %}
 
 <form class="login" method="POST" action="{% url 'account_login' %}">
@@ -40,9 +42,15 @@ for a {{ site_name }} account and sign in below:{% endblocktrans %}</p>
   {% if redirect_field_value %}
   <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
   {% endif %}
-  <a class="button secondaryAction" href="{% url 'account_reset_password' %}">{% trans "Forgot Password?" %}</a>
-  <button class="primaryAction btn btn-primary" type="submit">{% trans "Sign In" %}</button>
+  <div class="d-flex align-items-center justify-content-between">
+    <a class="button secondaryAction" href="{% url 'account_reset_password' %}">{% trans "Forgot Password?" %}</a>
+    <button class="primaryAction btn btn-primary" type="submit">{% trans "Sign In" %}</button>
+  </div>
 </form>
 
-{% endblock %}
+<p class="mt-4 mb-0 text-muted">
+  {% blocktrans %}No account yet? <a href="{{ signup_url }}">Sign up</a> with your
+  email address.{% endblocktrans %}
+</p>
 
+{% endblock %}

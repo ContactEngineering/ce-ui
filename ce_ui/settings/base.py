@@ -359,8 +359,13 @@ CELERY_REDIS_BACKEND_HEALTH_CHECK_INTERVAL = 30
 # ------------------------------------------------------------------------------
 # https://docs.allauth.org/en/latest/account/configuration.html
 ACCOUNT_FORMS = {"signup": "topobank_orcid.users.forms.SignupFormWithName"}
-# ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
-ACCOUNT_EMAIL_VERIFICATION = "none"
+# Whether people can register a local account with an email address and a
+# password. Social sign-in (ORCID, Google) is unaffected by this.
+ACCOUNT_ALLOW_SIGNUP = env.bool("ACCOUNT_ALLOW_SIGNUP", default=True)
+# An unverified address would let anybody register under somebody else's email
+# and then collect a password reset for it, so confirmation is the default.
+# Deployments that cannot send mail (development, CI) set this to "none".
+ACCOUNT_EMAIL_VERIFICATION = env.str("ACCOUNT_EMAIL_VERIFICATION", default="mandatory")
 ACCOUNT_ADAPTER = "topobank_orcid.users.adapters.AccountAdapter"
 # https://docs.allauth.org/en/latest/socialaccount/configuration.html
 SOCIALACCOUNT_ADAPTER = "topobank_orcid.users.adapters.SocialAccountAdapter"
@@ -398,7 +403,10 @@ SPECTACULAR_SETTINGS = {
 }
 
 #
-# Settings for authentication with ORCID
+# Settings for the identity providers. Which of these are actually offered
+# depends on the provider apps installed by the environment-specific settings
+# and on the `SocialApp` entries in the database, see `docs/authentication.rst`
+# in topobank.
 #
 SOCIALACCOUNT_PROVIDERS = {
     "orcid": {
@@ -406,11 +414,26 @@ SOCIALACCOUNT_PROVIDERS = {
         # 'BASE_DOMAIN':'sandbox.orcid.org',  # for the sandbox API
         # Member API or Public API? Default: False (for the public API)
         # 'MEMBER_API': False,  # for the member API
-    }
+    },
+    "google": {
+        # Everything we need from Google: a name to display and an address to
+        # reach the user at.
+        "SCOPE": ["profile", "email"],
+        "AUTH_PARAMS": {"access_type": "online"},
+        "OAUTH_PKCE_ENABLED": True,
+    },
 }
 SOCIALACCOUNT_QUERY_EMAIL = (
     True  # e-mail should be aquired from social account provider
 )
+# An address is mandatory when registering a local account, but not when
+# signing in through a provider: ORCID does not necessarily release one, and
+# requiring it would turn a sign-in that works today into a form to fill in.
+# Both settings otherwise follow their `ACCOUNT_` counterparts.
+SOCIALACCOUNT_EMAIL_REQUIRED = False
+# Whatever address a provider hands over has already been confirmed by the
+# provider, so there is nothing left for us to verify.
+SOCIALACCOUNT_EMAIL_VERIFICATION = "none"
 
 
 def ACCOUNT_USER_DISPLAY(user):
@@ -788,6 +811,11 @@ TOPOBANK_ANALYSIS_MEMORY_WINDOW_DAYS = env.int(
 
 # ALLAUTH SETTINGS
 # ------------------------------------------------------------------------------
-ACCOUNT_SIGNUP_FIELDS = ['email', 'username*', 'password1*', 'password2*']
+# The address is mandatory: it is how a local account is recovered, and it is
+# what identifies the same person when they later connect ORCID or Google.
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
 ACCOUNT_USER_MODEL_USERNAME_FIELD = "username"
 ACCOUNT_USERNAME_MIN_LENGTH = 3
+# Sign in with either the username or the address that was registered with it.
+ACCOUNT_LOGIN_METHODS = {"username", "email"}
+ACCOUNT_UNIQUE_EMAIL = True

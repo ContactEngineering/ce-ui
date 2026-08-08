@@ -133,9 +133,10 @@ STORAGES = {
     "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
 }
 
-# ORCID
+# IDENTITY PROVIDERS
 # ------------------------------------------------------------------------------
-INSTALLED_APPS.insert(
-    INSTALLED_APPS.index("allauth.socialaccount") + 1,
+_after_socialaccount = INSTALLED_APPS.index("allauth.socialaccount") + 1
+INSTALLED_APPS[_after_socialaccount:_after_socialaccount] = [
     "allauth.socialaccount.providers.orcid",
-)
+    "allauth.socialaccount.providers.google",
+]

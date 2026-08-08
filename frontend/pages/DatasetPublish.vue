@@ -57,6 +57,15 @@ function publish() {
                     variant: "danger"
                 }
             });
+        } else if (error.response?.status == 403) { // Refused, most likely no ORCID iD
+            show?.({
+                props: {
+                    title: "Publishing was refused",
+                    body: error.response.data?.detail
+                        ?? "Publishing a dataset requires a connected ORCID iD.",
+                    variant: "danger"
+                }
+            });
         } else {
             show?.({
                 props: {

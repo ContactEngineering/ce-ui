@@ -1,5 +1,22 @@
 # Changelog for plugin *ce-ui*
 
+## 1.39.0 (not yet released)
+
+- ENH: Sign in with Google, or with an email address and a password, in
+  addition to ORCID. The sign-in page offers every provider the deployment has
+  configured, and registration with an email address is open by default
+  (`ACCOUNT_ALLOW_SIGNUP`, `ACCOUNT_EMAIL_VERIFICATION`)
+- ENH: A *Connected identities* page (`/accounts/3rdparty/`) lists the ways a
+  user can sign in, connects further providers, and disconnects ones that are
+  no longer needed. It is linked from the user menu and the profile page
+- ENH: Publishing a dataset or a collection requires a connected ORCID iD. The
+  requirement is enforced on the publication endpoints themselves, so it also
+  covers API clients, and the publication pages explain it up front instead of
+  failing at the end of the form
+- MAINT: `appProps.loginUrl` points at the sign-in page rather than at the
+  ORCID provider directly, and `appProps.userHasOrcid` and
+  `appProps.connectionsUrl` were added
+
 ## 1.38.0 (2026-08-04)
 
 - ENH: Analysis cards poll the task states of all their pending analyses in a

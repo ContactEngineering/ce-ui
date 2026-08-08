@@ -70,6 +70,7 @@ onMounted(() => {
             v-if="!appProps.userIsAnonymous"
             :api-url="appProps.userApiUrl"
             :admin-url="appProps.adminUrl"
+            :connections-url="appProps.connectionsUrl"
             :name="appProps.userFullName"
             :orcid="appProps.userOrcid"
             :is-staff="appProps.userIsStaff"
