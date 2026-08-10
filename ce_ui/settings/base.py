@@ -144,12 +144,12 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     # Your stuff: custom apps go here
     "ce_ui.apps.CEUIAppConfig",
-    "topobank_orcid.users.apps.UsersAppConfig",
-    "topobank_orcid.authorization.apps.AuthorizationAppConfig",
+    "ce_ui.users.apps.UsersAppConfig",
+    "ce_ui.authorization.apps.AuthorizationAppConfig",
     "topobank.files.apps.FilesAppConfig",
     "topobank.manager.apps.ManagerAppConfig",
     "topobank.analysis.apps.AnalysisAppConfig",
-    "topobank_orcid.organizations.apps.OrganizationsAppConfig",
+    "ce_ui.organizations.apps.OrganizationsAppConfig",
     "topobank.properties.apps.PropertiesAppConfig",
     # Former plugins now integrated manually
     "topobank_contact.apps.TopobankContactAppConfig",
@@ -188,7 +188,7 @@ AUTHENTICATION_BACKENDS = [
 AUTH_USER_MODEL = "users.User"
 TOPOBANK_PERMISSION_MODEL = "authorization.PermissionSet"
 TOPOBANK_ORGANIZATION_MODEL = "organizations.Organization"
-TOPOBANK_ANONYMOUS_USER_GETTER = "topobank_orcid.users.anonymous.get_anonymous_user"
+TOPOBANK_ANONYMOUS_USER_GETTER = "ce_ui.users.anonymous.get_anonymous_user"
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-redirect-url
 LOGIN_REDIRECT_URL = "home"
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-url
@@ -237,7 +237,7 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
     "termsandconditions.middleware.TermsAndConditionsRedirectMiddleware",
     # we need an anonymous user with a user id for API calls
-    "topobank_orcid.users.middleware.anonymous_user_middleware",
+    "ce_ui.users.middleware.anonymous_user_middleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -358,7 +358,7 @@ CELERY_REDIS_BACKEND_HEALTH_CHECK_INTERVAL = 30
 # django-allauth
 # ------------------------------------------------------------------------------
 # https://docs.allauth.org/en/latest/account/configuration.html
-ACCOUNT_FORMS = {"signup": "topobank_orcid.users.forms.SignupFormWithName"}
+ACCOUNT_FORMS = {"signup": "ce_ui.users.forms.SignupFormWithName"}
 # Whether people can register a local account with an email address and a
 # password. Social sign-in (ORCID, Google) is unaffected by this.
 ACCOUNT_ALLOW_SIGNUP = env.bool("ACCOUNT_ALLOW_SIGNUP", default=True)
@@ -366,9 +366,9 @@ ACCOUNT_ALLOW_SIGNUP = env.bool("ACCOUNT_ALLOW_SIGNUP", default=True)
 # and then collect a password reset for it, so confirmation is the default.
 # Deployments that cannot send mail (development, CI) set this to "none".
 ACCOUNT_EMAIL_VERIFICATION = env.str("ACCOUNT_EMAIL_VERIFICATION", default="mandatory")
-ACCOUNT_ADAPTER = "topobank_orcid.users.adapters.AccountAdapter"
+ACCOUNT_ADAPTER = "ce_ui.users.adapters.AccountAdapter"
 # https://docs.allauth.org/en/latest/socialaccount/configuration.html
-SOCIALACCOUNT_ADAPTER = "topobank_orcid.users.adapters.SocialAccountAdapter"
+SOCIALACCOUNT_ADAPTER = "ce_ui.users.adapters.SocialAccountAdapter"
 SOCIALACCOUNT_LOGIN_ON_GET = True  # True: disable intermediate page
 ACCOUNT_LOGOUT_ON_GET = True  # True: disable intermediate page
 
@@ -528,12 +528,6 @@ TRACKED_DEPENDENCIES = [
         "topobank_rest_api.__version__",
         "MIT",
         "https://github.com/ContactEngineering/topobank-rest-api",
-    ),
-    (
-        "topobank_orcid",
-        "topobank_orcid.__version__",
-        "MIT",
-        "https://github.com/ContactEngineering/topobank-orcid",
     ),
     (
         "topobank_statistics",

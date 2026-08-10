@@ -31,6 +31,11 @@ classifiers = [
     'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
 ]
 dependencies = [
+    # Identity: the user model, the identity providers and the local
+    # email/password accounts all live in `ce_ui.users` (previously the
+    # separate `topobank-orcid` distribution, which brought these along)
+    'django-allauth[socialaccount]',
+    'django-notifications-hq',
     'django-termsandconditions>=2.0.8',
     'celery[redis]',
     'boto3',

@@ -17,7 +17,6 @@ from topobank.analysis.registry import get_implementation, get_workflow_names
 from topobank.manager.models import Surface, Topography
 from topobank.manager.utils import (get_reader_infos, subjects_from_base64,
                                     subjects_to_base64)
-from topobank_orcid.users.models import User
 from topobank_publication.models import PublicationCollection
 from topobank_publication.serializers import PublicationCollectionSerializer
 from topobank_rest_api.analysis.serializers import WorkflowDetailSerializer
@@ -27,6 +26,7 @@ from topobank_rest_api.manager.v2.serializers import SurfaceV2Serializer
 
 from ce_ui import breadcrumb
 from ce_ui.publication_metadata import publication_metadata
+from ce_ui.users.models import User
 
 ORDER_BY_CHOICES = {"name": "name", "-creation_datetime": "date"}
 SHARING_STATUS_FILTER_CHOICES = {

@@ -2,6 +2,16 @@
 
 ## 1.39.0 (not yet released)
 
+- MAINT: The `topobank-orcid` distribution was folded into this package as
+  `ce_ui.users`, `ce_ui.authorization` and `ce_ui.organizations`. It had a
+  single consumer -- this one -- and the seam it filled lives in topobank
+  (`AUTH_USER_MODEL`, `TOPOBANK_PERMISSION_MODEL`,
+  `TOPOBANK_ORGANIZATION_MODEL`, `TOPOBANK_ANONYMOUS_USER_GETTER`), which is
+  unaffected: a deployment with its own user and permission models still
+  provides them the same way. The Django app labels (`users`, `authorization`,
+  `organizations`) are unchanged, so recorded migrations stay valid and no
+  database change is needed. `django-allauth` and `django-notifications-hq`,
+  previously pulled in through `topobank-orcid`, are now declared here
 - ENH: Sign in with Google, or with an email address and a password, in
   addition to ORCID. The sign-in page offers every provider the deployment has
   configured, and registration with an email address is open by default

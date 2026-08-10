@@ -12,10 +12,10 @@ from django.urls import include, path, re_path
 from django.views import defaults as default_views
 from django.views.generic import RedirectView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
-from topobank_orcid.users.decorators import require_orcid_for_routes
 from topobank_rest_api.views import entry_points
 
 from . import robots, views
+from .users.decorators import require_orcid_for_routes
 
 app_name = "ce_ui"
 

@@ -53,8 +53,7 @@ jobs:
           git+https://github.com/ContactEngineering/topobank-rest-api.git@main \
           git+https://github.com/ContactEngineering/topobank-statistics.git@main \
           git+https://github.com/ContactEngineering/topobank-contact.git@main \
-          git+https://github.com/ContactEngineering/topobank-publication.git@main \
-          git+https://github.com/ContactEngineering/topobank-orcid.git@main
+          git+https://github.com/ContactEngineering/topobank-publication.git@main
         # Installed editable on purpose: `pytest.ini` sets
         # `--import-mode=importlib` and does not put the repository root on
         # `sys.path`, so a copied (non-editable) install means the tests import
