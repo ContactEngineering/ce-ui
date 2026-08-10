@@ -1,7 +1,30 @@
+from allauth.account import app_settings as account_settings
 from allauth.account.adapter import DefaultAccountAdapter
+from allauth.account.utils import has_verified_email
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from django.conf import settings
 from django.core.exceptions import ValidationError
+
+
+def _can_sign_in_locally(user):
+    """
+    Whether this user could sign in with an email address and a password.
+
+    A usable password is not enough on its own. Under mandatory email
+    verification django-allauth refuses the login of an account with no
+    verified address and sends a confirmation instead -- and ORCID does not
+    necessarily release an address, so such an account may have none at all.
+    Counting the password alone would let somebody disconnect their last
+    identity provider and lock themselves out.
+    """
+    if not user.has_usable_password():
+        return False
+    if (
+        account_settings.EMAIL_VERIFICATION
+        != account_settings.EmailVerificationMethod.MANDATORY
+    ):
+        return True
+    return has_verified_email(user)
 
 
 class AccountAdapter(DefaultAccountAdapter):
@@ -73,9 +96,10 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
         in place.
         """
         remaining = [other for other in accounts if other.pk != account.pk]
-        if remaining or account.user.has_usable_password():
+        if remaining or _can_sign_in_locally(account.user):
             return
         raise ValidationError(
-            "This is the only way you can sign in to your account. Set a "
-            "password or connect another account before disconnecting this one."
+            "This is the only way you can sign in to your account. Connect "
+            "another account, or set a password and confirm your email "
+            "address, before disconnecting this one."
         )
