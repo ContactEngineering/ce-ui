@@ -18,4 +18,8 @@ class UsersAppConfig(AppConfig):
     def ready(self):
         from django.db.models.signals import post_migrate
 
+        # Registers the receivers that keep email addresses in step with the
+        # identity providers connected to an account
+        from . import signals  # noqa: F401
+
         post_migrate.connect(_create_anonymous_user, sender=self)

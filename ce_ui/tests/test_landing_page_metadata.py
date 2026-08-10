@@ -10,6 +10,7 @@ import re
 
 import pytest
 from django.urls import NoReverseMatch, reverse
+from django.utils import timezone
 from topobank.testing.factories import (SurfaceFactory, Topography1DFactory,
                                         UserFactory)
 from topobank_publication.models import Publication
@@ -140,8 +141,11 @@ def test_citation_metadata_is_rendered(client, published):
     assert _meta(html, "citation_title") == ["Microcrystalline Diamond"]
     assert _meta(html, "citation_author") == ["Potter, Harry", "Granger, Hermione"]
     assert _meta(html, "citation_doi") == ["10.12345/ce-abcde"]
+    # The template renders the timestamp with `|date`, which converts to the
+    # active timezone. Comparing against the raw UTC value made this fail for
+    # the two hours a day when the two are on different dates.
     assert _meta(html, "citation_publication_date") == [
-        published.datetime.strftime("%Y/%m/%d")
+        timezone.localtime(published.datetime).strftime("%Y/%m/%d")
     ]
 
 

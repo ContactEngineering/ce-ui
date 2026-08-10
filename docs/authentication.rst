@@ -22,6 +22,13 @@ the *Connected identities* page (``/accounts/3rdparty/``):
 - a password, set from the profile,
 - further email addresses, any of which can then be used to sign in.
 
+Connecting a provider also records any address it has already verified, so a
+Google account brings its address with it and no confirmation mail is needed.
+django-allauth does this when a provider *creates* an account but leaves it
+undone when one is connected, so ``ce_ui.users.signals`` fills the gap. An
+address is skipped if any account already holds it — addresses are unique
+(``ACCOUNT_UNIQUE_EMAIL``), and taking one would hand over its sign-in.
+
 The ORCID account itself cannot be disconnected — it is what the account *is*.
 Everything else can be removed again, as long as one way of signing back in
 remains.
@@ -46,7 +53,15 @@ enforces the second condition; the first is django-allauth's own.
 This is why an account with no confirmed email address is worth chasing: ORCID
 does not always pass one on, and without one there is no Google sign-in, no
 password sign-in, and no account recovery. The *Connected identities* page says
-so when it applies.
+so when it applies, and the email page warns before the last address is removed
+— which is allowed, since the ORCID account still signs the user in.
+
+.. note::
+
+   A password can be set on an account that has no confirmed address, but it
+   cannot be used: under mandatory verification django-allauth refuses the
+   login and sends a confirmation instead. Setting a password is only useful
+   once an address is confirmed.
 
 Which providers a deployment actually offers depends on two things: the
 django-allauth provider app has to be in ``INSTALLED_APPS`` (ce-ui registers

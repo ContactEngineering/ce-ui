@@ -33,6 +33,19 @@
 </div>
   {% endfor %}
 
+{% if user.emailaddress_set.count == 1 %}
+{# Removing it is allowed -- the ORCID account still signs the user in -- but #}
+{# it takes password sign-in and account recovery with it, which is not       #}
+{# obvious from a button labelled "Remove".                                   #}
+<div class="alert alert-warning" role="status">
+  <strong>{% trans "This is your only email address." %}</strong>
+  Removing it does not lock you out — you can still sign in with ORCID — but
+  until you add another one there is no way to recover your account, no
+  sign-in with a password, and no sign-in with a connected Google account,
+  which is recognised by its address.
+</div>
+{% endif %}
+
 <div class="form-group">
       <button class="secondaryAction btn btn-primary" type="submit" name="action_primary" >{% trans 'Make Primary' %}</button>
       <button class="secondaryAction btn btn-primary" type="submit" name="action_send" >{% trans 'Re-send Verification' %}</button>

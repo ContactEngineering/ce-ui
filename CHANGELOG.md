@@ -13,9 +13,18 @@
   claimed without confirming; `SocialAccountAdapter.authenticate_by_email`
   requires a confirmed one, so that a claim cannot capture somebody else's
   sign-in
+- ENH: Connecting an identity provider records the addresses it has already
+  verified, so a Google account brings its address with it and no confirmation
+  mail is needed. django-allauth stores them when a provider creates an account
+  but not when one is connected; an address already held by any account is left
+  alone
 - ENH: The connected identities page warns when an account has no confirmed
   email address, which leaves it with no Google sign-in, no password sign-in
-  and no way to recover
+  and no way to recover; the email page warns before the last address is
+  removed, which stays allowed because ORCID still signs the user in
+- BUG: The citation-date assertion in the landing page tests compared a
+  timestamp rendered in the active timezone against the raw UTC value, and
+  failed for the two hours a day when those fall on different dates
 - DOC: `docs/authentication.rst` describes how users sign in and how to obtain
   credentials for each identity provider, including Google's consent screen,
   scope classification and publishing status. It lives here, together with the
