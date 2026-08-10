@@ -1,7 +1,6 @@
 import logging
 from html import unescape
 
-from allauth.account.views import EmailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
@@ -561,33 +560,6 @@ class TermsDetailView(TabbedTermsMixin, TermsView):
 
 class TermsAcceptView(TabbedTermsMixin, AcceptTermsView):
     pass
-
-
-class TabbedEmailView(EmailView):
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        breadcrumb.add_generic(
-            context,
-            {
-                "title": "User profile",
-                "icon": "user",
-                "href": reverse(
-                    "ce_ui:user-detail",
-                    kwargs=dict(username=self.request.user.username),
-                ),
-                "active": False,
-            },
-        )
-        breadcrumb.add_generic(
-            context,
-            {
-                "title": "Edit e-mail addresses",
-                "icon": "edit",
-                "href": self.request.path,
-                "active": True,
-            },
-        )
-        return context
 
 
 def _users_share_dataset(user_a, user_b):

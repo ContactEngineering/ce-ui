@@ -210,9 +210,13 @@ ui_urlpatterns = [
         view=views.UserDetailView.as_view(),
         name="user-detail",
     ),
+    # django-allauth serves the real page. This route predates it and is kept
+    # only so that an old bookmark still lands somewhere useful.
     path(
-        "user-email/", views.TabbedEmailView.as_view(), name="account_email"
-    ),  # same as allauth.accounts.email.EmailView, but with tab data
+        "user-email/",
+        RedirectView.as_view(pattern_name="account_email"),
+        name="account_email",
+    ),
     #
     # HTML routes
     #

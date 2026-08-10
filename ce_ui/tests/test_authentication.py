@@ -8,6 +8,7 @@ requires an ORCID account.
 """
 
 import pytest
+from allauth.account.models import EmailAddress
 from allauth.socialaccount.models import SocialAccount
 from django.contrib.auth import get_user_model
 from django.urls import reverse
@@ -100,6 +101,32 @@ def test_connections_page_warns_when_no_orcid_is_connected(client, local_user):
     assert "No ORCID iD connected" in html
     # The local account is listed as an identity of its own
     assert "Email and password" in html
+
+
+def test_connections_page_lists_every_email_address(client, local_user):
+    """
+    An account can carry several addresses, so the page lists them all rather
+    than only the primary one, and points at where they are managed.
+    """
+    EmailAddress.objects.create(
+        user=local_user, email="primary@example.com", verified=True, primary=True
+    )
+    EmailAddress.objects.create(
+        user=local_user, email="secondary@example.com", verified=False, primary=False
+    )
+    client.force_login(local_user)
+    html = client.get(reverse("socialaccount_connections")).content.decode()
+
+    assert "primary@example.com" in html
+    assert "secondary@example.com" in html
+    assert reverse("account_email") in html
+
+
+def test_the_old_email_route_still_lands_on_the_email_page(client, local_user):
+    client.force_login(local_user)
+    response = client.get(reverse("ce_ui:account_email"))
+    assert response.status_code == 302
+    assert response.url == reverse("account_email")
 
 
 def test_connections_page_lists_a_connected_orcid(client, local_user):

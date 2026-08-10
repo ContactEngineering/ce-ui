@@ -67,10 +67,7 @@
       <span class="flex-shrink-0" style="width: 1em"></span>
       <span class="d-flex align-items-center gap-2">
         <i class="fa fa-envelope fa-fw" aria-hidden="true"></i>
-        <span>
-          <span class="fw-semibold">{% trans "Email and password" %}</span>
-          <span class="text-muted ms-2">{{ user.email }}</span>
-        </span>
+        <span class="fw-semibold">{% trans "Email and password" %}</span>
       </span>
     </li>
     {% endif %}
@@ -82,6 +79,35 @@
   <p>{% trans "You currently have no third-party account connected to this profile." %}</p>
   {% endif %}
 </form>
+
+{# Addresses are listed separately from the identities above: an account can #}
+{# carry several of them, and they exist whether or not a password is set --  #}
+{# a provider hands one over when its account is connected.                   #}
+<h2 class="h5 mt-4">{% trans "Email addresses" %}</h2>
+<ul class="list-group mb-2">
+  {% for address in user.emailaddress_set.all %}
+  <li class="list-group-item d-flex align-items-center gap-2">
+    <i class="fa fa-envelope fa-fw text-muted" aria-hidden="true"></i>
+    <span>{{ address.email }}</span>
+    {% if address.primary %}
+    <span class="badge text-bg-secondary">{% trans "primary" %}</span>
+    {% endif %}
+    {% if address.verified %}
+    <span class="badge text-bg-success">{% trans "verified" %}</span>
+    {% else %}
+    <span class="badge text-bg-warning">{% trans "unverified" %}</span>
+    {% endif %}
+  </li>
+  {% empty %}
+  <li class="list-group-item text-muted">
+    {% trans "No email address is on file for this account." %}
+  </li>
+  {% endfor %}
+</ul>
+<p>
+  <a href="{% url 'account_email' %}">{% trans "Add or remove email addresses" %}</a>
+  — {% trans "the primary address receives password resets and notifications." %}
+</p>
 
 <h2 class="h5 mt-4">{% trans "Connect another account" %}</h2>
 {% get_providers as socialaccount_providers %}
