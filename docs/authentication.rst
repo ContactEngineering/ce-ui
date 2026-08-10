@@ -5,17 +5,48 @@ Who may sign in, and how, is decided by this package rather than by topobank:
 ce-ui supplies the user model, registers the django-allauth providers and holds
 the settings below. topobank itself is agnostic of the sign-in procedure.
 
-Users can sign in to TopoBank in three ways:
+An account is created with an ORCID iD, and no other way
+--------------------------------------------------------
 
-- with an `ORCID <https://orcid.org>`_ account,
-- with a Google account,
-- with an email address and a password.
+An `ORCID <https://orcid.org>`_ iD is what identifies the researcher behind an
+account, and what publishing a dataset requires, so it is where an account
+begins. Registering with an email address and a password is closed
+(``ACCOUNT_ALLOW_SIGNUP``), and a provider that is not listed in
+``SOCIALACCOUNT_SIGNUP_PROVIDERS`` cannot create one either: signing in with
+Google while holding no account here lands on a page explaining how to get one.
 
-Several of these can be connected to the same account. Somebody who registered
-with an email address can add their ORCID iD later, and the connected
-identities are listed on the *Connected identities* page (``/accounts/3rdparty/``).
-An identity can also be disconnected again, as long as one way of signing back
-in remains.
+Once an account exists, further ways of reaching it can be attached to it from
+the *Connected identities* page (``/accounts/3rdparty/``):
+
+- another identity provider, currently Google,
+- a password, set from the profile,
+- further email addresses, any of which can then be used to sign in.
+
+The ORCID account itself cannot be disconnected — it is what the account *is*.
+Everything else can be removed again, as long as one way of signing back in
+remains.
+
+How Google finds the right account
+..................................
+
+Because Google cannot create an account, a Google sign-in has to find one that
+already exists. It is matched by email address: if a confirmed address on some
+account equals the address Google reports — and Google has verified that
+address itself — the sign-in lands on that account, and the Google account is
+connected to it so that later sign-ins are recognised directly. Otherwise the
+sign-in is refused.
+
+Two conditions, both deliberate. The address has to be verified *by Google*,
+which is what makes it evidence of ownership. And it has to be confirmed *here*
+as well: django-allauth would otherwise settle for an address somebody had
+merely claimed without confirming, which would hand them the sign-in of the
+person who really owns it. ``SocialAccountAdapter.authenticate_by_email``
+enforces the second condition; the first is django-allauth's own.
+
+This is why an account with no confirmed email address is worth chasing: ORCID
+does not always pass one on, and without one there is no Google sign-in, no
+password sign-in, and no account recovery. The *Connected identities* page says
+so when it applies.
 
 Which providers a deployment actually offers depends on two things: the
 django-allauth provider app has to be in ``INSTALLED_APPS`` (ce-ui registers
@@ -246,25 +277,39 @@ and import them the same way as for ORCID, using the template file
 Login with email and password
 -----------------------------
 
-Local accounts need no provider configuration; the sign-up form is reachable
-from the login page. A registration asks for a name, a username, an email
-address and a password, and the account can then sign in with either the
-username or the address (``ACCOUNT_LOGIN_METHODS``).
+Local sign-in needs no provider configuration. It is not a way to *register* —
+that is closed — but a way to reach an account that already exists: set a
+password from the profile, and the account can then sign in with its username
+or with any of its email addresses (``ACCOUNT_LOGIN_METHODS``).
 
-Two settings govern local accounts:
+The settings that govern this:
 
 ``ACCOUNT_ALLOW_SIGNUP``
-   Whether the site accepts registrations for local accounts at all. Defaults
-   to ``True``. Switching it off leaves ORCID and Google sign-in untouched.
+   Whether the site accepts registrations for local accounts. ``False`` here,
+   because such a registration would create an account with no ORCID iD.
+   Switching it on leaves everything else untouched.
+
+``SOCIALACCOUNT_SIGNUP_PROVIDERS``
+   The providers that may bring a new account into existence, and which
+   therefore cannot be disconnected from one. ``["orcid"]`` here. Set it to
+   ``None`` to let any configured provider sign somebody up and every
+   connection be removed again.
 
 ``ACCOUNT_EMAIL_VERIFICATION``
-   Whether a newly registered address has to be confirmed before the account
-   can be used. Defaults to ``mandatory``, which requires a working outgoing
-   mail configuration. Set it to ``none`` for a development instance that
-   cannot send mail.
+   Whether a newly added address has to be confirmed before it counts.
+   Defaults to ``mandatory``, which requires a working outgoing mail
+   configuration. Set it to ``none`` for a development instance that cannot
+   send mail.
 
 Note that an address is mandatory for a *local* registration but not for a
 social one: ORCID does not necessarily release an email address, and requiring
 one would turn a working sign-in into a form to fill in. This is why
 ``SOCIALACCOUNT_EMAIL_REQUIRED`` is set to ``False`` explicitly — django-allauth
 would otherwise derive it from the local signup fields.
+
+.. note::
+
+   A superuser created with ``manage.py createsuperuser`` has no ORCID iD, and
+   under mandatory verification it needs a confirmed email address before it
+   can sign in with its password. Add one through the Django admin, or set
+   ``ACCOUNT_EMAIL_VERIFICATION=none`` while bootstrapping.

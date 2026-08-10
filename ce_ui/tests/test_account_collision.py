@@ -129,23 +129,24 @@ def test_freeing_the_identity_requires_a_password_first(google_user):
 
 
 @pytest.mark.django_db
-def test_a_password_alone_does_not_free_the_last_identity(orcid_user, settings):
+def test_a_password_alone_does_not_free_the_last_identity(google_user, settings):
     """
     A password is only a way back in if it can actually be used.
 
     Under mandatory verification, allauth refuses the login of an account with
-    no verified address, and ORCID does not necessarily release one -- so
-    letting the last identity go here would lock the account out for good.
+    no verified address -- so letting the last identity go here would lock the
+    account out for good. Tested on the Google account, since the ORCID one
+    anchors its account and cannot be disconnected at all.
     """
     settings.ACCOUNT_EMAIL_VERIFICATION = "mandatory"
-    orcid_user.set_password("a-very-secret-password")
-    orcid_user.save()
-    orcid_account = orcid_user.socialaccount_set.get()
+    google_user.set_password("a-very-secret-password")
+    google_user.save()
+    google_account = google_user.socialaccount_set.get()
 
     with pytest.raises(ValidationError):
-        SocialAccountAdapter().validate_disconnect(orcid_account, [orcid_account])
+        SocialAccountAdapter().validate_disconnect(google_account, [google_account])
 
     EmailAddress.objects.create(
-        user=orcid_user, email="researcher@example.org", verified=True, primary=True
+        user=google_user, email="researcher@example.com", verified=True, primary=True
     )
-    SocialAccountAdapter().validate_disconnect(orcid_account, [orcid_account])
+    SocialAccountAdapter().validate_disconnect(google_account, [google_account])

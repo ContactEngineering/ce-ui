@@ -7,7 +7,7 @@ from django.urls import resolve
 from django.utils.translation import gettext_lazy as _
 from topobank.authorization import get_anonymous_user
 
-from .identity import connected_identities, has_orcid
+from .identity import connected_identities, has_orcid, has_verified_email
 
 _ANONYMOUS_USER_UNSET = object()
 
@@ -112,6 +112,16 @@ class User(AbstractUser):
         that require one -- publishing, above all -- ask here.
         """
         return has_orcid(self)
+
+    @property
+    def has_verified_email(self) -> bool:
+        """
+        Whether a confirmed email address is on file.
+
+        See `ce_ui.users.identity.has_verified_email`. Account recovery,
+        password sign-in and Google sign-in all depend on it.
+        """
+        return has_verified_email(self)
 
     @property
     def connected_identities(self) -> list:

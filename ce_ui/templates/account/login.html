@@ -14,18 +14,30 @@
 
 {% if socialaccount_providers %}
 <p class="text-muted">
-  Sign in with an account you already have. You can connect further accounts to
-  the same profile later — publishing a dataset requires an ORCID iD, but
-  nothing else does.
+  Your ORCID iD is your account here: use it to sign in, or to create an
+  account if you do not have one yet. Anything else below works once you have
+  added it to your profile.
 </p>
 
 <div class="d-grid gap-2 mb-4">
   {% for provider in socialaccount_providers %}
-  <a class="btn btn-outline-primary btn-lg d-flex align-items-center justify-content-center gap-2"
+  {% if provider.id == "orcid" %}
+  <a class="btn btn-primary btn-lg d-flex align-items-center justify-content-center gap-2"
+     href="{% provider_login_url provider.id process='login' %}">
+    {% include "socialaccount/snippets/provider_icon.html" with provider_id=provider.id %}
+    {% trans "Sign in or sign up with ORCID" %}
+  </a>
+  {% endif %}
+  {% endfor %}
+
+  {% for provider in socialaccount_providers %}
+  {% if provider.id != "orcid" %}
+  <a class="btn btn-outline-primary d-flex align-items-center justify-content-center gap-2"
      href="{% provider_login_url provider.id process='login' %}">
     {% include "socialaccount/snippets/provider_icon.html" with provider_id=provider.id %}
     {% blocktrans with provider=provider.name %}Sign in with {{ provider }}{% endblocktrans %}
   </a>
+  {% endif %}
   {% endfor %}
 </div>
 
@@ -49,8 +61,9 @@
 </form>
 
 <p class="mt-4 mb-0 text-muted">
-  {% blocktrans %}No account yet? <a href="{{ signup_url }}">Sign up</a> with your
-  email address.{% endblocktrans %}
+  No account yet? Use <em>Sign in or sign up with ORCID</em> above — that is how
+  an account is created here. A password and other accounts can be added to it
+  afterwards.
 </p>
 
 {% endblock %}

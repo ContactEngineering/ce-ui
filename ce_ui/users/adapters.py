@@ -1,9 +1,28 @@
 from allauth.account import app_settings as account_settings
 from allauth.account.adapter import DefaultAccountAdapter
+from allauth.account.models import EmailAddress
 from allauth.account.utils import has_verified_email
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from django.conf import settings
 from django.core.exceptions import ValidationError
+
+from .identity import provider_name
+
+
+def signup_providers():
+    """
+    The identity providers that may bring a new account into existence.
+
+    These providers *anchor* an account: an account always has one, because
+    that is the only way it can have been created, and it cannot be
+    disconnected afterwards. Every other way of signing in -- another provider,
+    a password, a second email address -- is something the user attaches to an
+    account that already exists.
+
+    `None` lifts the restriction, letting any configured provider sign somebody
+    up and every connection be removed again.
+    """
+    return getattr(settings, "SOCIALACCOUNT_SIGNUP_PROVIDERS", None)
 
 
 def _can_sign_in_locally(user):
@@ -59,12 +78,42 @@ class AccountAdapter(DefaultAccountAdapter):
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
     def is_open_for_signup(self, request, sociallogin):
         """
-        Signing in through an identity provider always creates an account.
+        Whether this provider may bring a new account into existence.
+
+        Only the providers in `SOCIALACCOUNT_SIGNUP_PROVIDERS` may; signing in
+        through any other one reaches an existing account or nothing at all.
+        django-allauth turns a `False` here into `account/signup_closed.html`,
+        which explains how to get an account.
 
         The default implementation defers to the account adapter, which speaks
-        for local registration only.
+        for local registration only, so this override is what keeps closing
+        local registration from also closing the door on ORCID.
         """
-        return True
+        providers = signup_providers()
+        if providers is None:
+            return True
+        account = getattr(sociallogin, "account", None)
+        return account is not None and account.provider in providers
+
+    def authenticate_by_email(self, sociallogin):
+        """
+        Match a social login against an existing account by email address.
+
+        django-allauth offers the address to any local account holding it,
+        preferring a verified one but falling back to an unverified one. That
+        fallback would let somebody who had merely *claimed* an address --
+        without ever confirming it -- receive the sign-in of whoever really
+        owns it at the provider. Only a confirmed address counts here.
+        """
+        match = super().authenticate_by_email(sociallogin)
+        if match is None:
+            return None
+        user, email = match
+        if not EmailAddress.objects.filter(
+            user=user, email__iexact=email, verified=True
+        ).exists():
+            return None
+        return match
 
     def populate_user(self, request, sociallogin, data):
         """
@@ -88,13 +137,20 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
 
     def validate_disconnect(self, account, accounts):
         """
-        Refuse to remove the last way a user could sign back in.
+        Refuse to remove an account's anchor, or the last way back in.
 
-        Accounts can otherwise be connected and disconnected freely: a user who
-        registered with an email address can add their ORCID iD later, and one
-        who signed up through Google can drop it again once another identity is
-        in place.
+        The provider that created the account stays: it is what identifies the
+        person behind it, and what publishing requires. Everything else can be
+        connected and disconnected freely, as long as one way of signing back
+        in remains.
         """
+        providers = signup_providers()
+        if providers is not None and account.provider in providers:
+            raise ValidationError(
+                f"Your {provider_name(account.provider)} account identifies you "
+                "on this site and cannot be disconnected. Contact support if it "
+                "has to be changed."
+            )
         remaining = [other for other in accounts if other.pk != account.pk]
         if remaining or _can_sign_in_locally(account.user):
             return

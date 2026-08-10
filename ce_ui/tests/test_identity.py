@@ -1,7 +1,7 @@
 """Tests for connected identities and the ORCID requirement on publications."""
 
 import pytest
-from allauth.socialaccount.models import SocialAccount
+from allauth.socialaccount.models import SocialAccount, SocialLogin
 from django.contrib.auth import get_user_model
 from django.core.exceptions import (ImproperlyConfigured, PermissionDenied,
                                     ValidationError)
@@ -190,18 +190,29 @@ def test_unknown_route_is_an_error():
 
 
 @pytest.mark.django_db
-def test_signup_is_open_by_default(rf):
-    # `ACCOUNT_ALLOW_SIGNUP` is not in the test settings, so this exercises the
-    # default a deployment gets without configuring anything.
+def test_local_registration_follows_the_setting(settings, rf):
+    # Off on this site, because a local registration would create an account
+    # with no ORCID iD. See `test_signup_policy`.
+    settings.ACCOUNT_ALLOW_SIGNUP = True
     assert AccountAdapter().is_open_for_signup(rf.get("/accounts/signup/"))
+    settings.ACCOUNT_ALLOW_SIGNUP = False
+    assert not AccountAdapter().is_open_for_signup(rf.get("/accounts/signup/"))
 
 
 @pytest.mark.django_db
-def test_local_signup_can_be_switched_off(settings, rf):
+def test_closing_local_signup_leaves_orcid_open(settings, rf, user):
+    """
+    The two are separate switches. django-allauth's social adapter defers to
+    the account adapter by default, which would close ORCID along with local
+    registration; the override is what keeps them apart.
+    """
     settings.ACCOUNT_ALLOW_SIGNUP = False
     assert not AccountAdapter().is_open_for_signup(rf.get("/accounts/signup/"))
-    # Social sign-in is unaffected
-    assert SocialAccountAdapter().is_open_for_signup(rf.get("/"), None)
+
+    sociallogin = SocialLogin(
+        user=user, account=SocialAccount(provider="orcid", uid="0000-0002-1825-0097")
+    )
+    assert SocialAccountAdapter().is_open_for_signup(rf.get("/"), sociallogin)
 
 
 @pytest.mark.django_db
@@ -234,8 +245,6 @@ def test_account_can_be_disconnected_when_a_password_remains(user):
     ],
 )
 def test_name_is_taken_from_the_provider(data):
-    from allauth.socialaccount.models import SocialLogin
-
     User = get_user_model()
     populated = SocialAccountAdapter().populate_user(
         None, SocialLogin(user=User()), data

@@ -2,6 +2,20 @@
 
 ## 1.39.0 (not yet released)
 
+- ENH: An account is created with an ORCID iD and no other way. Registration
+  with an email address and a password is closed, and a provider outside
+  `SOCIALACCOUNT_SIGNUP_PROVIDERS` cannot create an account either; the page
+  such an attempt lands on explains how to get one. The ORCID account cannot be
+  disconnected afterwards, since it is what identifies the account
+- ENH: Google sign-in finds an existing account by email address -- verified by
+  Google, and confirmed here -- and connects itself to it, rather than being
+  turned away. django-allauth would settle for an address somebody had merely
+  claimed without confirming; `SocialAccountAdapter.authenticate_by_email`
+  requires a confirmed one, so that a claim cannot capture somebody else's
+  sign-in
+- ENH: The connected identities page warns when an account has no confirmed
+  email address, which leaves it with no Google sign-in, no password sign-in
+  and no way to recover
 - DOC: `docs/authentication.rst` describes how users sign in and how to obtain
   credentials for each identity provider, including Google's consent screen,
   scope classification and publishing status. It lives here, together with the

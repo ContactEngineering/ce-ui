@@ -359,9 +359,18 @@ CELERY_REDIS_BACKEND_HEALTH_CHECK_INTERVAL = 30
 # ------------------------------------------------------------------------------
 # https://docs.allauth.org/en/latest/account/configuration.html
 ACCOUNT_FORMS = {"signup": "ce_ui.users.forms.SignupFormWithName"}
+# An account comes into existence through ORCID and no other way: it is what
+# identifies the researcher behind it, and what publishing requires. A password
+# and further identity providers are things a user attaches to an account that
+# already exists, from the "Connected identities" page.
+#
 # Whether people can register a local account with an email address and a
-# password. Social sign-in (ORCID, Google) is unaffected by this.
-ACCOUNT_ALLOW_SIGNUP = env.bool("ACCOUNT_ALLOW_SIGNUP", default=True)
+# password. Off, because that would create an account without an ORCID iD.
+ACCOUNT_ALLOW_SIGNUP = env.bool("ACCOUNT_ALLOW_SIGNUP", default=False)
+# Providers that may bring a new account into existence, and which therefore
+# cannot be disconnected from one. Set to None to let any provider sign
+# somebody up.
+SOCIALACCOUNT_SIGNUP_PROVIDERS = ["orcid"]
 # An unverified address would let anybody register under somebody else's email
 # and then collect a password reset for it, so confirmation is the default.
 # Deployments that cannot send mail (development, CI) set this to "none".
@@ -420,8 +429,18 @@ SOCIALACCOUNT_PROVIDERS = {
         "SCOPE": ["profile", "email"],
         "AUTH_PARAMS": {"access_type": "online"},
         "OAUTH_PKCE_ENABLED": True,
+        # Google cannot create an account, so a Google sign-in has to find one.
+        # It is matched by email address, which Google has verified itself --
+        # without this, somebody who signed up with ORCID and then clicked
+        # "Sign in with Google" would be turned away rather than recognised.
+        # Enabled per provider on purpose: it trusts the provider's word on who
+        # owns an address, which is only safe for one that verifies them.
+        "EMAIL_AUTHENTICATION": True,
     },
 }
+# Having matched an account by address, keep the Google account connected to it,
+# so the next sign-in is recognised directly rather than by address again.
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 SOCIALACCOUNT_QUERY_EMAIL = (
     True  # e-mail should be aquired from social account provider
 )

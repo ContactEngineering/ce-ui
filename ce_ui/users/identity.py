@@ -73,6 +73,28 @@ def has_orcid(user):
     )
 
 
+def has_verified_email(user):
+    """
+    Whether a confirmed email address is on file for this user.
+
+    This is what account recovery, password sign-in and -- because a Google
+    account is recognised by its address -- Google sign-in all rest on. ORCID
+    does not always pass an address on, so an account can start out with none.
+    """
+    if user is None or not getattr(user, "is_authenticated", False):
+        return False
+    if not getattr(user, "pk", None):
+        return False
+
+    try:
+        from allauth.account.utils import \
+            has_verified_email as _allauth_has_verified_email
+    except ImportError:
+        return False
+
+    return _allauth_has_verified_email(user)
+
+
 def connected_identities(user):
     """
     Describe every identity this user can sign in with.

@@ -1,10 +1,10 @@
 """
 Tests for the ways a user can sign in, and for what an ORCID iD unlocks.
 
-Three routes lead into the site -- ORCID, Google, and a local account with an
-email address and a password -- and they can be combined on one profile. Only
-publishing depends on which of them a user has: it mints a citable record, so it
-requires an ORCID account.
+Three routes lead into the site -- ORCID, Google, and an email address with a
+password -- and they can be combined on one profile. Which of them may *create*
+an account is a separate matter, covered by `test_signup_policy`; the users
+here are built directly, standing in for accounts that already exist.
 """
 
 import pytest
@@ -56,8 +56,9 @@ def test_login_page_offers_all_providers(client, orcid_socialapp, google_sociala
     # carry whatever name django-allauth gives the provider
     assert "/accounts/orcid/login/" in html
     assert "/accounts/google/login/" in html
-    # ... and the local form, so an account can be created without either
-    assert reverse("account_signup") in html
+    # ... but no invitation to register: an account is created with ORCID and
+    # no other way, see `test_signup_policy`
+    assert reverse("account_signup") not in html
 
 
 def test_a_provider_that_hands_over_no_email_can_still_sign_someone_up():
@@ -73,19 +74,6 @@ def test_a_provider_that_hands_over_no_email_can_still_sign_someone_up():
     from allauth.socialaccount import app_settings
 
     assert not app_settings.EMAIL_REQUIRED
-
-
-def test_local_registration_is_open(db, client):
-    response = client.get(reverse("account_signup"))
-    assert response.status_code == 200
-    assert "Sign Up" in response.content.decode()
-
-
-def test_local_registration_can_be_switched_off(db, client, settings):
-    settings.ACCOUNT_ALLOW_SIGNUP = False
-    response = client.get(reverse("account_signup"))
-    # allauth renders its "signup closed" page rather than the form
-    assert "signup_form" not in response.content.decode()
 
 
 #
