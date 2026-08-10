@@ -405,8 +405,7 @@ SPECTACULAR_SETTINGS = {
 #
 # Settings for the identity providers. Which of these are actually offered
 # depends on the provider apps installed by the environment-specific settings
-# and on the `SocialApp` entries in the database, see `docs/authentication.rst`
-# in topobank.
+# and on the `SocialApp` entries in the database, see `docs/authentication.rst`.
 #
 SOCIALACCOUNT_PROVIDERS = {
     "orcid": {

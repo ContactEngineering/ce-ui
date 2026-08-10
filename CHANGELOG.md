@@ -2,6 +2,12 @@
 
 ## 1.39.0 (not yet released)
 
+- DOC: `docs/authentication.rst` describes how users sign in and how to obtain
+  credentials for each identity provider, including Google's consent screen,
+  scope classification and publishing status. It lives here, together with the
+  `orcid.yaml.template` and `google.yaml.template` fixtures, because this
+  package owns the user model and the provider configuration; topobank is
+  agnostic of the sign-in procedure
 - MAINT: The `topobank-orcid` distribution was folded into this package as
   `ce_ui.users`, `ce_ui.authorization` and `ce_ui.organizations`. It had a
   single consumer -- this one -- and the seam it filled lives in topobank
