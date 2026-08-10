@@ -95,12 +95,12 @@ const contactModal = ref(false);
         <div>
             <ul>
                 <li>Participate at <a
-                    href="https://github.com/ComputationalMechanics/TopoBank/discussions"
+                    href="https://github.com/ContactEngineering/TopoBank/discussions"
                     target="_blank">discussions
                     on GitHub</a>, or
                 </li>
                 <li>open an <a
-                    href="https://github.com/ComputationalMechanics/TopoBank/issues"
+                    href="https://github.com/ContactEngineering/TopoBank/issues"
                     target="_blank">issue
                     on
                     GitHub</a>, or
