@@ -38,6 +38,9 @@ def connect_google(user, email=None, verified=True, uid="12345"):
     """Connect a Google account the way the connect flow does."""
     request = RequestFactory().get("/")
     request.session = {}
+    # Connecting sends a notification mail, and rendering it runs the context
+    # processors, which read the request's user
+    request.user = user
     addresses = (
         [EmailAddress(email=email, verified=verified, primary=True)] if email else []
     )

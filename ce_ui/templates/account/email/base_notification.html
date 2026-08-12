@@ -1,0 +1,52 @@
+{% extends "account/email/base_message.html" %}
+{% comment %}
+The HTML half of the security notifications: password set or changed, an
+address added or removed, an identity provider connected or disconnected. Each
+of those fills in `notification_message` and `title`; everything the reader
+needs to act on lives here, so the individual mails stay one line long.
+{% endcomment %}
+
+{% block content %}
+<p style="margin:0 0 16px 0;">
+  This is a note to let you know about a change to your contact.engineering
+  account:
+</p>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+       style="margin:0 0 20px 0; background-color:#eef2f5; border-radius:6px;">
+  <tr>
+    <td style="padding:14px 16px; font-size:16px; font-weight:600; color:#12354e;">
+      {% block notification_message %}{% endblock notification_message %}
+    </td>
+  </tr>
+</table>
+
+<p style="margin:0 0 16px 0;">
+  If that was you, there is nothing to do — this message is just a record.
+</p>
+
+<p style="margin:0 0 16px 0;">
+  If it was not you, somebody else may have reached your account. Sign in with
+  your ORCID iD, which nobody can disconnect, and open the
+  <strong style="color:#12354e;">Connected identities</strong> page of your
+  profile: it lists every way your account can be signed in to, and lets you
+  remove any you do not recognise. Then write to
+  <a href="mailto:support@contact.engineering" style="color:#1c6e8c;">support@contact.engineering</a>
+  and we will help you sort it out.
+</p>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+       style="margin:20px 0 0 0; border-top:1px solid #dbe1e6;">
+  <tr>
+    <td style="padding:16px 0 0 0; font-size:13px; line-height:1.6; color:#5c6670;">
+      The change came from<br>
+      IP address: {{ ip|default:"unknown" }}<br>
+      Browser: {{ user_agent|default:"unknown" }}<br>
+      Date: {{ timestamp }}
+    </td>
+  </tr>
+</table>
+{% endblock content %}
+
+{% block why %}You are receiving this message because it is the address on file
+for a contact.engineering account whose sign-in settings changed.{% endblock why %}

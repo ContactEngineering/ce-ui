@@ -381,6 +381,12 @@ ACCOUNT_EMAIL_VERIFICATION = env.str("ACCOUNT_EMAIL_VERIFICATION", default="mand
 ACCOUNT_EMAIL_SUBJECT_PREFIX = env.str(
     "ACCOUNT_EMAIL_SUBJECT_PREFIX", default="[contact.engineering] "
 )
+# Tell people when the ways of signing in to their account change: a password
+# set or changed, an address added or removed, an identity provider connected
+# or disconnected. A connected provider is a way *into* the account, so gaining
+# one silently is exactly the event somebody should hear about. Off in
+# django-allauth by default.
+ACCOUNT_EMAIL_NOTIFICATIONS = env.bool("ACCOUNT_EMAIL_NOTIFICATIONS", default=True)
 ACCOUNT_ADAPTER = "ce_ui.users.adapters.AccountAdapter"
 # https://docs.allauth.org/en/latest/socialaccount/configuration.html
 SOCIALACCOUNT_ADAPTER = "ce_ui.users.adapters.SocialAccountAdapter"

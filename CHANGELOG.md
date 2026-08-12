@@ -13,6 +13,11 @@
   claimed without confirming; `SocialAccountAdapter.authenticate_by_email`
   requires a confirmed one, so that a claim cannot capture somebody else's
   sign-in
+- ENH: Users are told when the ways of signing in to their account change: a
+  password set or changed, an email address changed or removed, an identity
+  provider connected or disconnected. django-allauth has these switched off by
+  default, so none of them were sent. Each names what changed, says what to do
+  if it was not them, and records the address, browser and time it came from
 - ENH: The account mails are written and styled for contact.engineering rather
   than being django-allauth's defaults: a branded HTML half alongside the plain
   text, and copy that explains what the message is for and what happens if it

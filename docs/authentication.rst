@@ -289,6 +289,34 @@ and import them the same way as for ORCID, using the template file
    envsubst < google.yaml.template > google.yaml
    python manage.py loaddata google.yaml
 
+What the site sends by mail
+---------------------------
+
+Three mails are part of signing in: confirming an address, resetting a
+password, and the reply when a reset is requested for an address no account
+holds — which explains that accounts are made with an ORCID iD, since the
+reader cannot simply register.
+
+On top of those, ``ACCOUNT_EMAIL_NOTIFICATIONS`` (on here, off in
+django-allauth by default) tells a user when the ways of signing in to their
+account change: a password set or changed, an address changed or removed, an
+identity provider connected or disconnected. A connected provider is a way
+*into* the account, so gaining one silently is exactly the event somebody
+should hear about. Each names the change, says what to do if it was not them,
+and records the address, browser and time it came from.
+
+The templates live in ``ce_ui/templates/account/email/`` and
+``ce_ui/templates/socialaccount/email/``. Each mail has a subject, a plain-text
+body and an HTML alternative; django-allauth sends the text as the body and
+attaches the HTML, and a missing HTML template degrades quietly to a plain
+mail, so both belong together. ``base_message`` and ``base_notification`` carry
+the design, and the individual mails are a few lines each.
+
+The HTML is written for mail clients rather than browsers: table layout, inline
+styles, no stylesheet, no web fonts and no images. A logo would be either an
+SVG, which most clients refuse, or a remote image, which many block by default
+— both leave a hole where the brand should be — so the wordmark is set in type.
+
 Login with email and password
 -----------------------------
 

@@ -10,9 +10,12 @@ unrendered placeholder.
 
 import pytest
 from allauth.account.models import EmailAddress
+from allauth.core import context
+from allauth.socialaccount.models import SocialAccount, SocialLogin
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.core.cache import cache
+from django.test import RequestFactory
 from django.urls import reverse
 
 
@@ -151,3 +154,78 @@ def test_the_html_half_carries_no_remote_content(client, user, settings):
     assert "<img" not in html
     assert "<link" not in html  # no external stylesheet
     assert "<script" not in html
+
+
+#
+# Security notifications: the ways of signing in changed
+#
+
+
+@pytest.mark.django_db
+def test_connecting_a_provider_is_announced(user, google_socialapp):
+    """
+    A connected provider is a way *into* the account, so gaining one silently
+    is exactly the event somebody should hear about.
+    """
+    EmailAddress.objects.create(
+        user=user, email="researcher@example.org", verified=True, primary=True
+    )
+    mail.outbox = []
+    request = RequestFactory().get("/")
+    request.session = {}
+    request.user = user  # the mail renders with the request, so processors run
+    with context.request_context(request):
+        SocialLogin(
+            user=user, account=SocialAccount(provider="google", uid="12345")
+        ).connect(request, user)
+
+    message, text, html = _sent()
+    _assert_well_formed(message.subject, text, html)
+    assert "connected to your account" in message.subject
+    assert "can now be used to sign in to your account" in text
+    # ... and how to react if it was not you
+    assert "Connected identities" in text and "Connected identities" in html
+    assert "support@contact.engineering" in text
+
+
+@pytest.mark.django_db
+def test_setting_a_password_is_announced(client, db):
+    user = get_user_model().objects.create(username="researcher", name="A Researcher")
+    user.set_unusable_password()
+    user.save()
+    EmailAddress.objects.create(
+        user=user, email="researcher@example.org", verified=True, primary=True
+    )
+    client.force_login(user)
+    mail.outbox = []
+    client.post(
+        reverse("account_set_password"),
+        {"password1": "a-very-secret-password", "password2": "a-very-secret-password"},
+        follow=True,
+    )
+
+    message, text, html = _sent()
+    _assert_well_formed(message.subject, text, html)
+    assert "password was added" in message.subject
+
+
+@pytest.mark.django_db
+def test_removing_an_address_is_announced(client, user):
+    EmailAddress.objects.create(
+        user=user, email="researcher@example.org", verified=True, primary=True
+    )
+    removed = EmailAddress.objects.create(
+        user=user, email="old@example.org", verified=True, primary=False
+    )
+    client.force_login(user)
+    mail.outbox = []
+    client.post(
+        reverse("account_email"),
+        {"email": removed.email, "action_remove": ""},
+        follow=True,
+    )
+
+    message, text, html = _sent()
+    _assert_well_formed(message.subject, text, html)
+    assert "removed from your account" in message.subject
+    assert "old@example.org" in text and "old@example.org" in html

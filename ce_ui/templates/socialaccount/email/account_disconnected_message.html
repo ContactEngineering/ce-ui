@@ -1,0 +1,6 @@
+{% extends "account/email/base_notification.html" %}
+
+{% block preheader %}A {{ provider }} account can no longer sign in to your contact.engineering account.{% endblock %}
+{% block title %}{{ provider }} was disconnected from your account{% endblock %}
+{% block notification_message %}A {{ provider }} account was disconnected from
+your account, and can no longer be used to sign in to it.{% endblock notification_message %}
