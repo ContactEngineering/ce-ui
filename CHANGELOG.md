@@ -13,6 +13,14 @@
   claimed without confirming; `SocialAccountAdapter.authenticate_by_email`
   requires a confirmed one, so that a claim cannot capture somebody else's
   sign-in
+- ENH: The account mails are written and styled for contact.engineering rather
+  than being django-allauth's defaults: a branded HTML half alongside the plain
+  text, and copy that explains what the message is for and what happens if it
+  was not you. Covers email confirmation, password reset, and the reply sent
+  when a reset is requested for an address with no account
+- BUG: `ACCOUNT_EMAIL_SUBJECT_PREFIX` is set explicitly. django-allauth
+  otherwise builds it from the `Site` record's name, which is `example.com`
+  until somebody edits the database -- in every subject line
 - ENH: Connecting an identity provider records the addresses it has already
   verified, so a Google account brings its address with it and no confirmation
   mail is needed. django-allauth stores them when a provider creates an account

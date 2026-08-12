@@ -1,0 +1,17 @@
+{% extends "account/email/base_message.txt" %}
+{% load i18n %}
+
+{% block content %}{% autoescape off %}Please confirm that {{ email }} belongs to you, by opening this link:
+
+{{ activate_url }}
+
+Confirming an address is worth doing: it is how you can sign in with a password,
+how a connected Google account is recognised, and how you can get back into your
+account if you lose access to your ORCID iD.
+
+If the link has expired by the time you get to it, you can send yourself a new
+one from the "Email addresses" page of your profile.{% endautoescape %}{% endblock content %}
+
+{% block why %}You are receiving this message because this address was added to a
+contact.engineering account. If that was not you, you can ignore this message —
+the address is not used for anything until it is confirmed.{% endblock why %}

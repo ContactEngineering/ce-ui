@@ -375,6 +375,12 @@ SOCIALACCOUNT_SIGNUP_PROVIDERS = ["orcid"]
 # and then collect a password reset for it, so confirmation is the default.
 # Deployments that cannot send mail (development, CI) set this to "none".
 ACCOUNT_EMAIL_VERIFICATION = env.str("ACCOUNT_EMAIL_VERIFICATION", default="mandatory")
+# Set explicitly. Without it django-allauth builds the prefix from the `Site`
+# record's name, which is whatever happens to be in the database -- "example.com"
+# until somebody edits it, in every subject line we send.
+ACCOUNT_EMAIL_SUBJECT_PREFIX = env.str(
+    "ACCOUNT_EMAIL_SUBJECT_PREFIX", default="[contact.engineering] "
+)
 ACCOUNT_ADAPTER = "ce_ui.users.adapters.AccountAdapter"
 # https://docs.allauth.org/en/latest/socialaccount/configuration.html
 SOCIALACCOUNT_ADAPTER = "ce_ui.users.adapters.SocialAccountAdapter"

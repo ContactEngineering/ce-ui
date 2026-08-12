@@ -1,0 +1,10 @@
+{% load i18n %}{% autoescape off %}Hi there,
+
+{% block content %}{% endblock content %}
+{% block outro %}{% endblock outro %}
+--
+contact.engineering — the open repository for surface topography data
+https://contact.engineering
+
+{% block why %}You are receiving this message because somebody used this address on contact.engineering.{% endblock why %}
+{% endautoescape %}
