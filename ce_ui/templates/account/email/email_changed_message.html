@@ -1,0 +1,5 @@
+{% extends "account/email/base_notification.html" %}
+
+{% block preheader %}The address that receives password resets and notifications has changed.{% endblock %}
+{% block title %}Your main email address was changed{% endblock %}
+{% block notification_message %}The main address on your account was changed from {{ from_email }} to {{ to_email }}.{% endblock notification_message %}

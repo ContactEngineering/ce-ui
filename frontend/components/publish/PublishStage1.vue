@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import { BButton, BCard, BSpinner } from 'bootstrap-vue-next';
-import { ref } from 'vue';
+import { inject, ref } from 'vue';
 import axios from "axios";
 
 const props = defineProps({
@@ -10,6 +10,14 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['continue']);
+
+const appProps = inject("appProps") as any;
+
+// A publication is a citable record, so its authors have to be identifiable:
+// the server refuses to publish for a user with no ORCID account connected.
+// Say so here, before any author or license details have been filled in.
+const hasOrcid = appProps?.userHasOrcid ?? false;
+const connectionsUrl = appProps?.connectionsUrl ?? "/accounts/3rdparty/";
 
 const surface = ref();
 const readiness = ref();
@@ -88,6 +96,24 @@ Promise.all([
                 </div>
             </BCard>
 
+            <div v-if="!hasOrcid" class="alert alert-danger p-4 rounded-3 shadow-sm">
+                <div class="d-flex align-items-start">
+                    <i class="fa-solid fa-circle-exclamation fs-3 me-3"></i>
+                    <div class="w-100">
+                        <h5 class="alert-heading fw-bold mb-2">An ORCID iD is required to publish</h5>
+                        <p class="mb-2">
+                            Publishing creates a permanent, citable record, so its authors have
+                            to be identifiable as researchers. Connect your ORCID account to
+                            this profile and come back — everything you have uploaded stays
+                            where it is.
+                        </p>
+                        <a :href="connectionsUrl" class="btn btn-danger">
+                            Connect your ORCID iD
+                        </a>
+                    </div>
+                </div>
+            </div>
+
             <div v-if="readiness && !readiness.publishable"
                  class="alert alert-danger p-4 rounded-3 shadow-sm">
                 <div class="d-flex align-items-start">
@@ -120,7 +146,7 @@ Promise.all([
 
             <div class="d-flex justify-content-end">
                 <BButton @click="emit('continue')" variant="primary" size="lg" class="px-4"
-                         :disabled="!readiness || !readiness.publishable">
+                         :disabled="!hasOrcid || !readiness || !readiness.publishable">
                     Continue to Authors <i class="fa-solid fa-arrow-right ms-2"></i>
                 </BButton>
             </div>

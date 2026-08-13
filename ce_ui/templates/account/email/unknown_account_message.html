@@ -1,0 +1,37 @@
+{% extends "account/email/base_message.html" %}
+
+{% block preheader %}We have no contact.engineering account registered at this address.{% endblock %}
+{% block title %}No account at this address{% endblock %}
+
+{% block content %}
+<p style="margin:0 0 16px 0;">
+  Somebody tried to sign in or reset a password for
+  <strong style="color:#12354e;">{{ email }}</strong> on contact.engineering,
+  but we have no account registered at this address.
+</p>
+
+<p style="margin:0 0 8px 0;">If that was you, there are two likely explanations:</p>
+
+<p style="margin:0 0 12px 0;">
+  <strong style="color:#12354e;">Your account uses a different address.</strong>
+  Accounts are created with an ORCID iD, and ORCID does not always pass an
+  address on, so an older account may have none at all. Sign in with ORCID and
+  add this address from the <em>Email addresses</em> page of your profile.
+</p>
+
+<p style="margin:0 0 8px 0;">
+  <strong style="color:#12354e;">You do not have an account yet.</strong>
+  Accounts are created with an ORCID iD, which is free to register and takes a
+  couple of minutes.
+</p>
+
+{% include "account/email/_button.html" with url=signup_url label="Get started with ORCID" %}
+
+<p style="margin:24px 0 0 0; font-size:14px; color:#5c6670;">
+  If it was not you, you can safely ignore this message. Nothing has been
+  created and nothing has changed.
+</p>
+{% endblock content %}
+
+{% block why %}You are receiving this message because somebody entered this
+address on contact.engineering.{% endblock why %}

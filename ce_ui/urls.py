@@ -15,8 +15,17 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from topobank_rest_api.views import entry_points
 
 from . import robots, views
+from .users.decorators import require_orcid_for_routes
 
 app_name = "ce_ui"
+
+# Routes of the publication plugin that mint a publication. A publication is a
+# citable record, so its authors have to be identifiable: these require a
+# connected ORCID account, whichever way the user signed in. Guarding them here
+# rather than in the user interface covers API clients and direct POSTs too.
+# Everything else the plugin serves -- the public landing pages, the sitemap,
+# the readiness check -- stays open.
+ORCID_REQUIRED_PUBLICATION_ROUTES = ["publish/", "publish-collection/"]
 
 
 #
@@ -32,7 +41,16 @@ urlpatterns = [
     ),
     path(
         topobank_publication.urls.urlprefix,
-        include((topobank_publication.urls.urlpatterns, "publication"), namespace="publication")
+        include(
+            (
+                require_orcid_for_routes(
+                    topobank_publication.urls.urlpatterns,
+                    ORCID_REQUIRED_PUBLICATION_ROUTES,
+                ),
+                "publication",
+            ),
+            namespace="publication",
+        )
     ),
     path(
         topobank_statistics.urls.urlprefix,
@@ -192,9 +210,13 @@ ui_urlpatterns = [
         view=views.UserDetailView.as_view(),
         name="user-detail",
     ),
+    # django-allauth serves the real page. This route predates it and is kept
+    # only so that an old bookmark still lands somewhere useful.
     path(
-        "user-email/", views.TabbedEmailView.as_view(), name="account_email"
-    ),  # same as allauth.accounts.email.EmailView, but with tab data
+        "user-email/",
+        RedirectView.as_view(pattern_name="account_email"),
+        name="account_email",
+    ),
     #
     # HTML routes
     #

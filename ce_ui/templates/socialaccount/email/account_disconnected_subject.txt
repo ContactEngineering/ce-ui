@@ -1,0 +1,1 @@
+{% load i18n %}{% autoescape off %}{{ provider }} was disconnected from your account{% endautoescape %}

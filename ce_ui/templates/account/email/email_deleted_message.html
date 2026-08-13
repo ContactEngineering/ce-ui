@@ -1,0 +1,5 @@
+{% extends "account/email/base_notification.html" %}
+
+{% block preheader %}The address {{ deleted_email }} no longer belongs to your account.{% endblock %}
+{% block title %}An email address was removed{% endblock %}
+{% block notification_message %}The address {{ deleted_email }} was removed from your account.{% endblock notification_message %}

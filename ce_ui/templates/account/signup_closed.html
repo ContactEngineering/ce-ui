@@ -1,12 +1,60 @@
 {% extends "account/base.html" %}
 
 {% load i18n %}
+{% load socialaccount %}
 
-{% block head_title %}{% trans "Sign Up Closed" %}{% endblock %}
+{% block head_title %}{% trans "An ORCID iD is needed" %}{% endblock %}
+
+{% comment %}
+Reached from two directions, and the same answer serves both: somebody trying
+to register with an email address and a password, and somebody signing in with
+a provider that cannot create an account (Google) while holding no account
+here. django-allauth renders this page for both.
+{% endcomment %}
 
 {% block inner %}
-<h1>{% trans "Sign Up Closed" %}</h1>
+<h1 class="mb-3">{% trans "An ORCID iD is needed" %}</h1>
 
-<p>{% trans "We are sorry, but the sign up is currently closed." %}</p>
+<p>
+  Accounts on <em>contact.engineering</em> are created with an
+  <a href="https://orcid.org" rel="noopener noreferrer">ORCID</a> iD. It is what
+  identifies you as the author of the data you publish, so it is how an account
+  begins — you can add a password, further email addresses and other accounts
+  afterwards.
+</p>
+
+{# Guarded by the provider list rather than naming ORCID directly: this page is #}
+{# reached when something has already gone wrong, and `provider_login_url`     #}
+{# raises if the provider has no `SocialApp` row on this deployment.           #}
+{% get_providers as socialaccount_providers %}
+<div class="d-grid gap-2 my-4" style="max-width: 24rem">
+  {% for provider in socialaccount_providers %}
+  {% if provider.id == "orcid" %}
+  <a class="btn btn-primary btn-lg d-flex align-items-center justify-content-center gap-2"
+     href="{% provider_login_url provider.id process='login' %}">
+    {% include "socialaccount/snippets/provider_icon.html" with provider_id=provider.id %}
+    {% trans "Continue with ORCID" %}
+  </a>
+  {% endif %}
+  {% endfor %}
+</div>
+
+<p class="text-muted">
+  Registering with ORCID is free and takes a couple of minutes if you do not
+  have an iD yet.
+</p>
+
+<hr class="my-4">
+
+<p class="mb-0">
+  <strong>{% trans "Already have an account here?" %}</strong>
+  Sign in the way you usually do, then add this way of signing in from the
+  <em>Connected identities</em> page of your profile. A Google account is
+  recognised automatically once the email address on it has been confirmed
+  here.
+</p>
+
+<p class="mt-3">
+  <a href="{% url 'account_login' %}">&laquo; {% trans "Back to sign in" %}</a>
+</p>
 {% endblock %}
-

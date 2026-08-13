@@ -1,0 +1,24 @@
+{% extends "account/email/base_message.txt" %}
+{% load i18n %}
+
+{% block content %}{% autoescape off %}This is a note to let you know about a change to your contact.engineering
+account:
+
+  {% block notification_message %}{% endblock notification_message %}
+
+If that was you, there is nothing to do — this message is just a record.
+
+If it was not you, somebody else may have reached your account. Sign in with
+your ORCID iD, which nobody can disconnect, and open the "Connected identities"
+page of your profile: it lists every way your account can be signed in to, and
+lets you remove any you do not recognise. Then write to
+support@contact.engineering and we will help you sort it out.
+
+The change came from:
+
+  IP address: {{ ip|default:"unknown" }}
+  Browser: {{ user_agent|default:"unknown" }}
+  Date: {{ timestamp }}{% endautoescape %}{% endblock content %}
+
+{% block why %}You are receiving this message because it is the address on file
+for a contact.engineering account whose sign-in settings changed.{% endblock why %}

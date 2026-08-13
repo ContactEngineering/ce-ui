@@ -1,0 +1,13 @@
+{% comment %}
+The mark of an identity provider, for buttons and lists. Takes `provider_id`,
+the allauth provider id. Providers we have no mark for get a generic one rather
+than nothing, so the layout does not shift between them.
+{% endcomment %}
+{% if provider_id == "orcid" %}
+<img src="/static/images/ORCID-iD_icon_vector.svg" height="20" width="20" alt=""
+     aria-hidden="true">
+{% elif provider_id == "google" %}
+<i class="fa fa-google fa-fw" aria-hidden="true"></i>
+{% else %}
+<i class="fa fa-sign-in fa-fw" aria-hidden="true"></i>
+{% endif %}

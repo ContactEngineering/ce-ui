@@ -144,12 +144,12 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     # Your stuff: custom apps go here
     "ce_ui.apps.CEUIAppConfig",
-    "topobank_orcid.users.apps.UsersAppConfig",
-    "topobank_orcid.authorization.apps.AuthorizationAppConfig",
+    "ce_ui.users.apps.UsersAppConfig",
+    "ce_ui.authorization.apps.AuthorizationAppConfig",
     "topobank.files.apps.FilesAppConfig",
     "topobank.manager.apps.ManagerAppConfig",
     "topobank.analysis.apps.AnalysisAppConfig",
-    "topobank_orcid.organizations.apps.OrganizationsAppConfig",
+    "ce_ui.organizations.apps.OrganizationsAppConfig",
     "topobank.properties.apps.PropertiesAppConfig",
     # Former plugins now integrated manually
     "topobank_contact.apps.TopobankContactAppConfig",
@@ -188,7 +188,7 @@ AUTHENTICATION_BACKENDS = [
 AUTH_USER_MODEL = "users.User"
 TOPOBANK_PERMISSION_MODEL = "authorization.PermissionSet"
 TOPOBANK_ORGANIZATION_MODEL = "organizations.Organization"
-TOPOBANK_ANONYMOUS_USER_GETTER = "topobank_orcid.users.anonymous.get_anonymous_user"
+TOPOBANK_ANONYMOUS_USER_GETTER = "ce_ui.users.anonymous.get_anonymous_user"
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-redirect-url
 LOGIN_REDIRECT_URL = "home"
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-url
@@ -237,7 +237,7 @@ MIDDLEWARE = [
     "allauth.account.middleware.AccountMiddleware",
     "termsandconditions.middleware.TermsAndConditionsRedirectMiddleware",
     # we need an anonymous user with a user id for API calls
-    "topobank_orcid.users.middleware.anonymous_user_middleware",
+    "ce_ui.users.middleware.anonymous_user_middleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -358,12 +358,38 @@ CELERY_REDIS_BACKEND_HEALTH_CHECK_INTERVAL = 30
 # django-allauth
 # ------------------------------------------------------------------------------
 # https://docs.allauth.org/en/latest/account/configuration.html
-ACCOUNT_FORMS = {"signup": "topobank_orcid.users.forms.SignupFormWithName"}
-# ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
-ACCOUNT_EMAIL_VERIFICATION = "none"
-ACCOUNT_ADAPTER = "topobank_orcid.users.adapters.AccountAdapter"
+ACCOUNT_FORMS = {"signup": "ce_ui.users.forms.SignupFormWithName"}
+# An account comes into existence through ORCID and no other way: it is what
+# identifies the researcher behind it, and what publishing requires. A password
+# and further identity providers are things a user attaches to an account that
+# already exists, from the "Connected identities" page.
+#
+# Whether people can register a local account with an email address and a
+# password. Off, because that would create an account without an ORCID iD.
+ACCOUNT_ALLOW_SIGNUP = env.bool("ACCOUNT_ALLOW_SIGNUP", default=False)
+# Providers that may bring a new account into existence, and which therefore
+# cannot be disconnected from one. Set to None to let any provider sign
+# somebody up.
+SOCIALACCOUNT_SIGNUP_PROVIDERS = ["orcid"]
+# An unverified address would let anybody register under somebody else's email
+# and then collect a password reset for it, so confirmation is the default.
+# Deployments that cannot send mail (development, CI) set this to "none".
+ACCOUNT_EMAIL_VERIFICATION = env.str("ACCOUNT_EMAIL_VERIFICATION", default="mandatory")
+# Set explicitly. Without it django-allauth builds the prefix from the `Site`
+# record's name, which is whatever happens to be in the database -- "example.com"
+# until somebody edits it, in every subject line we send.
+ACCOUNT_EMAIL_SUBJECT_PREFIX = env.str(
+    "ACCOUNT_EMAIL_SUBJECT_PREFIX", default="[contact.engineering] "
+)
+# Tell people when the ways of signing in to their account change: a password
+# set or changed, an address added or removed, an identity provider connected
+# or disconnected. A connected provider is a way *into* the account, so gaining
+# one silently is exactly the event somebody should hear about. Off in
+# django-allauth by default.
+ACCOUNT_EMAIL_NOTIFICATIONS = env.bool("ACCOUNT_EMAIL_NOTIFICATIONS", default=True)
+ACCOUNT_ADAPTER = "ce_ui.users.adapters.AccountAdapter"
 # https://docs.allauth.org/en/latest/socialaccount/configuration.html
-SOCIALACCOUNT_ADAPTER = "topobank_orcid.users.adapters.SocialAccountAdapter"
+SOCIALACCOUNT_ADAPTER = "ce_ui.users.adapters.SocialAccountAdapter"
 SOCIALACCOUNT_LOGIN_ON_GET = True  # True: disable intermediate page
 ACCOUNT_LOGOUT_ON_GET = True  # True: disable intermediate page
 
@@ -398,7 +424,9 @@ SPECTACULAR_SETTINGS = {
 }
 
 #
-# Settings for authentication with ORCID
+# Settings for the identity providers. Which of these are actually offered
+# depends on the provider apps installed by the environment-specific settings
+# and on the `SocialApp` entries in the database, see `docs/authentication.rst`.
 #
 SOCIALACCOUNT_PROVIDERS = {
     "orcid": {
@@ -406,11 +434,36 @@ SOCIALACCOUNT_PROVIDERS = {
         # 'BASE_DOMAIN':'sandbox.orcid.org',  # for the sandbox API
         # Member API or Public API? Default: False (for the public API)
         # 'MEMBER_API': False,  # for the member API
-    }
+    },
+    "google": {
+        # Everything we need from Google: a name to display and an address to
+        # reach the user at.
+        "SCOPE": ["profile", "email"],
+        "AUTH_PARAMS": {"access_type": "online"},
+        "OAUTH_PKCE_ENABLED": True,
+        # Google cannot create an account, so a Google sign-in has to find one.
+        # It is matched by email address, which Google has verified itself --
+        # without this, somebody who signed up with ORCID and then clicked
+        # "Sign in with Google" would be turned away rather than recognised.
+        # Enabled per provider on purpose: it trusts the provider's word on who
+        # owns an address, which is only safe for one that verifies them.
+        "EMAIL_AUTHENTICATION": True,
+    },
 }
+# Having matched an account by address, keep the Google account connected to it,
+# so the next sign-in is recognised directly rather than by address again.
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 SOCIALACCOUNT_QUERY_EMAIL = (
     True  # e-mail should be aquired from social account provider
 )
+# An address is mandatory when registering a local account, but not when
+# signing in through a provider: ORCID does not necessarily release one, and
+# requiring it would turn a sign-in that works today into a form to fill in.
+# Both settings otherwise follow their `ACCOUNT_` counterparts.
+SOCIALACCOUNT_EMAIL_REQUIRED = False
+# Whatever address a provider hands over has already been confirmed by the
+# provider, so there is nothing left for us to verify.
+SOCIALACCOUNT_EMAIL_VERIFICATION = "none"
 
 
 def ACCOUNT_USER_DISPLAY(user):
@@ -505,12 +558,6 @@ TRACKED_DEPENDENCIES = [
         "topobank_rest_api.__version__",
         "MIT",
         "https://github.com/ContactEngineering/topobank-rest-api",
-    ),
-    (
-        "topobank_orcid",
-        "topobank_orcid.__version__",
-        "MIT",
-        "https://github.com/ContactEngineering/topobank-orcid",
     ),
     (
         "topobank_statistics",
@@ -788,6 +835,11 @@ TOPOBANK_ANALYSIS_MEMORY_WINDOW_DAYS = env.int(
 
 # ALLAUTH SETTINGS
 # ------------------------------------------------------------------------------
-ACCOUNT_SIGNUP_FIELDS = ['email', 'username*', 'password1*', 'password2*']
+# The address is mandatory: it is how a local account is recovered, and it is
+# what identifies the same person when they later connect ORCID or Google.
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
 ACCOUNT_USER_MODEL_USERNAME_FIELD = "username"
 ACCOUNT_USERNAME_MIN_LENGTH = 3
+# Sign in with either the username or the address that was registered with it.
+ACCOUNT_LOGIN_METHODS = {"username", "email"}
+ACCOUNT_UNIQUE_EMAIL = True

@@ -1,0 +1,1 @@
+{% load i18n %}{% autoescape off %}Your main email address was changed{% endautoescape %}

@@ -11,6 +11,7 @@ const visible = defineModel("visible");
 const props = defineProps({
     apiUrl: String,
     adminUrl: String,
+    connectionsUrl: String,
     name: String,
     orcid: String,
     isStaff: Boolean
@@ -30,11 +31,19 @@ const contactModal = ref(false);
 
         <template #footer>
             <BNavbarNav class="p-3 justify-content-end flex-grow-1">
-                <BNavItem :href="`https://orcid.org/${orcid}`"
+                <BNavItem v-if="orcid" :href="`https://orcid.org/${orcid}`"
                           class="align-self-center">
                     <img src="/static/images/ORCID-iD_icon_vector.svg"
                          alt="ORCID iD icon"/>
                     {{ orcid }}
+                </BNavItem>
+                <!-- Without an ORCID iD the account works, but cannot publish.
+                     Point at where one is connected rather than showing a
+                     blank ORCID row. -->
+                <BNavItem v-else :href="connectionsUrl" class="align-self-center">
+                    <img src="/static/images/ORCID-iD_icon_vector.svg"
+                         alt="ORCID iD icon"/>
+                    Connect your ORCID iD
                 </BNavItem>
                 <BNavItem class="btn btn-secondary" @click="signoutModal = true">
                     Sign out
@@ -53,6 +62,7 @@ const contactModal = ref(false);
             <BNavItem href="/watchman/">Watchman status (JSON)</BNavItem>
         </BNavbarNav>
         <BNavbarNav class="p-3 justify-content-end flex-grow-1">
+            <BNavItem :href="connectionsUrl">Connected identities</BNavItem>
             <BNavItem href="/file-formats/">Supported file formats</BNavItem>
             <BNavItem href="/termsandconditions/">Terms &amp; conditions</BNavItem>
             <BNavItem href="https://github.com/ContactEngineering/TopoBank/discussions">
@@ -85,12 +95,12 @@ const contactModal = ref(false);
         <div>
             <ul>
                 <li>Participate at <a
-                    href="https://github.com/ComputationalMechanics/TopoBank/discussions"
+                    href="https://github.com/ContactEngineering/TopoBank/discussions"
                     target="_blank">discussions
                     on GitHub</a>, or
                 </li>
                 <li>open an <a
-                    href="https://github.com/ComputationalMechanics/TopoBank/issues"
+                    href="https://github.com/ContactEngineering/TopoBank/issues"
                     target="_blank">issue
                     on
                     GitHub</a>, or

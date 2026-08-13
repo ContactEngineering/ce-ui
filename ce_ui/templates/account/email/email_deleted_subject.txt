@@ -1,0 +1,1 @@
+{% load i18n %}{% autoescape off %}An email address was removed from your account{% endautoescape %}

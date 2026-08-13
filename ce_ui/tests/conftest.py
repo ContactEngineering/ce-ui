@@ -6,7 +6,7 @@ from topobank.testing.fixtures import two_topos  # noqa: F401
 from topobank.testing.fixtures import (  # noqa: F401
     user_alice, user_three_topographies_three_surfaces_three_tags)
 
-from .fixtures import orcid_socialapp  # noqa: F401
+from .fixtures import google_socialapp, orcid_socialapp  # noqa: F401
 
 
 @pytest.fixture

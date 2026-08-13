@@ -1,0 +1,28 @@
+{% extends "account/email/base_message.html" %}
+
+{% block preheader %}Confirm {{ email }} so it can be used to sign in and to recover your account.{% endblock %}
+{% block title %}Confirm your email address{% endblock %}
+
+{% block content %}
+<p style="margin:0 0 16px 0;">
+  Please confirm that <strong style="color:#12354e;">{{ email }}</strong> belongs
+  to you.
+</p>
+
+{% include "account/email/_button.html" with url=activate_url label="Confirm this address" %}
+
+<p style="margin:24px 0 16px 0;">
+  Confirming an address is worth doing: it is how you can sign in with a
+  password, how a connected Google account is recognised, and how you can get
+  back into your account if you lose access to your ORCID iD.
+</p>
+
+<p style="margin:0; font-size:14px; color:#5c6670;">
+  If the link has expired by the time you get to it, you can send yourself a
+  new one from the <em>Email addresses</em> page of your profile.
+</p>
+{% endblock content %}
+
+{% block why %}You are receiving this message because this address was added to a
+contact.engineering account. If that was not you, you can ignore it — the
+address is not used for anything until it is confirmed.{% endblock why %}

@@ -1,7 +1,6 @@
 import logging
 from html import unescape
 
-from allauth.account.views import EmailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
@@ -17,7 +16,6 @@ from topobank.analysis.registry import get_implementation, get_workflow_names
 from topobank.manager.models import Surface, Topography
 from topobank.manager.utils import (get_reader_infos, subjects_from_base64,
                                     subjects_to_base64)
-from topobank_orcid.users.models import User
 from topobank_publication.models import PublicationCollection
 from topobank_publication.serializers import PublicationCollectionSerializer
 from topobank_rest_api.analysis.serializers import WorkflowDetailSerializer
@@ -27,6 +25,7 @@ from topobank_rest_api.manager.v2.serializers import SurfaceV2Serializer
 
 from ce_ui import breadcrumb
 from ce_ui.publication_metadata import publication_metadata
+from ce_ui.users.models import User
 
 ORDER_BY_CHOICES = {"name": "name", "-creation_datetime": "date"}
 SHARING_STATUS_FILTER_CHOICES = {
@@ -561,33 +560,6 @@ class TermsDetailView(TabbedTermsMixin, TermsView):
 
 class TermsAcceptView(TabbedTermsMixin, AcceptTermsView):
     pass
-
-
-class TabbedEmailView(EmailView):
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        breadcrumb.add_generic(
-            context,
-            {
-                "title": "User profile",
-                "icon": "user",
-                "href": reverse(
-                    "ce_ui:user-detail",
-                    kwargs=dict(username=self.request.user.username),
-                ),
-                "active": False,
-            },
-        )
-        breadcrumb.add_generic(
-            context,
-            {
-                "title": "Edit e-mail addresses",
-                "icon": "edit",
-                "href": self.request.path,
-                "active": True,
-            },
-        )
-        return context
 
 
 def _users_share_dataset(user_a, user_b):

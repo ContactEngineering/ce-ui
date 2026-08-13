@@ -1,0 +1,23 @@
+{% extends "account/email/base_message.txt" %}
+{% load i18n %}
+
+{% block content %}{% autoescape off %}Somebody tried to sign in or reset a password for {{ email }} on
+contact.engineering, but we have no account registered at this address.
+
+If that was you, there are two likely explanations:
+
+1. Your account is registered under a different address. Accounts are created
+   with an ORCID iD, and ORCID does not always pass an address on, so an older
+   account may have none at all — sign in with ORCID and add this address from
+   the "Email addresses" page of your profile.
+
+2. You do not have an account yet. Accounts are created with an ORCID iD, which
+   is free to register and takes a couple of minutes:
+
+   {{ signup_url }}
+
+If it was not you, you can safely ignore this message. Nothing has been created
+and nothing has changed.{% endautoescape %}{% endblock content %}
+
+{% block why %}You are receiving this message because somebody entered this
+address on contact.engineering.{% endblock why %}

@@ -87,6 +87,11 @@ const validSelection = computed(() => {
     return datasetIds.length > 1 && !invalid_id.value;
 });
 
+// A collection is a citable record like any other publication, so the server
+// requires the publisher to have a connected ORCID account.
+const hasOrcid = appProps?.userHasOrcid ?? false;
+const connectionsUrl = appProps?.connectionsUrl ?? "/accounts/3rdparty/";
+
 </script>
 <template>
     <div class="container py-4">
@@ -97,7 +102,19 @@ const validSelection = computed(() => {
             </div>
 
             <div class="card-body p-4 p-md-5">
-                <div v-if="validSelection">
+                <BAlert v-if="!hasOrcid" :model-value="true" variant="danger" class="shadow-sm">
+                    <h4 class="alert-heading fw-bold">
+                        <i class="fa-solid fa-circle-exclamation me-2"></i>An ORCID iD is required to publish
+                    </h4>
+                    <p>
+                        Publishing creates a permanent, citable record, so its authors have to be
+                        identifiable as researchers. Connect your ORCID account to this profile
+                        and come back.
+                    </p>
+                    <a :href="connectionsUrl" class="btn btn-danger mb-0">Connect your ORCID iD</a>
+                </BAlert>
+
+                <div v-else-if="validSelection">
                     <BAlert :model-value="true" variant="warning" class="border-warning-subtle bg-warning-subtle text-warning-emphasis mb-4 shadow-sm">
                         <h5 class="alert-heading fw-bold mb-2">
                             <i class="fa-solid fa-triangle-exclamation me-2"></i>Publication Collection Agreement

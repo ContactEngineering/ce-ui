@@ -56,15 +56,19 @@ EMAIL_HOST = "localhost"
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-port
 EMAIL_PORT = 1025
 
-# ORCID
+# IDENTITY PROVIDERS
 # ------------------------------------------------------------------------------
-# Registered here as it is in `local` and `production`: without the provider
-# app, `app.html` cannot render (it builds the sign-in link with
-# `provider_login_url 'orcid'`), so no Vue page could be tested at all.
-INSTALLED_APPS.insert(  # noqa: F405
-    INSTALLED_APPS.index("allauth.socialaccount") + 1,  # noqa: F405
+# Registered here as they are in `local` and `production`, so the login page
+# under test offers the same providers as the deployed site.
+_after_socialaccount = INSTALLED_APPS.index("allauth.socialaccount") + 1  # noqa: F405
+INSTALLED_APPS[_after_socialaccount:_after_socialaccount] = [  # noqa: F405
     "allauth.socialaccount.providers.orcid",
-)
+    "allauth.socialaccount.providers.google",
+]
+
+# Confirming an address needs outgoing mail, which the test settings do not
+# have; registration in tests completes immediately.
+ACCOUNT_EMAIL_VERIFICATION = "none"
 
 # CELERY
 # ------------------------------------------------------------------------------

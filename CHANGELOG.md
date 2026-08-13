@@ -1,5 +1,75 @@
 # Changelog for plugin *ce-ui*
 
+## 1.39.0 (not yet released)
+
+- ENH: An account is created with an ORCID iD and no other way. Registration
+  with an email address and a password is closed, and a provider outside
+  `SOCIALACCOUNT_SIGNUP_PROVIDERS` cannot create an account either; the page
+  such an attempt lands on explains how to get one. The ORCID account cannot be
+  disconnected afterwards, since it is what identifies the account
+- ENH: Google sign-in finds an existing account by email address -- verified by
+  Google, and confirmed here -- and connects itself to it, rather than being
+  turned away. django-allauth would settle for an address somebody had merely
+  claimed without confirming; `SocialAccountAdapter.authenticate_by_email`
+  requires a confirmed one, so that a claim cannot capture somebody else's
+  sign-in
+- ENH: Users are told when the ways of signing in to their account change: a
+  password set or changed, an email address changed or removed, an identity
+  provider connected or disconnected. django-allauth has these switched off by
+  default, so none of them were sent. Each names what changed, says what to do
+  if it was not them, and records the address, browser and time it came from
+- ENH: The account mails are written and styled for contact.engineering rather
+  than being django-allauth's defaults: a branded HTML half alongside the plain
+  text, and copy that explains what the message is for and what happens if it
+  was not you. Covers email confirmation, password reset, and the reply sent
+  when a reset is requested for an address with no account
+- BUG: `ACCOUNT_EMAIL_SUBJECT_PREFIX` is set explicitly. django-allauth
+  otherwise builds it from the `Site` record's name, which is `example.com`
+  until somebody edits the database -- in every subject line
+- ENH: Connecting an identity provider records the addresses it has already
+  verified, so a Google account brings its address with it and no confirmation
+  mail is needed. django-allauth stores them when a provider creates an account
+  but not when one is connected; an address already held by any account is left
+  alone
+- ENH: The connected identities page warns when an account has no confirmed
+  email address, which leaves it with no Google sign-in, no password sign-in
+  and no way to recover; the email page warns before the last address is
+  removed, which stays allowed because ORCID still signs the user in
+- BUG: The citation-date assertion in the landing page tests compared a
+  timestamp rendered in the active timezone against the raw UTC value, and
+  failed for the two hours a day when those fall on different dates
+- DOC: `docs/authentication.rst` describes how users sign in and how to obtain
+  credentials for each identity provider, including Google's consent screen,
+  scope classification and publishing status. It lives here, together with the
+  `orcid.yaml.template` and `google.yaml.template` fixtures, because this
+  package owns the user model and the provider configuration; topobank is
+  agnostic of the sign-in procedure
+- MAINT: The `topobank-orcid` distribution was folded into this package as
+  `ce_ui.users`, `ce_ui.authorization` and `ce_ui.organizations`. It had a
+  single consumer -- this one -- and the seam it filled lives in topobank
+  (`AUTH_USER_MODEL`, `TOPOBANK_PERMISSION_MODEL`,
+  `TOPOBANK_ORGANIZATION_MODEL`, `TOPOBANK_ANONYMOUS_USER_GETTER`), which is
+  unaffected: a deployment with its own user and permission models still
+  provides them the same way. The Django app labels (`users`, `authorization`,
+  `organizations`) are unchanged, so recorded migrations stay valid and no
+  database change is needed. `django-allauth` and `django-notifications-hq`,
+  previously pulled in through `topobank-orcid`, are now declared here
+- ENH: Sign in with Google, or with an email address and a password, in
+  addition to ORCID. The sign-in page offers every provider the deployment has
+  configured. Note that these are ways of reaching an account that already
+  exists: creating one still requires an ORCID iD, see the entry above
+  (`ACCOUNT_ALLOW_SIGNUP`, `ACCOUNT_EMAIL_VERIFICATION`)
+- ENH: A *Connected identities* page (`/accounts/3rdparty/`) lists the ways a
+  user can sign in, connects further providers, and disconnects ones that are
+  no longer needed. It is linked from the user menu and the profile page
+- ENH: Publishing a dataset or a collection requires a connected ORCID iD. The
+  requirement is enforced on the publication endpoints themselves, so it also
+  covers API clients, and the publication pages explain it up front instead of
+  failing at the end of the form
+- MAINT: `appProps.loginUrl` points at the sign-in page rather than at the
+  ORCID provider directly, and `appProps.userHasOrcid` and
+  `appProps.connectionsUrl` were added
+
 ## 1.38.0 (2026-08-04)
 
 - ENH: Analysis cards poll the task states of all their pending analyses in a
