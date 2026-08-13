@@ -33,10 +33,12 @@ PROVIDER_NAMES = {
 
 #: Shown wherever publishing is refused for a missing ORCID iD. The UI, the API
 #: error and the documentation should all say the same thing.
+#: Deliberately says "publishing" rather than "publishing a dataset": the same
+#: message answers the collection endpoint too.
 ORCID_REQUIRED_FOR_PUBLICATION = (
-    "Publishing a dataset requires a connected ORCID iD, because a publication "
-    "is a citable record and its authors must be identifiable. Connect your "
-    "ORCID account to your profile and then publish."
+    "Publishing requires a connected ORCID iD, because a publication is a "
+    "citable record and its authors must be identifiable. Connect your ORCID "
+    "account to your profile and then publish."
 )
 
 

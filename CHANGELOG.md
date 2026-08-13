@@ -56,7 +56,8 @@
   previously pulled in through `topobank-orcid`, are now declared here
 - ENH: Sign in with Google, or with an email address and a password, in
   addition to ORCID. The sign-in page offers every provider the deployment has
-  configured, and registration with an email address is open by default
+  configured. Note that these are ways of reaching an account that already
+  exists: creating one still requires an ORCID iD, see the entry above
   (`ACCOUNT_ALLOW_SIGNUP`, `ACCOUNT_EMAIL_VERIFICATION`)
 - ENH: A *Connected identities* page (`/accounts/3rdparty/`) lists the ways a
   user can sign in, connects further providers, and disconnects ones that are

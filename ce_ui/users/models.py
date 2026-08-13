@@ -62,8 +62,8 @@ class User(AbstractUser):
     def _orcid_info(self):  # TODO use local cache
         try:
             from allauth.socialaccount.models import SocialAccount
-        except:  # noqa: E722
-            raise ORCIDException("ORCID authentication not configured.")
+        except ImportError as exc:
+            raise ORCIDException("ORCID authentication not configured.") from exc
 
         try:
             social_account = SocialAccount.objects.get(user_id=self.id, provider="orcid")
@@ -84,9 +84,12 @@ class User(AbstractUser):
         return orcid_info
 
     @property
-    def orcid_id(self) -> str:
+    def orcid_id(self) -> str | None:
         """
         Return ORCID iD, a unique 16-digit identifier for researchers.
+
+        `None` when no ORCID account is connected, which an account signed in
+        through another provider may well be.
         """
         try:
             return self._orcid_info()["path"]
