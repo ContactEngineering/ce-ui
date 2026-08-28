@@ -154,9 +154,11 @@ function saveEdits() {
             emit('update:topography', response.data);
         }).catch(error => {
             show?.({
-                title: "Failed to save changes",
-                body: error,
-                variant: 'danger'
+                props: {
+                    title: "Failed to save changes",
+                    body: error,
+                    variant: 'danger'
+                }
             });
             emit('update:topography', _savedTopography);
         }).finally(() => {
@@ -180,11 +182,17 @@ function deleteTopography() {
     axios.delete(props.topographyUrl).then(response => {
         emit('delete:topography', props.topographyUrl);
     }).catch(error => {
-        show?.({
-            title: "Failed to delete measurement",
-            body: error,
-            variant: 'danger'
-        });
+        if (error.response && error.response.status === 404) {
+            emit('delete:topography', props.topographyUrl);
+        } else {
+            show?.({
+                props: {
+                    title: "Failed to delete measurement",
+                    body: error,
+                    variant: 'danger'
+                }
+            });
+        }
     });
 }
 
@@ -193,9 +201,11 @@ function forceInspect() {
         emit('update:topography', response.data);
     }).catch(error => {
         show?.({
-            title: "Failed to force file inspection",
-            body: error,
-            variant: 'danger'
+            props: {
+                title: "Failed to force file inspection",
+                body: error,
+                variant: 'danger'
+            }
         });
     });
 }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import axios from "axios";
-import {computed, onMounted, onBeforeUnmount} from "vue";
+import {computed, onBeforeUnmount, watch} from "vue";
 
 import TopographyErrorCard from "@/components/manager/TopographyErrorCard.vue";
 import TopographyPendingCard from "@/components/manager/TopographyPendingCard.vue";
@@ -54,10 +54,6 @@ const emit = defineEmits([
 
 let _currentTimeout = null;
 
-onMounted(() => {
-    scheduleStateCheck(props.topography);
-});
-
 onBeforeUnmount(() => {
     if (_currentTimeout != null) {
         clearTimeout(_currentTimeout);
@@ -66,26 +62,36 @@ onBeforeUnmount(() => {
 });
 
 const isUploading = computed(() => {
-    return props.topography !== null && props.topography.datafile.upload_instructions != null;
+    return props.topography !== null && props.topography.datafile?.upload_instructions != null;
 });
 
 function scheduleStateCheck(topography) {
-    if (topography === null) {
-        checkState();
-    } else if (topography.datafile.upload_instructions == null && ['no', 'pe', 'st'].includes(topography.task_state)) {
-        if (_currentTimeout != null) {
-            clearTimeout(_currentTimeout);
-        }
+    if (_currentTimeout != null) {
+        clearTimeout(_currentTimeout);
+        _currentTimeout = null;
+    }
+    if (topography != null && topography.datafile?.upload_instructions == null && ['no', 'pe', 'st'].includes(topography.task_state)) {
         _currentTimeout = setTimeout(checkState, props.pollingInterval);
     }
 }
 
 function checkState() {
+    if (!props.topographyUrl) {
+        return;
+    }
     axios.get(props.topographyUrl).then(response => {
         emit('update:topography', response.data);
-        scheduleStateCheck(response.data);
+    }).catch(() => {
+        if (_currentTimeout != null) {
+            clearTimeout(_currentTimeout);
+            _currentTimeout = null;
+        }
     });
 }
+
+watch(() => props.topography, (newTopography) => {
+    scheduleStateCheck(newTopography);
+}, { immediate: true });
 
 function topographyDeleted(url) {
     emit('delete:topography', url);
@@ -93,15 +99,10 @@ function topographyDeleted(url) {
 
 const topographyModel = computed({
     get() {
-        // FIXME: side-effect (scheduleStateCheck) inside a computed getter. The getter runs on every dependency
-        // read/re-evaluation, so state-check polling is scheduled at unpredictable times. This should be refactored
-        // to a watcher, but that is a higher-risk change handled in a separate pass.
-        scheduleStateCheck(props.topography);
         return props.topography;
     },
     set(value) {
         emit('update:topography', value);
-        scheduleStateCheck(value);
     }
 });
 

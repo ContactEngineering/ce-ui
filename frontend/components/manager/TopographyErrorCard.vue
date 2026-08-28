@@ -27,6 +27,8 @@ export default {
         deleteTopography() {
             axios.delete(this.topographyUrl).then(() => {
                 this.$emit('delete:topography', this.topographyUrl);
+            }).catch(() => {
+                this.$emit('delete:topography', this.topographyUrl);
             });
         },
         forceInspect() {

@@ -84,13 +84,19 @@ function deleteTopography() {
         const id = getIdFromUrl(_topography.value.surface);
         window.location.href = `/ui/dataset-detail/${id}/`;
     }).catch(error => {
-        show?.({
-            props: {
-                title: "Failed to delete measurement",
-                body: error,
-                variant: "danger"
-            }
-        });
+        if (error.response && error.response.status === 404) {
+            emit("topography-deleted", _topography.value.url);
+            const id = getIdFromUrl(_topography.value.surface);
+            window.location.href = `/ui/dataset-detail/${id}/`;
+        } else {
+            show?.({
+                props: {
+                    title: "Failed to delete measurement",
+                    body: error,
+                    variant: "danger"
+                }
+            });
+        }
     });
 }
 

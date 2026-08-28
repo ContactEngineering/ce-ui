@@ -200,7 +200,8 @@ function uploadNewTopography(file) {
 }
 
 function deleteTopography(index) {
-    _topographies.value[index] = null;
+    _topographies.value.splice(index, 1);
+    _selected.value.splice(index, 1);
 }
 
 function saveBatchEdit(topography) {
@@ -383,7 +384,7 @@ const measurementCount = computed(() => {
                         <!-- Left accent bar (primary) plus alternating row
                              background visually separate each measurement. -->
                         <div v-for="(topography, index) in _topographies"
-                             :key="index"
+                             :key="topography?.id ?? index"
                              class="border-start border-primary border-4 ps-3 mb-2"
                              :class="index % 2 === 0 ? 'bg-body' : 'bg-body-tertiary'">
                             <TopographyCard v-if="topography != null"

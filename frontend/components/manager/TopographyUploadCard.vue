@@ -66,7 +66,7 @@ onMounted(() => {
 });
 
 function deleteTopography() {
-    axios.delete(props.topography.url);
+    axios.delete(props.topography.url).catch(() => {});
     emit('delete:topography', props.topography.url);
 }
 

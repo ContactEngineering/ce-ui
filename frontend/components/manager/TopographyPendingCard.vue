@@ -22,7 +22,7 @@ export default {
     },
     methods: {
         deleteTopography() {
-            axios.delete(this.url);
+            axios.delete(this.url).catch(() => {});
             this.$emit('delete:topography', this.url);
         },
         forceInspect() {
