@@ -19,7 +19,7 @@ PACKAGE = "@bokeh/bokehjs"
 #: Used when `package.json` cannot be read at all, so that a packaging mistake
 #: costs a possibly outdated BokehJS rather than every plot on the site. A system
 #: check reports it when this has gone stale, see `checks.py`.
-FALLBACK_VERSION = "3.9.2"
+FALLBACK_VERSION = "3.10.0"
 
 #: Where to look for `package.json`: next to the package, which is where the
 #: wheel ships it (see `force-include` in `pyproject.toml`), then the repository

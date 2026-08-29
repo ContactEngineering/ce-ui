@@ -105,15 +105,19 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
         without ever confirming it -- receive the sign-in of whoever really
         owns it at the provider. Only a confirmed address counts here.
         """
-        match = super().authenticate_by_email(sociallogin)
-        if match is None:
-            return None
-        user, email = match
-        if not EmailAddress.objects.filter(
-            user=user, email__iexact=email, verified=True
-        ).exists():
-            return None
-        return match
+        for email_address in getattr(sociallogin, "email_addresses", []):
+            if not email_address.verified:
+                continue
+            matched_email = (
+                EmailAddress.objects.filter(
+                    email__iexact=email_address.email, verified=True
+                )
+                .select_related("user")
+                .first()
+            )
+            if matched_email is not None:
+                return (matched_email.user, matched_email.email)
+        return None
 
     def populate_user(self, request, sociallogin, data):
         """
