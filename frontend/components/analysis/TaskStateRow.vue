@@ -102,7 +102,7 @@ const taskMemoryPretty = computed(() => {
 });
 
 const durationPretty = computed(() => formatDuration(analysis.value.task_duration));
-const creationTimePretty = computed(() => formatDateTime(analysis.value.creation_time));
+const creationTimePretty = computed(() => formatDateTime(analysis.value.created_at || analysis.value.creation_time));
 const startTimePretty = computed(() => formatDateTime(analysis.value.task_start_time));
 
 watch(() => analysis.value, () => {
