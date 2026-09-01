@@ -428,7 +428,9 @@ function createPlots() {
 
             let attrs = {
                 visible: dataSource.visible,
-                color: firstElement == null ? 'black' : firstElement.color,
+                // A data source can pin its own color, bypassing the palette
+                // otherwise assigned from its position among the plot's subjects.
+                color: dataSource.color ?? (firstElement == null ? 'black' : firstElement.color),
                 alpha: dataSource.isTopographyAnalysis ? Number(_opacity.value) : dataSource.alpha
             };
 
@@ -495,14 +497,18 @@ function createPlots() {
                 {
                     ...attrs,
                     ...{
-                        dash: secondElement == null ? 'solid' : secondElement.dash,
+                        // A data source can pin its own dash, bypassing the one
+                        // otherwise cycled from its position among the plot's series.
+                        dash: dataSource.dash ?? (secondElement == null ? 'solid' : secondElement.dash),
                         width: Number(_lineWidth.value) * dataSource.width
                     }
                 });
             figure.lines.unshift(line);
             renderers.push(line);
 
-            if (props.showSymbols) {
+            // A data source can opt out of point markers even while the plot as a
+            // whole shows them, e.g. a reference curve plotted as a line only.
+            if (props.showSymbols && dataSource.showSymbols !== false) {
                 const symbolAttrs = {
                     ...attrs,
                     ...{
