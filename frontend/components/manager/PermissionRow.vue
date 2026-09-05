@@ -2,9 +2,9 @@
 
 import axios from "axios";
 import {onMounted, ref} from "vue";
-import {BForm, BFormSelect, BPlaceholder, useToastController} from "bootstrap-vue-next";
+import {BForm, BFormSelect, BPlaceholder, useToast} from "bootstrap-vue-next";
 
-const {show} = useToastController();
+const toast = useToast();
 
 const userPermission = defineModel('userPermission', {required: true});
 
@@ -26,13 +26,11 @@ onMounted(() => {
         axios.get(userPermission.value.user).then(response => {
             user.value = response.data;
         }).catch(error => {
-            show?.({
-                props: {
-                    title: "Error while loading user",
-                    body: error.message,
-                    variant: "danger"
-                }
-            });
+            toast.create({
+                title: "Error while loading user",
+                body: error.message,
+                variant: "danger"
+            })?.show();
         });
     }
 });

@@ -9,7 +9,7 @@ import {
     BFormInput,
     BFormTextarea,
     BSpinner,
-    useToastController
+    useToast
 } from 'bootstrap-vue-next';
 
 const appProps = inject("appProps") as any;
@@ -19,7 +19,7 @@ const title = ref("");
 const validTitle = ref<boolean | null>(null);
 const description = ref("");
 const pending_request = ref(false);
-const { show } = useToastController();
+const toast = useToast();
 
 const datasetIds = appProps?.searchParams?.getAll("dataset") || [];
 const invalid_id = ref(false);
@@ -32,25 +32,21 @@ datasetIds.forEach((datasetId: string) => {
         }).catch((err) => {
             console.error("An error occured while getting the publication:\n", err);
             invalid_id.value = true;
-            show?.({
-                props: {
-                    title: "Dataset not published",
-                    body: `The dataset with ID:${datasetId} is not published.`,
-                    variant: 'danger'
-                }
-            });
+            toast.create({
+                title: "Dataset not published",
+                body: `The dataset with ID:${datasetId} is not published.`,
+                variant: 'danger'
+            })?.show();
         });
     }).catch((err) => {
         console.error("An error occured while getting the dataset:\n", err);
 
         invalid_id.value = true;
-        show?.({
-            props: {
-                title: "Could not find datasets",
-                body: `The dataset with ID:${datasetId} could not be found.`,
-                variant: 'danger'
-            }
-        });
+        toast.create({
+            title: "Could not find datasets",
+            body: `The dataset with ID:${datasetId} could not be found.`,
+            variant: 'danger'
+        })?.show();
     });
 });
 
@@ -72,13 +68,11 @@ function publish() {
         }).catch((err) => {
             console.error(err.response?.statusText);
             pending_request.value = false;
-            show?.({
-                props: {
-                    title: "Publishing failed",
-                    body: err.response?.statusText || "An error occurred",
-                    variant: 'danger'
-                }
-            });
+            toast.create({
+                title: "Publishing failed",
+                body: err.response?.statusText || "An error occurred",
+                variant: 'danger'
+            })?.show();
         });
     }
 }

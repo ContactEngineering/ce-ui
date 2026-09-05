@@ -13,7 +13,7 @@ import {
     BListGroup,
     BOverlay,
     BPagination,
-    useToastController
+    useToast
 } from "bootstrap-vue-next";
 
 import {useDatasetSelectionStore} from "@/stores/datasetSelection";
@@ -23,7 +23,7 @@ import DatasetListRow from '@/components/manager/DatasetListRow.vue';
 import HelpTooltip from '@/components/ui/HelpTooltip.vue';
 import SearchTokenInput from '@/components/ui/SearchTokenInput.vue';
 
-const {show} = useToastController();
+const toast = useToast();
 const selection = useDatasetSelectionStore();
 
 const props = defineProps({
@@ -134,13 +134,11 @@ function getDatasets(offset: number = 0) {
         if (axios.isCancel(error)) {
             return;
         }
-        show?.({
-            props: {
-                title: "Error fetching datasets",
-                body: error,
-                variant: 'danger'
-            }
-        });
+        toast.create({
+            title: "Error fetching datasets",
+            body: error,
+            variant: 'danger'
+        })?.show();
         _isLoading.value = false;
     });
 }

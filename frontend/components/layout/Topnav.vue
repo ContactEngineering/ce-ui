@@ -7,13 +7,13 @@ import {
     BNavbarBrand,
     BNavbarNav,
     BNavItem,
-    useToastController
+    useToast
 } from "bootstrap-vue-next";
 
 import NotificationButton from "@/components/layout/NotificationButton.vue";
 import UserMenuButton from "@/components/layout/UserMenuButton.vue";
 
-const {show} = useToastController();
+const toast = useToast();
 
 const props = defineProps({
     messages: {
@@ -40,13 +40,11 @@ const levelToTitle = {
 
 onMounted(() => {
     for (const message of props.messages) {
-        show?.({
-            props: {
-                title: levelToTitle[message.level],
-                body: message.message,
-                variant: levelToVariant[message.level]
-            }
-        });
+        toast.create({
+            title: levelToTitle[message.level],
+            body: message.message,
+            variant: levelToVariant[message.level]
+        })?.show();
     }
 });
 
