@@ -8,7 +8,7 @@ import {
     BButton,
     BButtonGroup,
     BSpinner,
-    useToastController
+    useToast
 } from 'bootstrap-vue-next';
 
 import SearchUserModal from "@/components/ui/SearchUserModal.vue";
@@ -16,7 +16,7 @@ import PermissionRow from "@/components/manager/PermissionRow.vue";
 import Toolbar from "@/components/ui/Toolbar.vue";
 import LoadingIndicator from '@/components/ui/LoadingIndicator.vue';
 
-const {show} = useToastController();
+const toast = useToast();
 
 const props = defineProps({
     // v2 permission-set endpoint of the dataset
@@ -46,13 +46,11 @@ function loadPermissions() {
         currentUser.value = rows.find(row => row.isCurrentUser) ?? null;
         otherUsers.value = rows.filter(row => !row.isCurrentUser);
     }).catch(error => {
-        show?.({
-            props: {
-                title: "Failed to fetch permissions",
-                body: error,
-                variant: 'danger'
-            }
-        });
+        toast.create({
+            title: "Failed to fetch permissions",
+            body: error,
+            variant: 'danger'
+        })?.show();
     });
 }
 
@@ -77,13 +75,11 @@ function saveCard() {
         }
     }
     Promise.all(requests).catch(error => {
-        show?.({
-            props: {
-                title: "Permission update failed",
-                body: error,
-                variant: 'danger'
-            }
-        });
+        toast.create({
+            title: "Permission update failed",
+            body: error,
+            variant: 'danger'
+        })?.show();
     }).finally(() => {
         // Re-read the authoritative state, whether saving succeeded or not
         loadPermissions();

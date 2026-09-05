@@ -12,7 +12,7 @@ import {
     BAlert,
     BProgress,
     BModal,
-    useToastController
+    useToast
 } from 'bootstrap-vue-next';
 
 
@@ -27,7 +27,7 @@ const attachmentCount = defineModel("attachmentCount",{
 });
 
 
-const {show} = useToastController();
+const toast = useToast();
 
 const attachments = ref({});
 
@@ -48,13 +48,11 @@ function refreshAttachments() {
         attachments.value = response.data;
         attachmentCount.value = Object.keys(attachments.value).length; // Update the attachment count
     }).catch(error => {
-        show?.({
-            props: {
-                title: "Error while listing attachments",
-                body: error.message,
-                variant: "danger"
-            }
-        });
+        toast.create({
+            title: "Error while listing attachments",
+            body: error.message,
+            variant: "danger"
+        })?.show();
     });
 }
 
@@ -81,34 +79,28 @@ function handleFileDrop(files) {
                 axios.get(manifest.url).then(response => {
                     attachments.value[manifest.filename] = response.data;
                 }).catch(error => {
-                    show?.({
-                        props: {
-                            title: "Error while fetching attachment",
-                            body: error.message,
-                            variant: 'danger'
-                        }
-                    });
+                    toast.create({
+                        title: "Error while fetching attachment",
+                        body: error.message,
+                        variant: 'danger'
+                    })?.show();
                     console.error(error);
                 });
             }).catch(error => {
-                show?.({
-                    props: {
-                        title: "Error while uploading",
-                        body: error.message,
-                        variant: 'danger'
-                    }
-                });
+                toast.create({
+                    title: "Error while uploading",
+                    body: error.message,
+                    variant: 'danger'
+                })?.show();
                 console.error(error);
                 delete uploadIndicator.value[fileId];
             });
         }).catch((error) => {
-            show?.({
-                props: {
-                    title: "Error while initiating upload",
-                    body: error.message,
-                    variant: 'danger'
-                }
-            });
+            toast.create({
+                title: "Error while initiating upload",
+                body: error.message,
+                variant: 'danger'
+            })?.show();
             console.error(error);
         });
     }
@@ -123,13 +115,11 @@ function deleteAttachment(key) {
             deleteAttachmentKey.value = null;
         })
         .catch((error) => {
-            show?.({
-                props: {
-                    title: "Error while deleting",
-                    body: error.message,
-                    variant: 'danger'
-                }
-            });
+            toast.create({
+                title: "Error while deleting",
+                body: error.message,
+                variant: 'danger'
+            })?.show();
             console.error(error);
         });
 }

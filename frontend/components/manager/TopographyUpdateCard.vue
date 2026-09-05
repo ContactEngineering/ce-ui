@@ -16,7 +16,7 @@ import {
     BNav,
     BNavItem,
     BSpinner,
-    useToastController
+    useToast
 } from 'bootstrap-vue-next';
 
 import {subjectsToBase64} from "@/utils/api";
@@ -31,7 +31,7 @@ import HelpTooltip from "@/components/ui/HelpTooltip.vue";
 import Toolbar from "@/components/ui/Toolbar.vue";
 import {paperSection} from "@/utils/references";
 
-const {show} = useToastController();
+const toast = useToast();
 
 const props = defineProps({
     batchEdit: {type: Boolean, default: false},
@@ -153,13 +153,11 @@ function saveEdits() {
         axios.patch(props.topographyUrl, filterTopographyForPatchRequest(props.topography)).then(response => {
             emit('update:topography', response.data);
         }).catch(error => {
-            show?.({
-                props: {
-                    title: "Failed to save changes",
-                    body: error,
-                    variant: 'danger'
-                }
-            });
+            toast.create({
+                title: "Failed to save changes",
+                body: error,
+                variant: 'danger'
+            })?.show();
             emit('update:topography', _savedTopography);
         }).finally(() => {
             _saving.value = false;
@@ -185,13 +183,11 @@ function deleteTopography() {
         if (error.response && error.response.status === 404) {
             emit('delete:topography', props.topographyUrl);
         } else {
-            show?.({
-                props: {
-                    title: "Failed to delete measurement",
-                    body: error,
-                    variant: 'danger'
-                }
-            });
+            toast.create({
+                title: "Failed to delete measurement",
+                body: error,
+                variant: 'danger'
+            })?.show();
         }
     });
 }
@@ -200,13 +196,11 @@ function forceInspect() {
     axios.post(`${props.topographyUrl}force-inspect/`).then(response => {
         emit('update:topography', response.data);
     }).catch(error => {
-        show?.({
-            props: {
-                title: "Failed to force file inspection",
-                body: error,
-                variant: 'danger'
-            }
-        });
+        toast.create({
+            title: "Failed to force file inspection",
+            body: error,
+            variant: 'danger'
+        })?.show();
     });
 }
 
