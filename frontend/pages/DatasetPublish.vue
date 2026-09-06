@@ -2,7 +2,7 @@
 
 import { inject, ref } from "vue";
 
-import { useToastController } from "bootstrap-vue-next";
+import { useToast } from "bootstrap-vue-next";
 
 import axios from "axios";
 import PublishStage1 from "@/components/publish/PublishStage1.vue";
@@ -17,7 +17,7 @@ const props = defineProps({
 
 const appProps = inject("appProps") as any;
 
-const { show } = useToastController();
+const toast = useToast();
 
 const stage = ref(0);
 const pending_request = ref(false);
@@ -50,30 +50,24 @@ function publish() {
         window.location.href = `/ui/dataset-detail/${response.data.dataset_id}/`;
     }).catch((error) => {
         if (error.response?.status == 429) { // Too Many Requests
-            show?.({
-                props: {
-                    title: "Too many requests",
-                    body: `Please wait ${error.response.data} seconds before publishing this digital surface twin again.`,
-                    variant: "danger"
-                }
-            });
+            toast.create({
+                title: "Too many requests",
+                body: `Please wait ${error.response.data} seconds before publishing this digital surface twin again.`,
+                variant: "danger"
+            })?.show();
         } else if (error.response?.status == 403) { // Refused, most likely no ORCID iD
-            show?.({
-                props: {
-                    title: "Publishing was refused",
-                    body: error.response.data?.detail
-                        ?? "Publishing a dataset requires a connected ORCID iD.",
-                    variant: "danger"
-                }
-            });
+            toast.create({
+                title: "Publishing was refused",
+                body: error.response.data?.detail
+                    ?? "Publishing a dataset requires a connected ORCID iD.",
+                variant: "danger"
+            })?.show();
         } else {
-            show?.({
-                props: {
-                    title: "Error",
-                    body: "An error occurred while publishing the digital surface twin. Please try again later.",
-                    variant: "danger"
-                }
-            });
+            toast.create({
+                title: "Error",
+                body: "An error occurred while publishing the digital surface twin. Please try again later.",
+                variant: "danger"
+            })?.show();
         }
         pending_request.value = false;
     });

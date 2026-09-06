@@ -2,9 +2,9 @@
 import { ref, watchEffect } from "vue";
 import axios from "axios";
 
-import { BBadge, BPagination, useToastController } from "bootstrap-vue-next";
+import { BBadge, BPagination, useToast } from "bootstrap-vue-next";
 
-const { show } = useToastController();
+const toast = useToast();
 const props = defineProps({
     apiUrl: {
         type: String,
@@ -27,13 +27,11 @@ watchEffect(() => {
             collectionsCount.value = result.data.count;
         })
         .catch((err) => {
-            show?.({
-                props: {
-                    title: "Error fetching collections",
-                    body: "Error while fetching publication collections",
-                    variant: "danger",
-                },
-            });
+            toast.create({
+                title: "Error fetching collections",
+                body: "Error while fetching publication collections",
+                variant: "danger",
+            })?.show();
             console.error(
                 "Error while fetching publication collections:\n",
                 err,
@@ -53,13 +51,11 @@ function copyToClipboard(text) {
     navigator.clipboard
         .writeText(text)
         .then(() => {
-            show?.({
-                props: {
-                    title: "Copied",
-                    body: "DOI url was copied to your system clippboard",
-                    variant: "success",
-                },
-            });
+            toast.create({
+                title: "Copied",
+                body: "DOI url was copied to your system clippboard",
+                variant: "success",
+            })?.show();
         })
         .catch((err) => {
             console.error("Failed to copy:", err);

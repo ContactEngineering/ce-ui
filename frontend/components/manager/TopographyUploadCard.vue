@@ -9,12 +9,12 @@ import {
     BButtonGroup,
     BCard,
     BProgress,
-    useToastController
+    useToast
 } from 'bootstrap-vue-next';
 
 import {uploadFile} from "@/utils/upload";
 
-const {show} = useToastController();
+const toast = useToast();
 
 const emit = defineEmits([
     'delete:topography',
@@ -55,13 +55,11 @@ onMounted(() => {
     }).catch(error => {
         // Upload failed
         _error.value = error;
-        show?.({
-            props: {
-                title: "Error while uploading",
-                body: error.message,
-                variant: 'danger'
-            }
-        });
+        toast.create({
+            title: "Error while uploading",
+            body: error.message,
+            variant: 'danger'
+        })?.show();
     });
 });
 

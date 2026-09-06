@@ -3,9 +3,9 @@
 import axios from "axios";
 import { inject, ref } from "vue";
 
-import { BBadge, useToastController } from "bootstrap-vue-next";
+import { BBadge, useToast } from "bootstrap-vue-next";
 
-const { show } = useToastController();
+const toast = useToast();
 const appProps = inject("appProps");
 
 const collection = ref({});
@@ -25,44 +25,36 @@ axios.get(appProps.object.url).then((response) => {
             axios.get(response.data.surface).then((response) => {
                 datasets.value.push(response.data);
             }).catch(() => {
-                show?.({
-                    props: {
-                        title: "API error",
-                        body: `Dataset \"${response.data.surface}\" could not be found.`,
-                        variant: 'danger'
-                    }
-                });
+                toast.create({
+                    title: "API error",
+                    body: `Dataset \"${response.data.surface}\" could not be found.`,
+                    variant: 'danger'
+                })?.show();
             });
         }).catch(() => {
-            show?.({
-                props: {
-                    title: "API error",
-                    body: `Publication \"${publication_url}\" could not be found.`,
-                    variant: 'danger'
-                }
-            });
+            toast.create({
+                title: "API error",
+                body: `Publication \"${publication_url}\" could not be found.`,
+                variant: 'danger'
+            })?.show();
         });
     })
 }).catch((err) => {
     console.error(err);
-    show?.({
-        props: {
-            title: "API error",
-            body: `Publication Collection \"${appProps.object.url}\" could not be found.`,
-            variant: 'danger'
-        }
-    });
+    toast.create({
+        title: "API error",
+        body: `Publication Collection \"${appProps.object.url}\" could not be found.`,
+        variant: 'danger'
+    })?.show();
 });
 
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {
-        show?.({
-            props: {
-                title: "Copied",
-                body: "DOI url was copied to your system clippboard",
-                variant: 'success'
-            }
-        });
+        toast.create({
+            title: "Copied",
+            body: "DOI url was copied to your system clippboard",
+            variant: 'success'
+        })?.show();
     }).catch(err => {
         console.error("Failed to copy:", err);
     });

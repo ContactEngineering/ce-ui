@@ -9,14 +9,14 @@ import {
     BNavbarNav,
     BNavItem,
     BOffcanvas,
-    useToastController
+    useToast
 } from "bootstrap-vue-next";
 
 import DownloadModal from "@/components/ui/DownloadModal.vue";
 import { useDatasetSelectionStore } from "@/stores/datasetSelection";
 import { onMounted, ref, computed } from "vue";
 
-const { show } = useToastController();
+const toast = useToast();
 
 const selection = useDatasetSelectionStore();
 
@@ -66,13 +66,11 @@ function showCollectionInfo() {
     else if (selection.nbSelected < 2) {
         issue = "You selected less than 2 datasets."
     }
-    show?.({
-        props: {
-            title: "Creating a collection",
-            body: "To create a collection you must select at least 2, published datasets." + issue,
-            variant: 'info'
-        }
-    });
+    toast.create({
+        title: "Creating a collection",
+        body: "To create a collection you must select at least 2, published datasets." + issue,
+        variant: 'info'
+    })?.show();
 }
 
 const selectionIsPublished = computed(() => {

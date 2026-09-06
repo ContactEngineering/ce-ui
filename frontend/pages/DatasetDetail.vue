@@ -15,7 +15,7 @@ import {
     BSpinner,
     BTab,
     BTabs,
-    useToastController
+    useToast
 } from 'bootstrap-vue-next';
 
 import {useActiveTab} from "@/stores/tabs";
@@ -38,7 +38,7 @@ import LoadingIndicator from '@/components/ui/LoadingIndicator.vue';
 import Toolbar from '@/components/ui/Toolbar.vue';
 import {paperSection} from "@/utils/references";
 
-const {show} = useToastController();
+const toast = useToast();
 
 const props = defineProps({
     newTopographyUrl: {
@@ -130,13 +130,11 @@ async function fetchTopographies() {
         _topographies.value = topographies;
         _selected.value = new Array(topographies.length).fill(false);  // Nothing is selected
     } catch (error) {
-        show?.({
-            props: {
-                title: "Failed to fetch measurements",
-                body: error,
-                variant: 'danger'
-            }
-        });
+        toast.create({
+            title: "Failed to fetch measurements",
+            body: error,
+            variant: 'danger'
+        })?.show();
     } finally {
         _loadingTopographies.value = false;
     }
@@ -154,13 +152,11 @@ function updatePublication() {
             _publication.value = response.data;
             updateVersions();
         }).catch(error => {
-            show?.({
-                props: {
-                    title: "Failed to fetch publication information",
-                    body: error,
-                    variant: 'danger'
-                }
-            });
+            toast.create({
+                title: "Failed to fetch publication information",
+                body: error,
+                variant: 'danger'
+            })?.show();
         });
     }
 }
@@ -169,13 +165,11 @@ function updateVersions() {
     axios.get(`/go/publication/?original_surface=${getOriginalSurfaceId()}`).then(response => {
         _versions.value = response.data;
     }).catch(error => {
-        show?.({
-            props: {
-                title: "Failed to fetch published versions",
-                body: error,
-                variant: 'danger'
-            }
-        });
+        toast.create({
+            title: "Failed to fetch published versions",
+            body: error,
+            variant: 'danger'
+        })?.show();
     });
 }
 
@@ -222,13 +216,11 @@ function saveBatchEdit(topography) {
             axios.patch(t.url, filterTopographyForPatchRequest(t)).then(response => {
                 _topographies.value[i] = response.data;
             }).catch(error => {
-                show?.({
-                    props: {
-                        title: "Failed to update measurement",
-                        body: error,
-                        variant: 'danger'
-                    }
-                });
+                toast.create({
+                    title: "Failed to update measurement",
+                    body: error,
+                    variant: 'danger'
+                })?.show();
             });
         }
     }
@@ -269,13 +261,11 @@ function deleteSurface() {
         emit('delete:surface', _surface.value.url);
         window.location.href = `/ui/dataset-list/`;
     }).catch(error => {
-        show?.({
-            props: {
-                title: "Failed to delete digital surface twin",
-                body: error,
-                variant: 'danger'
-            }
-        });
+        toast.create({
+            title: "Failed to delete digital surface twin",
+            body: error,
+            variant: 'danger'
+        })?.show();
     });
 }
 

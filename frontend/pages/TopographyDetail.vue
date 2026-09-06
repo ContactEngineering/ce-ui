@@ -9,7 +9,7 @@ import {
     BModal,
     BTab,
     BTabs,
-    useToastController
+    useToast
 } from "bootstrap-vue-next";
 
 import { useActiveTab } from "@/stores/tabs";
@@ -23,7 +23,7 @@ import DeepZoomImage from "@/components/ui/DeepZoomImage.vue";
 import LineScanPlot from "@/components/ui/LineScanPlot.vue";
 import LoadingIndicator from "@/components/ui/LoadingIndicator.vue";
 
-const { show } = useToastController();
+const toast = useToast();
 
 const props = defineProps({
     topographyUrl: String,
@@ -67,13 +67,11 @@ async function updateCard(topography = null) {
             _topography.value = response.data;
             _disabled.value = _topography.value === null || _topography.value.permissions.current_user.permission === "view";
         } catch (error) {
-            show?.({
-                props: {
-                    title: "Failed to load measurement",
-                    body: error,
-                    variant: "danger"
-                }
-            });
+            toast.create({
+                title: "Failed to load measurement",
+                body: error,
+                variant: "danger"
+            })?.show();
         }
     }
 }
@@ -89,13 +87,11 @@ function deleteTopography() {
             const id = getIdFromUrl(_topography.value.surface);
             window.location.href = `/ui/dataset-detail/${id}/`;
         } else {
-            show?.({
-                props: {
-                    title: "Failed to delete measurement",
-                    body: error,
-                    variant: "danger"
-                }
-            });
+            toast.create({
+                title: "Failed to delete measurement",
+                body: error,
+                variant: "danger"
+            })?.show();
         }
     });
 }
@@ -105,13 +101,11 @@ async function forceInspect() {
         const response = await axios.post(_topography.value.api.force_inspect);
         await updateCard(response.data);
     } catch (error) {
-        show?.({
-            props: {
-                title: "Failed to retry processing",
-                body: error,
-                variant: "danger"
-            }
-        });
+        toast.create({
+            title: "Failed to retry processing",
+            body: error,
+            variant: "danger"
+        })?.show();
     }
 }
 

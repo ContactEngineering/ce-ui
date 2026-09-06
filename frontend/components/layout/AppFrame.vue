@@ -18,7 +18,7 @@ const props = defineProps({
 <template>
     <BOrchestrator></BOrchestrator>
     <div class="fixed-top">
-        <Topnav></Topnav>
+        <Topnav :messages="messages"></Topnav>
         <Breadcrumbs :tabs="breadcrumbs"></Breadcrumbs>
     </div>
 

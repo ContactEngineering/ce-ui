@@ -4,7 +4,7 @@ import axios from "axios";
 import throttle from "lodash/throttle";
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 
-import { BDropdownDivider, BDropdownItem, BTab, BTabs, useToastController } from "bootstrap-vue-next";
+import { BDropdownDivider, BDropdownItem, BTab, BTabs, useToast } from "bootstrap-vue-next";
 
 import { useActiveTab } from "@/stores/tabs";
 
@@ -54,7 +54,7 @@ const props = defineProps({
     }
 });
 
-const { show } = useToastController();
+const toast = useToast();
 
 const _analyses = ref(null);
 let _analysesById = {};
@@ -118,13 +118,11 @@ function updateCard() {
             _outputBackend.value = response.data.plotConfiguration?.outputBackend;
         })
         .catch(error => {
-            show?.({
-                props: {
-                    title: "Error fetching contact mechanics analysis results",
-                    body: error.message,
-                    variant: "danger"
-                }
-            });
+            toast.create({
+                title: "Error fetching contact mechanics analysis results",
+                body: error.message,
+                variant: "danger"
+            })?.show();
         })
         .finally(() => {
             _nbPendingAjaxRequests.value--;
@@ -147,13 +145,11 @@ function onSelected(obj, data) {
         };
     }).catch(error => {
         _isLoading.value = false;
-        show?.({
-            props: {
-                title: "Error analysis results",
-                body: error.message,
-                variant: "danger"
-            }
-        });
+        toast.create({
+            title: "Error analysis results",
+            body: error.message,
+            variant: "danger"
+        })?.show();
     });
 }
 
@@ -269,13 +265,11 @@ async function downloadCsv() {
             toCsvText(buildColumnsCsvRows(groups, SUMMARY_COLUMNS, "Measurement")),
             "text/csv;charset=utf-8");
     } catch (error) {
-        show?.({
-            props: {
-                title: "Error preparing download",
-                body: describeRequestError(error),
-                variant: "danger"
-            }
-        });
+        toast.create({
+            title: "Error preparing download",
+            body: describeRequestError(error),
+            variant: "danger"
+        })?.show();
     } finally {
         _nbPendingAjaxRequests.value--;
     }

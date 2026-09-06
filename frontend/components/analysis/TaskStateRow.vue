@@ -24,13 +24,13 @@ function cachedGet(url) {
 
 import {computed, ref, watch} from "vue";
 
-import {BButton, useToastController} from "bootstrap-vue-next";
+import {BButton, useToast} from "bootstrap-vue-next";
 
 import {formatDateTime, formatDuration, prettyBytes} from "@/utils/formatting";
 
 import ProgressIndicator from "@/components/ui/ProgressIndicator.vue";
 
-const {show} = useToastController();
+const toast = useToast();
 
 const analysis = defineModel('analysis', {required: true});
 
@@ -43,7 +43,7 @@ function fetchInfo() {
         cachedGet(analysis.value.function).then(data => {
             _function.value = data;
         }).catch(error => {
-            show?.({props: {title: "Request failed", body: error, variant: 'danger'}});
+            toast.create({title: "Request failed", body: error, variant: 'danger'})?.show();
         });
     }
 
@@ -53,12 +53,12 @@ function fetchInfo() {
             subject.topography : subject.surface != null ?
                 subject.surface : subject.tag;
         if (subjectUrl == null) {
-            show?.({props: {title: "Error", body: "Unable to determine subject for analysis", variant: 'danger'}});
+            toast.create({title: "Error", body: "Unable to determine subject for analysis", variant: 'danger'})?.show();
         } else {
             cachedGet(subjectUrl).then(data => {
                 _subject.value = data;
             }).catch(error => {
-                show?.({props: {title: "Request failed", body: error, variant: 'danger'}});
+                toast.create({title: "Request failed", body: error, variant: 'danger'})?.show();
             });
         }
     }
@@ -77,11 +77,11 @@ function fetchFailureReason() {
                 axios.get(resultFile.url).then(response => {
                     _error.value = response.data.message;
                 }).catch(error => {
-                    show?.({props: {title: "Request failed", body: error, variant: 'danger'}});
+                    toast.create({title: "Request failed", body: error, variant: 'danger'})?.show();
                 });
             }
         }).catch(error => {
-            show?.({props: {title: "Request failed", body: error, variant: 'danger'}});
+            toast.create({title: "Request failed", body: error, variant: 'danger'})?.show();
         });
     }
 }
@@ -93,7 +93,7 @@ function renew() {
     axios.put(analysis.value.url).then(response => {
         analysis.value = response.data;
     }).catch(error => {
-        show?.({props: {title: "Request failed", body: error, variant: 'danger'}});
+        toast.create({title: "Request failed", body: error, variant: 'danger'})?.show();
     });
 }
 

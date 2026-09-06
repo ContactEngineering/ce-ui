@@ -4,7 +4,7 @@ import axios from "axios";
 import throttle from "lodash/throttle";
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 
-import { BDropdownDivider, BDropdownItem, useToastController } from "bootstrap-vue-next";
+import { BDropdownDivider, BDropdownItem, useToast } from "bootstrap-vue-next";
 
 import DataTable from "datatables.net-vue3";
 import DataTablesLib from "datatables.net-bs5";
@@ -18,7 +18,7 @@ import { escapeHtml } from "@/utils/html";
 
 import AnalysisCard from "@/components/analysis/AnalysisCard.vue";
 
-const {show} = useToastController();
+const toast = useToast();
 
 const props = defineProps({
     apiUrl: {
@@ -137,13 +137,11 @@ function updateCard() {
             _messages.value = response.data.messages;
         })
         .catch(error => {
-            show?.({
-                props: {
-                    title: "Error fetching roughness parameters",
-                    body: error.message,
-                    variant: "danger"
-                }
-            });
+            toast.create({
+                title: "Error fetching roughness parameters",
+                body: error.message,
+                variant: "danger"
+            })?.show();
         })
         .finally(() => {
             _nbPendingAjaxRequests.value--;

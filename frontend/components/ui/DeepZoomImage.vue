@@ -7,7 +7,7 @@
 
 import axios from "axios";
 import {onBeforeUnmount, onMounted, ref, watch} from "vue";
-import {useToastController} from "bootstrap-vue-next";
+import {useToast} from "bootstrap-vue-next";
 
 import {computeColorbarTicks} from "@/utils/colorbar";
 
@@ -35,7 +35,7 @@ const props = defineProps({
     }
 });
 
-const {show} = useToastController();
+const toast = useToast();
 
 // The OpenSeadragon instance
 let viewer = null;
@@ -137,13 +137,11 @@ function refreshDzi() {
             });
         });
     }).catch(error => {
-        show?.({
-            props: {
-                title: "Error fetching zoomable image",
-                body: error.message,
-                variant: 'danger'
-            }
-        });
+        toast.create({
+            title: "Error fetching zoomable image",
+            body: error.message,
+            variant: 'danger'
+        })?.show();
     });
 }
 
@@ -221,13 +219,11 @@ function requestDzi() {
 
             _isLoaded.value = true;
         }).catch(error => {
-            show?.({
-                props: {
-                    title: "Error rendering zoomable image",
-                    body: error.message,
-                    variant: 'danger'
-                }
-            });
+            toast.create({
+                title: "Error rendering zoomable image",
+                body: error.message,
+                variant: 'danger'
+            })?.show();
         });
     }).catch(error => {
         /**

@@ -15,12 +15,12 @@ import {
     BTh,
     BThead,
     BTr,
-    useToastController
+    useToast
 } from 'bootstrap-vue-next';
 
 import Toolbar from "@/components/ui/Toolbar.vue";
 
-const { show } = useToastController();
+const toast = useToast();
 
 const properties = defineModel('properties', {
     default: {}
@@ -79,21 +79,17 @@ let formIsValid = computed(() => {
 const propertiesBeforeEdit = ref<any[]>([]);
 
 function showWarning(msg) {
-    show?.({
-        props: {
-            body: msg,
-            variant: "warning"
-        }
-    });
+    toast.create({
+        body: msg,
+        variant: "warning"
+    })?.show();
 }
 
 function showError(msg) {
-    show?.({
-        props: {
-            body: msg,
-            variant: "danger"
-        }
-    });
+    toast.create({
+        body: msg,
+        variant: "danger"
+    })?.show();
 }
 
 const isEditable = computed(() => {
@@ -152,12 +148,10 @@ function save() {
         // Restore properties
         _properties.value = propertiesObjectToArray(properties.value);
         const msg = `Upload Failed: ${error.response.data.detail}. Please report this bug!`
-        show?.({
-            props: {
-                body: msg,
-                variant: "warning"
-            }
-        });
+        toast.create({
+            body: msg,
+            variant: "warning"
+        })?.show();
     });
     propertyCount.value = Object.keys(propertiesArrayToObject(_properties.value)).length; // Update the property count
 }
