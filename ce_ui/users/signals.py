@@ -26,9 +26,13 @@ def store_verified_provider_addresses(request, sociallogin, **kwargs):
 
     Only verified ones: an address the provider has not confirmed is a claim,
     not evidence, and confirming it is what the email management page is for.
-    An address already on file anywhere is left alone -- addresses are unique
-    across accounts (`ACCOUNT_UNIQUE_EMAIL`), and taking one from another
-    account would hand over its sign-in.
+
+    An address held by *another* account is left alone -- addresses are unique
+    across accounts (`ACCOUNT_UNIQUE_EMAIL`), and taking one would hand over
+    its sign-in. One this user already holds unconfirmed is confirmed instead
+    of skipped: the provider has just vouched for it, which is exactly the
+    evidence the confirmation mail would have produced, and leaving it
+    unconfirmed would keep the account without a way back in.
     """
     user = getattr(sociallogin, "user", None)
     if user is None or not getattr(user, "pk", None):
@@ -39,12 +43,20 @@ def store_verified_provider_addresses(request, sociallogin, **kwargs):
     for address in sociallogin.email_addresses:
         if not address.verified:
             continue
-        if EmailAddress.objects.filter(email__iexact=address.email).exists():
-            continue
 
-        stored = EmailAddress.objects.create(
-            user=user, email=address.email, verified=True
-        )
+        existing = EmailAddress.objects.filter(email__iexact=address.email).first()
+        if existing is not None:
+            if existing.user_id != user.pk or existing.verified:
+                continue
+            # Ours, and the provider has just vouched for it.
+            existing.verified = True
+            existing.save(update_fields=["verified"])
+            stored = existing
+        else:
+            stored = EmailAddress.objects.create(
+                user=user, email=address.email, verified=True
+            )
+
         if not has_address:
             # The account had none, so this one becomes the address it is
             # reached at; `set_as_primary` keeps `User.email` in step.

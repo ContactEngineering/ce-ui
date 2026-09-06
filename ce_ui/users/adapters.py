@@ -1,49 +1,15 @@
-from allauth.account import app_settings as account_settings
 from allauth.account.adapter import DefaultAccountAdapter
 from allauth.account.models import EmailAddress
-from allauth.account.utils import has_verified_email
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from django.conf import settings
 from django.core.exceptions import ValidationError
 
-from .identity import provider_name
+from .identity import (can_sign_in_locally, is_anchor_provider, provider_name,
+                       signup_providers)
 
-
-def signup_providers():
-    """
-    The identity providers that may bring a new account into existence.
-
-    These providers *anchor* an account: an account always has one, because
-    that is the only way it can have been created, and it cannot be
-    disconnected afterwards. Every other way of signing in -- another provider,
-    a password, a second email address -- is something the user attaches to an
-    account that already exists.
-
-    `None` lifts the restriction, letting any configured provider sign somebody
-    up and every connection be removed again.
-    """
-    return getattr(settings, "SOCIALACCOUNT_SIGNUP_PROVIDERS", None)
-
-
-def _can_sign_in_locally(user):
-    """
-    Whether this user could sign in with an email address and a password.
-
-    A usable password is not enough on its own. Under mandatory email
-    verification django-allauth refuses the login of an account with no
-    verified address and sends a confirmation instead -- and ORCID does not
-    necessarily release an address, so such an account may have none at all.
-    Counting the password alone would let somebody disconnect their last
-    identity provider and lock themselves out.
-    """
-    if not user.has_usable_password():
-        return False
-    if (
-        account_settings.EMAIL_VERIFICATION
-        != account_settings.EmailVerificationMethod.MANDATORY
-    ):
-        return True
-    return has_verified_email(user)
+# Re-exported: `signup_providers` used to live here, and the template tag and
+# the tests reach for it under this name.
+__all__ = ["AccountAdapter", "SocialAccountAdapter", "signup_providers"]
 
 
 class AccountAdapter(DefaultAccountAdapter):
@@ -95,29 +61,26 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
         account = getattr(sociallogin, "account", None)
         return account is not None and account.provider in providers
 
-    def authenticate_by_email(self, sociallogin):
+    def can_authenticate_by_email(self, login, email):
         """
-        Match a social login against an existing account by email address.
+        Whether a sign-in at this provider may reach an account by `email`.
 
         django-allauth offers the address to any local account holding it,
-        preferring a verified one but falling back to an unverified one. That
-        fallback would let somebody who had merely *claimed* an address --
-        without ever confirming it -- receive the sign-in of whoever really
-        owns it at the provider. Only a confirmed address counts here.
+        preferring a verified one but falling back to an unverified one -- and
+        falling back further to the raw `User.email` field, which nobody ever
+        confirmed. That would let somebody who had merely *claimed* an address
+        receive the sign-in of whoever really owns it at the provider. Only an
+        address confirmed here counts.
+
+        This is the hook django-allauth consults per address in
+        `SocialLogin._lookup_by_email`, immediately before it looks a user up,
+        so refusing here is what actually stops the match. The base
+        implementation decides whether email authentication is switched on for
+        the provider at all; that answer still stands.
         """
-        for email_address in getattr(sociallogin, "email_addresses", []):
-            if not email_address.verified:
-                continue
-            matched_email = (
-                EmailAddress.objects.filter(
-                    email__iexact=email_address.email, verified=True
-                )
-                .select_related("user")
-                .first()
-            )
-            if matched_email is not None:
-                return (matched_email.user, matched_email.email)
-        return None
+        if not super().can_authenticate_by_email(login, email):
+            return False
+        return EmailAddress.objects.filter(email__iexact=email, verified=True).exists()
 
     def populate_user(self, request, sociallogin, data):
         """
@@ -148,15 +111,14 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
         connected and disconnected freely, as long as one way of signing back
         in remains.
         """
-        providers = signup_providers()
-        if providers is not None and account.provider in providers:
+        if is_anchor_provider(account.provider):
             raise ValidationError(
                 f"Your {provider_name(account.provider)} account identifies you "
                 "on this site and cannot be disconnected. Contact support if it "
                 "has to be changed."
             )
         remaining = [other for other in accounts if other.pk != account.pk]
-        if remaining or _can_sign_in_locally(account.user):
+        if remaining or can_sign_in_locally(account.user):
             return
         raise ValidationError(
             "This is the only way you can sign in to your account. Connect "

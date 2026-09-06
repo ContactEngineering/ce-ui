@@ -16,10 +16,16 @@ a statement about identity, and because the check has to be available to the UI
 well as to the view layer (to enforce it).
 """
 
+from allauth.account import app_settings as account_settings
+from django.conf import settings
 from django.core.exceptions import PermissionDenied
 
 #: allauth provider id of ORCID.
 ORCID_PROVIDER_ID = "orcid"
+
+#: The pseudo-provider id of the local email/password account. Not an allauth
+#: provider: it stands for "signs in here, with a password".
+LOCAL_PROVIDER_ID = "local"
 
 #: Human-readable names for the providers we know about. `SocialAccount` can
 #: name its own provider, but only by going through the provider registry,
@@ -29,6 +35,7 @@ ORCID_PROVIDER_ID = "orcid"
 PROVIDER_NAMES = {
     ORCID_PROVIDER_ID: "ORCID",
     "google": "Google",
+    LOCAL_PROVIDER_ID: "Email and password",
 }
 
 #: Shown wherever publishing is refused for a missing ORCID iD. The UI, the API
@@ -40,6 +47,28 @@ ORCID_REQUIRED_FOR_PUBLICATION = (
     "citable record and its authors must be identifiable. Connect your ORCID "
     "account to your profile and then publish."
 )
+
+
+def signup_providers():
+    """
+    The identity providers that may bring a new account into existence.
+
+    These providers *anchor* an account: an account always has one, because
+    that is the only way it can have been created, and it cannot be
+    disconnected afterwards. Every other way of signing in -- another provider,
+    a password, a second email address -- is something the user attaches to an
+    account that already exists.
+
+    `None` lifts the restriction, letting any configured provider sign somebody
+    up and every connection be removed again.
+    """
+    return getattr(settings, "SOCIALACCOUNT_SIGNUP_PROVIDERS", None)
+
+
+def is_anchor_provider(provider_id):
+    """Whether an account at this provider is what identifies its user."""
+    providers = signup_providers()
+    return providers is not None and provider_id in providers
 
 
 def _social_accounts(user):
@@ -60,7 +89,7 @@ def _social_accounts(user):
     except ImportError:
         return []
 
-    return list(SocialAccount.objects.filter(user_id=user.pk))
+    return list(SocialAccount.objects.filter(user_id=user.pk).order_by("date_joined"))
 
 
 def provider_name(provider_id):
@@ -79,9 +108,8 @@ def has_verified_email(user):
     """
     Whether a confirmed email address is on file for this user.
 
-    This is what account recovery, password sign-in and -- because a Google
-    account is recognised by its address -- Google sign-in all rest on. ORCID
-    does not always pass an address on, so an account can start out with none.
+    This is what account recovery and password sign-in rest on. ORCID does not
+    always pass an address on, so an account can start out with none.
     """
     if user is None or not getattr(user, "is_authenticated", False):
         return False
@@ -97,17 +125,72 @@ def has_verified_email(user):
     return _allauth_has_verified_email(user)
 
 
+def can_sign_in_locally(user):
+    """
+    Whether this user could sign in with an email address and a password.
+
+    A usable password is not enough on its own. Under mandatory email
+    verification django-allauth refuses the login of an account with no
+    verified address and sends a confirmation instead -- and ORCID does not
+    necessarily release an address, so such an account may have none at all.
+    Counting the password alone would let somebody disconnect their last
+    identity provider and lock themselves out, and would have the connected
+    identities page name a way in that does not work.
+    """
+    if user is None or not getattr(user, "is_authenticated", False):
+        return False
+    if not user.has_usable_password():
+        return False
+    if (
+        account_settings.EMAIL_VERIFICATION
+        != account_settings.EmailVerificationMethod.MANDATORY
+    ):
+        return True
+    return has_verified_email(user)
+
+
+def _identity_label(account):
+    """
+    What to show next to a social identity: whatever names it to a human.
+
+    The uid is the provider's own identifier. For ORCID that *is* the iD one
+    reads and cites; for anything else it is an opaque number, so an address
+    the provider handed over is preferred where there is one.
+    """
+    if account.provider == ORCID_PROVIDER_ID:
+        return account.uid
+    extra_data = account.extra_data if isinstance(account.extra_data, dict) else {}
+    return extra_data.get("email") or account.uid
+
+
 def connected_identities(user):
     """
     Describe every identity this user can sign in with.
 
-    Returns a list of dictionaries with the keys `provider` (the allauth
-    provider id, or `"local"` for the email/password account), `name` (for
-    display), `uid` (the identifier at the provider, empty for the local
-    account) and `url` (a link to the identity's public page, or `None`).
+    Returns a list of dictionaries with the keys
 
-    A local account is reported when the user has a usable password: that is
-    exactly the condition under which they can sign in with email and password.
+    ``provider``
+        the allauth provider id, or ``"local"`` for the email/password account
+    ``name``
+        for display
+    ``uid``
+        the identifier at the provider, the primary address for the local
+        account
+    ``url``
+        a link to the identity's public page, or ``None``
+    ``account_id``
+        primary key of the underlying ``SocialAccount``, or ``None`` for the
+        local account -- what the disconnect form posts back
+    ``is_anchor``
+        whether this identity created the account and therefore cannot be
+        disconnected, see `signup_providers`
+    ``usable``
+        whether it can be signed in with *right now*. Only the local account
+        can be unusable: a password is refused until an address is confirmed.
+
+    A local account is reported when the user has a usable password, whether or
+    not it can be used yet -- somebody who set one should see it listed, with
+    the reason it does not work, rather than wonder where it went.
     """
     identities = []
 
@@ -119,18 +202,24 @@ def connected_identities(user):
             {
                 "provider": account.provider,
                 "name": provider_name(account.provider),
-                "uid": account.uid,
+                "uid": _identity_label(account),
                 "url": url,
+                "account_id": account.pk,
+                "is_anchor": is_anchor_provider(account.provider),
+                "usable": True,
             }
         )
 
     if getattr(user, "is_authenticated", False) and user.has_usable_password():
         identities.append(
             {
-                "provider": "local",
-                "name": "Email and password",
+                "provider": LOCAL_PROVIDER_ID,
+                "name": provider_name(LOCAL_PROVIDER_ID),
                 "uid": user.email or "",
                 "url": None,
+                "account_id": None,
+                "is_anchor": False,
+                "usable": can_sign_in_locally(user),
             }
         )
 

@@ -3,6 +3,33 @@
 {% load socialaccount %}
 
 {% block extra_css %}
+    <style>
+        /* The rules `lined-tabs` gets from the bundle's stylesheet, for the
+           pages that do not load the bundle. */
+        .breadcrumb-tabs .nav-link {
+            border: none;
+            border-bottom: 3px solid transparent;
+        }
+
+        .breadcrumb-tabs .nav-link.active {
+            background: none;
+            border-color: var(--bs-primary);
+        }
+
+        .breadcrumb-separator {
+            padding: var(--bs-nav-link-padding-y) 0;
+            color: var(--bs-secondary-color);
+        }
+
+        .breadcrumb-tabs .nav-item:last-child .breadcrumb-separator {
+            display: none;
+        }
+
+        .identity-icon {
+            width: 1.25em;
+            text-align: center;
+        }
+    </style>
 {% endblock extra_css %}
 
 {% block body %}
@@ -13,6 +40,32 @@
                 contact.engineering </a></div>
     </div>
 
-    {% block content %}{% endblock content %}
+    {# The Vue app draws this bar from the same `fixed_tabs` context processor #}
+    {# (`components/layout/Breadcrumbs.vue`). The account pages are outside the #}
+    {# app, so without it they offer no way back to the site at all. A page adds #}
+    {# its own crumb by overriding `crumbs`. #}
+    <ul role="tablist"
+        class="nav nav-tabs breadcrumb-tabs align-items-center bg-light w-100 shadow">
+        {% for tab in fixed_tabs %}
+            {% if not tab.login_required or user.is_authenticated %}
+                <li class="nav-item d-flex" title="{{ tab.tooltip }}">
+                    <div class="nav-link">
+                        <a class="link-offset-2 link-underline link-underline-opacity-0 link-underline-opacity-75-hover"
+                           href="{{ tab.href }}">
+                            <i class="{{ tab.icon_style_prefix|default:'fa' }} fa-{{ tab.icon }}"></i>
+                            {{ tab.title }}
+                        </a>
+                    </div>
+                    <div class="breadcrumb-separator">/</div>
+                </li>
+            {% endif %}
+        {% endfor %}
+        {% block crumbs %}{% endblock crumbs %}
+    </ul>
+
+    {# A `row` outside a container hangs its negative margins off the page. #}
+    <div class="container-fluid mt-3">
+        {% block content %}{% endblock content %}
+    </div>
     <div class="mt-2"></div>
 {% endblock body %}

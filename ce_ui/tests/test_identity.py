@@ -1,6 +1,7 @@
 """Tests for connected identities and the ORCID requirement on publications."""
 
 import pytest
+from allauth.account.models import EmailAddress
 from allauth.socialaccount.models import SocialAccount, SocialLogin
 from django.contrib.auth import get_user_model
 from django.core.exceptions import (ImproperlyConfigured, PermissionDenied,
@@ -12,7 +13,8 @@ from django.urls import path
 from ce_ui.users.adapters import AccountAdapter, SocialAccountAdapter
 from ce_ui.users.decorators import orcid_required, require_orcid_for_routes
 from ce_ui.users.identity import (ORCID_REQUIRED_FOR_PUBLICATION, can_publish,
-                                  connected_identities, has_orcid)
+                                  can_sign_in_locally, connected_identities,
+                                  has_orcid)
 
 
 @pytest.fixture
@@ -103,6 +105,40 @@ def test_account_without_password_has_no_local_identity(user_without_password):
     connect_google(user_without_password)
     identities = connected_identities(user_without_password)
     assert [identity["provider"] for identity in identities] == ["google"]
+
+
+@pytest.mark.django_db
+def test_a_password_alone_is_not_a_usable_identity(user, settings):
+    """
+    Under mandatory verification allauth refuses the login of an account with
+    no confirmed address, so a password on its own is not a way in. The
+    identity is still listed -- somebody who set one should see it -- but it is
+    marked for what it is.
+    """
+    settings.ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+    connect_orcid(user)
+    assert not can_sign_in_locally(user)
+    local = next(i for i in user.connected_identities if i["provider"] == "local")
+    assert local["usable"] is False
+
+    EmailAddress.objects.create(
+        user=user, email="alice@example.com", verified=True, primary=True
+    )
+    assert can_sign_in_locally(user)
+    local = next(i for i in user.connected_identities if i["provider"] == "local")
+    assert local["usable"] is True
+
+
+@pytest.mark.django_db
+def test_the_signup_provider_anchors_the_account(user):
+    connect_orcid(user)
+    connect_google(user)
+    identities = {i["provider"]: i for i in user.connected_identities}
+    assert identities["orcid"]["is_anchor"]
+    assert not identities["google"]["is_anchor"]
+    # The disconnect form posts this back, so every removable identity has one
+    assert identities["google"]["account_id"] is not None
+    assert identities["local"]["account_id"] is None
 
 
 def test_anonymous_user_has_no_identities():

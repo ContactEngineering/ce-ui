@@ -5,151 +5,163 @@
 {% load identities %}
 
 {% block head_title %}{% trans "Connected identities" %}{% endblock %}
+{% block crumb_icon %}id-card{% endblock %}
+{% block crumb_title %}{% trans "Connected identities" %}{% endblock %}
 
-{% block inner %}
-<h1 class="mb-3">{% trans "Connected identities" %}</h1>
+{# Wider than the forms the other account pages carry: this one is a list with #}
+{# an action on each row. #}
+{% block content %}
+<div class="row">
+  <div class="col-lg-8 offset-lg-2">
+    {% block inner %}
 
-<p class="text-muted">
-  These are the ways you can sign in to <em>contact.engineering</em>. They all
-  lead to the same profile and the same datasets, so it does not matter which
-  one you use.
-</p>
+    <h1 class="mb-3">{% trans "Connected identities" %}</h1>
 
-{% if user.has_orcid %}
-<div class="alert alert-success d-flex align-items-start" role="status">
-  <img src="/static/images/ORCID-iD_icon_vector.svg" height="20" width="20" alt=""
-       class="me-2 mt-1" aria-hidden="true">
-  <div>
-    <strong>Your ORCID iD is connected.</strong>
-    You can publish datasets.
-  </div>
-</div>
-{% else %}
-<div class="alert alert-warning d-flex align-items-start" role="status">
-  <i class="fa fa-exclamation-triangle fa-fw me-2 mt-1" aria-hidden="true"></i>
-  <div>
-    <strong>No ORCID iD connected.</strong>
-    Publishing a dataset creates a citable record, so it requires an ORCID iD.
-    Connect your ORCID account below — everything else works without one.
-  </div>
-</div>
-{% endif %}
+    <p class="text-muted">
+      These are the ways you can sign in to <em>contact.engineering</em>. They
+      all lead to the same profile and the same datasets, so it does not matter
+      which one you use.
+    </p>
 
-{# The form is what disconnects an account, so the social accounts have to be #}
-{# listed inside it. The local account is listed alongside them but is not    #}
-{# part of the form: a password is removed by changing it, not from here.     #}
-<form method="post" action="{% url 'socialaccount_connections' %}">
-  {% csrf_token %}
+    {% if not user.has_orcid %}
+    <div class="alert alert-warning d-flex align-items-start" role="status">
+      <i class="fa fa-exclamation-triangle fa-fw me-2 mt-1" aria-hidden="true"></i>
+      <div>
+        <strong>{% trans "No ORCID iD connected." %}</strong>
+        Publishing a dataset creates a citable record, so it requires an ORCID
+        iD. Connect your ORCID account below — everything else works without
+        one.
+      </div>
+    </div>
+    {% endif %}
 
-  {% if form.non_field_errors %}
-  <div class="alert alert-danger">{{ form.non_field_errors }}</div>
-  {% endif %}
+    {% if form.errors %}
+    <div class="alert alert-danger">
+      {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+      {% for error in form.account.errors %}<div>{{ error }}</div>{% endfor %}
+    </div>
+    {% endif %}
 
-  {% anchor_providers as anchors %}
-  <ul class="list-group mb-3">
-    {% for base_account in form.accounts %}
-    {% with base_account.get_provider_account as account %}
-    {# The provider that created the account has no radio: it identifies the #}
-    {# user and the adapter refuses to disconnect it.                        #}
-    <li class="list-group-item d-flex align-items-center gap-3">
-      {% if base_account.provider in anchors %}
-      <span class="flex-shrink-0" style="width: 1em"></span>
-      <span class="d-flex align-items-center gap-2 flex-grow-1">
-        {% include "socialaccount/snippets/provider_icon.html" with provider_id=base_account.provider %}
-        <span>
-          <span class="fw-semibold">{{ account.get_brand.name }}</span>
-          <span class="text-muted ms-2">{{ account }}</span>
+    {# One row per identity, each with its own disconnect form: the alternative #}
+    {# is django-allauth's single form with a radio per row, which makes        #}
+    {# removing one connection a two-step choose-then-submit. The form posts    #}
+    {# `account`, which is all `DisconnectForm` reads.                          #}
+    <ul class="list-group mb-2">
+      {% for identity in user.connected_identities %}
+      <li class="list-group-item d-flex align-items-center gap-3">
+        {% include "socialaccount/snippets/provider_icon.html" with provider_id=identity.provider %}
+        <span class="flex-grow-1">
+          <span class="fw-semibold">{{ identity.name }}</span>
+          {% if identity.url %}
+          <a class="ms-2" href="{{ identity.url }}" rel="noopener noreferrer"
+             target="_blank">{{ identity.uid }}</a>
+          {% elif identity.uid %}
+          <span class="text-muted ms-2">{{ identity.uid }}</span>
+          {% endif %}
+          {% if not identity.usable %}
+          <div class="small text-warning-emphasis">
+            <i class="fa fa-exclamation-triangle fa-fw" aria-hidden="true"></i>
+            {% trans "Not usable until an email address on this account is confirmed." %}
+          </div>
+          {% endif %}
         </span>
-        <span class="badge text-bg-light border ms-auto">{% trans "identifies you" %}</span>
-      </span>
-      {% else %}
-      <input class="form-check-input flex-shrink-0 m-0" type="radio" name="account"
-             id="id_account_{{ base_account.id }}" value="{{ base_account.id }}">
-      <label class="d-flex align-items-center gap-2 flex-grow-1 mb-0"
-             for="id_account_{{ base_account.id }}">
-        {% include "socialaccount/snippets/provider_icon.html" with provider_id=base_account.provider %}
-        <span>
-          <span class="fw-semibold">{{ account.get_brand.name }}</span>
-          <span class="text-muted ms-2">{{ account }}</span>
-        </span>
-      </label>
+        {% if identity.is_anchor %}
+        {# The provider that created the account identifies the user, and the #}
+        {# adapter refuses to disconnect it, so it is offered no button.      #}
+        <span class="badge text-bg-light border">{% trans "identifies you" %}</span>
+        {% elif identity.account_id %}
+        <form method="post" action="{% url 'socialaccount_connections' %}" class="m-0">
+          {% csrf_token %}
+          <input type="hidden" name="account" value="{{ identity.account_id }}">
+          <button class="btn btn-sm btn-outline-danger" type="submit">
+            {% trans "Disconnect" %}
+          </button>
+        </form>
+        {% else %}
+        {# The local account is removed by removing its password, not from here. #}
+        <a class="btn btn-sm btn-outline-secondary"
+           href="{% url 'account_change_password' %}">{% trans "Change password" %}</a>
+        {% endif %}
+      </li>
+      {% empty %}
+      <li class="list-group-item text-muted">
+        {% trans "You have no way of signing in to this account." %}
+      </li>
+      {% endfor %}
+    </ul>
+
+    <h2 class="h5 mt-4">{% trans "Add another way to sign in" %}</h2>
+    <p class="text-muted">
+      Connecting takes you straight to the provider and back; there is nothing
+      to prepare here first, and no address to register beforehand. The identity
+      is added to this profile as soon as you return.
+    </p>
+    {% unconnected_providers as providers %}
+    <div class="d-grid gap-2" style="max-width: 24rem">
+      {% for provider in providers %}
+      <a class="btn btn-outline-primary d-flex align-items-center justify-content-center gap-2"
+         href="{% provider_login_url provider.id process='connect' %}">
+        {% include "socialaccount/snippets/provider_icon.html" with provider_id=provider.id %}
+        {% blocktrans with provider=provider.name %}Connect {{ provider }}{% endblocktrans %}
+      </a>
+      {% endfor %}
+      {% if not user.has_usable_password %}
+      <a class="btn btn-outline-primary d-flex align-items-center justify-content-center gap-2"
+         href="{% url 'account_set_password' %}">
+        {% include "socialaccount/snippets/provider_icon.html" with provider_id="local" %}
+        {% trans "Set a password" %}
+      </a>
       {% endif %}
-    </li>
-    {% endwith %}
-    {% endfor %}
+      {% if not providers and user.has_usable_password %}
+      <p class="text-muted mb-0">
+        {% trans "Everything this site offers is already connected." %}
+      </p>
+      {% endif %}
+    </div>
 
-    {% if user.has_usable_password %}
-    <li class="list-group-item d-flex align-items-center gap-3">
-      <span class="flex-shrink-0" style="width: 1em"></span>
-      <span class="d-flex align-items-center gap-2">
-        <i class="fa fa-envelope fa-fw" aria-hidden="true"></i>
-        <span class="fw-semibold">{% trans "Email and password" %}</span>
-      </span>
-    </li>
+    {# Addresses are listed apart from the identities above: an account can #}
+    {# carry several of them, and they exist whether or not a password is    #}
+    {# set -- a provider hands one over when its account is connected.       #}
+    <h2 class="h5 mt-4">{% trans "Email addresses" %}</h2>
+    <ul class="list-group mb-2">
+      {% for address in user.emailaddress_set.all %}
+      <li class="list-group-item d-flex align-items-center gap-2">
+        <i class="fa fa-envelope fa-fw identity-icon text-muted" aria-hidden="true"></i>
+        <span>{{ address.email }}</span>
+        {% if address.primary %}
+        <span class="badge text-bg-secondary">{% trans "primary" %}</span>
+        {% endif %}
+        {% if address.verified %}
+        <span class="badge text-bg-success">{% trans "verified" %}</span>
+        {% else %}
+        <span class="badge text-bg-warning">{% trans "unverified" %}</span>
+        {% endif %}
+      </li>
+      {% empty %}
+      <li class="list-group-item text-muted">
+        {% trans "No email address is on file for this account." %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% if not user.has_verified_email %}
+    <div class="alert alert-warning d-flex align-items-start" role="status">
+      <i class="fa fa-exclamation-triangle fa-fw me-2 mt-1" aria-hidden="true"></i>
+      <div>
+        <strong>{% trans "No confirmed email address." %}</strong>
+        ORCID does not always pass one on, and without a confirmed address there
+        is no way to recover this account and no password sign-in. Connecting an
+        identity above confirms the address that provider vouches for, or you
+        can add one yourself.
+      </div>
+    </div>
     {% endif %}
-  </ul>
 
-  {% if form.accounts %}
-  <button class="btn btn-outline-danger" type="submit">{% trans "Disconnect" %}</button>
-  {% else %}
-  <p>{% trans "You currently have no third-party account connected to this profile." %}</p>
-  {% endif %}
-</form>
+    <p>
+      <a href="{% url 'account_email' %}">{% trans "Add or remove email addresses" %}</a>
+      — {% trans "the primary address receives password resets and notifications." %}
+    </p>
 
-{# Addresses are listed separately from the identities above: an account can #}
-{# carry several of them, and they exist whether or not a password is set --  #}
-{# a provider hands one over when its account is connected.                   #}
-<h2 class="h5 mt-4">{% trans "Email addresses" %}</h2>
-<ul class="list-group mb-2">
-  {% for address in user.emailaddress_set.all %}
-  <li class="list-group-item d-flex align-items-center gap-2">
-    <i class="fa fa-envelope fa-fw text-muted" aria-hidden="true"></i>
-    <span>{{ address.email }}</span>
-    {% if address.primary %}
-    <span class="badge text-bg-secondary">{% trans "primary" %}</span>
-    {% endif %}
-    {% if address.verified %}
-    <span class="badge text-bg-success">{% trans "verified" %}</span>
-    {% else %}
-    <span class="badge text-bg-warning">{% trans "unverified" %}</span>
-    {% endif %}
-  </li>
-  {% empty %}
-  <li class="list-group-item text-muted">
-    {% trans "No email address is on file for this account." %}
-  </li>
-  {% endfor %}
-</ul>
-{% if not user.has_verified_email %}
-<div class="alert alert-warning d-flex align-items-start" role="status">
-  <i class="fa fa-exclamation-triangle fa-fw me-2 mt-1" aria-hidden="true"></i>
-  <div>
-    <strong>{% trans "No confirmed email address." %}</strong>
-    ORCID does not always pass one on, and without a confirmed address there is
-    no way to recover this account, no password sign-in, and no Google sign-in —
-    a Google account is recognised by its address. Adding one takes a moment.
+    {% endblock inner %}
   </div>
 </div>
-{% endif %}
-
-<p>
-  <a href="{% url 'account_email' %}">{% trans "Add or remove email addresses" %}</a>
-  — {% trans "the primary address receives password resets and notifications." %}
-</p>
-
-<h2 class="h5 mt-4">{% trans "Connect another account" %}</h2>
-{% get_providers as socialaccount_providers %}
-<div class="d-grid gap-2" style="max-width: 24rem">
-  {% for provider in socialaccount_providers %}
-  <a class="btn btn-outline-primary d-flex align-items-center justify-content-center gap-2"
-     href="{% provider_login_url provider.id process='connect' %}">
-    {% include "socialaccount/snippets/provider_icon.html" with provider_id=provider.id %}
-    {% blocktrans with provider=provider.name %}Connect {{ provider }}{% endblocktrans %}
-  </a>
-  {% endfor %}
-</div>
-
-<p class="mt-4">
-  <a href="/">&laquo; {% trans "Back to contact.engineering" %}</a>
-</p>
-{% endblock %}
+{% endblock content %}

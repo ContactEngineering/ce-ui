@@ -97,6 +97,21 @@ def test_an_unverified_address_is_not_stored(researcher):
 
 
 @pytest.mark.django_db
+def test_an_unconfirmed_address_of_this_account_is_confirmed(researcher):
+    """
+    The provider has just vouched for it, which is what the confirmation mail
+    would have established. Leaving it unconfirmed would keep the account
+    without a verified address -- and so without password sign-in or recovery
+    -- for an address whose ownership is no longer in doubt.
+    """
+    EmailAddress.objects.create(
+        user=researcher, email="researcher@gmail.com", verified=False, primary=True
+    )
+    connect_google(researcher, email="researcher@gmail.com")
+    assert _addresses(researcher) == {("researcher@gmail.com", True)}
+
+
+@pytest.mark.django_db
 def test_an_address_held_by_another_account_is_not_taken(researcher):
     """
     Addresses are unique across accounts, and taking one would hand over the

@@ -122,7 +122,68 @@ def test_connections_page_lists_a_connected_orcid(client, local_user):
     client.force_login(local_user)
     response = client.get(reverse("socialaccount_connections"))
     assert response.status_code == 200
-    assert "Your ORCID iD is connected" in response.content.decode()
+    html = response.content.decode()
+    # The iD itself is the row, rather than a banner announcing it
+    assert "0000-0002-1825-0097" in html
+    assert "No ORCID iD connected" not in html
+
+
+def test_connections_page_offers_a_way_back_to_the_site(client, local_user):
+    """
+    The account pages sit outside the Vue app, which draws the breadcrumb bar
+    for everything else, so they render their own from the same tabs.
+    """
+    client.force_login(local_user)
+    html = client.get(reverse("socialaccount_connections")).content.decode()
+    assert reverse("ce_ui:select") in html
+    assert "Connected identities" in html
+
+
+def test_each_identity_carries_its_own_disconnect_action(
+    client, local_user, google_socialapp
+):
+    """
+    One button per row rather than django-allauth's pick-a-radio-then-submit.
+    """
+    google = SocialAccount.objects.create(
+        user=local_user, provider="google", uid="12345"
+    )
+    client.force_login(local_user)
+    html = client.get(reverse("socialaccount_connections")).content.decode()
+    assert f'name="account" value="{google.id}"' in html
+
+    client.post(
+        reverse("socialaccount_connections"), {"account": google.id}, follow=True
+    )
+    assert not local_user.socialaccount_set.filter(provider="google").exists()
+
+
+def test_a_password_that_cannot_be_used_yet_says_so(client, local_user, settings):
+    """
+    Under mandatory verification a password is refused until an address is
+    confirmed, so listing it without a word would name a way in that is not one.
+    """
+    settings.ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+    connect_orcid(local_user)
+    client.force_login(local_user)
+    html = client.get(reverse("socialaccount_connections")).content.decode()
+    assert "Not usable until an email address" in html
+
+    EmailAddress.objects.create(
+        user=local_user, email="local-user@example.com", verified=True, primary=True
+    )
+    html = client.get(reverse("socialaccount_connections")).content.decode()
+    assert "Not usable until an email address" not in html
+
+
+def test_an_already_connected_provider_is_not_offered_again(
+    client, local_user, google_socialapp, orcid_socialapp
+):
+    SocialAccount.objects.create(user=local_user, provider="google", uid="12345")
+    client.force_login(local_user)
+    html = client.get(reverse("socialaccount_connections")).content.decode()
+    assert "Connect ORCID" in html
+    assert "Connect Google" not in html
 
 
 def test_orcid_can_be_added_to_a_local_account(local_user):

@@ -26,35 +26,59 @@ Connecting a provider also records any address it has already verified, so a
 Google account brings its address with it and no confirmation mail is needed.
 django-allauth does this when a provider *creates* an account but leaves it
 undone when one is connected, so ``ce_ui.users.signals`` fills the gap. An
-address is skipped if any account already holds it — addresses are unique
-(``ACCOUNT_UNIQUE_EMAIL``), and taking one would hand over its sign-in.
+address another account holds is left alone — addresses are unique
+(``ACCOUNT_UNIQUE_EMAIL``), and taking one would hand over its sign-in. One
+this account already holds unconfirmed is confirmed instead: the provider has
+just vouched for it, which is what the confirmation mail would have
+established.
 
 The ORCID account itself cannot be disconnected — it is what the account *is*.
 Everything else can be removed again, as long as one way of signing back in
 remains.
 
-How Google finds the right account
-..................................
+Connecting Google
+.................
 
-Because Google cannot create an account, a Google sign-in has to find one that
-already exists. It is matched by email address: if a confirmed address on some
-account equals the address Google reports — and Google has verified that
-address itself — the sign-in lands on that account, and the Google account is
-connected to it so that later sign-ins are recognised directly. Otherwise the
-sign-in is refused.
+Connecting is its own act, and it runs through Google. From *Connected
+identities* the *Connect Google* button hands the browser to Google's consent
+screen (``process=connect``) and the Google account is attached to the profile
+on the way back. Nothing has to be prepared here first — no address registered,
+no confirmation mail — and the Google mark appears in the list immediately.
+Whatever address Google has verified is recorded at the same time, see above.
 
-Two conditions, both deliberate. The address has to be verified *by Google*,
-which is what makes it evidence of ownership. And it has to be confirmed *here*
-as well: django-allauth would otherwise settle for an address somebody had
-merely claimed without confirming, which would hand them the sign-in of the
-person who really owns it. ``SocialAccountAdapter.authenticate_by_email``
-enforces the second condition; the first is django-allauth's own.
+How a Google *sign-in* finds an account
+.......................................
+
+Signing in is the other direction, and it is where an address comes in. A
+Google account that has been connected is recognised by its own identifier, so
+the address plays no part. One that has never been connected has to find an
+account some other way, since Google cannot create one: it is matched by email
+address, and on a match the Google account is connected, so this happens at
+most once per person.
+
+The match has two conditions, both deliberate. The address has to be verified
+*by Google*, which is what makes it evidence of ownership. And it has to be
+confirmed *here* as well: django-allauth would otherwise settle for an address
+somebody had merely claimed without confirming — or for the bare ``User.email``
+field, which nothing ever confirmed — and hand them the sign-in of the person
+who really owns it. ``SocialAccountAdapter.can_authenticate_by_email`` adds the
+second condition to django-allauth's own first one.
+
+.. warning::
+
+   That hook is the one django-allauth consults from
+   ``SocialLogin._lookup_by_email``. An earlier version of this code overrode
+   an ``authenticate_by_email`` method that django-allauth never calls, and
+   failed silently and open: unconfirmed addresses matched while the tests --
+   which called the method directly -- passed. ``test_signup_policy``
+   therefore drives ``SocialLogin.lookup`` rather than the adapter method, so
+   a hook django-allauth stops calling shows up as a failing test.
 
 This is why an account with no confirmed email address is worth chasing: ORCID
-does not always pass one on, and without one there is no Google sign-in, no
-password sign-in, and no account recovery. The *Connected identities* page says
-so when it applies, and the email page warns before the last address is removed
-— which is allowed, since the ORCID account still signs the user in.
+does not always pass one on, and without one there is no password sign-in and
+no account recovery. The *Connected identities* page says so when it applies,
+and the email page warns before the last address is removed — which is allowed,
+since the ORCID account still signs the user in.
 
 .. note::
 

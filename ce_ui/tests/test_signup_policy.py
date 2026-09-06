@@ -56,9 +56,14 @@ def _social_login(provider, uid, email=None, verified=True):
     return sociallogin
 
 
-def _authenticate_by_email(provider, uid, email, verified=True):
+def _lookup_by_email(provider, uid, email, verified=True):
     """
-    Run the address match the way a real request would.
+    Run the address match the way a real sign-in does, and report what it found.
+
+    Drives `SocialLogin.lookup`, which is what the callback view calls, rather
+    than the adapter method it consults: the point of these tests is *that* the
+    policy is reached, and an adapter hook that django-allauth no longer calls
+    would pass every test written against it directly.
 
     The per-provider `EMAIL_AUTHENTICATION` setting is read off the resolved
     provider, which in turn needs both its `SocialApp` row and a request in
@@ -68,7 +73,8 @@ def _authenticate_by_email(provider, uid, email, verified=True):
     with context.request_context(request):
         sociallogin = _social_login(provider, uid, email=email, verified=verified)
         sociallogin.provider = get_social_adapter().get_provider(request, provider)
-        return SocialAccountAdapter().authenticate_by_email(sociallogin)
+        sociallogin.lookup()
+    return sociallogin.user if sociallogin.user.pk else None
 
 
 #
@@ -152,9 +158,9 @@ def test_google_matches_an_account_with_that_confirmed_address(researcher, googl
     EmailAddress.objects.create(
         user=researcher, email="researcher@example.org", verified=True, primary=True
     )
-    match = _authenticate_by_email("google", "12345", email="researcher@example.org")
-    assert match is not None
-    assert match[0] == researcher
+    assert _lookup_by_email("google", "12345", email="researcher@example.org") == (
+        researcher
+    )
 
 
 @pytest.mark.django_db
@@ -167,8 +173,7 @@ def test_google_does_not_match_an_unconfirmed_address(researcher, google_sociala
     EmailAddress.objects.create(
         user=researcher, email="researcher@example.org", verified=False, primary=True
     )
-    match = _authenticate_by_email("google", "12345", email="researcher@example.org")
-    assert match is None
+    assert _lookup_by_email("google", "12345", email="researcher@example.org") is None
 
 
 @pytest.mark.django_db
@@ -176,14 +181,17 @@ def test_google_does_not_match_when_the_provider_has_not_verified(researcher, go
     EmailAddress.objects.create(
         user=researcher, email="researcher@example.org", verified=True, primary=True
     )
-    match = _authenticate_by_email("google", "12345", email="researcher@example.org", verified=False)
-    assert match is None
+    assert (
+        _lookup_by_email(
+            "google", "12345", email="researcher@example.org", verified=False
+        )
+        is None
+    )
 
 
 @pytest.mark.django_db
 def test_google_matches_nothing_when_no_account_holds_the_address(researcher, google_socialapp):
-    match = _authenticate_by_email("google", "12345", email="nobody@example.org")
-    assert match is None
+    assert _lookup_by_email("google", "12345", email="nobody@example.org") is None
 
 
 #
@@ -202,3 +210,25 @@ def test_an_account_without_a_confirmed_address_is_warned(client, researcher):
     )
     html = client.get(reverse("socialaccount_connections")).content.decode()
     assert "No confirmed email address" not in html
+
+
+@pytest.mark.django_db
+def test_google_does_not_match_the_bare_user_email_field(researcher, google_socialapp):
+    """
+    django-allauth falls back to the `User.email` field when no `EmailAddress`
+    row matches. Nothing ever confirmed that field -- a provider or an admin
+    may simply have written it there -- so it must not hand over a sign-in.
+    """
+    researcher.email = "researcher@example.org"
+    researcher.save()
+    assert _lookup_by_email("google", "12345", email="researcher@example.org") is None
+
+
+@pytest.mark.django_db
+def test_a_connected_google_account_is_matched_by_its_uid(researcher, google_socialapp):
+    """
+    Once connected, the identity itself is what is recognised -- no address is
+    consulted, so a sign-in keeps working when the address changes or goes.
+    """
+    SocialAccount.objects.create(user=researcher, provider="google", uid="12345")
+    assert _lookup_by_email("google", "12345", email="nobody@example.org") == researcher
