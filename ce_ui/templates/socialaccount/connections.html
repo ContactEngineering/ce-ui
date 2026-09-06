@@ -105,14 +105,23 @@
         {% blocktrans with provider=provider.name %}Connect {{ provider }}{% endblocktrans %}
       </a>
       {% endfor %}
+      {# A password needs an address to go with it: it is half of an          #}
+      {# email-and-password sign-in, and a password reset is delivered to an   #}
+      {# address. Offered only once the account has one, so that setting a     #}
+      {# password cannot produce a credential with nothing to use it with.     #}
       {% if not user.has_usable_password %}
+      {% if user.emailaddress_set.exists %}
       <a class="btn btn-outline-primary d-flex align-items-center justify-content-center gap-2"
          href="{% url 'account_set_password' %}">
         {% include "socialaccount/snippets/provider_icon.html" with provider_id="local" %}
         {% trans "Set a password" %}
       </a>
+      {% else %}
+      <p class="text-muted mb-0">
+        {% trans "Add an email address below to be able to set a password." %}
+      </p>
       {% endif %}
-      {% if not providers and user.has_usable_password %}
+      {% elif not providers %}
       <p class="text-muted mb-0">
         {% trans "Everything this site offers is already connected." %}
       </p>

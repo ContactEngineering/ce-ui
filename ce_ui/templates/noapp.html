@@ -25,9 +25,22 @@
             display: none;
         }
 
+        /* One box of the same width for a provider mark, whether it is an
+           <img> or a FontAwesome glyph, so marks line up down a list and
+           across buttons. The box scales with the surrounding font size; no
+           mark sets a font-size of its own, which would scale the em box with
+           it and break the alignment. */
         .identity-icon {
             width: 1.25em;
+            flex: 0 0 auto;
             text-align: center;
+        }
+
+        /* Both axes, and `contain`: sizing only the width would leave the
+           image at its height attribute and stretch the artwork. */
+        img.identity-icon {
+            height: 1.25em;
+            object-fit: contain;
         }
     </style>
 {% endblock extra_css %}

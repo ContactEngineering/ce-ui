@@ -186,6 +186,32 @@ def test_an_already_connected_provider_is_not_offered_again(
     assert "Connect Google" not in html
 
 
+def test_setting_a_password_needs_an_address_to_go_with_it(client, db):
+    """
+    A password is half of an email-and-password sign-in, and a reset is
+    delivered to an address. An account with none -- which is how ORCID sign-up
+    can leave one -- is pointed at the email page first, so that setting a
+    password cannot produce a credential with nothing to use it with.
+    """
+    user = get_user_model().objects.create(username="no-address", name="No Address")
+    user.set_unusable_password()
+    user.save()
+    connect_orcid(user)
+    client.force_login(user)
+
+    html = client.get(reverse("socialaccount_connections")).content.decode()
+    assert "Set a password" not in html
+    assert "Add an email address below" in html
+
+    EmailAddress.objects.create(
+        user=user, email="someone@example.org", verified=False, primary=True
+    )
+    html = client.get(reverse("socialaccount_connections")).content.decode()
+    assert "Set a password" in html
+    assert reverse("account_set_password") in html
+    assert "Add an email address below" not in html
+
+
 def test_orcid_can_be_added_to_a_local_account(local_user):
     assert not local_user.has_orcid
     connect_orcid(local_user)

@@ -23,7 +23,7 @@
 <div class="d-grid gap-2 mb-4">
   {% for provider in socialaccount_providers %}
   {% if provider.id == "orcid" %}
-  <a class="btn btn-primary btn-lg d-flex align-items-center justify-content-center gap-2"
+  <a class="btn btn-primary d-flex align-items-center justify-content-center gap-2"
      href="{% provider_login_url provider.id process='login' %}">
     {% include "socialaccount/snippets/provider_icon.html" with provider_id=provider.id %}
     {% trans "Sign in or sign up with ORCID" %}
