@@ -4,7 +4,7 @@ import axios from "axios";
 import throttle from "lodash/throttle";
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 
-import { BButton, BDropdownDivider, BDropdownItem, BFormCheckbox, useToast } from "bootstrap-vue-next";
+import { BDropdownDivider, BDropdownItem, BFormCheckbox, useToast } from "bootstrap-vue-next";
 
 import { subjectsToBase64 } from "@/utils/api";
 import {
@@ -16,7 +16,7 @@ import {
     toCsvText,
     triggerBrowserDownload
 } from "@/utils/download";
-import { buildReferenceDataSources, REFERENCE_DATASETS } from "@/utils/referenceData";
+import { buildReferenceDataSources, REFERENCE_DATASETS, referenceSurfaceOptions, selectedReferenceKeys } from "@/utils/referenceData";
 
 import AnalysisCard from "@/components/analysis/AnalysisCard.vue";
 import BokehPlot from "@/components/ui/BokehPlot.vue";
@@ -73,9 +73,27 @@ const _plot = ref(null);
 const _dois = ref([]);
 const _messages = ref([]);
 
-// Reference data (fixed comparison curves, e.g. a consensus-study result)
+// Reference data (fixed comparison curves, e.g. a consensus-study result).
+// The user toggles each reference surface independently (none, one, or both
+// at once) and optionally adds IQR bands as a single shared toggle, rather
+// than checking each of the 2 surfaces' 3 curves (median, lower/upper IQR)
+// independently.
 const _availableReferenceDatasets = computed(() => REFERENCE_DATASETS[props.functionName] ?? []);
-const _selectedReferenceDatasetKeys = ref<string[]>([]);
+const _referenceSurfaces = computed(() => referenceSurfaceOptions(_availableReferenceDatasets.value));
+const _selectedReferenceSurfaceKeys = ref<string[]>([]);
+const _showReferenceIqr = ref(false);
+const _selectedReferenceDatasetKeys = computed<string[]>(() => selectedReferenceKeys(
+    _availableReferenceDatasets.value, _selectedReferenceSurfaceKeys.value, _showReferenceIqr.value));
+
+function toggleReferenceSurface(surfaceKey: string) {
+    const index = _selectedReferenceSurfaceKeys.value.indexOf(surfaceKey);
+    if (index === -1) {
+        _selectedReferenceSurfaceKeys.value = [..._selectedReferenceSurfaceKeys.value, surfaceKey];
+    } else {
+        _selectedReferenceSurfaceKeys.value = _selectedReferenceSurfaceKeys.value.filter(k => k !== surfaceKey);
+    }
+}
+
 // Collapsed by default: with several reference datasets registered for one
 // workflow, showing every checkbox unconditionally would clutter a card that
 // most views of it never need to compare against anything.
@@ -216,6 +234,15 @@ async function downloadData(fileFormat) {
                   @refreshButtonClicked="updateCard"
                   @someTasksFinished="updateCardThrottled">
         <template #dropdowns>
+            <template v-if="_availableReferenceDatasets.length > 0">
+                <BDropdownDivider></BDropdownDivider>
+                <!-- Tucked into the burger menu rather than a standalone button: few users
+                     need this, so it should not be a main control element on the card. -->
+                <BDropdownItem @click="_showReferenceDatasets = !_showReferenceDatasets">
+                    <i class="fa-solid fa-code-compare me-1"></i>
+                    {{ _showReferenceDatasets ? 'Hide reference data' : 'Compare to reference data' }}
+                </BDropdownItem>
+            </template>
             <template v-if="hasData">
                 <BDropdownDivider></BDropdownDivider>
                 <BDropdownItem @click="downloadData('txt')">
@@ -230,25 +257,26 @@ async function downloadData(fileFormat) {
                 </BDropdownItem>
             </template>
         </template>
-        <template v-if="_availableReferenceDatasets.length > 0">
-            <div class="d-flex">
-                <!-- Reference data toggle button, mirroring BokehPlot's "Plot options" button -->
-                <BButton @click="_showReferenceDatasets = !_showReferenceDatasets"
-                         variant="outline-secondary" size="sm" class="ms-auto shadow-none mb-2">
-                    <i class="fa-solid fa-code-compare me-1"></i>
-                    {{ _showReferenceDatasets ? 'Hide reference data' : 'Compare to reference data' }}
-                </BButton>
-            </div>
-            <div v-if="_showReferenceDatasets" class="bg-light p-3 rounded border mb-2 shadow-sm">
-                <BFormCheckbox v-for="dataset in _availableReferenceDatasets"
-                               :key="dataset.key"
-                               v-model="_selectedReferenceDatasetKeys"
-                               :value="dataset.key"
-                               inline>
-                    {{ dataset.label }}
+        <div v-if="_showReferenceDatasets && _availableReferenceDatasets.length > 0"
+             class="bg-light p-3 rounded border mb-2 shadow-sm">
+            <div class="small fw-bold text-secondary mb-1">Compare to STC consensus curve:</div>
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <span v-for="surface in _referenceSurfaces"
+                      :key="surface.key"
+                      class="badge rounded-pill cursor-pointer border user-select-none py-1 px-2"
+                      :class="_selectedReferenceSurfaceKeys.includes(surface.key)
+                          ? 'bg-primary text-white border-primary'
+                          : 'bg-light text-dark border-secondary-subtle opacity-75'"
+                      @click="toggleReferenceSurface(surface.key)">
+                    {{ surface.label }}
+                </span>
+                <BFormCheckbox v-if="_selectedReferenceSurfaceKeys.length > 0"
+                               v-model="_showReferenceIqr"
+                               class="ms-2">
+                    Show IQR range
                 </BFormCheckbox>
             </div>
-        </template>
+        </div>
         <BokehPlot ref="_plot"
                    v-model:nbPendingAjaxRequests="_nbPendingAjaxRequests"
                    :categories="_categories"

@@ -1,9 +1,15 @@
 import {describe, expect, it} from "vitest";
 
-import {buildReferenceDataSources} from "@/utils/referenceData";
+import {
+    buildReferenceDataSources,
+    REFERENCE_DATASETS,
+    referenceSurfaceOptions,
+    selectedReferenceKeys,
+} from "@/utils/referenceData";
 
 const PSD_FUNCTION = "topobank_statistics.power_spectral_density";
 const RMS_HEIGHT_FUNCTION = "topobank_statistics.variable_bandwidth";
+const PSD_DATASETS = REFERENCE_DATASETS[PSD_FUNCTION];
 
 describe("buildReferenceDataSources", () => {
     it("returns nothing for a workflow with no registered reference data", () => {
@@ -108,5 +114,55 @@ describe("buildReferenceDataSources", () => {
             ["rms-rough-median"], RMS_HEIGHT_FUNCTION, [], "Bandwidth (nm)", "RMS height (nm)");
         expect(source.xScaleFactor).toBeCloseTo(1e9);
         expect(source.yScaleFactor).toBeCloseTo(1e9);
+    });
+});
+
+describe("referenceSurfaceOptions", () => {
+    it("lists one option per surface, not per curve", () => {
+        expect(referenceSurfaceOptions(PSD_DATASETS)).toEqual([
+            {key: "rough", label: "Rougher"},
+            {key: "smooth", label: "Smoother"},
+        ]);
+    });
+
+    it("returns nothing for a workflow with no reference datasets", () => {
+        expect(referenceSurfaceOptions([])).toEqual([]);
+    });
+});
+
+describe("selectedReferenceKeys", () => {
+    it("selects nothing when no surface is chosen", () => {
+        expect(selectedReferenceKeys(PSD_DATASETS, [], false)).toEqual([]);
+        expect(selectedReferenceKeys(PSD_DATASETS, [], true)).toEqual([]);
+    });
+
+    it("selects only the median curve for a chosen surface when IQR is off", () => {
+        expect(selectedReferenceKeys(PSD_DATASETS, ["rough"], false)).toEqual(["psd-rough-median"]);
+    });
+
+    it("adds both IQR bounds (but not the other surface) when IQR is on", () => {
+        const keys = selectedReferenceKeys(PSD_DATASETS, ["rough"], true);
+        expect(keys).toContain("psd-rough-median");
+        expect(keys).toContain("psd-rough-lower-quartile");
+        expect(keys).toContain("psd-rough-upper-quartile");
+        expect(keys).not.toContain("psd-smooth-median");
+        expect(keys).toHaveLength(3);
+    });
+
+    it("selects only the chosen surface's curves when just the other surface is picked", () => {
+        expect(selectedReferenceKeys(PSD_DATASETS, ["smooth"], true)).toEqual(
+            expect.arrayContaining(["psd-smooth-median", "psd-smooth-lower-quartile", "psd-smooth-upper-quartile"]));
+        expect(selectedReferenceKeys(PSD_DATASETS, ["smooth"], true)).toHaveLength(3);
+    });
+
+    it("selects both surfaces at once when both are chosen", () => {
+        const keys = selectedReferenceKeys(PSD_DATASETS, ["rough", "smooth"], false);
+        expect(keys).toEqual(expect.arrayContaining(["psd-rough-median", "psd-smooth-median"]));
+        expect(keys).toHaveLength(2);
+    });
+
+    it("adds IQR bounds for both surfaces when both are chosen and IQR is on", () => {
+        const keys = selectedReferenceKeys(PSD_DATASETS, ["rough", "smooth"], true);
+        expect(keys).toHaveLength(6);
     });
 });

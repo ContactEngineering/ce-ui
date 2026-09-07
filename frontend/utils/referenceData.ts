@@ -57,6 +57,16 @@ export interface ReferenceDataset {
      */
     color: string;
     dash: string;
+    /**
+     * Which of the two reference surfaces this curve belongs to, and its
+     * short chip label (e.g. "rough"/"Rougher"). Lets `SeriesCard` offer one
+     * toggle chip per surface instead of one checkbox per curve.
+     */
+    surfaceKey: string;
+    surfaceLabel: string;
+    /** Which STC quartile curve this is, so the UI can group median vs. IQR
+     *  bounds without parsing `key` or `label` strings. */
+    quartile: Quartile;
 }
 
 // The reference curves should read as a callback to Figure 9 of the STC
@@ -64,7 +74,7 @@ export interface ReferenceDataset {
 const ROUGH_COLOR = "#808080";
 const SMOOTH_COLOR = "#D9A521";
 
-type Quartile = "median" | "lower-quartile" | "upper-quartile";
+export type Quartile = "median" | "lower-quartile" | "upper-quartile";
 
 const QUARTILE_LABEL: { [key in Quartile]: string } = {
     "median": "median",
@@ -95,9 +105,9 @@ const QUARTILE_DASH: { [key in Quartile]: string } = {
 function stcConsensusDatasets(
     keyPrefix: string, urlFolder: string, xExponent: number, yExponent: number
 ): ReferenceDataset[] {
-    const surfaces: { key: string, subject: string, color: string, file: string }[] = [
-        {key: "rough", subject: "STC consensus (rough surface)", color: ROUGH_COLOR, file: "rougher_surface"},
-        {key: "smooth", subject: "STC consensus (smooth surface)", color: SMOOTH_COLOR, file: "smoother_surface"},
+    const surfaces: { key: string, subject: string, chipLabel: string, color: string, file: string }[] = [
+        {key: "rough", subject: "STC consensus (rough surface)", chipLabel: "Rougher", color: ROUGH_COLOR, file: "rougher_surface"},
+        {key: "smooth", subject: "STC consensus (smooth surface)", chipLabel: "Smoother", color: SMOOTH_COLOR, file: "smoother_surface"},
     ];
     const quartiles: Quartile[] = ["median", "lower-quartile", "upper-quartile"];
 
@@ -114,6 +124,9 @@ function stcConsensusDatasets(
                 yExponent,
                 color: surface.color,
                 dash: QUARTILE_DASH[quartile],
+                surfaceKey: surface.key,
+                surfaceLabel: surface.chipLabel,
+                quartile,
             });
         }
     }
@@ -132,6 +145,49 @@ export const REFERENCE_DATASETS: { [functionName: string]: ReferenceDataset[] } 
     "topobank_statistics.power_spectral_density": stcConsensusDatasets("psd", "psd", -1, 3),
     "topobank_statistics.variable_bandwidth": stcConsensusDatasets("rms", "rms_height", 1, 1),
 };
+
+export interface ReferenceSurfaceOption {
+    key: string;
+    label: string;
+}
+
+/**
+ * The distinct reference surfaces offered by a list of datasets (e.g. one
+ * entry each for "rough" and "smooth"), in the order they first appear, for
+ * `SeriesCard`'s surface picker. Each surface bundles its median and IQR
+ * curves; the picker toggles each surface independently (any combination of
+ * none, one, or both may be selected at once) rather than checking each of
+ * its 3 curves separately.
+ */
+export function referenceSurfaceOptions(datasets: ReferenceDataset[]): ReferenceSurfaceOption[] {
+    const seen = new Set<string>();
+    const surfaces: ReferenceSurfaceOption[] = [];
+    for (const dataset of datasets) {
+        if (!seen.has(dataset.surfaceKey)) {
+            seen.add(dataset.surfaceKey);
+            surfaces.push({key: dataset.surfaceKey, label: dataset.surfaceLabel});
+        }
+    }
+    return surfaces;
+}
+
+/**
+ * The dataset keys to plot for a given surface-picker selection: each
+ * selected surface's median curve, plus (if `showIqr`) its lower/upper IQR
+ * bounds. A surface not in `surfaceKeys` contributes nothing.
+ */
+export function selectedReferenceKeys(
+    datasets: ReferenceDataset[],
+    surfaceKeys: string[],
+    showIqr: boolean,
+): string[] {
+    if (surfaceKeys.length === 0) {
+        return [];
+    }
+    return datasets
+        .filter(dataset => surfaceKeys.includes(dataset.surfaceKey) && (dataset.quartile === "median" || showIqr))
+        .map(dataset => dataset.key);
+}
 
 /**
  * The index a data source should use for a category, reusing the index of an
