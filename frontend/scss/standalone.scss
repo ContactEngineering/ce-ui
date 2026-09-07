@@ -1,0 +1,25 @@
+// Stylesheet entry for the server-rendered Django pages.
+//
+// `ce_ui/templates/base.html` links the result of compiling this file, so that
+// the pages outside the Vue app -- sign-in, connected identities, the whole
+// account section -- wear the same theme as the app rather than stock
+// Bootstrap. Built by `npm run build-css`; see package.json.
+//
+// The imports below deliberately omit the `.css` extension, the opposite of
+// `custom.scss`. Sass passes an import ending in `.css` through as a plain CSS
+// `@import`, which in a standalone stylesheet would leave a bare package
+// specifier no browser can resolve; without the extension Sass inlines the
+// rules instead. The font URLs inside them stay relative (`../webfonts/...`,
+// `./files/...`), which is why `build-css` copies the font directories to
+// where those paths land next to the compiled file.
+@import "theme";
+
+@import "@fortawesome/fontawesome-free/css/all.min";
+
+// Self-hosted IBM Plex (latin subset only; no external CDN)
+@import "@fontsource/ibm-plex-sans/latin-400";
+@import "@fontsource/ibm-plex-sans/latin-500";
+@import "@fontsource/ibm-plex-sans/latin-600";
+@import "@fontsource/ibm-plex-sans/latin-700";
+@import "@fontsource/ibm-plex-mono/latin-400";
+@import "@fontsource/ibm-plex-mono/latin-500";

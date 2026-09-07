@@ -1,0 +1,649 @@
+// ============================================================================
+//  Topobank theme — Bootstrap 5.3 default overrides (tokens).
+//
+//  Compiled twice, and the two results have to match: into the Vue bundle via
+//  `custom.scss`, and into `ce_ui/static/css/theme.css` via `standalone.scss`
+//  (the `build-css` script), which is what the server-rendered Django pages
+//  load. This file holds everything the two share -- the tokens, Bootstrap
+//  itself and the custom rules below. The icon font and the web fonts are left
+//  to the two entry files, because webpack and the `sass` CLI have to import
+//  them differently; see the comments there.
+//
+//  The whole restyle is driven from these variables (set *before* Bootstrap is
+//  imported) so almost no bespoke CSS is needed: Bootstrap and bootstrap-vue-next
+//  regenerate every component, utility and `--bs-*` custom property from them.
+//
+//  Palette: Ridgway (1912) "Color Standards and Color Nomenclature" — a fitting
+//  early-scientific color vocabulary for a surface-metrology instrument.
+//  Note: functions (shade-color(), etc.) are not available this early, so any
+//  derived shades below are written as literal hex.
+// ============================================================================
+
+// -- Brand combination (Sanzo Wada, "A Dictionary of Color Combinations") -----
+$ce-navy:  #12354e; // Dark Tyrian Blue — brand / chrome / text (12.8:1 on white)
+$ce-amber: #f99d1b; // Yellow Orange    — accent / attention
+
+// -- Map onto Bootstrap's semantic theme colors ------------------------------
+//  The chosen pair is navy + amber (high contrast, sober, well suited to a
+//  scientific UI). It has no green/red/neutral, so $success, $danger, $info and
+//  $secondary are *derived* to stay legible and conventional — each ≥ AA for
+//  white text when used as a button background.
+$primary:   $ce-navy;
+$dark:      $ce-navy;
+$warning:   $ce-amber;
+$info:      #1c6e8c; // derived lighter teal-blue, distinct from the navy primary
+$success:   #2e7d46; // derived green
+$danger:    #c0392b; // derived clean red (the pair has no red; kept for UX)
+$secondary: #5c6670; // derived cool neutral grey
+
+// -- Cool, near-white canvas (suits navy far better than a warm cream) --------
+$body-bg:      #fbfcfd; // cool near-white
+$body-color:   #1a2530; // cool near-black, from the navy
+$light:        #eef2f5; // cool light surface
+$border-color: #dbe1e6; // cool hairline
+
+// -- Shape: a touch softer than stock, still precise -------------------------
+$border-radius:    .5rem;
+$border-radius-sm: .375rem;
+$border-radius-lg: .75rem;
+$border-radius-xl: 1rem;
+
+// Buttons crisper (less rounded) than the base — a precise, technical feel
+$btn-border-radius:    .2rem;
+$btn-border-radius-sm: .15rem;
+$btn-border-radius-lg: .25rem;
+
+// -- Typography: IBM Plex (self-hosted via @fontsource, imported below), ------
+//  an engineered-but-humanist family that suits a measurement instrument.
+//  Falls back to the native system stack if the web font hasn't loaded.
+$font-family-sans-serif: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+$font-family-monospace: "IBM Plex Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo,
+    Consolas, "Liberation Mono", monospace;
+$headings-font-weight: 600;
+$headings-line-height:  1.25;
+
+// -- Links: color-led, underline only on hover (a modern, calmer default) ----
+$link-decoration:       none;
+$link-hover-decoration: underline;
+
+// Two toolchains compile this file and they have to agree on every import:
+// webpack's sass-loader, which builds the Vue bundle, and the plain `sass` CLI,
+// which builds `ce_ui/static/css/theme.css` for the server-rendered pages (see
+// `build-css` in package.json). Hence no `~` prefix -- webpack-only syntax,
+// deprecated in sass-loader -- and no `.css` extension: Sass passes an import
+// ending in `.css` straight through as a plain CSS `@import` rather than
+// inlining it, which would leave the standalone stylesheet pointing at bare
+// package specifiers that no browser can resolve. Without the extension the
+// same files are inlined, and their relative `url()`s are what `build-css`
+// copies the font files into place for.
+@import "bootstrap/scss/bootstrap";
+
+
+// Then add additional custom code here
+
+.alert-debug {
+    color: black;
+    background-color: white;
+    border-color: #d6e9c6;
+}
+
+.alert-error {
+    color: #b94a48;
+    background-color: #f2dede;
+    border-color: #eed3d7;
+}
+
+.spinner {
+    width: 20px;
+    height: 20px;
+    background-color: #333;
+    position: relative;
+    float: left;
+
+    border-radius: 100%;
+    -webkit-animation: sk-scaleout 1.0s infinite ease-in-out;
+    animation: sk-scaleout 1.0s infinite ease-in-out;
+}
+
+@-webkit-keyframes sk-scaleout {
+    0% {
+        -webkit-transform: scale(0)
+    }
+    100% {
+        -webkit-transform: scale(1.0);
+        opacity: 0;
+    }
+}
+
+@keyframes sk-scaleout {
+    0% {
+        -webkit-transform: scale(0);
+        transform: scale(0);
+    }
+    100% {
+        -webkit-transform: scale(1.0);
+        transform: scale(1.0);
+        opacity: 0;
+    }
+}
+
+input.checkbox-color:checked + span:after {
+    background: currentColor;
+    border: currentColor;
+}
+
+input.checkbox-color:checked + span:before {
+    background: currentColor;
+    border: currentColor;
+}
+
+input.checkbox-color-design:checked + span:after {
+    background: black;
+}
+
+.surface-summary-plot {
+    height: 400px;
+    text-align: left; /** this is only needed in surface detail, don't know why */
+}
+
+.surface-summary-plot .light-label text.text-line {
+    font-size: large;
+}
+
+.welcome-page-statistics {
+    font-size: xx-large;
+}
+
+.shared-by-badge, .published-by-badge {
+    font-size: small;
+}
+
+.btn:active {
+    box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+}
+
+.btn {
+    white-space: normal; /** we want the text in buttons wrap if the windows is made smaller, issue 272 */
+}
+
+.highlight {
+    background-color: yellow;
+}
+
+/** Improve layout of notifications a bit */
+div.live_notify_list {
+    /** inline-size: min-content; */
+    overflow-wrap: break-word;
+    overflow-inline: auto;
+    width: 600px;
+}
+
+/**
+  Settings for task table
+*/
+
+.task-table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+td.ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/** Thanks to user Christina on SO, see https://stackoverflow.com/a/25859829/10608001 */
+@media (min-width: 992px) {
+    .modal-xl {
+        width: 90%;
+        max-width: 1200px;
+    }
+}
+
+/** Checkboxes in analyses plot */
+.topobank-subject-checkbox div.bk-input-group {
+    overflow: hidden;
+    text-overflow: ellipsis; /** this does not work here, don't know why */
+}
+
+.topobank-surface-checkbox div.bk-input-group span {
+    font-weight: bold;
+}
+
+/** bokeh's "primary" color should be same as bootstrap's */
+div.bk-btn-group button.bk-btn-primary {
+    background-color: $primary;
+    border-color: $primary;
+}
+
+div.bk-btn-group button.bk-btn-primary:hover {
+    background-color: $primary;
+    border-color: $primary;
+}
+
+/** Extra (dynamic) tabs */
+.nav-tabs {
+    z-index: 1000;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    /* Reserves the band the app frame covers: it pins its navbar and
+       breadcrumbs with `.fixed-top` (components/layout/AppFrame.vue), which
+       takes them out of flow, so without this the page would start underneath
+       them. Pages rendered by Django alone keep their chrome in normal flow
+       and set this back to zero; see `noapp.html`. */
+    padding-top: 105px;
+    display: flex;
+    flex-direction: column;
+}
+
+/** Animate search bar */
+#global-search {
+    width: 162px;
+    -webkit-transition: width 0.4s ease-in-out;
+    transition: width 0.4s ease-in-out;
+}
+
+/** When the input field gets focus, change width of search bar to 100% */
+#global-search:focus-within {
+    width: 100%;
+}
+
+#global-search-input {
+    border-radius: 5px 0px 0px 5px; /* left side should be round */
+}
+
+/** larger font in basket elements */
+.basket-element {
+    font-size: medium;
+}
+
+
+/** showing topographies */
+.carousel-inner img {
+    margin: auto;
+}
+
+.carousel-caption {
+    position: relative;
+    left: 0;
+    top: 0;
+}
+
+/** improve readability of terms document */
+section[title="Terms and Conditions"] div.toc-container, #tc-terms-html {
+    width: 65%;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-font-smoothing: antialiased !important;
+    text-rendering: optimizelegibility !important;
+    letter-spacing: .03em;
+}
+
+/** improve bandwidth plot */
+.bandwidth-hover-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.bandwidth-hover-box img {
+    float: right;
+    margin: 0px 15px 0px 0px;
+}
+
+.bandwidth-hover-box span {
+    font-size: large;
+}
+
+/** Vertical navigation (the <BTabs pills vertical class="nav-pills-custom">).
+ *  All selectors are qualified with `.nav-pills` so they only style this
+ *  vertical pills nav — NOT other navs nested in the tab content (e.g. the
+ *  `.nav-tabs` inside a TopographyUpdateCard), which previously inherited the
+ *  full-width pill look and an extra bottom margin. */
+
+.nav-pills-custom .nav-pills .nav-item {
+    margin-bottom: 0.5rem;
+}
+
+.nav-pills-custom .nav-pills.nav-fill {
+    width: 15rem;
+}
+
+.nav-pills-custom .nav-pills .nav-link {
+    width: 100%;
+    background: $white;
+    position: relative;
+    border: 1px solid $primary-border-subtle;
+}
+
+.nav-pills-custom .nav-pills .nav-link.active {
+    background: $primary;
+    border: 1px solid $primary;
+}
+
+/* Add indicator arrow for the active tab */
+@media (min-width: 992px) {
+    .nav-pills-custom .nav-pills .nav-link::before {
+        content: '';
+        display: block;
+        border-top: 8px solid transparent;
+        border-left: 10px solid $primary;
+        border-bottom: 8px solid transparent;
+        position: absolute;
+        top: 50%;
+        right: -8px;
+        transform: translateY(-50%);
+        opacity: 0;
+    }
+}
+
+.nav-pills-custom .nav-pills .nav-link.active::before {
+    opacity: 1;
+}
+
+/* lined tabs */
+
+.lined-tabs .nav-link {
+    border: none;
+    border-bottom: 3px solid transparent;
+}
+
+.lined-tabs .nav-link:hover {
+    border: none;
+    border-bottom: 3px solid transparent;
+}
+
+.lined-tabs .nav-link.active {
+    background: none;
+    color: $body-color;
+    border-color: $primary;
+}
+
+.bk-root {
+    font-size: 1rem !important;
+}
+
+.bk-btn {
+    font-size: 1rem !important;
+}
+
+.bk-tab {
+    font-size: 1rem !important;
+}
+
+
+/** Container for deep zoom images */
+
+.dzi-container {
+    display: flex;
+    align-items: stretch;
+    flex-direction: row;
+}
+
+.dzi-view {
+    float: left;
+    width: calc(100% - 1em);
+    aspect-ratio: 4 / 3;
+}
+
+.dzi-colorbar {
+    width: 8em;
+    margin-left: 5px;
+    float: right;
+}
+
+
+/** Color bars for deep zoom image views */
+
+.dzi-colorbar-column {
+    margin-left: 5px;
+    width: 20px;
+    height: 300px;
+    float: left;
+    position: relative;
+}
+
+.background-viridis {
+    background: linear-gradient(to top, #440154, #48186a, #472d7b, #424086, #3b528b, #33638d, #2c728e, #26818e, #21908c, #1f9f88, #28ae80, #3ebc74, #5dc963, #82d34c, #abdc32, #d5e21a, #fde725);
+}
+
+.dzi-colorbar-tick {
+    background: black;
+    height: 1px;
+    width: 5px;
+    right: 0px;
+    position: absolute;
+    transform: translateY(-50%);
+}
+
+.dzi-colorbar-text {
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    transform: translateY(-50%);
+}
+
+.dzi-colorbar-title {
+    align-content: center;
+}
+
+.dot {
+    width: 1em;
+    height: 1em;
+    background-color: #333;
+    position: relative;
+    float: left;
+    border-radius: 100%;
+    top: 0.3em; /* to center the dot, there is probably a better way to do this */
+    margin-right: 0.5em;
+}
+
+/*!
+ * Start Bootstrap - SB Admin 2 v5.0.0 (https://startbootstrap.com/template-overviews/sb-admin-2)
+ * Copyright 2013-2018 Start Bootstrap
+ * Licensed under MIT (https://github.com/BlackrockDigital/startbootstrap-sb-admin/blob/master/LICENSE)
+ */
+
+html {
+    //position: relative;
+    min-height: 100%;
+}
+
+body {
+    height: 100%;
+}
+
+#wrapper {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    flex: 1 0 auto;
+}
+
+#wrapper #content-wrapper {
+    overflow-x: hidden;
+    width: 100%;
+    padding-top: 1rem;
+    padding-bottom: 80px;
+}
+
+.scroll-to-top {
+    position: fixed;
+    right: 15px;
+    bottom: 15px;
+    display: none;
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    color: #fff;
+    background: rgba(52, 58, 64, 0.5);
+    line-height: 46px;
+}
+
+.scroll-to-top:focus, .scroll-to-top:hover {
+    color: white;
+}
+
+.scroll-to-top:hover {
+    background: #343a40;
+}
+
+.scroll-to-top i {
+    font-weight: 800;
+}
+
+.smaller {
+    font-size: 0.7rem;
+}
+
+.o-hidden {
+    overflow: hidden !important;
+}
+
+.navbar-nav .form-inline .input-group {
+    width: 100%;
+}
+
+.navbar-nav .nav-item.active .nav-link {
+    color: $primary;
+}
+
+.navbar-nav .nav-item.dropdown .dropdown-toggle::after {
+    width: 1rem;
+    text-align: center;
+    float: right;
+    vertical-align: 0;
+    border: 0;
+    font-weight: 900;
+    content: '\f105';
+    font-family: 'Font Awesome 5 Free';
+}
+
+.navbar-nav .nav-item.dropdown.show .dropdown-toggle::after {
+    content: '\f107';
+}
+
+.navbar-nav .nav-item.dropdown.no-arrow .dropdown-toggle::after {
+    display: none;
+}
+
+.navbar-nav .nav-item .nav-link:focus {
+    outline: none;
+}
+
+.navbar-nav .nav-item .nav-link .badge {
+    position: absolute;
+    margin-left: 0.75rem;
+    top: 0.3rem;
+    font-weight: 400;
+    font-size: 0.7rem;
+}
+
+@media (min-width: 768px) {
+    .navbar-nav .form-inline .input-group {
+        width: auto;
+    }
+}
+
+.card-body-icon {
+    position: absolute;
+    z-index: 0;
+    top: -1.25rem;
+    right: -1rem;
+    opacity: 0.4;
+    font-size: 5rem;
+    -webkit-transform: rotate(15deg);
+    transform: rotate(15deg);
+}
+
+footer.sticky-footer {
+    height: 80px;
+    background-color: $body-bg; // match the warm canvas instead of stark white
+    border-top: 1px solid $border-color; // hairline keeps the bar defined
+}
+
+footer.sticky-footer .copyright {
+    line-height: 1;
+    font-size: 0.8rem;
+}
+
+@media (min-width: 768px) {
+    footer.sticky-footer {
+        /* width: calc(100% - 225px); use this with sidebar */
+        width: 100%;
+    }
+}
+
+.btn-default {
+    color: $dark;
+    background-color: $white;
+    border-color: $secondary-border-subtle;
+}
+
+.drop-zone {
+    border: dashed 1px $secondary;
+    width: 100%;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+    text-align: center;
+}
+
+.drop-zone-active {
+    background-color: $light;
+}
+
+/* Remove up/down arrows on numeric input fields.
+   From: https://www.w3schools.com/howto/howto_css_hide_arrow_number.asp
+ */
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+
+/* Fix width of the unit selection box */
+.unit-select {
+    max-width: 5rem;
+}
+
+/* Hide fancytree loading indicator */
+.fancytree-statusnode-loading {
+    display: none;
+}
+
+.opacity-container {
+  position: relative;
+}
+
+.opacity-container:hover .image {
+  opacity: 0.3;
+}
+
+.opacity-container:hover .middle {
+  opacity: 1;
+}
+
+.middle {
+  transition: .5s ease;
+  opacity: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  text-align: center;
+}
