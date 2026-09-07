@@ -15,6 +15,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from topobank_rest_api.views import entry_points
 
 from . import robots, views
+from .users import views as users_views
 from .users.decorators import require_orcid_for_routes
 
 app_name = "ce_ui"
@@ -122,6 +123,17 @@ urlpatterns = [
     #
     # Allauth
     #
+    # Shadows allauth's own route, which must therefore stay below this one:
+    # the addresses are managed from the connected identities page, so this
+    # keeps allauth's POST handling and drops its page. Same URL and same name,
+    # so `reverse("account_email")` and every allauth link still work.
+    path("accounts/email/", users_views.EmailView.as_view(), name="account_email"),
+    # django-allauth sets and changes a password but cannot remove one.
+    path(
+        "accounts/password/remove/",
+        users_views.RemovePasswordView.as_view(),
+        name="account_remove_password",
+    ),
     path("accounts/", include("allauth.urls")),
     #
     # Django Admin, use {% url 'admin:index' %}

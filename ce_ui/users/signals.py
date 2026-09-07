@@ -25,7 +25,7 @@ def store_verified_provider_addresses(request, sociallogin, **kwargs):
     Record the addresses a newly connected provider has verified itself.
 
     Only verified ones: an address the provider has not confirmed is a claim,
-    not evidence, and confirming it is what the email management page is for.
+    not evidence; confirming it is what the connected identities page is for.
 
     An address held by *another* account is left alone -- addresses are unique
     across accounts (`ACCOUNT_UNIQUE_EMAIL`), and taking one would hand over

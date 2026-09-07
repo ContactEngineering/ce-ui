@@ -4,7 +4,8 @@ from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from django.conf import settings
 from django.core.exceptions import ValidationError
 
-from .identity import (can_sign_in_locally, is_anchor_provider, provider_name,
+from .identity import (can_sign_in_locally, is_anchor_provider,
+                       leaves_a_way_in, provider_name, provider_of_email,
                        signup_providers)
 
 # Re-exported: `signup_providers` used to live here, and the template tag and
@@ -24,6 +25,35 @@ class AccountAdapter(DefaultAccountAdapter):
         Google.
         """
         return getattr(settings, "ACCOUNT_ALLOW_SIGNUP", True)
+
+    def can_delete_email(self, email_address):
+        """
+        Whether this address may be removed from its account.
+
+        django-allauth's own rules first: it keeps the primary address while
+        others remain, and keeps the last one when signing in depends on it.
+
+        On top of that, two rules of this site's own. An address a connected
+        provider vouches for stays for as long as that provider is connected:
+        it is how the provider's sign-in finds this account -- a Google sign-in
+        is matched by address -- so removing it would quietly break a way in
+        that the page above still lists as working. Disconnecting the provider
+        first releases it.
+
+        And the last address of an account that signs in with a password and
+        nothing else stays, because allauth's own guard for that case only
+        fires when email is the sole login method, which it is not here; see
+        `leaves_a_way_in`.
+
+        Consulted by `allauth.account.internal.flows.manage_email.delete_email`,
+        so the rule holds for anything that removes an address, not only for
+        the button on the connected identities page.
+        """
+        if not super().can_delete_email(email_address):
+            return False
+        if provider_of_email(email_address.user, email_address.email) is not None:
+            return False
+        return leaves_a_way_in(email_address.user, without_email=email_address)
 
     def save_user(self, request, user, form, commit=True):
         """

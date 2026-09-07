@@ -77,8 +77,46 @@ second condition to django-allauth's own first one.
 This is why an account with no confirmed email address is worth chasing: ORCID
 does not always pass one on, and without one there is no password sign-in and
 no account recovery. The *Connected identities* page says so when it applies,
-and the email page warns before the last address is removed — which is allowed,
-since the ORCID account still signs the user in.
+and warns before the last address is removed — which is allowed, since the
+ORCID account still signs the user in.
+
+Managing the addresses
+......................
+
+Addresses are listed on *Connected identities*, beside the providers they
+arrive with, and there is no separate page for them: ``/accounts/email/``
+redirects there. Adding one is a modal, removing one a button on its row. Both
+post to ``ce_ui.users.views.EmailView``, which is django-allauth's own view
+with its page taken away, so the validation, the confirmation mail, the
+notification mails and the rules on what may be removed are all still allauth's.
+
+The password
+............
+
+A password is managed in its own section at the foot of the page, not among the
+providers: it is not one of them, and it is the one credential here that the
+providers cannot see. Whatever second factor ORCID or Google enforces does not
+cover a password sign-in, so the section says so plainly — an account with a
+password is only as well protected as that password and the mailbox a reset
+would reach.
+
+It can therefore be taken off again, which django-allauth has no view for:
+``ce_ui.users.views.RemovePasswordView`` does it, refusing (like disconnecting a
+provider) when it would take away the last way in, and sending the same kind of
+notification mail that setting or changing one does. Setting a password is
+offered only once an address is on file, since a password with no address can
+neither be used under mandatory verification nor reset.
+
+Two rules decide whether an address may go. django-allauth keeps the primary
+address while another one exists — hand primary over first, which is what the
+*Make primary* action on the other rows is for. On top of that,
+``AccountAdapter.can_delete_email`` keeps an address that a connected provider
+vouches for: a Google sign-in finds this account *by* that address, so removing
+it would quietly break a way in that the page still lists as working. The row
+says *from Google* and offers no *Remove*; disconnecting Google releases it.
+Nothing links an address to the account that supplied it, so
+``identity.provider_of_email`` reads the addresses back out of what each
+provider stored.
 
 .. note::
 

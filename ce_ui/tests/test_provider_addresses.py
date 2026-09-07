@@ -145,13 +145,13 @@ def test_the_only_address_is_flagged_before_it_is_removed(client, researcher):
         user=researcher, email="only@example.org", verified=True, primary=True
     )
     client.force_login(researcher)
-    html = client.get(reverse("account_email")).content.decode()
+    html = client.get(reverse("socialaccount_connections")).content.decode()
     assert "This is your only email address" in html
 
     EmailAddress.objects.create(
         user=researcher, email="second@example.org", verified=False, primary=False
     )
-    html = client.get(reverse("account_email")).content.decode()
+    html = client.get(reverse("socialaccount_connections")).content.decode()
     assert "This is your only email address" not in html
 
 

@@ -7,7 +7,8 @@ from django.urls import resolve
 from django.utils.translation import gettext_lazy as _
 from topobank.authorization import get_anonymous_user
 
-from .identity import connected_identities, has_orcid, has_verified_email
+from .identity import (can_remove_password, connected_identities,
+                       email_addresses, has_orcid, has_verified_email)
 
 _ANONYMOUS_USER_UNSET = object()
 
@@ -134,6 +135,26 @@ class User(AbstractUser):
         See `ce_ui.users.identity.connected_identities`.
         """
         return connected_identities(self)
+
+    @property
+    def email_addresses(self) -> list:
+        """
+        The addresses on this account, with what the UI has to show for each.
+
+        See `ce_ui.users.identity.email_addresses`. Richer than
+        `emailaddress_set`: it also says which provider vouches for an address
+        and whether it may be removed.
+        """
+        return email_addresses(self)
+
+    @property
+    def can_remove_password(self) -> bool:
+        """
+        Whether the password may be taken off this account.
+
+        See `ce_ui.users.identity.can_remove_password`.
+        """
+        return can_remove_password(self)
 
     @property
     def is_anonymous(self):

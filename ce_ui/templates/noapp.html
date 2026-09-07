@@ -116,6 +116,25 @@
         {% block crumbs %}{% endblock crumbs %}
     </ul>
 
+    {% comment %}
+    Whatever the last action had to say. The app frame shows these as toasts;
+    these pages had nowhere to put them, so a refused removal or a rejected
+    address used to fail silently. `error` is Django's level tag and `danger`
+    is Bootstrap's name for it; the rest line up.
+    {% endcomment %}
+    {% if messages %}
+        <div class="container-fluid mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{% if message.level_tag == 'error' %}danger{% else %}{{ message.level_tag|default:'info' }}{% endif %} alert-dismissible fade show"
+                     role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"
+                            aria-label="{% trans 'Close' %}"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
     {# A `row` outside a container hangs its negative margins off the page. #}
     <div class="container-fluid mt-3">
         {% block content %}{% endblock content %}

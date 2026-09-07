@@ -107,7 +107,6 @@ def test_connections_page_lists_every_email_address(client, local_user):
 
     assert "primary@example.com" in html
     assert "secondary@example.com" in html
-    assert reverse("account_email") in html
 
 
 def test_the_old_email_route_still_lands_on_the_email_page(client, local_user):
@@ -190,7 +189,7 @@ def test_setting_a_password_needs_an_address_to_go_with_it(client, db):
     """
     A password is half of an email-and-password sign-in, and a reset is
     delivered to an address. An account with none -- which is how ORCID sign-up
-    can leave one -- is pointed at the email page first, so that setting a
+    can leave one -- is pointed at the address list first, so that setting a
     password cannot produce a credential with nothing to use it with.
     """
     user = get_user_model().objects.create(username="no-address", name="No Address")
@@ -201,7 +200,7 @@ def test_setting_a_password_needs_an_address_to_go_with_it(client, db):
 
     html = client.get(reverse("socialaccount_connections")).content.decode()
     assert "Set a password" not in html
-    assert "Add an email address below" in html
+    assert "Add an email address above" in html
 
     EmailAddress.objects.create(
         user=user, email="someone@example.org", verified=False, primary=True
@@ -209,7 +208,7 @@ def test_setting_a_password_needs_an_address_to_go_with_it(client, db):
     html = client.get(reverse("socialaccount_connections")).content.decode()
     assert "Set a password" in html
     assert reverse("account_set_password") in html
-    assert "Add an email address below" not in html
+    assert "Add an email address above" not in html
 
 
 def test_orcid_can_be_added_to_a_local_account(local_user):

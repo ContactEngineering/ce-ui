@@ -149,6 +149,58 @@ def can_sign_in_locally(user):
     return has_verified_email(user)
 
 
+def can_remove_password(user):
+    """
+    Whether the password may be taken off this account.
+
+    Only while something else still signs the user in. Every account here is
+    anchored by the provider that created it (see `signup_providers`), so in
+    practice there always is -- but an account with a password and nothing else
+    would be locked out for good, and the rule should not depend on a setting
+    somewhere else staying the way it is.
+    """
+    if user is None or not getattr(user, "is_authenticated", False):
+        return False
+    if not user.has_usable_password():
+        return False
+    return bool(_social_accounts(user))
+
+
+def leaves_a_way_in(user, without_email=None):
+    """
+    Whether `user` could still sign in once `without_email` is gone.
+
+    django-allauth guards the last address only when email is the *only* login
+    method (`LOGIN_METHODS == {"email"}`). This site also accepts a username,
+    so that guard never fires here, and an account whose password is its only
+    way in could delete the address that password depends on -- after which it
+    can neither be signed in to (mandatory verification refuses an account with
+    no confirmed address) nor recovered (no address for a reset to reach).
+
+    Mirrors what the login actually accepts, so it stays true to the rule it is
+    protecting rather than to a summary of it.
+    """
+    if _social_accounts(user):
+        return True
+    if not user.has_usable_password():
+        return False
+    if (
+        account_settings.EMAIL_VERIFICATION
+        != account_settings.EmailVerificationMethod.MANDATORY
+    ):
+        # Username and password is enough; no address has to survive.
+        return True
+
+    try:
+        from allauth.account.models import EmailAddress
+    except ImportError:
+        return False
+    remaining = EmailAddress.objects.filter(user_id=user.pk, verified=True)
+    if without_email is not None and without_email.pk:
+        remaining = remaining.exclude(pk=without_email.pk)
+    return remaining.exists()
+
+
 def _identity_label(account):
     """
     What to show next to a social identity: whatever names it to a human.
@@ -224,6 +276,89 @@ def connected_identities(user):
         )
 
     return identities
+
+
+def provider_of_email(user, email):
+    """
+    The connected provider that vouches for `email`, or `None`.
+
+    An address a provider handed over is how its sign-in finds this account
+    (see `docs/authentication.rst`), so it has to stay for as long as the
+    provider is connected. Nothing links an address row to the account that
+    supplied it, so the answer is read back out of what each provider stored.
+    """
+    if not email:
+        return None
+    wanted = email.lower()
+
+    for account in _social_accounts(user):
+        for candidate in _emails_from(account):
+            if candidate.lower() == wanted:
+                return account.provider
+    return None
+
+
+def _emails_from(account):
+    """Every address a `SocialAccount` carries in its stored provider data."""
+    extra_data = account.extra_data if isinstance(account.extra_data, dict) else {}
+
+    # The provider knows how to read its own payload, which is worth more than
+    # guessing at key names -- but it is only reachable when its app is still
+    # installed and configured, and it wants a request in scope.
+    try:
+        provider = account.get_provider()
+        addresses = provider.extract_email_addresses(extra_data)
+    except Exception:  # noqa: BLE001 -- any provider/registry problem
+        addresses = []
+    emails = [address.email for address in addresses if address.email]
+
+    # Fall back to the conventional key, which is where Google and ORCID put it.
+    candidate = extra_data.get("email")
+    if not emails and isinstance(candidate, str):
+        emails = [candidate]
+    return emails
+
+
+def email_addresses(user):
+    """
+    Every address on the account, with what the page has to show for each.
+
+    Returns dictionaries with `email`, `verified`, `primary`, `provider` (the
+    id of a connected provider that vouches for the address, else `None`),
+    `provider_name` and `removable`.
+
+    `removable` comes from django-allauth's own `can_delete_email`, which this
+    site extends in `AccountAdapter`, so the button appears exactly when the
+    removal would be allowed rather than on a rule of the template's own.
+    """
+    if user is None or not getattr(user, "is_authenticated", False):
+        return []
+    if not getattr(user, "pk", None):
+        return []
+
+    try:
+        from allauth.account.adapter import get_adapter
+        from allauth.account.models import EmailAddress
+    except ImportError:
+        return []
+
+    adapter = get_adapter()
+    addresses = []
+    for address in EmailAddress.objects.filter(user_id=user.pk).order_by(
+        "-primary", "email"
+    ):
+        provider = provider_of_email(user, address.email)
+        addresses.append(
+            {
+                "email": address.email,
+                "verified": address.verified,
+                "primary": address.primary,
+                "provider": provider,
+                "provider_name": provider_name(provider) if provider else None,
+                "removable": adapter.can_delete_email(address),
+            }
+        )
+    return addresses
 
 
 def can_publish(user):

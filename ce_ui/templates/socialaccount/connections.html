@@ -78,11 +78,9 @@
             {% trans "Disconnect" %}
           </button>
         </form>
-        {% else %}
-        {# The local account is removed by removing its password, not from here. #}
-        <a class="btn btn-sm btn-outline-secondary"
-           href="{% url 'account_change_password' %}">{% trans "Change password" %}</a>
         {% endif %}
+        {# The local account has no button here: setting, changing and removing #}
+        {# a password all live in their own section at the foot of the page.    #}
       </li>
       {% empty %}
       <li class="list-group-item text-muted">
@@ -91,13 +89,14 @@
       {% endfor %}
     </ul>
 
+    {% unconnected_providers as providers %}
+    {% if providers %}
     <h2 class="h5 mt-4">{% trans "Add another way to sign in" %}</h2>
     <p class="text-muted">
       Connecting takes you straight to the provider and back; there is nothing
       to prepare here first, and no address to register beforehand. The identity
       is added to this profile as soon as you return.
     </p>
-    {% unconnected_providers as providers %}
     <div class="d-grid gap-2" style="max-width: 24rem">
       {% for provider in providers %}
       <a class="btn btn-outline-primary d-flex align-items-center justify-content-center gap-2"
@@ -106,45 +105,80 @@
         {% blocktrans with provider=provider.name %}Connect {{ provider }}{% endblocktrans %}
       </a>
       {% endfor %}
-      {# A password needs an address to go with it: it is half of an          #}
-      {# email-and-password sign-in, and a password reset is delivered to an   #}
-      {# address. Offered only once the account has one, so that setting a     #}
-      {# password cannot produce a credential with nothing to use it with.     #}
-      {% if not user.has_usable_password %}
-      {% if user.emailaddress_set.exists %}
-      <a class="btn btn-outline-primary d-flex align-items-center justify-content-center gap-2"
-         href="{% url 'account_set_password' %}">
-        {% include "socialaccount/snippets/provider_icon.html" with provider_id="local" %}
-        {% trans "Set a password" %}
-      </a>
-      {% else %}
-      <p class="text-muted mb-0">
-        {% trans "Add an email address below to be able to set a password." %}
-      </p>
-      {% endif %}
-      {% elif not providers %}
-      <p class="text-muted mb-0">
-        {% trans "Everything this site offers is already connected." %}
-      </p>
-      {% endif %}
     </div>
+    {% endif %}
 
     {# Addresses are listed apart from the identities above: an account can #}
     {# carry several of them, and they exist whether or not a password is    #}
     {# set -- a provider hands one over when its account is connected.       #}
-    <h2 class="h5 mt-4">{% trans "Email addresses" %}</h2>
-    <ul class="list-group mb-2">
-      {% for address in user.emailaddress_set.all %}
+    <div class="d-flex align-items-center justify-content-between mt-4 mb-2">
+      <h2 class="h5 mb-0">{% trans "Email addresses" %}</h2>
+      <button type="button" class="btn btn-sm btn-outline-primary"
+              data-bs-toggle="modal" data-bs-target="#add-email">
+        <i class="fa fa-plus" aria-hidden="true"></i>
+        {% trans "Add address" %}
+      </button>
+    </div>
+    <p class="text-muted">
+      The primary address receives password resets and notifications. Every
+      confirmed address can be used to sign in.
+    </p>
+
+    {# Each action posts on its own, as the identity rows do. The field names #}
+    {# are django-allauth's -- the form goes to its view, which validates,    #}
+    {# sends the confirmation and notification mail and applies the rules on  #}
+    {# what may be removed.                                                   #}
+    {% with addresses=user.email_addresses %}
+    <ul class="list-group identity-list mb-2">
+      {% for address in addresses %}
       <li class="list-group-item d-flex align-items-center gap-2">
         <i class="fa fa-envelope fa-fw identity-icon text-muted" aria-hidden="true"></i>
-        <span>{{ address.email }}</span>
-        {% if address.primary %}
-        <span class="badge text-bg-secondary">{% trans "primary" %}</span>
+        <span class="flex-grow-1">
+          {{ address.email }}
+          {% if address.primary %}
+          <span class="badge text-bg-secondary ms-1">{% trans "primary" %}</span>
+          {% endif %}
+          {% if address.verified %}
+          <span class="badge text-bg-success ms-1">{% trans "verified" %}</span>
+          {% else %}
+          <span class="badge text-bg-warning ms-1">{% trans "unverified" %}</span>
+          {% endif %}
+          {% if address.provider %}
+          {# Removing it would break that provider's sign-in, which finds this #}
+          {# account by address; see `AccountAdapter.can_delete_email`.        #}
+          <span class="badge text-bg-light border ms-1">
+            {% blocktrans with provider=address.provider_name %}from {{ provider }}{% endblocktrans %}
+          </span>
+          {% endif %}
+        </span>
+
+        {% if not address.verified %}
+        <form method="post" action="{% url 'account_email' %}" class="m-0">
+          {% csrf_token %}
+          <input type="hidden" name="email" value="{{ address.email }}">
+          <button class="btn btn-sm btn-link text-decoration-none" type="submit"
+                  name="action_send">{% trans "Resend confirmation" %}</button>
+        </form>
         {% endif %}
-        {% if address.verified %}
-        <span class="badge text-bg-success">{% trans "verified" %}</span>
-        {% else %}
-        <span class="badge text-bg-warning">{% trans "unverified" %}</span>
+
+        {% if not address.primary and address.verified %}
+        {# The primary address cannot be removed while another one exists, so #}
+        {# without this there would be no way to ever remove it.              #}
+        <form method="post" action="{% url 'account_email' %}" class="m-0">
+          {% csrf_token %}
+          <input type="hidden" name="email" value="{{ address.email }}">
+          <button class="btn btn-sm btn-link text-decoration-none" type="submit"
+                  name="action_primary">{% trans "Make primary" %}</button>
+        </form>
+        {% endif %}
+
+        {% if address.removable %}
+        <form method="post" action="{% url 'account_email' %}" class="m-0">
+          {% csrf_token %}
+          <input type="hidden" name="email" value="{{ address.email }}">
+          <button class="btn btn-sm btn-outline-danger" type="submit"
+                  name="action_remove">{% trans "Remove" %}</button>
+        </form>
         {% endif %}
       </li>
       {% empty %}
@@ -161,15 +195,115 @@
         ORCID does not always pass one on, and without a confirmed address there
         is no way to recover this account and no password sign-in. Connecting an
         identity above confirms the address that provider vouches for, or you
-        can add one yourself.
+        can add one here.
+      </div>
+    </div>
+    {% elif addresses|length == 1 and addresses.0.removable %}
+    {# Removing it is allowed -- the ORCID account still signs the user in -- #}
+    {# but it takes password sign-in and account recovery with it, which is   #}
+    {# not obvious from a button labelled "Remove".                           #}
+    <div class="alert alert-warning d-flex align-items-start" role="status">
+      <i class="fa fa-exclamation-triangle fa-fw me-2 mt-1" aria-hidden="true"></i>
+      <div>
+        <strong>{% trans "This is your only email address." %}</strong>
+        Removing it does not lock you out — you can still sign in with the
+        account that identifies you — but until you add another one there is no
+        way to recover your account and no sign-in with a password.
       </div>
     </div>
     {% endif %}
+    {% endwith %}
 
-    <p>
-      <a href="{% url 'account_email' %}">{% trans "Add or remove email addresses" %}</a>
-      — {% trans "the primary address receives password resets and notifications." %}
+    <h2 class="h5 mt-4">{% trans "Password authentication" %}</h2>
+    <div class="alert alert-warning d-flex align-items-start" role="status">
+      <i class="fa fa-exclamation-triangle fa-fw me-2 mt-1" aria-hidden="true"></i>
+      <div>
+        <strong>{% trans "A password goes around your providers' protection." %}</strong>
+        ORCID and Google can both require a second factor when you sign in with
+        them. A password here is a way into this account that they never see, so
+        while one is set, that protection no longer covers this account — it is
+        then only as strong as the password and the mailbox a reset would go to.
+        Set one only if you need to sign in without a provider, and choose it
+        with care.
+      </div>
+    </div>
+
+    {% if user.has_usable_password %}
+    <div class="d-flex flex-wrap gap-2">
+      <a class="btn btn-outline-primary d-flex align-items-center gap-2"
+         href="{% url 'account_change_password' %}">
+        {% include "socialaccount/snippets/provider_icon.html" with provider_id="local" %}
+        {% trans "Change password" %}
+      </a>
+      {% if user.can_remove_password %}
+      {# The counterpart to disconnecting a provider: it takes a way in away, #}
+      {# so it posts, and the view refuses if it would take the last one.     #}
+      <form method="post" action="{% url 'account_remove_password' %}" class="m-0">
+        {% csrf_token %}
+        <button class="btn btn-outline-danger" type="submit">
+          {% trans "Remove password" %}
+        </button>
+      </form>
+      {% endif %}
+    </div>
+    {% if user.can_remove_password %}
+    <p class="text-muted mt-2 mb-0">
+      {% trans "Removing it leaves the accounts above, which is the safer arrangement: you keep whatever protection they are set up with." %}
     </p>
+    {% endif %}
+    {% else %}
+    {# A password needs an address to go with it: it is half of an           #}
+    {# email-and-password sign-in, and a reset is delivered to an address.   #}
+    {# Offered only once the account has one, so that setting a password     #}
+    {# cannot produce a credential with nothing to use it with.              #}
+    {% if user.emailaddress_set.exists %}
+    <a class="btn btn-outline-primary d-flex align-items-center gap-2"
+       style="max-width: 24rem"
+       href="{% url 'account_set_password' %}">
+      {% include "socialaccount/snippets/provider_icon.html" with provider_id="local" %}
+      {% trans "Set a password" %}
+    </a>
+    {% else %}
+    <p class="text-muted mb-0">
+      {% trans "Add an email address above to be able to set a password." %}
+    </p>
+    {% endif %}
+    {% endif %}
+
+    {# The modal is the whole of adding an address: one field, and the #}
+    {# confirmation mail does the rest.                                #}
+    <div class="modal fade" id="add-email" tabindex="-1"
+         aria-labelledby="add-email-title" aria-hidden="true">
+      <div class="modal-dialog">
+        <form class="modal-content" method="post" action="{% url 'account_email' %}">
+          {% csrf_token %}
+          <div class="modal-header">
+            <h3 class="modal-title h5" id="add-email-title">
+              {% trans "Add an email address" %}
+            </h3>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    aria-label="{% trans 'Close' %}"></button>
+          </div>
+          <div class="modal-body">
+            <label class="form-label" for="add-email-input">
+              {% trans "Email address" %}
+            </label>
+            <input class="form-control" type="email" name="email" id="add-email-input"
+                   autocomplete="email" required>
+            <div class="form-text">
+              {% trans "We send a confirmation link there. The address can be used to sign in once it is confirmed." %}
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+            <button type="submit" name="action_add" class="btn btn-primary">
+              {% trans "Add address" %}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
 
     {% endblock inner %}
   </div>
