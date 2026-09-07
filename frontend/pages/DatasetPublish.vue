@@ -2,7 +2,7 @@
 
 import { inject, ref } from "vue";
 
-import { useToast } from "bootstrap-vue-next";
+import {useToast} from "@/composables/toast";
 
 import axios from "axios";
 import PublishStage1 from "@/components/publish/PublishStage1.vue";

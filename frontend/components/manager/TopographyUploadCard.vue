@@ -8,9 +8,9 @@ import {
     BButton,
     BButtonGroup,
     BCard,
-    BProgress,
-    useToast
-} from 'bootstrap-vue-next';
+    BProgress
+} from "bootstrap-vue-next";
+import {useToast} from "@/composables/toast";
 
 import {uploadFile} from "@/utils/upload";
 

@@ -12,9 +12,9 @@ import {
     BInputGroup,
     BListGroup,
     BOverlay,
-    BPagination,
-    useToast
+    BPagination
 } from "bootstrap-vue-next";
+import {useToast} from "@/composables/toast";
 
 import {useDatasetSelectionStore} from "@/stores/datasetSelection";
 

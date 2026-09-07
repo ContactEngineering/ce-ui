@@ -4,7 +4,8 @@ import axios from "axios";
 import throttle from "lodash/throttle";
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 
-import { BDropdownDivider, BDropdownItem, useToast } from "bootstrap-vue-next";
+import {BDropdownDivider, BDropdownItem} from "bootstrap-vue-next";
+import {useToast} from "@/composables/toast";
 
 import DataTable from "datatables.net-vue3";
 import DataTablesLib from "datatables.net-bs5";

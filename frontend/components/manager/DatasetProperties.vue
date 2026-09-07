@@ -14,9 +14,9 @@ import {
     BTd,
     BTh,
     BThead,
-    BTr,
-    useToast
-} from 'bootstrap-vue-next';
+    BTr
+} from "bootstrap-vue-next";
+import {useToast} from "@/composables/toast";
 
 import Toolbar from "@/components/ui/Toolbar.vue";
 

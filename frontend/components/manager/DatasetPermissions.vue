@@ -7,9 +7,9 @@ import {
     BAlert,
     BButton,
     BButtonGroup,
-    BSpinner,
-    useToast
-} from 'bootstrap-vue-next';
+    BSpinner
+} from "bootstrap-vue-next";
+import {useToast} from "@/composables/toast";
 
 import SearchUserModal from "@/components/ui/SearchUserModal.vue";
 import PermissionRow from "@/components/manager/PermissionRow.vue";

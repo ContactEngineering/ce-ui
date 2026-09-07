@@ -3,7 +3,8 @@
 import axios from "axios";
 import { inject, ref } from "vue";
 
-import { BBadge, useToast } from "bootstrap-vue-next";
+import {BBadge} from "bootstrap-vue-next";
+import {useToast} from "@/composables/toast";
 
 const toast = useToast();
 const appProps = inject("appProps");

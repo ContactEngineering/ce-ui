@@ -24,7 +24,8 @@ function cachedGet(url) {
 
 import {computed, ref, watch} from "vue";
 
-import {BButton, useToast} from "bootstrap-vue-next";
+import {BButton} from "bootstrap-vue-next";
+import {useToast} from "@/composables/toast";
 
 import {formatDateTime, formatDuration, prettyBytes} from "@/utils/formatting";
 

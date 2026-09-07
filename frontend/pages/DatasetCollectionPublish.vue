@@ -8,9 +8,9 @@ import {
     BAlert,
     BFormInput,
     BFormTextarea,
-    BSpinner,
-    useToast
-} from 'bootstrap-vue-next';
+    BSpinner
+} from "bootstrap-vue-next";
+import {useToast} from "@/composables/toast";
 
 const appProps = inject("appProps") as any;
 const datasets = ref<any[]>([]);

@@ -2,7 +2,8 @@
 
 import axios from "axios";
 import {onMounted, ref} from "vue";
-import {BForm, BFormSelect, BPlaceholder, useToast} from "bootstrap-vue-next";
+import {BForm, BFormSelect, BPlaceholder} from "bootstrap-vue-next";
+import {useToast} from "@/composables/toast";
 
 const toast = useToast();
 

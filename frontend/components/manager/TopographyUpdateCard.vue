@@ -15,9 +15,9 @@ import {
     BModal,
     BNav,
     BNavItem,
-    BSpinner,
-    useToast
-} from 'bootstrap-vue-next';
+    BSpinner
+} from "bootstrap-vue-next";
+import {useToast} from "@/composables/toast";
 
 import {subjectsToBase64} from "@/utils/api";
 import {describeDetrend, filterTopographyForPatchRequest} from "@/utils/topography";

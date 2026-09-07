@@ -2,7 +2,8 @@
 import { ref, watchEffect } from "vue";
 import axios from "axios";
 
-import { BBadge, BPagination, useToast } from "bootstrap-vue-next";
+import {BBadge, BPagination} from "bootstrap-vue-next";
+import {useToast} from "@/composables/toast";
 
 const toast = useToast();
 const props = defineProps({

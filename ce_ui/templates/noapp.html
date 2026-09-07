@@ -11,6 +11,23 @@
             padding-top: 0;
         }
 
+        /* The countdown on a toast, matching the progress bar the app's own
+           toasts draw. Bootstrap pauses autohide while the pointer is over a
+           toast, so the bar pauses with it. */
+        .ce-toast-countdown {
+            width: 100%;
+            animation: ce-toast-countdown var(--ce-toast-delay, 6000ms) linear forwards;
+        }
+
+        .toast:hover .ce-toast-countdown {
+            animation-play-state: paused;
+        }
+
+        @keyframes ce-toast-countdown {
+            from { width: 100%; }
+            to   { width: 0%; }
+        }
+
         /* The breadcrumb bar reuses the theme's `.lined-tabs`, the same rules
            the app's own bar uses; these two are all it needs on top. */
         .breadcrumb-separator {
@@ -122,22 +139,59 @@
     </ul>
 
     {% comment %}
-    Whatever the last action had to say. The app frame shows these as toasts;
-    these pages had nowhere to put them, so a refused removal or a rejected
-    address used to fail silently. `error` is Django's level tag and `danger`
-    is Bootstrap's name for it; the rest line up.
+    Whatever the last action had to say, as a toast in the top-right corner --
+    the same corner, markup, colours, countdown and timing the app uses, so a
+    notice does not change character depending on which half of the site raised
+    it. The app raises these through bootstrap-vue-next (see
+    `frontend/composables/toast.ts`, which holds the durations mirrored here);
+    these pages do not load that bundle, so they use Bootstrap's own toast --
+    the component bootstrap-vue-next renders anyway -- and reproduce its markup.
+
+    `error` is Django's level tag where Bootstrap says `danger`; `debug` has no
+    colour of its own and reads as ordinary information.
     {% endcomment %}
     {% if messages %}
-        <div class="container-fluid mt-3">
+        <div class="top-0 end-0 toast-container position-fixed p-3"
+             style="width: calc(var(--bs-toast-max-width, 350px) + var(--bs-toast-padding-x, 1rem) * 2);">
             {% for message in messages %}
-                <div class="alert alert-{% if message.level_tag == 'error' %}danger{% else %}{{ message.level_tag|default:'info' }}{% endif %} alert-dismissible fade show"
-                     role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"
-                            aria-label="{% trans 'Close' %}"></button>
+                <div class="toast text-bg-{% if message.level_tag == 'error' %}danger{% elif message.level_tag == 'debug' %}info{% else %}{{ message.level_tag|default:'info' }}{% endif %}"
+                     role="alert" aria-live="assertive" aria-atomic="true"
+                     data-ce-delay="{% if message.level_tag == 'error' or message.level_tag == 'warning' %}12000{% else %}6000{% endif %}"
+                     style="--ce-toast-delay: {% if message.level_tag == 'error' or message.level_tag == 'warning' %}12000{% else %}6000{% endif %}ms">
+                    <div class="toast-header">
+                        <strong>
+                            {% if message.level_tag == 'error' %}{% trans "Error" %}
+                            {% elif message.level_tag == 'warning' %}{% trans "Warning" %}
+                            {% elif message.level_tag == 'success' %}{% trans "Success" %}
+                            {% else %}{% trans "Information" %}{% endif %}
+                        </strong>
+                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="toast"
+                                aria-label="{% trans 'Close' %}"></button>
+                    </div>
+                    <div class="d-flex">
+                        <div class="toast-body">{{ message }}</div>
+                    </div>
+                    {# The countdown the app's toasts draw. Bootstrap has no such #}
+                    {# thing of its own, so it is a width animation over the same #}
+                    {# delay, paused on hover exactly as the autohide is.         #}
+                    <div class="progress" style="height: 4px;">
+                        <div class="progress-bar ce-toast-countdown"></div>
+                    </div>
                 </div>
             {% endfor %}
         </div>
+        <script>
+            // Bootstrap's toast is opt-in, and its bundle loads at the end of
+            // the body -- so wait for the parse before reaching for it.
+            document.addEventListener('DOMContentLoaded', function () {
+                document.querySelectorAll('.toast[data-ce-delay]').forEach(function (el) {
+                    new bootstrap.Toast(el, {
+                        delay: parseInt(el.dataset.ceDelay, 10),
+                        autohide: true
+                    }).show();
+                });
+            });
+        </script>
     {% endif %}
 
     {# A `row` outside a container hangs its negative margins off the page. #}

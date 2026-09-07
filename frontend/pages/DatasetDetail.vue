@@ -14,9 +14,9 @@ import {
     BModal,
     BSpinner,
     BTab,
-    BTabs,
-    useToast
-} from 'bootstrap-vue-next';
+    BTabs
+} from "bootstrap-vue-next";
+import {useToast} from "@/composables/toast";
 
 import {useActiveTab} from "@/stores/tabs";
 

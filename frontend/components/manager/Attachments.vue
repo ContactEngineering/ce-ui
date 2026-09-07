@@ -11,9 +11,9 @@ import {
     BButton,
     BAlert,
     BProgress,
-    BModal,
-    useToast
-} from 'bootstrap-vue-next';
+    BModal
+} from "bootstrap-vue-next";
+import {useToast} from "@/composables/toast";
 
 
 const props = defineProps({

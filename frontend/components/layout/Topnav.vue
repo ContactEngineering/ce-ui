@@ -6,9 +6,9 @@ import {
     BNavbar,
     BNavbarBrand,
     BNavbarNav,
-    BNavItem,
-    useToast
+    BNavItem
 } from "bootstrap-vue-next";
+import {useToast} from "@/composables/toast";
 
 import NotificationButton from "@/components/layout/NotificationButton.vue";
 import UserMenuButton from "@/components/layout/UserMenuButton.vue";
@@ -24,18 +24,24 @@ const props = defineProps({
 
 const appProps = inject("appProps");
 
+// Django's message level tags, mapped onto what Bootstrap calls them. `debug`
+// has no colour of its own and reads as ordinary information. `noapp.html`
+// renders the same set for the pages that do not load this bundle, and the two
+// are meant to agree.
 const levelToVariant = {
     'error': 'danger',
     'warning': 'warning',
     'info': 'info',
-    'success': 'success'
+    'success': 'success',
+    'debug': 'info'
 };
 
 const levelToTitle = {
     'error': 'Error',
     'warning': 'Warning',
     'info': 'Information',
-    'success': 'Success'
+    'success': 'Success',
+    'debug': 'Information'
 }
 
 onMounted(() => {

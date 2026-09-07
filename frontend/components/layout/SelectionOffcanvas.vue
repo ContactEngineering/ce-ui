@@ -8,9 +8,9 @@ import {
     BListGroupItem,
     BNavbarNav,
     BNavItem,
-    BOffcanvas,
-    useToast
+    BOffcanvas
 } from "bootstrap-vue-next";
+import {useToast} from "@/composables/toast";
 
 import DownloadModal from "@/components/ui/DownloadModal.vue";
 import { useDatasetSelectionStore } from "@/stores/datasetSelection";

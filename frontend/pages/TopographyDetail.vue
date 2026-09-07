@@ -8,9 +8,9 @@ import {
     BButton,
     BModal,
     BTab,
-    BTabs,
-    useToast
+    BTabs
 } from "bootstrap-vue-next";
+import {useToast} from "@/composables/toast";
 
 import { useActiveTab } from "@/stores/tabs";
 

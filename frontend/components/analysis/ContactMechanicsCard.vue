@@ -4,7 +4,8 @@ import axios from "axios";
 import throttle from "lodash/throttle";
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 
-import { BDropdownDivider, BDropdownItem, BTab, BTabs, useToast } from "bootstrap-vue-next";
+import {BDropdownDivider, BDropdownItem, BTab, BTabs} from "bootstrap-vue-next";
+import {useToast} from "@/composables/toast";
 
 import { useActiveTab } from "@/stores/tabs";
 

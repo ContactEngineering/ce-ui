@@ -7,7 +7,7 @@
 
 import axios from "axios";
 import {onBeforeUnmount, onMounted, ref, watch} from "vue";
-import {useToast} from "bootstrap-vue-next";
+import {useToast} from "@/composables/toast";
 
 import {computeColorbarTicks} from "@/utils/colorbar";
 
