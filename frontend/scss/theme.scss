@@ -227,6 +227,16 @@ div.bk-btn-group button.bk-btn-primary:hover {
     z-index: 1000;
 }
 
+/* The top bar holds different things on different pages: a Sign in button when
+   nobody is signed in, plain nav links when somebody is, and the pages Django
+   renders carry their own markup for it. Those come out at different heights --
+   a button is taller than a link -- and the bar visibly jumped as you moved
+   between them. Pin it to what the tallest needs (0.5rem of navbar padding and
+   0.5rem of nav-link padding either side of a 38px button) so it stays put. */
+.navbar {
+    min-height: 4.375rem;
+}
+
 html, body {
     height: 100%;
 }

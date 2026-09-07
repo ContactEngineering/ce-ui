@@ -18,6 +18,11 @@
             color: var(--bs-secondary-color);
         }
 
+        /* No separator against the ends of the trail, which is the rule the
+           app's own bar follows (`index !== 0 && index !== tabs.length - 1`
+           in components/layout/Breadcrumbs.vue) -- so no slash between the
+           home mark and the crumb after it. */
+        .nav-tabs .nav-item:first-child .breadcrumb-separator,
         .nav-tabs .nav-item:last-child .breadcrumb-separator {
             display: none;
         }
