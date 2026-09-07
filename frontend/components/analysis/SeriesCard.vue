@@ -20,6 +20,7 @@ import { buildReferenceDataSources, REFERENCE_DATASETS, referenceSurfaceOptions,
 
 import AnalysisCard from "@/components/analysis/AnalysisCard.vue";
 import BokehPlot from "@/components/ui/BokehPlot.vue";
+import HelpTooltip from "@/components/ui/HelpTooltip.vue";
 
 const toast = useToast();
 
@@ -259,7 +260,13 @@ async function downloadData(fileFormat) {
         </template>
         <div v-if="_showReferenceDatasets && _availableReferenceDatasets.length > 0"
              class="bg-light p-3 rounded border mb-2 shadow-sm">
-            <div class="small fw-bold text-secondary mb-1">Compare to STC consensus curve:</div>
+            <div class="small fw-bold text-secondary mb-1">
+                Compare to STC consensus curves
+                <HelpTooltip text="Digitized from Figure 9 of the Surface-Topography Challenge benchmark study (Pradhan et al., Tribology Letters 73, 41, 2025)."
+                             link-url="https://doi.org/10.1007/s11249-025-02014-y"
+                             link-text="View the paper"
+                             placement="bottom"/>
+            </div>
             <div class="d-flex flex-wrap align-items-center gap-2">
                 <span v-for="surface in _referenceSurfaces"
                       :key="surface.key"
