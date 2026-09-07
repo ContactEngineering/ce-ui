@@ -4,40 +4,50 @@
 
 {% block extra_css %}
     <style>
-        /* The rules `lined-tabs` gets from the bundle's stylesheet, for the
-           pages that do not load the bundle. */
-        .breadcrumb-tabs .nav-link {
-            border: none;
-            border-bottom: 3px solid transparent;
+        /* The theme reserves a band at the top of the page for the app frame,
+           which pins its chrome with `.fixed-top`. The navbar and breadcrumbs
+           below are in normal flow, so here that band is just a gap above them. */
+        body {
+            padding-top: 0;
         }
 
-        .breadcrumb-tabs .nav-link.active {
-            background: none;
-            border-color: var(--bs-primary);
-        }
-
+        /* The breadcrumb bar reuses the theme's `.lined-tabs`, the same rules
+           the app's own bar uses; these two are all it needs on top. */
         .breadcrumb-separator {
             padding: var(--bs-nav-link-padding-y) 0;
             color: var(--bs-secondary-color);
         }
 
-        .breadcrumb-tabs .nav-item:last-child .breadcrumb-separator {
+        .nav-tabs .nav-item:last-child .breadcrumb-separator {
             display: none;
+        }
+
+        /* Rows of equal height, whatever control each one carries on the
+           right. The tallest is a small button (3rem including the row's own
+           padding and border); a row whose action is only a badge is 7px
+           shorter, which reads as a misaligned list rather than a deliberate
+           difference. */
+        .identity-list .list-group-item {
+            min-height: 3rem;
+        }
+
+        /* `min-height` sizes the border box, and Bootstrap collapses the border
+           between adjacent rows, so the first row spends two of those pixels on
+           borders where the others spend one. Give it that pixel back, or it
+           sits 1px shorter inside. */
+        .identity-list .list-group-item:first-child {
+            min-height: calc(3rem + 1px);
         }
 
         /* One box of the same width for a provider mark, whether it is an
            <img> or a FontAwesome glyph, so marks line up down a list and
-           across buttons. The box scales with the surrounding font size; no
-           mark sets a font-size of its own, which would scale the em box with
-           it and break the alignment. */
+           across buttons. */
         .identity-icon {
             width: 1.25em;
             flex: 0 0 auto;
             text-align: center;
         }
 
-        /* Both axes, and `contain`: sizing only the width would leave the
-           image at its height attribute and stretch the artwork. */
         img.identity-icon {
             height: 1.25em;
             object-fit: contain;
@@ -46,11 +56,41 @@
 {% endblock extra_css %}
 
 {% block body %}
+    {% comment %}
+    The same chrome the app frame draws (components/layout/Topnav.vue), for the
+    pages that render without it. It cannot be the Vue component -- these pages
+    do not load the bundle -- so it is the markup equivalent: the brand, and on
+    the right the way in or out of the account. Without it these pages offer no
+    way to sign in and no way back to the profile.
+    {% endcomment %}
     <div class="navbar bg-dark navbar-expand navbar-dark">
         <div class="container-fluid">
             <a class="navbar-brand d-flex flex-grow-1" href="/"><img
-                src="/static/images/ce_logo.svg" height="25px"> &nbsp;
-                contact.engineering </a></div>
+                src="{% static 'images/ce_logo.svg' %}" height="25px"> &nbsp;
+                contact.engineering </a>
+            {# The buttons sit in a nav item, as they do in `Topnav.vue`, so that #}
+            {# the bar is the same height here as it is over the app.             #}
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <span class="nav-link d-flex align-items-center gap-2">
+                    {% if user.is_authenticated %}
+                        <a class="btn btn-secondary d-flex align-items-center gap-2"
+                           href="{% url 'socialaccount_connections' %}">
+                            <i class="fa fa-user-circle" aria-hidden="true"></i>
+                            {{ user.display_name }}
+                        </a>
+                        <a class="btn btn-outline-light" href="{% url 'account_logout' %}">
+                            {% trans "Sign out" %}
+                        </a>
+                    {% else %}
+                        <a class="btn btn-secondary" href="{% url 'account_login' %}">
+                            {% trans "Sign in" %}
+                        </a>
+                    {% endif %}
+                    </span>
+                </li>
+            </ul>
+        </div>
     </div>
 
     {# The Vue app draws this bar from the same `fixed_tabs` context processor #}
@@ -58,7 +98,7 @@
     {# app, so without it they offer no way back to the site at all. A page adds #}
     {# its own crumb by overriding `crumbs`. #}
     <ul role="tablist"
-        class="nav nav-tabs breadcrumb-tabs align-items-center bg-light w-100 shadow">
+        class="nav nav-tabs lined-tabs align-items-center bg-light w-100 shadow">
         {% for tab in fixed_tabs %}
             {% if not tab.login_required or user.is_authenticated %}
                 <li class="nav-item d-flex" title="{{ tab.tooltip }}">

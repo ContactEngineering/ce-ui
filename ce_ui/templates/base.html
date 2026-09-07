@@ -21,8 +21,14 @@
 
     {# Machine-readable description of the page, for harvesters and crawlers #}
     {% block head_metadata %}{% endblock head_metadata %}
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    {% comment %}
+    The site theme: Bootstrap built from the tokens in `frontend/scss/theme.scss`,
+    plus FontAwesome and the IBM Plex faces. The same file styles the Vue app,
+    which compiles it into its bundle; this is the standalone build, so the pages
+    Django renders on its own do not fall back to stock Bootstrap and end up
+    looking like a different site. Produced by `npm run build-css`.
+    {% endcomment %}
+    <link href="{% static 'css/theme.css' %}" rel="stylesheet">
 
     <style>
         html, body {

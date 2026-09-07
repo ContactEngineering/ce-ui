@@ -388,3 +388,8 @@ topobank/analysis/tests/topographies
 
 # Legacy docker-based generated pip packages
 docker/local/django/pip-packages/*
+
+# Build output of `npm run build-css`: the theme the server-rendered pages load,
+# and the font files it references. Generated from frontend/scss, not sources.
+/ce_ui/static/css/
+/ce_ui/static/webfonts/

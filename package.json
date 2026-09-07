@@ -7,6 +7,7 @@
   },
   "scripts": {
     "dev": "webpack --env=prefix=.. --mode development --devtool inline-source-map --watch",
+    "build-css": "node build-css.mjs",
     "build-dev": "webpack --mode development",
     "build-prod": "webpack --mode production",
     "test": "vitest run",

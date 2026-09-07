@@ -20,7 +20,8 @@
     <p class="text-muted">
       These are the ways you can sign in to <em>contact.engineering</em>. They
       all lead to the same profile and the same datasets, so it does not matter
-      which one you use.
+      which one you use. The ORCID is the primary identifier that identifies you
+      as a person. It cannot be removed.
     </p>
 
     {% if not user.has_orcid %}
@@ -46,7 +47,7 @@
     {# is django-allauth's single form with a radio per row, which makes        #}
     {# removing one connection a two-step choose-then-submit. The form posts    #}
     {# `account`, which is all `DisconnectForm` reads.                          #}
-    <ul class="list-group mb-2">
+    <ul class="list-group identity-list mb-2">
       {% for identity in user.connected_identities %}
       <li class="list-group-item d-flex align-items-center gap-3">
         {% include "socialaccount/snippets/provider_icon.html" with provider_id=identity.provider %}
