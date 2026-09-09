@@ -2,13 +2,16 @@
 
 The "STC consensus" curves (median and interquartile range of power spectral
 density and RMS height, for a rougher and a smoother reference surface) are
-digitized from Figure 9 of:
+the same underlying data used to produce Figure 9 of:
 
 > Pradhan, A., Müser, M.H., Miller, N., Abdelnabe, J.P., Afferrante, L.,
 > Albertini, D., et al., Pastewka, L., Jacobs, T.D.B. "The Surface-Topography
 > Challenge: A Multi-Laboratory Benchmark Study to Advance the
-> Characterization of Topography." *Tribology Letters* **73**, 41 (2025).
+> Characterization of Topography." *Tribology Letters* **73**, 110 (2025).
 > https://doi.org/10.1007/s11249-025-02014-y
+
+(see each JSON file's own `source` field for the exact Zenodo record this was
+sourced from).
 
 Published under [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/),
 which permits this reuse provided the source is credited (as done here and in
@@ -25,5 +28,6 @@ compared in Figure 9.
 - `rms_height/{rougher,smoother}_surface_{median,lower_quartile,upper_quartile}.json`
   — `{x: [...], y: [...]}` with x = bandwidth (m), y = RMS height (m)
 
-All values are raw SI units, straight from the digitized data; unit display
-conversion happens client-side (see `referenceData.ts`).
+All values are raw SI units, straight from the source dataset; unit display
+conversion happens client-side (see `referenceData.ts`). Each file also
+carries a `description` and `source` field with this same information.
