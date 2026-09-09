@@ -57,3 +57,10 @@ jobs:
     - name: Check that the webpack bundle builds
       run: |
         npm run build-prod
+
+    # Built by the release workflow too, where a failure would surface only at
+    # publishing time. Node is already set up here, so it costs a few seconds
+    # to find out on the push that broke it instead.
+    - name: Check that the theme stylesheet builds
+      run: |
+        npm run build-css
