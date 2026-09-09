@@ -3,21 +3,25 @@
  * comparison against a previously published consensus-study result.
  *
  * The "STC consensus" curves below (median and interquartile range of PSD and
- * RMS height, for a rougher and a smoother reference surface) are digitized
- * from Figure 9 of:
+ * RMS height, for a rougher and a smoother reference surface) are the same
+ * underlying data used to produce Figure 9 of:
  *
  *   Pradhan, A., Müser, M.H., Miller, N., et al. "The Surface-Topography
  *   Challenge: A Multi-Laboratory Benchmark Study to Advance the
- *   Characterization of Topography." Tribology Letters 73, 41 (2025).
+ *   Characterization of Topography." Tribology Letters 73, 110 (2025).
  *   https://doi.org/10.1007/s11249-025-02014-y
  *
  * See `ce_ui/static/reference_data/SOURCE.md` for the full author list and
- * how the raw data files here were derived from the paper.
+ * how the raw data files here relate to the paper.
  *
  * A reference dataset is registered once per workflow (keyed by its function
- * name) in `REFERENCE_DATASETS` below; `SeriesCard` shows a checkbox for each
- * entry registered for the card's own function and, when checked, merges the
- * corresponding synthetic `dataSource` into the ones `BokehPlot` renders.
+ * name) in `REFERENCE_DATASETS` below; `SeriesCard`'s "Compare to STC data"
+ * toggle merges every entry registered for the card's own function into the
+ * synthetic `dataSource`s `BokehPlot` renders. Each curve's `subjectName` and
+ * `seriesName` (shared with the same field on a real analysis data source)
+ * are what let `BokehPlot`'s existing category chips ("Averages /
+ * Measurements", "Data series") show/hide individual surfaces or quartile
+ * bands, so no dedicated picker UI is needed for this.
  *
  * The data itself is stored in raw SI units (metres) as a static JSON file
  * fetched the same way a real analysis series is (see
@@ -31,9 +35,9 @@ import {parseAxisLabel} from "@/utils/axes";
 import {factorFromMetrePower, parseLengthPower} from "@/utils/units";
 
 export interface ReferenceDataset {
-    /** Unique key, used as the checkbox's `v-model` value. */
+    /** Unique key identifying this curve among `REFERENCE_DATASETS[functionName]`. */
     key: string;
-    /** Checkbox label shown to the user. */
+    /** Human-readable label, currently unused by the UI but kept for debugging/logging. */
     label: string;
     /** URL of the `{x: [...], y: [...]}` JSON file, in raw SI units. */
     url: string;
@@ -57,13 +61,6 @@ export interface ReferenceDataset {
      */
     color: string;
     dash: string;
-    /**
-     * Which of the two reference surfaces this curve belongs to, and its
-     * short chip label (e.g. "rough"/"Rougher"). Lets `SeriesCard` offer one
-     * toggle chip per surface instead of one checkbox per curve.
-     */
-    surfaceKey: string;
-    surfaceLabel: string;
     /** Which STC quartile curve this is, so the UI can group median vs. IQR
      *  bounds without parsing `key` or `label` strings. */
     quartile: Quartile;
@@ -105,9 +102,9 @@ const QUARTILE_DASH: { [key in Quartile]: string } = {
 function stcConsensusDatasets(
     keyPrefix: string, urlFolder: string, xExponent: number, yExponent: number
 ): ReferenceDataset[] {
-    const surfaces: { key: string, subject: string, chipLabel: string, color: string, file: string }[] = [
-        {key: "rough", subject: "STC consensus (rough surface)", chipLabel: "Rougher", color: ROUGH_COLOR, file: "rougher_surface"},
-        {key: "smooth", subject: "STC consensus (smooth surface)", chipLabel: "Smoother", color: SMOOTH_COLOR, file: "smoother_surface"},
+    const surfaces: { key: string, subject: string, color: string, file: string }[] = [
+        {key: "rough", subject: "STC consensus (rough surface)", color: ROUGH_COLOR, file: "rougher_surface"},
+        {key: "smooth", subject: "STC consensus (smooth surface)", color: SMOOTH_COLOR, file: "smoother_surface"},
     ];
     const quartiles: Quartile[] = ["median", "lower-quartile", "upper-quartile"];
 
@@ -124,8 +121,6 @@ function stcConsensusDatasets(
                 yExponent,
                 color: surface.color,
                 dash: QUARTILE_DASH[quartile],
-                surfaceKey: surface.key,
-                surfaceLabel: surface.chipLabel,
                 quartile,
             });
         }
@@ -136,7 +131,7 @@ function stcConsensusDatasets(
 /**
  * Reference datasets available per workflow, keyed by `Meta.name` of the
  * `WorkflowImplementation` (i.e. `SeriesCard`'s `functionName` prop). A
- * workflow with no entry here simply shows no "reference data" checkboxes.
+ * workflow with no entry here simply shows no "Compare to STC data" toggle.
  */
 export const REFERENCE_DATASETS: { [functionName: string]: ReferenceDataset[] } = {
     // Wavevector (m⁻¹) and PSD (m³) are never auto-rescaled server-side
@@ -145,49 +140,6 @@ export const REFERENCE_DATASETS: { [functionName: string]: ReferenceDataset[] } 
     "topobank_statistics.power_spectral_density": stcConsensusDatasets("psd", "psd", -1, 3),
     "topobank_statistics.variable_bandwidth": stcConsensusDatasets("rms", "rms_height", 1, 1),
 };
-
-export interface ReferenceSurfaceOption {
-    key: string;
-    label: string;
-}
-
-/**
- * The distinct reference surfaces offered by a list of datasets (e.g. one
- * entry each for "rough" and "smooth"), in the order they first appear, for
- * `SeriesCard`'s surface picker. Each surface bundles its median and IQR
- * curves; the picker toggles each surface independently (any combination of
- * none, one, or both may be selected at once) rather than checking each of
- * its 3 curves separately.
- */
-export function referenceSurfaceOptions(datasets: ReferenceDataset[]): ReferenceSurfaceOption[] {
-    const seen = new Set<string>();
-    const surfaces: ReferenceSurfaceOption[] = [];
-    for (const dataset of datasets) {
-        if (!seen.has(dataset.surfaceKey)) {
-            seen.add(dataset.surfaceKey);
-            surfaces.push({key: dataset.surfaceKey, label: dataset.surfaceLabel});
-        }
-    }
-    return surfaces;
-}
-
-/**
- * The dataset keys to plot for a given surface-picker selection: each
- * selected surface's median curve, plus (if `showIqr`) its lower/upper IQR
- * bounds. A surface not in `surfaceKeys` contributes nothing.
- */
-export function selectedReferenceKeys(
-    datasets: ReferenceDataset[],
-    surfaceKeys: string[],
-    showIqr: boolean,
-): string[] {
-    if (surfaceKeys.length === 0) {
-        return [];
-    }
-    return datasets
-        .filter(dataset => surfaceKeys.includes(dataset.surfaceKey) && (dataset.quartile === "median" || showIqr))
-        .map(dataset => dataset.key);
-}
 
 /**
  * The index a data source should use for a category, reusing the index of an

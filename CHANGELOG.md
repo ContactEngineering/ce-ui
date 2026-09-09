@@ -72,7 +72,7 @@
 - ENH: The "Power spectral density" and "Variable bandwidth" (RMS height)
   cards can overlay the median and interquartile range of the "STC consensus"
   rougher/smoother reference surfaces from the Surface-Topography Challenge
-  benchmark study (Pradhan, Müser, Miller, et al., *Tribology Letters* 73, 41
+  benchmark study (Pradhan, Müser, Miller, et al., *Tribology Letters* 73, 110
   (2025), doi:10.1007/s11249-025-02014-y, CC-BY 4.0), behind a "Compare to
   reference data" toggle so it stays out of the way by default
 - ENH: A `dataSource` given to `BokehPlot` can now pin its own line color and

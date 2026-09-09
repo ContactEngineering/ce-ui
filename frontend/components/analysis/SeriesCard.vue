@@ -4,7 +4,7 @@ import axios from "axios";
 import throttle from "lodash/throttle";
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 
-import { BDropdownDivider, BDropdownItem, BFormCheckbox, useToast } from "bootstrap-vue-next";
+import { BDropdownDivider, BDropdownItem, useToast } from "bootstrap-vue-next";
 
 import { subjectsToBase64 } from "@/utils/api";
 import {
@@ -16,11 +16,10 @@ import {
     toCsvText,
     triggerBrowserDownload
 } from "@/utils/download";
-import { buildReferenceDataSources, REFERENCE_DATASETS, referenceSurfaceOptions, selectedReferenceKeys } from "@/utils/referenceData";
+import { buildReferenceDataSources, REFERENCE_DATASETS } from "@/utils/referenceData";
 
 import AnalysisCard from "@/components/analysis/AnalysisCard.vue";
 import BokehPlot from "@/components/ui/BokehPlot.vue";
-import HelpTooltip from "@/components/ui/HelpTooltip.vue";
 
 const toast = useToast();
 
@@ -74,31 +73,20 @@ const _plot = ref(null);
 const _dois = ref([]);
 const _messages = ref([]);
 
-// Reference data (fixed comparison curves, e.g. a consensus-study result).
-// The user toggles each reference surface independently (none, one, or both
-// at once) and optionally adds IQR bands as a single shared toggle, rather
-// than checking each of the 2 surfaces' 3 curves (median, lower/upper IQR)
-// independently.
+// Reference data (fixed comparison curves from the Surface-Topography
+// Challenge's Figure 9). Toggling "Compare to STC data" merges in every
+// registered curve as one more synthetic data source; the plot's existing
+// subjectName/seriesName category chips (Averages / Measurements, Data
+// series) then let the user show/hide individual surfaces or quartile bands
+// exactly as they would for a real measurement, so no dedicated picker UI is
+// needed here.
 const _availableReferenceDatasets = computed(() => REFERENCE_DATASETS[props.functionName] ?? []);
-const _referenceSurfaces = computed(() => referenceSurfaceOptions(_availableReferenceDatasets.value));
-const _selectedReferenceSurfaceKeys = ref<string[]>([]);
-const _showReferenceIqr = ref(false);
-const _selectedReferenceDatasetKeys = computed<string[]>(() => selectedReferenceKeys(
-    _availableReferenceDatasets.value, _selectedReferenceSurfaceKeys.value, _showReferenceIqr.value));
-
-function toggleReferenceSurface(surfaceKey: string) {
-    const index = _selectedReferenceSurfaceKeys.value.indexOf(surfaceKey);
-    if (index === -1) {
-        _selectedReferenceSurfaceKeys.value = [..._selectedReferenceSurfaceKeys.value, surfaceKey];
-    } else {
-        _selectedReferenceSurfaceKeys.value = _selectedReferenceSurfaceKeys.value.filter(k => k !== surfaceKey);
-    }
-}
-
 // Collapsed by default: with several reference datasets registered for one
-// workflow, showing every checkbox unconditionally would clutter a card that
-// most views of it never need to compare against anything.
+// workflow, showing them unconditionally would clutter a card that most
+// views of it never need to compare against anything.
 const _showReferenceDatasets = ref(false);
+const _selectedReferenceDatasetKeys = computed<string[]>(() =>
+    _showReferenceDatasets.value ? _availableReferenceDatasets.value.map(dataset => dataset.key) : []);
 // Merged in, rather than mutating `_dataSources`, so re-fetching the card's own
 // data (`updateCard`) cannot lose a selection made in the meantime.
 const _plottedDataSources = computed(() => {
@@ -241,7 +229,7 @@ async function downloadData(fileFormat) {
                      need this, so it should not be a main control element on the card. -->
                 <BDropdownItem @click="_showReferenceDatasets = !_showReferenceDatasets">
                     <i class="fa-solid fa-code-compare me-1"></i>
-                    {{ _showReferenceDatasets ? 'Hide reference data' : 'Compare to reference data' }}
+                    {{ _showReferenceDatasets ? 'Hide STC data' : 'Compare to STC data' }}
                 </BDropdownItem>
             </template>
             <template v-if="hasData">
@@ -258,31 +246,14 @@ async function downloadData(fileFormat) {
                 </BDropdownItem>
             </template>
         </template>
+        <!-- A plain text note rather than a hover tooltip: `HelpTooltip`'s popover
+             used to render nested inside the burger menu's own dropdown, which
+             clips/scrolls floated content and left it unreadable. -->
         <div v-if="_showReferenceDatasets && _availableReferenceDatasets.length > 0"
-             class="bg-light p-3 rounded border mb-2 shadow-sm">
-            <div class="small fw-bold text-secondary mb-1">
-                Compare to STC consensus curves
-                <HelpTooltip text="Digitized from Figure 9 of the Surface-Topography Challenge benchmark study (Pradhan et al., Tribology Letters 73, 41, 2025)."
-                             link-url="https://doi.org/10.1007/s11249-025-02014-y"
-                             link-text="View the paper"
-                             placement="bottom"/>
-            </div>
-            <div class="d-flex flex-wrap align-items-center gap-2">
-                <span v-for="surface in _referenceSurfaces"
-                      :key="surface.key"
-                      class="badge rounded-pill cursor-pointer border user-select-none py-1 px-2"
-                      :class="_selectedReferenceSurfaceKeys.includes(surface.key)
-                          ? 'bg-primary text-white border-primary'
-                          : 'bg-light text-dark border-secondary-subtle opacity-75'"
-                      @click="toggleReferenceSurface(surface.key)">
-                    {{ surface.label }}
-                </span>
-                <BFormCheckbox v-if="_selectedReferenceSurfaceKeys.length > 0"
-                               v-model="_showReferenceIqr"
-                               class="ms-2">
-                    Show IQR range
-                </BFormCheckbox>
-            </div>
+             class="small text-secondary mb-2">
+            STC Fig. 9 median and interquartile range (Pradhan et al.,
+            <a href="https://doi.org/10.1007/s11249-025-02014-y" target="_blank" rel="noopener">
+                Tribol Lett 73, 110 (2025)</a>).
         </div>
         <BokehPlot ref="_plot"
                    v-model:nbPendingAjaxRequests="_nbPendingAjaxRequests"
