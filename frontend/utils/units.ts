@@ -98,6 +98,68 @@ export function rescaleLengthUnit(magnitude: number, fromUnit: string | null | u
 }
 
 /**
+ * Unicode superscript digits, the way the backend writes an exponent, e.g.
+ * `µm³`, `nm⁻¹`. Mirrors `_SUPERSCRIPT_DIGITS` in
+ * `topobank_rest_api/analysis/display_units.py`.
+ */
+const SUPERSCRIPT_DIGITS: { [digit: string]: string } = {
+    '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4',
+    '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9',
+};
+
+const POWER_UNIT_PATTERN = /^(\S+?)(⁻?)([⁰¹²³⁴⁵⁶⁷⁸⁹]+)$/;
+
+export interface LengthPower {
+    /** The length unit the axis is built from, e.g. "µm". */
+    base: string;
+    /** The power it is raised to, e.g. -1 for "µm⁻¹", 3 for "µm³". */
+    exponent: number;
+}
+
+/**
+ * Split a unit into the length it is built from and the power it is raised to.
+ * Mirrors `parse_length_power` in `topobank_rest_api/analysis/display_units.py`,
+ * which is what produces these unit strings in the first place.
+ *
+ * @param unit A unit as an axis label carries it, e.g. `nm`, `nm⁻¹` or `µm³`.
+ * @returns The base length unit and its exponent, or null if `unit` is not a
+ *     power of a length unit we know.
+ */
+export function parseLengthPower(unit: string | null | undefined): LengthPower | null {
+    if (unit == null) {
+        return null;
+    }
+    if (unit in LENGTH_UNIT_EXPONENTS) {
+        return {base: unit, exponent: 1};
+    }
+    const match = POWER_UNIT_PATTERN.exec(unit);
+    if (match == null) {
+        return null;
+    }
+    const [, base, sign, digits] = match;
+    if (!(base in LENGTH_UNIT_EXPONENTS)) {
+        return null;
+    }
+    const magnitude = Number(digits.split('').map(d => SUPERSCRIPT_DIGITS[d]).join(''));
+    return {base, exponent: sign ? -magnitude : magnitude};
+}
+
+/**
+ * Factor converting a value given in a power of metres into the same power of
+ * `unit`, e.g. the factor for a value in m³ displayed in µm³.
+ *
+ * @param exponent The power the length unit is raised to (3 for m³, -1 for m⁻¹).
+ * @param unit The length unit to convert into, e.g. "µm".
+ * @returns The conversion factor, or null if `unit` is not a length unit we know.
+ */
+export function factorFromMetrePower(exponent: number, unit: string | null | undefined): number | null {
+    if (unit == null || !(unit in LENGTH_UNIT_EXPONENTS)) {
+        return null;
+    }
+    return Math.pow(10, -LENGTH_UNIT_EXPONENTS[unit] * exponent);
+}
+
+/**
  * Largest absolute value in `values`, ignoring non-finite entries (undefined
  * data points in a measurement are stored as NaN).
  *
