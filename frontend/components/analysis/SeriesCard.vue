@@ -17,6 +17,7 @@ import {
     toCsvText,
     triggerBrowserDownload
 } from "@/utils/download";
+import { buildReferenceDataSources, REFERENCE_DATASETS } from "@/utils/referenceData";
 
 import AnalysisCard from "@/components/analysis/AnalysisCard.vue";
 import BokehPlot from "@/components/ui/BokehPlot.vue";
@@ -72,6 +73,38 @@ const _plot = ref(null);
 // Auxiliary information
 const _dois = ref([]);
 const _messages = ref([]);
+
+// Reference data (fixed comparison curves from the Surface-Topography
+// Challenge's Figure 9). Toggling "Compare to STC data" merges in every
+// registered curve as one more synthetic data source; the plot's existing
+// subjectName/seriesName category chips (Averages / Measurements, Data
+// series) then let the user show/hide individual surfaces or quartile bands
+// exactly as they would for a real measurement, so no dedicated picker UI is
+// needed here.
+const _availableReferenceDatasets = computed(() => REFERENCE_DATASETS[props.functionName] ?? []);
+// Collapsed by default: with several reference datasets registered for one
+// workflow, showing them unconditionally would clutter a card that most
+// views of it never need to compare against anything.
+const _showReferenceDatasets = ref(false);
+const _selectedReferenceDatasetKeys = computed<string[]>(() =>
+    _showReferenceDatasets.value ? _availableReferenceDatasets.value.map(dataset => dataset.key) : []);
+// Merged in, rather than mutating `_dataSources`, so re-fetching the card's own
+// data (`updateCard`) cannot lose a selection made in the meantime.
+const _plottedDataSources = computed(() => {
+    if (_dataSources.value == null || _availableReferenceDatasets.value.length === 0) {
+        return _dataSources.value;
+    }
+    const plot = _plots.value?.[0];
+    return [
+        ..._dataSources.value,
+        ...buildReferenceDataSources(
+            _selectedReferenceDatasetKeys.value,
+            props.functionName,
+            _dataSources.value,
+            plot?.xAxisLabel ?? null,
+            plot?.yAxisLabel ?? null)
+    ];
+});
 
 
 onMounted(() => {
@@ -191,6 +224,15 @@ async function downloadData(fileFormat) {
                   @refreshButtonClicked="updateCard"
                   @someTasksFinished="updateCardThrottled">
         <template #dropdowns>
+            <template v-if="_availableReferenceDatasets.length > 0">
+                <BDropdownDivider></BDropdownDivider>
+                <!-- Tucked into the burger menu rather than a standalone button: few users
+                     need this, so it should not be a main control element on the card. -->
+                <BDropdownItem @click="_showReferenceDatasets = !_showReferenceDatasets">
+                    <i class="fa-solid fa-code-compare me-1"></i>
+                    {{ _showReferenceDatasets ? 'Hide STC data' : 'Compare to STC data' }}
+                </BDropdownItem>
+            </template>
             <template v-if="hasData">
                 <BDropdownDivider></BDropdownDivider>
                 <BDropdownItem @click="downloadData('txt')">
@@ -205,10 +247,19 @@ async function downloadData(fileFormat) {
                 </BDropdownItem>
             </template>
         </template>
+        <!-- A plain text note rather than a hover tooltip: `HelpTooltip`'s popover
+             used to render nested inside the burger menu's own dropdown, which
+             clips/scrolls floated content and left it unreadable. -->
+        <div v-if="_showReferenceDatasets && _availableReferenceDatasets.length > 0"
+             class="small text-secondary mb-2">
+            STC Fig. 9 median and interquartile range (Pradhan et al.,
+            <a href="https://doi.org/10.1007/s11249-025-02014-y" target="_blank" rel="noopener">
+                Tribol Lett 73, 110 (2025)</a>).
+        </div>
         <BokehPlot ref="_plot"
                    v-model:nbPendingAjaxRequests="_nbPendingAjaxRequests"
                    :categories="_categories"
-                   :dataSources="_dataSources"
+                   :dataSources="_plottedDataSources"
                    :functionTitle="_title"
                    :outputBackend="_outputBackend"
                    :plots="_plots"
