@@ -22,18 +22,23 @@ function cachedGet(url) {
 
 <script setup lang="ts">
 
-import {computed, ref, watch} from "vue";
+import {computed, inject, ref, watch} from "vue";
 
 import {BButton} from "bootstrap-vue-next";
 import {useToast} from "@/composables/toast";
 
 import {formatDateTime, formatDuration, prettyBytes} from "@/utils/formatting";
+import {renewErrorMessage, SIGN_IN_TO_RENEW} from "@/utils/renew";
 
 import ProgressIndicator from "@/components/ui/ProgressIndicator.vue";
 
 const toast = useToast();
 
 const analysis = defineModel('analysis', {required: true});
+
+// Only signed-in users may renew an analysis (the API answers 403 otherwise)
+const appProps = inject("appProps", {}) as { userIsAnonymous?: boolean };
+const _isAnonymous = computed<boolean>(() => appProps?.userIsAnonymous === true);
 
 const _error = ref(null);
 const _function = ref(null);
@@ -88,13 +93,23 @@ function fetchFailureReason() {
 }
 
 function renew() {
+    // Show the task as pending right away, but remember what it was: if the
+    // request fails, the row must not keep claiming that it is queued
+    const previousState = analysis.value.task_state;
+    const previousError = _error.value;
     analysis.value.task_state = 'pe';  // The batched poller in TasksButton picks this up
     _error.value = null;
     // A PUT request triggers renewal of the analysis
     axios.put(analysis.value.url).then(response => {
         analysis.value = response.data;
     }).catch(error => {
-        toast.create({title: "Request failed", body: error, variant: 'danger'})?.show();
+        analysis.value.task_state = previousState;
+        _error.value = previousError;
+        toast.create({
+            title: "Could not run the analysis again",
+            body: renewErrorMessage(error),
+            variant: 'danger'
+        })?.show();
     });
 }
 
@@ -161,10 +176,12 @@ watch(() => analysis.value, () => {
         <td class="align-middle text-end" style="width:120px">
             <BButton variant="outline-primary"
                      size="sm"
-                     :disabled="analysis.task_state === 'pe' || analysis.task_state === 'st'"
-                     :title="analysis.task_state === 'pe' || analysis.task_state === 'st'
-                             ? 'This task is already queued or running'
-                             : 'Discard the result and run this analysis again'"
+                     :disabled="_isAnonymous || analysis.task_state === 'pe' || analysis.task_state === 'st'"
+                     :title="_isAnonymous
+                             ? SIGN_IN_TO_RENEW
+                             : analysis.task_state === 'pe' || analysis.task_state === 'st'
+                               ? 'This task is already queued or running'
+                               : 'Discard the result and run this analysis again'"
                      @click="renew">
                 <i class="fa fa-rotate-right me-1"></i>Renew
             </BButton>
