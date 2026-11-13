@@ -37,7 +37,7 @@ export default {
     },
     methods: {
         searchUser(searchTerm) {
-            axios.get(`${this.url}?name=${searchTerm}&limit=${this.maxResults}`).then(response => {
+            axios.get(this.url, {params: {name: searchTerm, limit: this.maxResults}}).then(response => {
                 this._searchResult = response.data.results;
             });
         },
@@ -59,7 +59,7 @@ export default {
             <b-form-group id="input-group-1"
                           label="Name"
                           label-for="input-1"
-                          description="Search by full name of the user.">
+                          description="Enter the full name or ORCID iD of the user.">
                 <b-form-input id="input-1"
                               v-model="_searchTerm"
                               type="text"
@@ -72,7 +72,7 @@ export default {
             <b-button v-for="user in _searchResult"
                       variant="outline-secondary"
                       @click="selectUser(user)">
-                {{ user.name }} ({{ user.orcid }})
+                {{ user.name }}<span v-if="user.orcid"> ({{ user.orcid }})</span>
             </b-button>
         </b-button-group>
     </b-modal>
