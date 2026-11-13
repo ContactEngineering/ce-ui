@@ -2,6 +2,8 @@
 
 ## 1.39.0 (not yet released)
 
+- BUG: The notification list no longer fails for users who still had
+  notifications from old analysis collections, which are removed on upgrade
 - ENH: An account is created with an ORCID iD and no other way. Registration
   with an email address and a password is closed, and a provider outside
   `SOCIALACCOUNT_SIGNUP_PROVIDERS` cannot create an account either; the page
