@@ -2,7 +2,7 @@
 
 import axios from "axios";
 
-import {computed, onBeforeUnmount, onMounted, ref, watch} from "vue";
+import {computed, inject, onBeforeUnmount, onMounted, ref, watch} from "vue";
 
 import {
     BButton,
@@ -17,6 +17,7 @@ import {
 import {useToast} from "@/composables/toast";
 
 import {useDatasetSelectionStore} from "@/stores/datasetSelection";
+import {initialSharingStatus, sharingStatusChoicesFor} from "@/utils/sharingStatus";
 
 import SelectionOffcanvas from "@/components/layout/SelectionOffcanvas.vue";
 import DatasetListRow from '@/components/manager/DatasetListRow.vue';
@@ -55,12 +56,14 @@ const orderByFilterChoices = [
     {text: 'Date', value: '-created_at'},
     {text: 'Name', value: 'name'},
 ];
-const sharingStatusFilterChoices = [
-    {text: 'All accessible datasets', value: 'all'},
-    {text: 'Unpublished datasets created by me', value: 'own'},
-    {text: 'Unpublished datasets created by others', value: 'others'},
-    {text: 'Published datasets', value: 'published'}
-];
+
+// Whether the visitor is signed in. The page is mounted without props, so the
+// flag comes from the app; the prop is kept for embedding the page elsewhere.
+const appProps = inject("appProps", {}) as { userIsAnonymous?: boolean };
+const _isAnonymous = computed<boolean>(
+    () => props.isAnonymous || appProps?.userIsAnonymous === true
+);
+const sharingStatusFilterChoices = computed(() => sharingStatusChoicesFor(_isAnonymous.value));
 
 
 // UI logic
@@ -74,7 +77,7 @@ const _searchTerm = ref<string>(props.searchTerm);
 // Structured search filters (chips), e.g. [{type: 'author', value: 'Lars'}]
 const _searchTokens = ref<any[]>([]);
 const _selectionOffcanvasVisible = ref<boolean>(false);
-const _sharingStatus = ref(sharingStatusFilterChoices[0].value);
+const _sharingStatus = ref<string>(initialSharingStatus(_isAnonymous.value));
 
 const _datasets = ref([]);
 const _nextUrl = ref(null);
@@ -242,7 +245,8 @@ function sharingStatusChanged() {
         </div>
         <div class="col-4">
             <BFormGroup description="Filter results by sharing status">
-                <BFormSelect v-model="_sharingStatus" :disabled="_isLoading"
+                <BFormSelect v-model="_sharingStatus" :disabled="_isLoading || _isAnonymous"
+                             :title="_isAnonymous ? 'Sign in to see unpublished datasets' : undefined"
                              :options="sharingStatusFilterChoices" class="form-control"
                              name="sharing_status"
                              @change="sharingStatusChanged">
@@ -276,12 +280,12 @@ function sharingStatusChanged() {
                      @click="_selectionOffcanvasVisible = true">
                 {{ selection.nbSelected }} datasets selected
             </BButton>
-            <BButton v-if="isAnonymous" disabled
+            <BButton v-if="_isAnonymous" disabled
                      title="Please sign-in to use this feature"
                      variant="primary">
                 Create new digital surface twin
             </BButton>
-            <BButton v-if="!isAnonymous"
+            <BButton v-if="!_isAnonymous"
                      class="float-end"
                      :disabled="_isLoading"
                      variant="primary"

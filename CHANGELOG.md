@@ -2,6 +2,8 @@
 
 ## 1.39.0 (not yet released)
 
+- BUG: Visitors who are not signed in see the dataset list filtered to published
+  datasets, with the filter locked, and cannot start creating a dataset
 - ENH: An account is created with an ORCID iD and no other way. Registration
   with an email address and a password is closed, and a provider outside
   `SOCIALACCOUNT_SIGNUP_PROVIDERS` cannot create an account either; the page
