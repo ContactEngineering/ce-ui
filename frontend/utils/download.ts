@@ -230,19 +230,29 @@ export function slugifyFilename(name: string): string {
     return slug === "" ? "download" : slug;
 }
 
+/** How long the object URL of a download stays valid after the click. */
+export const DOWNLOAD_URL_LIFETIME_MS = 60_000;
+
 /**
  * Hand a string to the browser as a file download.
+ *
+ * The link is attached to the document while it is clicked, and its object URL
+ * is revoked only later: some browsers (Safari, older Firefox) ignore clicks on
+ * detached links or read the URL after `click()` returns, and cancel the
+ * download if it has already been revoked.
  */
 export function triggerBrowserDownload(filename: string, content: string, mimeType: string): void {
     const url = URL.createObjectURL(new Blob([content], {type: mimeType}));
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.style.display = "none";
+    document.body.appendChild(anchor);
     try {
-        const anchor = document.createElement("a");
-        anchor.href = url;
-        anchor.download = filename;
         anchor.click();
     } finally {
-        // Safe to revoke immediately: the click has already started the download.
-        URL.revokeObjectURL(url);
+        anchor.remove();
+        setTimeout(() => URL.revokeObjectURL(url), DOWNLOAD_URL_LIFETIME_MS);
     }
 }
 

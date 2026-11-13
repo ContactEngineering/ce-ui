@@ -1,4 +1,4 @@
-import {describe, expect, it} from "vitest";
+import {afterEach, describe, expect, it, vi} from "vitest";
 
 import {
     buildColumnsCsvRows,
@@ -11,7 +11,9 @@ import {
     quoteCsvField,
     seriesFromDataSource,
     slugifyFilename,
-    toCsvText
+    toCsvText,
+    triggerBrowserDownload,
+    DOWNLOAD_URL_LIFETIME_MS
 } from "@/utils/download";
 
 describe("quoteCsvField", () => {
@@ -429,5 +431,59 @@ describe("describeRequestError", () => {
         expect(message.length).toBeLessThanOrEqual(300);
         expect(message).not.toContain("\n");
         expect(message.endsWith("…")).toBe(true);
+    });
+});
+
+
+describe("triggerBrowserDownload", () => {
+    afterEach(() => {
+        vi.useRealTimers();
+        vi.unstubAllGlobals();
+    });
+
+    function stubBrowser() {
+        const events: string[] = [];
+        const anchor = {
+            href: "", download: "", style: {} as Record<string, string>,
+            click: vi.fn(() => events.push(`click attached=${attached}`)),
+            remove: vi.fn(() => { attached = false; events.push("remove"); })
+        };
+        let attached = false;
+        vi.stubGlobal("document", {
+            createElement: vi.fn(() => anchor),
+            body: {appendChild: vi.fn(() => { attached = true; events.push("append"); })}
+        });
+        const revokeObjectURL = vi.fn(() => events.push("revoke"));
+        vi.stubGlobal("URL", {createObjectURL: vi.fn(() => "blob:test"), revokeObjectURL});
+        return {anchor, events, revokeObjectURL};
+    }
+
+    it("clicks an attached link and revokes the URL only later (topobank#1301)", () => {
+        vi.useFakeTimers();
+        const {anchor, events, revokeObjectURL} = stubBrowser();
+
+        triggerBrowserDownload("curvature.txt", "x y", "text/plain");
+
+        expect(anchor.download).toBe("curvature.txt");
+        expect(anchor.href).toBe("blob:test");
+        // Safari ignores clicks on detached links, and cancels the download
+        // if the URL is revoked while it still reads it
+        expect(events).toEqual(["append", "click attached=true", "remove"]);
+        expect(revokeObjectURL).not.toHaveBeenCalled();
+
+        vi.advanceTimersByTime(DOWNLOAD_URL_LIFETIME_MS);
+        expect(revokeObjectURL).toHaveBeenCalledWith("blob:test");
+    });
+
+    it("cleans up even if the click throws", () => {
+        vi.useFakeTimers();
+        const {anchor, revokeObjectURL} = stubBrowser();
+        anchor.click.mockImplementation(() => { throw new Error("blocked"); });
+
+        expect(() => triggerBrowserDownload("a.txt", "", "text/plain")).toThrow("blocked");
+
+        expect(anchor.remove).toHaveBeenCalled();
+        vi.advanceTimersByTime(DOWNLOAD_URL_LIFETIME_MS);
+        expect(revokeObjectURL).toHaveBeenCalledWith("blob:test");
     });
 });
