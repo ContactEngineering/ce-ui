@@ -13,6 +13,7 @@ import {useToast} from "@/composables/toast";
 
 import SearchUserModal from "@/components/ui/SearchUserModal.vue";
 import PermissionRow from "@/components/manager/PermissionRow.vue";
+import {rowForNewUser, rowFromUserPermission} from "@/utils/permissions";
 import Toolbar from "@/components/ui/Toolbar.vue";
 import LoadingIndicator from '@/components/ui/LoadingIndicator.vue';
 
@@ -27,7 +28,7 @@ const isEditing = ref(false);
 const isSaving = ref(false);
 const searchUser = ref(false);
 
-/* Rows in the shape PermissionRow works on: {user: <url>, permission: <level>}.
+/* Rows in the shape PermissionRow works on (see utils/permissions.ts).
    The current user's row is read-only; the others can be edited with full
    access. */
 const _api = ref(null);  // grant/revoke routes reported by the permission set
@@ -40,9 +41,7 @@ onMounted(loadPermissions);
 function loadPermissions() {
     axios.get(props.permissionsUrl).then(response => {
         _api.value = response.data.api;
-        const rows = response.data.user_permissions.map(p => {
-            return {user: p.user.url, permission: p.allow, isCurrentUser: p.is_current_user};
-        });
+        const rows = response.data.user_permissions.map(rowFromUserPermission);
         currentUser.value = rows.find(row => row.isCurrentUser) ?? null;
         otherUsers.value = rows.filter(row => !row.isCurrentUser);
     }).catch(error => {
@@ -89,7 +88,7 @@ function saveCard() {
 
 function addUser(user) {
     searchUser.value = false;
-    otherUsers.value.push({user: user.url, permission: 'view'});
+    otherUsers.value.push(rowForNewUser(user));
 }
 
 </script>

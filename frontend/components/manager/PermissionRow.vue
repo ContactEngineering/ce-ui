@@ -3,9 +3,7 @@
 import axios from "axios";
 import {onMounted, ref} from "vue";
 import {BForm, BFormSelect, BPlaceholder} from "bootstrap-vue-next";
-import {useToast} from "@/composables/toast";
-
-const toast = useToast();
+import {needsUserDetails} from "@/utils/permissions";
 
 const userPermission = defineModel('userPermission', {required: true});
 
@@ -13,7 +11,8 @@ const props = defineProps({
     disabled: Boolean
 });
 
-const user = ref(null);
+// Show what the row already knows about the user right away
+const user = ref(userPermission.value.userData ?? null);
 
 const options = [
     {value: 'no-access', text: 'Revoke access (unshare digital surface twin)'},
@@ -23,15 +22,14 @@ const options = [
 ];
 
 onMounted(() => {
-    if (userPermission.value.user != null) {
+    // The ORCID iD is not part of the permission list, so fetch the user for it.
+    // Failing to do so is not worth an error: the name is already shown, and
+    // the user may not be visible to us (e.g. just found by exact name).
+    if (userPermission.value.user != null && needsUserDetails(userPermission.value)) {
         axios.get(userPermission.value.user).then(response => {
             user.value = response.data;
-        }).catch(error => {
-            toast.create({
-                title: "Error while loading user",
-                body: error.message,
-                variant: "danger"
-            })?.show();
+        }).catch(() => {
+            user.value ??= {url: userPermission.value.user, name: "Unknown user"};
         });
     }
 });
