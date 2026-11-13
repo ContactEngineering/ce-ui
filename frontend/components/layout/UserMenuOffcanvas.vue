@@ -2,7 +2,7 @@
 
 import {ref} from "vue";
 
-import {BModal, BNavbarNav, BNavItem, BOffcanvas} from "bootstrap-vue-next";
+import {BButton, BModal, BNavbarNav, BNavItem, BOffcanvas} from "bootstrap-vue-next";
 
 import VersionInformation from "@/components/layout/VersionInformation.vue";
 
@@ -45,9 +45,12 @@ const contactModal = ref(false);
                          alt="ORCID iD icon"/>
                     Connect your ORCID iD
                 </BNavItem>
-                <BNavItem class="btn btn-secondary" @click="signoutModal = true">
-                    Sign out
-                </BNavItem>
+                <!-- A real button; see SelectionOffcanvas (topobank#1407) -->
+                <li class="nav-item d-grid my-2">
+                    <BButton variant="secondary" @click="signoutModal = true">
+                        Sign out
+                    </BButton>
+                </li>
                 <BNavItem>
                     <VersionInformation></VersionInformation>
                 </BNavItem>

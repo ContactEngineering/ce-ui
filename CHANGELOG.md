@@ -2,6 +2,8 @@
 
 ## 1.39.0 (not yet released)
 
+- BUG: The buttons in the selection, notification and user menus react to clicks
+  anywhere on them, and look disabled when they are
 - ENH: An account is created with an ORCID iD and no other way. Registration
   with an email address and a password is closed, and a provider outside
   `SOCIALACCOUNT_SIGNUP_PROVIDERS` cannot create an account either; the page

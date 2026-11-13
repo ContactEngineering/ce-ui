@@ -5,10 +5,9 @@ import {onBeforeUnmount, onMounted, ref} from "vue";
 
 import {
     BAlert,
+    BButton,
     BListGroup,
     BListGroupItem,
-    BNavbarNav,
-    BNavItem,
     BOffcanvas
 } from "bootstrap-vue-next";
 
@@ -80,12 +79,13 @@ function clearNotifications() {
             <span class="ms-2">Notifications</span>
         </template>
         <template #footer>
-            <BNavbarNav class="p-3 justify-content-end flex-grow-1">
-                <BNavItem class="btn btn-secondary" @click="clearNotifications"
-                          :disabled="unreadCount === 0">
+            <!-- A real button; see SelectionOffcanvas (topobank#1407) -->
+            <div class="d-grid p-3 flex-grow-1 align-content-end">
+                <BButton variant="secondary" @click="clearNotifications"
+                         :disabled="unreadCount === 0">
                     Clear notifications
-                </BNavItem>
-            </BNavbarNav>
+                </BButton>
+            </div>
         </template>
 
         <BAlert :model-value="unreadCount === 0" variant="secondary">

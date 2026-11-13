@@ -4,10 +4,9 @@ import axios from "axios";
 
 import {
     BAlert,
+    BButton,
     BListGroup,
     BListGroupItem,
-    BNavbarNav,
-    BNavItem,
     BOffcanvas
 } from "bootstrap-vue-next";
 import {useToast} from "@/composables/toast";
@@ -86,28 +85,31 @@ const selectionIsPublished = computed(() => {
             <span class="ms-2">Selected datasets</span>
         </template>
         <template #footer>
-            <BNavbarNav class="p-3 justify-content-end flex-grow-1">
-                <BNavItem class="btn btn-success mb-2"
+            <!-- Real buttons: a BNavItem styled with `btn` only reacts to clicks
+                 on its inner link, not on the padding of the button it looks
+                 like, and still looks enabled when disabled (topobank#1407) -->
+            <div class="d-grid gap-2 p-3 flex-grow-1 align-content-end">
+                <BButton variant="success"
                     :href="`${analysisListUrl}?subjects=${selection.selectedAsBase64}`"
                     :disabled="selection.nbSelected === 0">
                     Analyze
-                </BNavItem>
-                <BNavItem class="btn btn-light mb-2"
+                </BButton>
+                <BButton variant="light"
                     :disabled="selection.nbSelected === 0"
                     @click="download()">
                     Download
-                </BNavItem>
-                <BNavItem v-if="selection.nbSelected > 1 && selectionIsPublished" class="btn btn-light mb-2"
+                </BButton>
+                <BButton v-if="selection.nbSelected > 1 && selectionIsPublished" variant="light"
                     :href="`/ui/dataset-collection-publish/?${datasets.map((surface) => `dataset=${surface.id}`).join('&')}`">
                     Create collection
-                </BNavItem>
-                <BNavItem v-else class="btn btn-light mb-2" @click="showCollectionInfo()">
+                </BButton>
+                <BButton v-else variant="light" @click="showCollectionInfo()">
                     Create collection
-                </BNavItem>
-                <BNavItem class="btn btn-secondary" @click="selection.clear()" :disabled="selection.nbSelected === 0">
+                </BButton>
+                <BButton variant="secondary" @click="selection.clear()" :disabled="selection.nbSelected === 0">
                     Clear selection
-                </BNavItem>
-            </BNavbarNav>
+                </BButton>
+            </div>
         </template>
 
         <BAlert :model-value="selection.nbSelected === 0" variant="secondary">
